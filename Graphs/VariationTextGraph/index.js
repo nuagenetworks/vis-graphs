@@ -151,14 +151,14 @@ export class VariationTextGraph extends AbstractGraph {
             </span>
         }
 
-        let fullScreenFont = context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
+        let fullScreenFont = context && context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
         return (
 
             <div style={{height: "100%"}}>
                 <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
                     <FontAwesome
                         name={this.settings.icon}
-                        style={Object.assign({}, style.iconFont, (context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}
+                        style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}
                         >
                         <div style={Object.assign({}, style.labelText, fullScreenFont)}>
                             {`${this.decimals(this.settings.values.variation)}%`}

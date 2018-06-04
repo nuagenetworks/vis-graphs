@@ -105,7 +105,6 @@ export default class AbstractGraph extends React.Component {
     }
 
     tooltipContent({tooltip, accessors}) {
-        console.log("xxxxx", this.hoveredDatum)
         return (
             <div>
                 {/* Display each tooltip column as "label : value". */}
@@ -501,15 +500,6 @@ export default class AbstractGraph extends React.Component {
         } = this.getConfiguredProperties();
 
         return legend.orientation === 'vertical';
-    }
-
-    getOpacity(d) {
-        const {
-            configuration,
-            context
-        } = this.props;
-        let vkey = `${configuration.id.replace(/-/g, '')}vkey`;
-        return (!context[vkey] || !configuration.key || context[vkey]  === evalExpression("(" + configuration.key + ")")(d)) ? "1" : "0.5"
     }
 
     // to show message at the center of container

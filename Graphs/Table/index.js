@@ -71,7 +71,7 @@ class Table extends AbstractGraph {
                 this.setState({ fontSize: style.defaultFontsize})
             }
 
-            if(this.props.context[this.columns] === nextProps.context[this.columns]) {
+            if(this.props.context && this.props.context[this.columns] === nextProps.context[this.columns]) {
                 this.initiate(nextProps);
             }
         }
@@ -106,7 +106,7 @@ class Table extends AbstractGraph {
 
         this.filterData = props.data;
 
-        let columnsContext = context.hasOwnProperty(this.columns) ? context[this.columns] : false
+        let columnsContext = context && context.hasOwnProperty(this.columns) ? context[this.columns] : false
 
         // filter columns who will be display in table
         let filteredColumns = columns.filter( d => {

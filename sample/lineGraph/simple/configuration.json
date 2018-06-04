@@ -1,0 +1,19 @@
+{
+   "data": {
+        "dateHistogram": true,
+        "xColumn": "timestamp",
+        "yColumn": "value",
+        "stroke": {
+          "color": "#f76159",
+          "width": "2px"
+        },
+        "xTickGrid": false,
+        "yTickGrid": true,
+        "yTickFormat": ".2s",
+        "xLabel": "Time",
+        "yLabel": "Total # ACL Hits",
+        "xColumn": "timestamp",
+        "yColumn": "value",
+        "brushEnabled": false
+    }
+}

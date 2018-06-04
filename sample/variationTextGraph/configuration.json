@@ -1,0 +1,10 @@
+{
+    "data": {
+        "titlePosition": "top",
+        "target":{
+            "column": "timezones",
+            "value": "1503120370000",
+            "field": "value"
+        }
+    }
+}

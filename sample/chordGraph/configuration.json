@@ -1,0 +1,7 @@
+{
+    "data": {
+        "chordSourceColumn": "spg",
+        "chordDestinationColumn": "dpg",
+        "colorColumn": "spg"
+    }
+}

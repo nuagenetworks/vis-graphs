@@ -15,7 +15,7 @@ const INITIAL_FONT_SIZE = 4
 class SimpleTextGraph extends AbstractGraph {
 
     constructor(props) {
-        super(props, null);
+        super(props, properties);
 
         this.state = {
             fontSize: INITIAL_FONT_SIZE,

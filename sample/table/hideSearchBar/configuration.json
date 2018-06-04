@@ -1,0 +1,13 @@
+{
+    "data": {
+        "searchBar":false,
+        "columns": [
+            { "column": "timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
+            { "column": "Application", "label": "Application" },
+            { "column": "MEMORY", "label": "MEMORY" },
+            { "column": "value", "label": "Value" }
+        ]
+    }
+}
+
+
