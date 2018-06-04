@@ -417,8 +417,11 @@ class HeatmapGraph extends XYGraph {
     } = this.getConfiguredProperties()
 
     if (selectedData) {
-	return selectedData[xColumn] === d[xColumn] && selectedData[yColumn] === d[yColumn] ? "1" : "0.5"
+	    return selectedData[xColumn] === d[xColumn] && selectedData[yColumn] === d[yColumn] ? "1" : "0.5"
     }
+
+    if(!context)
+      return 1
 
     let vkey = `${configuration.id.replace(/-/g, '')}vkey`;
     let keyValue = d => d[xColumn] + d[yColumn]
