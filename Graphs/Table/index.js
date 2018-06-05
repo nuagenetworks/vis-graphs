@@ -17,7 +17,7 @@ import { pick } from '../../utils/helpers'
 
 import SearchBar from "../../SearchBar"
 
-const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context']
+const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
 
 class Table extends AbstractGraph {
@@ -88,7 +88,8 @@ class Table extends AbstractGraph {
     initiate(props) {
 
         const {
-            context
+            context,
+            selectedColumns
         } = props
 
         const {
@@ -106,18 +107,28 @@ class Table extends AbstractGraph {
 
         this.filterData = props.data;
 
-        let columnsContext = context && context.hasOwnProperty(this.columns) ? context[this.columns] : false
+        let columnsContext = false
+
+        if(selectedColumns) {
+            columnsContext = selectedColumns
+        } else {
+            columnsContext = context && context.hasOwnProperty(this.columns) ? context[this.columns] : false
+        }
 
         // filter columns who will be display in table
         let filteredColumns = columns.filter( d => {
             Object.assign(d, {value: d.label})
+
+            //Must return all the columns
             if(!selectColumnOption) {
                 return true
             }
-            else if(columnsContext) {
+
+            //Only selected Columns
+            if(columnsContext) {
                 return columnsContext.indexOf(d.label) > -1 || false
-            }
-            else {
+            } else {
+                //Configured Columns
                 return d.display !== false
             }
         })
@@ -418,7 +429,7 @@ class Table extends AbstractGraph {
                     Object.assign({}, query, params) : Object.assign({}, query);
             li.onclick = (e) => {
                 // dispatch a push to the menu link
-                goTo(pathname, queryParams);
+                goTo && goTo(pathname, queryParams);
             };
             node.append(li);
         });
@@ -486,10 +497,22 @@ class Table extends AbstractGraph {
 
 
     handleColumnSelection(columns, name) {
+        const {
+            onColumnSelection,
+            goTo,
+            context
+        } = this.props
+
         let columnsData = []
         columns.forEach( d => {columnsData.push(d.label)})
         this.setState({ columns })
-        this.props.goTo(window.location.pathname, Object.assign({}, this.props.context, {[this.columns]: JSON.stringify(columnsData)}))
+
+        if(onColumnSelection) {
+            onColumnSelection(columnsData)
+        }
+
+        goTo && goTo(window.location.pathname, Object.assign({}, context, {[this.columns]: JSON.stringify(columnsData)}))
+
     }
 
     getColumnListItem() {

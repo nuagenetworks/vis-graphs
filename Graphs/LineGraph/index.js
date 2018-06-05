@@ -318,7 +318,7 @@ class LineGraph extends XYGraph {
                           .map(xScale.invert, xScale) // Convert from pixel coords to Date objects.
                           .map((date) => date.getTime()); // Convert from Date to epoch milliseconds.
                         const queryParams = Object.assign({}, this.props.context, { startTime, endTime });
-                        this.props.goTo(window.location.pathname, queryParams);
+                        this.props.goTo && this.props.goTo(window.location.pathname, queryParams);
                     }
                 });
         }
