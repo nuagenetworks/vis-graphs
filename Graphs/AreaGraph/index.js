@@ -25,6 +25,13 @@ class AreaGraph extends XYGraph {
   }
 
   componentDidMount() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length)
+      return
+
     this.elementGenerator();
     this.updateElements();
   }
@@ -36,6 +43,13 @@ class AreaGraph extends XYGraph {
   }
 
   componentDidUpdate() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length)
+      return
+
     this.updateElements();
   }
 

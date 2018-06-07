@@ -21,6 +21,13 @@ class HeatmapGraph extends XYGraph {
   }
 
   componentDidMount() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length || !this.getFilterData().length)
+      return
+
     this.elementGenerator()
     this.updateElements()
   }
@@ -35,6 +42,13 @@ class HeatmapGraph extends XYGraph {
   }
 
   componentDidUpdate() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length || !this.getFilterData().length)
+      return
+
     this.updateElements()
   }
 
@@ -326,9 +340,6 @@ class HeatmapGraph extends XYGraph {
       yTickFontSize,
       yLabelLimit
     } = this.getConfiguredProperties()
-
-    if (!data || !data.length)
-      return
 
     const svg = this.getGraph()
 

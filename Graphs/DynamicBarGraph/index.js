@@ -24,6 +24,13 @@ class BarGraph extends XYGraph {
   }
 
   componentDidMount() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length)
+      return
+
     this.elementGenerator()
     this.updateElements()
   }
@@ -38,6 +45,13 @@ class BarGraph extends XYGraph {
   }
 
   componentDidUpdate() {
+    const {
+      data
+    } = props
+
+    if (!data || !data.length)
+      return
+
     this.updateElements()
   }
 
