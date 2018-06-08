@@ -27,7 +27,7 @@ class AreaGraph extends XYGraph {
   componentDidMount() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length)
       return
@@ -45,7 +45,7 @@ class AreaGraph extends XYGraph {
   componentDidUpdate() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length)
       return

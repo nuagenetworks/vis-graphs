@@ -23,7 +23,7 @@ class HeatmapGraph extends XYGraph {
   componentDidMount() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length || !this.getFilterData().length)
       return
@@ -44,7 +44,7 @@ class HeatmapGraph extends XYGraph {
   componentDidUpdate() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length || !this.getFilterData().length)
       return
