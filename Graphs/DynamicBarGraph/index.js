@@ -26,7 +26,7 @@ class BarGraph extends XYGraph {
   componentDidMount() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length)
       return
@@ -47,7 +47,7 @@ class BarGraph extends XYGraph {
   componentDidUpdate() {
     const {
       data
-    } = props
+    } = this.props;
 
     if (!data || !data.length)
       return
