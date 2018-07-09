@@ -339,7 +339,7 @@ class Table extends AbstractGraph {
             selected: this.selectedRows[this.currentPage]
         })
 
-        const { onSelect, location } = this.props;
+        const { onSelect } = this.props;
         if (onSelect) {
             let matchingRows = []
 
@@ -417,8 +417,8 @@ class Table extends AbstractGraph {
         node.id = 'contextMenu';
         node.style = `top: ${y}px; left: ${x}px; z-index: 100000;`;
 
-        const { goTo, location: { query }, configuration: { id } } = this.props;
-        query.id = id;
+        const { goTo, context, configuration: { id } } = this.props;
+        context.id = id;
 
         menu.forEach((item) => {
             const { text, rootpath, params } = item;
@@ -426,7 +426,7 @@ class Table extends AbstractGraph {
             const li = document.createElement('li');
             li.textContent = text;
             const queryParams = (params && Object.getOwnPropertyNames(params).length > 0) ?
-                    Object.assign({}, query, params) : Object.assign({}, query);
+                    Object.assign({}, context, params) : Object.assign({}, context);
             li.onclick = (e) => {
                 // dispatch a push to the menu link
                 goTo && goTo(pathname, queryParams);
