@@ -9,6 +9,7 @@ import "./style.css";
 import {properties} from "./default.config"
 
 export default class ChordGraph extends AbstractGraph {
+    chordDiagram = null;
 
     constructor(props) {
         super(props, properties);
@@ -20,12 +21,23 @@ export default class ChordGraph extends AbstractGraph {
     }
 
     componentDidMount() {
+      this.initiate()
+    }
 
-        if(!this.svg)
-          return
+    componentWillReceiveProps(nextProps) {
+      this.parseData(nextProps.data)
+    }
 
+    componentDidUpdate() {
+      this.initiate()
+    }
+
+    initiate() {
+      if(!this.svg)
+        return
+
+      if(!this.chordDiagram) {
         this.chordDiagram = ChordDiagram(this.svg);
-        this.updateChord(this.props);
 
         const { tooltip } = this.getConfiguredProperties();
 
@@ -67,11 +79,9 @@ export default class ChordGraph extends AbstractGraph {
         }
 
         this.chordDiagram.onChordHover((d) => this.hoveredDatum = d );
-    }
+      }
 
-    componentWillReceiveProps(nextProps) {
-        this.parseData(nextProps.data)
-        this.updateChord(nextProps);
+      this.updateChord(this.props);
     }
 
     parseData(data) {
@@ -80,14 +90,17 @@ export default class ChordGraph extends AbstractGraph {
         chordDestinationColumn
       } = this.getConfiguredProperties();
 
-      this.filterData =  data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
+      this.filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
     }
 
     updateChord(props) {
+        const {
+          width,
+          height,
+          onMarkClick
+        } = props;
 
-        const { width, height, onMarkClick } = props;
-
-        if(!this.filterData || !this.filterData.length)
+        if(!this.filterData || !this.filterData.length || !this.chordDiagram)
           return
 
         const {
@@ -149,12 +162,11 @@ export default class ChordGraph extends AbstractGraph {
 
         const { data, width, height } = this.props;
 
-
         if (!data || !data.length || !this.filterData.length)
             return this.renderMessage('No data to visualize')
 
         return (
-            <div className="pie-graph">
+            <div className="chord-graph">
                 {this.tooltip}
                 <svg
                   width={ width }
