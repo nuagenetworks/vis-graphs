@@ -20,6 +20,7 @@ The use of the graphs module is to provide a module to quickly shows your data i
       - [HeatmpaGraph](#heatmapgraph)
       - [AreaGraph](#areagraph)
       - [GuageGraph](#guagegraph)
+      - [Geomap] (#geomap)
 
 
 ## Requirement-
@@ -456,4 +457,63 @@ __maxValue__ - Maximum value to draw speddometer
 __currentColumn__ - Column used to show needle value
 
 __gauzeTicks__ - Number of ticks on speedometer
+
+## *Geomap*
+Display a cluster markers on map to show data
+
+>[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/guageGraph)
+
+![geomap](https://user-images.githubusercontent.com/26645756/42522636-3da71248-8489-11e8-9987-dfb640f0f085.png)
+
+__latitudeColumn__ - Latitude of the marker
+
+__longitudeColumn__ - Longitude of the marker
+
+__nameColumn__ - name displayed on marker infowindow
+
+__localityColumn__ - Locality displayed on marker infowindow
+
+__idColumn__ - id to uniquely identified each marker
+
+__links__ - (Object) to show connected lines beetween markers. For e.g.
+
+```javascript
+
+"links": {
+    "source": "data1", // data source
+    "sourceColumn": "source", // source column id(equivalent to idColumn)
+    "destinationColumn": "destination" // destination column id(equivalent to idColumn)
+}
+
+```
+
+__markerIcon__ - (Object || string) to show markers icon. List of all the icons are defined in the Icon Helper files. Please add the icon over there before using the "key" over here like: nsGateway, icon1, icon2 and so on
+. For e.g.
+
+```javascript
+
+"markerIcon": "nsgGateway"
+
+or
+
+"markerIcon": {
+    "default": "default-icon", // optional
+    "criteria": [
+        {
+            "icon": "icon1",
+            "fields": {
+                "nsg.status": "deactivated"
+            }
+        },
+        {
+            "icon": "icon2",
+            "fields": {
+                "nsg.status": "activated",
+                "nsg.signal": "yellow"
+            }
+        }
+    ]
+}
+
+```
 

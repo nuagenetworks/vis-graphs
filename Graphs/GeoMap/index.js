@@ -182,7 +182,7 @@ class GeoMap extends AbstractGraph {
         onMouseOver={() => this.toggleInfoWindow(data, position)}
         onMouseOut={() => this.toggleInfoWindow()}
         icon={{
-          url: getIconPath(markerIcon),
+          url: getIconPath(markerIcon, data),
           labelOrigin,
           anchor: labelOrigin
         }}
