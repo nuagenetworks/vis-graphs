@@ -1,10 +1,12 @@
 import objectPath from "object-path"
 
 const icons = {
-    'nsgateway': 'icon-nsgateway-resized.png'
+    'nsGatewayBlue': 'icon-nsgateway-blue-26x26.png',
+    'nsGatewayRed': 'icon-nsgateway-red-26x26.png',
+    'nsGatewayYellow': 'icon-nsgateway-yellow-26x26.png'
 };
 
-const defaultIcon = 'nsgateway';
+const defaultIcon = 'nsGatewayBlue';
 
 export default (iconKey = null, data = []) => {
 
