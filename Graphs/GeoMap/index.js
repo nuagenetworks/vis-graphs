@@ -451,7 +451,8 @@ class GeoMap extends AbstractGraph {
   render() {
     const {
       data,
-      height
+      height,
+      googleMapURL
     } = this.props
 
     const {
@@ -481,6 +482,7 @@ class GeoMap extends AbstractGraph {
       <div>
         {this.renderSearchBarIfNeeded()}
         <GoogleMapsWrapper
+          googleMapURL={googleMapURL}
           onBoundsChanged={this.onBoundsChanged}
           onZoomChanged={this.onZoomChanged}
           center={defaultLatLng}
