@@ -11,7 +11,7 @@ const defaultIcon = 'nsGatewayBlue';
 export default (iconKey = null, data = []) => {
 
     let icon
-    if (typeof iconKey === "object") {
+    if (iconKey && typeof iconKey === "object") {
       if (iconKey.criteria) {
         iconKey.criteria.forEach(d => {
 
