@@ -37,9 +37,10 @@ class Table extends AbstractGraph {
 
         /**
         */
+        this.originalData = []
         this.keyColumns = {}
         this.currentPage = 1
-        this.filterData = false
+        this.filterData = []
         this.selectedRows = {}
         this.htmlData = {}
         this.state = {
@@ -124,6 +125,8 @@ class Table extends AbstractGraph {
             this.filterData.push(data)
         })
 
+        this.originalData = this.filterData
+
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
@@ -175,11 +178,12 @@ class Table extends AbstractGraph {
         this.selectedRows = {};
     }
 
-    handleSearch(data) {
-        this.resetFilters();
-
-        this.filterData = data;
-        this.updateData();
+    handleSearch(data, isSuccess) {
+        if(isSuccess) {
+            this.resetFilters();
+            this.filterData = data;
+            this.updateData();
+        }
     }
 
     updateData(columns = this.state.columns) {
@@ -240,7 +244,7 @@ class Table extends AbstractGraph {
                 }
             }
         }
-        console.error(headerData)
+
         return headerData
     }
 
@@ -528,7 +532,7 @@ class Table extends AbstractGraph {
 
         return (
           <SearchBar
-            data={this.filterData}
+            data={this.originalData}
             searchText={searchText}
             options={headerData}
             handleSearch={this.handleSearch}

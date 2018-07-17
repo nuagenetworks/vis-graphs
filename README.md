@@ -86,8 +86,8 @@ class Graph extends Component {
               data={data}
               data1={data1} // you may pass data from multiple source as well
               configuration={configuration} // configuration object
-              width={width} // graph width (in pixel)
-              height={height} // graph height (in pixel)
+              width={width} // graph width (numeric)
+              height={height} // graph height (numeric)
               onMarkClick={ this.handleClickEvent } // event listener
             />
         </MuiThemeProvider>
