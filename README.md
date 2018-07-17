@@ -326,6 +326,7 @@ __columns__ - (Array) Array of columns display in the table. Example -
             "DENY": "red"
             }
         },
+        { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
         { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
     ]
@@ -484,6 +485,24 @@ __links__ - (Object) to show connected lines beetween markers. For e.g.
     "sourceColumn": "source", // source column id(equivalent to idColumn)
     "destinationColumn": "destination" // destination column id(equivalent to idColumn)
 }
+
+```
+__filters__ - List down columns in search bar
+
+```javascript
+
+"filters": [
+            {
+                "columnText": "name",
+                "columField": "nsgatewayName",
+                "type": "text"
+            },
+            {
+                "columField": "status",
+                "type": "selection" // for `selection`, columnText must be empty and value of status field should be string
+            }
+
+        ]
 
 ```
 
