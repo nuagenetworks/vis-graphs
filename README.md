@@ -293,7 +293,7 @@ __showCheckboxes__ - To show checkboxes to select rows - default is `false`
 
 __enableSelectAll__ - To enable/disable select all feature - Default is `true`
 
-__selectedColumn__ - (string) Compare `selectedColumn` value with all available datas and if equal to selected row, then save all matched records in store under "matchedRows"
+__matchingRowColumn__ - (string) Compare `matchingRowColumn` value with all available datas and if equal to selected row, then save all matched records in store under "matchedRows"
 
 __selectColumnOption__ - (Boolean) To show columns selection dropdown set this value to `true` (default is `false`).
 In Columns array set `display: false` to hide any column (default is true, i.e. column will display inside the table if `display` is missing or set to `true`).

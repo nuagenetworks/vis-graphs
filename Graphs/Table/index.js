@@ -48,11 +48,7 @@ class Table extends AbstractGraph {
             data: [],
             fontSize: style.defaultFontsize,
             contextMenu: null,
-            columns: [],
-            modalIsOpen: false,
-            clickedColumn: null,
-            modalQuery: null,
-            row: []
+            columns: []
         }
     }
 
@@ -99,7 +95,8 @@ class Table extends AbstractGraph {
         } = props
 
         const {
-            selectColumnOption
+            selectColumnOption,
+            matchingRowColumn
         } = this.getConfiguredProperties()
 
         let columns = this.getColumns();
@@ -107,18 +104,36 @@ class Table extends AbstractGraph {
         if (!columns)
             return;
 
-        // generate random key for each column and assign that key to the values in data
-        columns.forEach( d =>
-            this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d)
+        let columnNameList = []
+        this.keyColumns    = []
+        this.filterData    = []
 
-        this.filterData = []
+        // generate random key for each column and assign that key to the values in data
+        columns.forEach( d => {
+            columnNameList.push(d.column)
+            this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
+        })
 
         props.data.forEach( d => {
-            let data = {}
+            let data = {};
             for(let key in this.keyColumns) {
                 if(this.keyColumns.hasOwnProperty(key)) {
-                    let accessor = columnAccessor(this.keyColumns[key])
-                    data[key] = accessor(d)
+                    const columnData = Object.assign({}, this.keyColumns[key]);
+
+                    delete columnData.totalCharacters;
+
+                    const accessor = columnAccessor(columnData);
+                    data[key] = accessor(d);
+
+                    // add tooltip column data if it doesn't exist in column array
+                    if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                        data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
+                    }
+
+                    // add matching row data if it doesn't exist in column array
+                    if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                        data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
+                    }
                 }
             }
 
@@ -269,20 +284,21 @@ class Table extends AbstractGraph {
             for (let key in keyColumns) {
                 if(keyColumns.hasOwnProperty(key)) {
 
-                    const columnObj = keyColumns[key]
+                    const columnObj  = keyColumns[key],
+                        originalData = d[key];
+                    let columnData   = originalData;
 
-
-                    let originalData = d[key],
-                      columnData   = originalData
+                    // get substring of data upto defined total characters
+                    if(columnObj.totalCharacters) {
+                        columnData = columnAccessor({column: columnObj.column, totalCharacters: columnObj.totalCharacters})(keyData)
+                    }
 
                     // enable tooltip on mouse hover
                     if((columnData || columnData === 0) && columnObj.tooltip) {
-                        const tooltipAccessor = columnAccessor(columnObj.tooltip);
-                        let fullText = tooltipAccessor(keyData, true)
-                        fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText
 
-                        if(columnObj.tooltip.totalCharacters)
-                            columnData = columnAccessor({column: columnObj.column, totalCharacters: columnObj.tooltip.totalCharacters})(keyData)
+                        let fullText = d[columnObj.tooltip.column] || originalData
+
+                        fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText
 
                         let hoverContent = (
                             <div key={`tooltip_${j}_${key}`}>
@@ -367,7 +383,7 @@ class Table extends AbstractGraph {
     handleRowSelection(selectedRows) {
         const {
             multiSelectable,
-            selectedColumn
+            matchingRowColumn
         } = this.getConfiguredProperties();
 
         if(!multiSelectable) {
@@ -388,15 +404,16 @@ class Table extends AbstractGraph {
             const selectedData = this.getSelectedRows()
 
             if(selectedData.length > 1) {
-                rows = selectedData
+                rows = selectedData.map( d => this.replaceKeyFromColumn(d))
             } else {
                 let row =  selectedData.length ? selectedData[0] : {}
                 /**
-                 * Compare `selectedColumn` value with all available datas and if equal to selected row,
+                 * Compare `matchingRowColumn` value with all available datas and if equal to selected row,
                  * then save all matched records in store under "matchedRows",
                 **/
-                if(selectedColumn) {
-                    let key = this.getKeyByColumnName(selectedColumn)
+                if(matchingRowColumn) {
+                    let key = this.getKeyByColumnName(matchingRowColumn) || matchingRowColumn
+
                     matchingRows = this.filterData.filter( (d) => {
                         return (row[key] || row[key] === 0) && row !== d && row[key] === d[key]
                     });
@@ -405,11 +422,9 @@ class Table extends AbstractGraph {
                         matchingRows = matchingRows.map( d => this.replaceKeyFromColumn(d))
                     }
                 }
-
-                rows = row
+                rows = this.replaceKeyFromColumn(row)
             }
-
-            onSelect({ rows: this.replaceKeyFromColumn(rows), matchingRows});
+            onSelect({rows, matchingRows});
         }
 
     }
@@ -418,9 +433,9 @@ class Table extends AbstractGraph {
     replaceKeyFromColumn(row) {
         const columns = this.getKeyColumns()
         let updatedRow = {}
-        for (let key in columns) {
-            if(columns.hasOwnProperty(key) && row[key]) {
-                objectPath.set(updatedRow, columns[key].column, row[key]);
+        for (let key in row) {
+            if(row.hasOwnProperty(key)) {
+                objectPath.set(updatedRow, columns[key] ? columns[key].column : key, row[key]);
             }
         }
         return updatedRow
