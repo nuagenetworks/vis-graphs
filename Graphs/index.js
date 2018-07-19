@@ -24,7 +24,6 @@ let registry = {
     BarGraph,
     LineGraph,
     MultiLineGraph,
-    Table,
     PieGraph,
     ChordGraph,
     GaugeGraph,
