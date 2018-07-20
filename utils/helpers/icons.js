@@ -18,9 +18,11 @@ export default (iconKey = null, data = []) => {
           let counter = 0
           // match all criteria's field with given data, if matched then pick criteria's icon
           for (let key in d.fields) {
-            let value = objectPath.get(data, key)
-            if (d.fields.hasOwnProperty(key) && value && d.fields[key] === value) {
-              counter++
+            if(d.fields.hasOwnProperty(key)) {
+              let value = objectPath.get(data, key)
+              if (d.fields.hasOwnProperty(key) && value && d.fields[key] === value) {
+                counter++
+              }
             }
           }
 

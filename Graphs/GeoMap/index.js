@@ -84,7 +84,7 @@ class GeoMap extends AbstractGraph {
 
     const bounds = new window.google.maps.LatLngBounds()
 
-    this.state.data.map(marker => {
+    this.state.data.forEach(marker => {
       if (marker[latitudeColumn] && marker[longitudeColumn]) {
         bounds.extend(new window.google.maps.LatLng(marker[latitudeColumn], marker[longitudeColumn]));
       }
@@ -114,8 +114,7 @@ class GeoMap extends AbstractGraph {
   renderInfowindow() {
     const {
       localityColumn,
-      nameColumn,
-      idColumn
+      nameColumn
     } = this.getConfiguredProperties();
 
     let { data, position } = this.state.infowindow

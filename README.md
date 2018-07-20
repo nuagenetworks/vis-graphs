@@ -86,8 +86,8 @@ class Graph extends Component {
               data={data}
               data1={data1} // you may pass data from multiple source as well
               configuration={configuration} // configuration object
-              width={width} // graph width (in pixel)
-              height={height} // graph height (in pixel)
+              width={width} // graph width (numeric)
+              height={height} // graph height (numeric)
               onMarkClick={ this.handleClickEvent } // event listener
             />
         </MuiThemeProvider>
@@ -293,7 +293,7 @@ __showCheckboxes__ - To show checkboxes to select rows - default is `false`
 
 __enableSelectAll__ - To enable/disable select all feature - Default is `true`
 
-__selectedColumn__ - (string) Compare `selectedColumn` value with all available datas and if equal to selected row, then save all matched records in store under "matchedRows"
+__matchingRowColumn__ - (string) Compare `matchingRowColumn` value with all available datas and if equal to selected row, then save all matched records in store under "matchedRows"
 
 __selectColumnOption__ - (Boolean) To show columns selection dropdown set this value to `true` (default is `false`).
 In Columns array set `display: false` to hide any column (default is true, i.e. column will display inside the table if `display` is missing or set to `true`).
@@ -326,6 +326,7 @@ __columns__ - (Array) Array of columns display in the table. Example -
             "DENY": "red"
             }
         },
+        { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
         { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
     ]
@@ -484,6 +485,24 @@ __links__ - (Object) to show connected lines beetween markers. For e.g.
     "sourceColumn": "source", // source column id(equivalent to idColumn)
     "destinationColumn": "destination" // destination column id(equivalent to idColumn)
 }
+
+```
+__filters__ - List down columns in search bar
+
+```javascript
+
+"filters": [
+            {
+                "columnText": "name",
+                "columField": "nsgatewayName",
+                "type": "text"
+            },
+            {
+                "columField": "status",
+                "type": "selection" // for `selection`, columnText must be empty and value of status field should be string
+            }
+
+        ]
 
 ```
 

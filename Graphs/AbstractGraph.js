@@ -1,6 +1,5 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
-import evalExpression from "eval-expression"
 import * as d3 from "d3";
 
 import "./style.css"

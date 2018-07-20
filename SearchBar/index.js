@@ -90,7 +90,8 @@ export default class SearchBar extends React.Component {
         } = this.state
 
         const {
-            options
+            options,
+            data
         } = this.props
 
         return (
@@ -102,6 +103,7 @@ export default class SearchBar extends React.Component {
             <div className="filter">
                 <ReactFilterBox
                     ref="filterBox"
+                    data={data}
                     onChange={this.onChange}
                     autoCompleteHandler={this.autoCompleteHandler}
                     query={query}

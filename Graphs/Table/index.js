@@ -5,6 +5,7 @@ import {Tooltip} from 'react-lightweight-tooltip'
 import _ from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield'
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
+import objectPath from "object-path";
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -19,7 +20,6 @@ import SearchBar from "../../SearchBar"
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
-
 class Table extends AbstractGraph {
 
     constructor(props, context) {
@@ -37,8 +37,10 @@ class Table extends AbstractGraph {
 
         /**
         */
+        this.originalData = []
+        this.keyColumns = {}
         this.currentPage = 1
-        this.filterData = false
+        this.filterData = []
         this.selectedRows = {}
         this.htmlData = {}
         this.state = {
@@ -85,7 +87,16 @@ class Table extends AbstractGraph {
         }
     }
 
+    isEmptyData() {
+        const {
+            data
+        } = this.props;
+
+       return _.isEmpty(data);
+    }
+
     initiate(props) {
+
 
         const {
             context,
@@ -93,19 +104,61 @@ class Table extends AbstractGraph {
         } = props
 
         const {
-            selectColumnOption
+            selectColumnOption,
+            matchingRowColumn
         } = this.getConfiguredProperties()
 
-        let columns = this.getColumns();
+        if(this.isEmptyData()) {
+            return;
+        }
+
+        const columns = this.getColumns();
 
         if (!columns)
             return;
+
+        let columnNameList = []
+        this.keyColumns    = {}
+        this.filterData    = []
+
+        // generate random key for each column and assign that key to the values in data
+        columns.forEach( d => {
+            columnNameList.push(d.column)
+            this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
+        })
+
+        props.data.forEach( d => {
+            let data = {};
+            for(let key in this.keyColumns) {
+                if(this.keyColumns.hasOwnProperty(key)) {
+                    const columnData = Object.assign({}, this.keyColumns[key]);
+
+                    delete columnData.totalCharacters;
+
+                    const accessor = columnAccessor(columnData);
+                    data[key] = accessor(d);
+
+                    // add tooltip column data if it doesn't exist in column array
+                    if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                        data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
+                    }
+
+                    // add matching row data if it doesn't exist in column array
+                    if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                        data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
+                    }
+                }
+            }
+
+            this.filterData.push(data)
+        })
+
+        this.originalData = this.filterData
+
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
         this.resetFilters();
-
-        this.filterData = props.data;
 
         let columnsContext = false
 
@@ -116,7 +169,7 @@ class Table extends AbstractGraph {
         }
 
         // filter columns who will be display in table
-        let filteredColumns = columns.filter( d => {
+        const filteredColumns = columns.filter( d => {
             Object.assign(d, {value: d.label})
 
             //Must return all the columns
@@ -153,11 +206,12 @@ class Table extends AbstractGraph {
         this.selectedRows = {};
     }
 
-    handleSearch(data) {
-        this.resetFilters();
-
-        this.filterData = data;
-        this.updateData();
+    handleSearch(data, isSuccess) {
+        if(isSuccess) {
+            this.resetFilters();
+            this.filterData = data;
+            this.updateData();
+        }
     }
 
     updateData(columns = this.state.columns) {
@@ -165,7 +219,7 @@ class Table extends AbstractGraph {
             limit,
         } = this.getConfiguredProperties();
 
-        let offset = limit * (this.currentPage - 1);
+        const offset = limit * (this.currentPage - 1);
         this.setState({
             data : this.filterData.slice(offset, offset + limit),
             selected: this.selectedRows[this.currentPage] ? this.selectedRows[this.currentPage]: [],
@@ -175,41 +229,31 @@ class Table extends AbstractGraph {
 
     getColumns() {
         const {
-            data,
             configuration,
         } = this.props;
-
-        if (!data || !data.length)
-            return;
 
         return configuration.data.columns;
     }
 
-    getAccessor(columns) {
-        return columns.map(columnAccessor);
-    }
-
-    getTooltipAccessor(columns) {
-        return columns.map(column => {
-            return column.tooltip ? columnAccessor(column.tooltip) : () => {}
-        });
+    getKeyColumns() {
+        return this.keyColumns;
     }
 
     // filter and formatting columns for table header
     getHeaderData() {
-        let columns = this.getColumns()
+        const columns = this.getKeyColumns()
         let headerData = []
         for(let index in columns) {
             if(columns.hasOwnProperty(index)) {
-                let columnRow = columns[index]
+                const columnRow = columns[index]
                 if(this.state.columns.filter( d => d.value === columnRow.label).length) {
                     headerData.push({
-                        key: columnRow.column,
+                        key: index,
                         label: columnRow.label || columnRow.column,
                         sortable: true,
-                        columnText: columnRow.label || columnRow.column,
-                        columField: columnRow.column,
-                        type:"text",
+                        columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+                        columField: index,
+                        type: columnRow.selection ? "selection" : "text",
                         style: {
                           textIndent: '2px'
                         }
@@ -230,51 +274,71 @@ class Table extends AbstractGraph {
         if(!columns)
             return []
 
-        const accessors = this.getAccessor(columns);
-        const tooltipAccessor = this.getTooltipAccessor(columns);
+        const keyColumns = this.getKeyColumns()
 
         return this.state.data.map((d, j) => {
 
             let data = {},
-                highlighter = false;
+              highlighter = false;
 
-            accessors.forEach((accessor, i) => {
-                let originalData = accessor(d),
-                    columnData   = originalData
+            const keyData = this.replaceKeyFromColumn(d)
 
-                if((columnData || columnData === 0) && columns[i].tooltip) {
-                    let fullText = tooltipAccessor[i](d, true)
-                    fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText
-                    let hoverContent = (
-                        <div key={`tooltip_${j}_${i}`}>
-                            {fullText}
-                            <CopyToClipboard text={fullText ? fullText.toString() : ''}><button title="copy" className="btn btn-link btn-xs fa fa-copy pointer text-white"></button></CopyToClipboard>
-                        </div>
-                    )
+            for (let key in keyColumns) {
+                if(keyColumns.hasOwnProperty(key)) {
 
-                    columnData = (
-                        <Tooltip key={`tooltip_${j}_${i}`}
-                            content={[hoverContent]}
-                            styles={tooltipStyle}>
-                                {columnData}
-                        </Tooltip>
-                    )
+                    const columnObj  = keyColumns[key],
+                        originalData = d[key];
+                    let columnData   = originalData;
+
+                    // get substring of data upto defined total characters
+                    if(columnObj.totalCharacters) {
+                        columnData = columnAccessor({column: columnObj.column, totalCharacters: columnObj.totalCharacters})(keyData)
+                    }
+
+                    // enable tooltip on mouse hover
+                    if((columnData || columnData === 0) && columnObj.tooltip) {
+
+                        let fullText = d[columnObj.tooltip.column] || originalData
+
+                        fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText
+
+                        const hoverContent = (
+                            <div key={`tooltip_${j}_${key}`}>
+                                {fullText}
+                                <CopyToClipboard text={fullText ? fullText.toString() : ''}><button title="copy" className="btn btn-link btn-xs fa fa-copy pointer text-white"></button></CopyToClipboard>
+                            </div>
+                        )
+
+                        columnData = (
+                            <Tooltip key={`tooltip_${j}_${key}`}
+                                content={[hoverContent]}
+                                styles={tooltipStyle}>
+                                    {columnData}
+                            </Tooltip>
+                        )
+                    }
+
+                    // highlight the entire row if highlight array have a column with non-empty value
+                    if(highlight && highlight.includes(columnObj.column) && originalData) {
+                        highlighter = true
+                    }
+
+                    /**
+                     * indicate column value with colors,
+                     *  if column value configured in color array as a key with given color as a value. For e.g. -
+                     * color {"insla": "red", "outsla": "green"}
+                     */
+                    if (columnObj.colors && columnObj.colors[originalData]) {
+                        columnData =  (
+                            <div style={{ background:  columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+                        )
+                    }
+
+                    if(columnData) {
+                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
+                    }
                 }
-
-                if(highlight && highlight.includes(columns[i].column) && originalData) {
-                    highlighter = true
-                }
-
-                if (columns[i].colors && columns[i].colors[originalData]) {
-                    columnData =  (
-                        <div style={{ background:  columns[i].colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginLeft: "6px", marginRight: "6px" }}></div>
-                    )
-                }
-
-                if(columnData) {
-                    data[columns[i].column] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData;
-                }
-            });
+            }
 
             if(highlighter)
                 Object.keys(data).map(key => {
@@ -283,17 +347,16 @@ class Table extends AbstractGraph {
                 })
 
             return data
-        }).filter(o => !_.isEmpty(o))
+        })
     }
 
     handleSortOrderChange(column, order) {
-        const value = columnAccessor({column})
         this.filterData = this.filterData.sort(
           (a, b) => {
              if(order === 'desc')
-               return value(b) > value(a) ? 1 : -1
+               return b[column] > a[column] ? 1 : -1
 
-            return value(a) > value(b) ? 1 : -1
+            return a[column] > b[column] ? 1 : -1
           }
         );
 
@@ -316,17 +379,13 @@ class Table extends AbstractGraph {
 
     handleClick(key) {
         if(this.props.onMarkClick && this.state.data[key])
-           this.props.onMarkClick(this.state.data[key]);
+           this.props.onMarkClick(this.replaceKeyFromColumn(this.state.data[key]));
     }
 
     handleRowSelection(selectedRows) {
         const {
-            data
-        } = this.props
-
-        const {
             multiSelectable,
-            selectedColumn
+            matchingRowColumn
         } = this.getConfiguredProperties();
 
         if(!multiSelectable) {
@@ -347,32 +406,58 @@ class Table extends AbstractGraph {
             const selectedData = this.getSelectedRows()
 
             if(selectedData.length > 1) {
-                rows = selectedData
+                rows = selectedData.map( d => this.replaceKeyFromColumn(d))
             } else {
                 let row =  selectedData.length ? selectedData[0] : {}
                 /**
-                 * Compare `selectedColumn` value with all available datas and if equal to selected row,
+                 * Compare `matchingRowColumn` value with all available datas and if equal to selected row,
                  * then save all matched records in store under "matchedRows",
                 **/
-                if(selectedColumn) {
-                    const value = columnAccessor({column: selectedColumn})
-                    matchingRows = data.filter( (d) => {
-                        return (value(row) || value(row) === 0) && row !== d && value(row) === value(d)
-                    });
-                }
+                if(matchingRowColumn) {
+                    const key = this.getKeyByColumnName(matchingRowColumn) || matchingRowColumn
 
-                rows = row
+                    matchingRows = this.filterData.filter( (d) => {
+                        return (row[key] || row[key] === 0) && row !== d && row[key] === d[key]
+                    });
+
+                    if(matchingRows.length) {
+                        matchingRows = matchingRows.map( d => this.replaceKeyFromColumn(d))
+                    }
+                }
+                rows = this.replaceKeyFromColumn(row)
             }
             onSelect({rows, matchingRows});
         }
 
     }
 
+    // replace random generated keys of columns from actual column name
+    replaceKeyFromColumn(row) {
+        const columns = this.getKeyColumns()
+        let updatedRow = {}
+        for (let key in row) {
+            if(row.hasOwnProperty(key)) {
+                objectPath.set(updatedRow, columns[key] ? columns[key].column : key, row[key]);
+            }
+        }
+        return updatedRow
+    }
+
+    // pass column name and get column key (random generated at component will mount/ update)
+    getKeyByColumnName(column) {
+        const columns = this.getKeyColumns()
+        for (let key in columns) {
+            if(columns.hasOwnProperty(key) && columns[key].column === column) {
+                return key
+            }
+        }
+        return false
+    }
+
     getMenu() {
         const {
             menu,
-            multiMenu,
-            multiSelectable
+            multiMenu
         } = this.getConfiguredProperties();
 
         if (multiMenu && this.getSelectedRows().length > 1) {
@@ -383,7 +468,7 @@ class Table extends AbstractGraph {
     }
 
     handleContextMenu(event) {
-        let menu = this.getMenu()
+        const menu = this.getMenu()
 
         if (!menu) {
             return false;
@@ -463,7 +548,7 @@ class Table extends AbstractGraph {
 
         return (
           <SearchBar
-            data={this.props.data}
+            data={this.originalData}
             searchText={searchText}
             options={headerData}
             handleSearch={this.handleSearch}
@@ -481,7 +566,7 @@ class Table extends AbstractGraph {
           return data
 
         if(highlight) {
-            this.state.selected.map( (key) => {
+            this.state.selected.forEach( (key) => {
                 if(highlight && data[key]) {
                     for (let i in data[key]) {
                         if (data[key].hasOwnProperty(i)) {
@@ -600,12 +685,13 @@ class Table extends AbstractGraph {
             selectColumnOption
         } = this.getConfiguredProperties();
 
-        if(!data || !data.length) {
+        if(this.isEmptyData()) {
             return this.renderMessage('No data to visualize')
         }
 
-        let tableData  = this.getTableData(this.getColumns()),
-            headerData = this.getHeaderData()
+        let tableData  = this.getTableData(this.getColumns());
+        const headerData = this.getHeaderData()
+
 
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
