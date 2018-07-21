@@ -17,6 +17,7 @@ import {properties} from "./default.config"
 import { pick } from '../../utils/helpers'
 
 import SearchBar from "../../SearchBar"
+import Modal from "../../../../components/Modal"
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
@@ -331,6 +332,17 @@ class Table extends AbstractGraph {
                     if (columnObj.colors && columnObj.colors[originalData]) {
                         columnData =  (
                             <div style={{ background:  columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+                        )
+                    }
+
+                    if(columnObj.showPopup && originalData) {
+                        columnData =  (
+                            <div onClick={(e) => {
+                                //e.stopPropagation();
+                                this.togglePopup({ row: keyData, clickedColumn: columnObj.column, modalQuery: columnObj.showPopup })
+                            }}>
+                                {originalData}
+                            </div>
                         )
                     }
 
@@ -669,6 +681,43 @@ class Table extends AbstractGraph {
         )
     }
 
+    togglePopup({
+        row,
+        clickedColumn,
+        modalQuery
+    }) {
+        if (!this.state.modalIsOpen) {
+            this.setState({
+                modalIsOpen : true,
+                row,
+                clickedColumn,
+                modalQuery
+            })
+        }
+    }
+
+    closeModal() {
+        this.setState({
+            modalIsOpen : false,
+            row: [],
+            clickedColumn: null,
+            modalQuery: null
+        })
+    }
+
+    modalPopup() {
+        return (
+            <Modal
+                modalIsOpen={this.state.modalIsOpen}
+                row={this.state.row}
+                column={this.state.clickedColumn}
+                closeModal={this.closeModal}
+                script={"tableScript"}
+                query={this.state.modalQuery}
+            />
+        )
+    }
+
     render() {
         const {
             height,
@@ -708,6 +757,7 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
                     >
+                        {this.modalPopup()}
                         {this.filteredColumnBar(selectColumnOption)}
                         <div style={{clear:"both"}}></div>
 
