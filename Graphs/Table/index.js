@@ -17,10 +17,10 @@ import {properties} from "./default.config"
 import { pick } from '../../utils/helpers'
 
 import SearchBar from "../../SearchBar"
-import Modal from "../../../../components/Modal"
+import InfoBox from "../../../../components/InfoBox"
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
-const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
+const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox']
 class Table extends AbstractGraph {
 
     constructor(props, context) {
@@ -33,6 +33,7 @@ class Table extends AbstractGraph {
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.handleColumnSelection   = this.handleColumnSelection.bind(this)
         this.selectionColumnRenderer = this.selectionColumnRenderer.bind(this)
+        this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
 
         this.columns = `${props.configuration.id}-columns`
 
@@ -49,7 +50,8 @@ class Table extends AbstractGraph {
             data: [],
             fontSize: style.defaultFontsize,
             contextMenu: null,
-            columns: []
+            columns: [],
+            showInfoBox: false,
         }
     }
 
@@ -335,13 +337,18 @@ class Table extends AbstractGraph {
                         )
                     }
 
-                    if(columnObj.showPopup && originalData) {
+                    if(columnObj.infoBox && columnData) {
                         columnData =  (
                             <div onClick={(e) => {
                                 //e.stopPropagation();
-                                this.togglePopup({ row: keyData, clickedColumn: columnObj.column, modalQuery: columnObj.showPopup })
+                                this.openInfoBox({ 
+                                    infoBoxRow: keyData, 
+                                    infoBoxColumn: columnObj.column,
+                                    infoBoxData: originalData,
+                                    infoBoxScript: columnObj.infoBox 
+                                })
                             }}>
-                                {originalData}
+                                {columnData}
                             </div>
                         )
                     }
@@ -681,46 +688,47 @@ class Table extends AbstractGraph {
         )
     }
 
-    togglePopup({
-        row,
-        clickedColumn,
-        modalQuery
+    openInfoBox({
+        infoBoxRow,
+        infoBoxColumn,
+        infoBoxData,
+        infoBoxScript
     }) {
-        if (!this.state.modalIsOpen) {
-            this.setState({
-                modalIsOpen : true,
-                row,
-                clickedColumn,
-                modalQuery
-            })
-        }
-    }
-
-    closeModal() {
         this.setState({
-            modalIsOpen : false,
-            row: [],
-            clickedColumn: null,
-            modalQuery: null
+            showInfoBox: true,
+            infoBoxRow,
+            infoBoxColumn,
+            infoBoxData,
+            infoBoxScript
         })
     }
 
-    modalPopup() {
+    onInfoBoxCloseHandler() {
+        this.setState({
+            showInfoBox: false
+        })
+    }
+
+    renderInfoBox() {
+        let { showInfoBox, infoBoxRow, infoBoxColumn, infoBoxScript, infoBoxData  } = this.state;
+
         return (
-            <Modal
-                modalIsOpen={this.state.modalIsOpen}
-                row={this.state.row}
-                column={this.state.clickedColumn}
-                closeModal={this.closeModal}
-                script={"tableScript"}
-                query={this.state.modalQuery}
-            />
+            showInfoBox && 
+            <InfoBox
+                infoBoxRow={infoBoxRow}
+                infoBoxColumn={infoBoxColumn}
+                infoBoxData={infoBoxData}
+                onInfoBoxClose={this.onInfoBoxCloseHandler}
+                infoBoxScript={infoBoxScript}
+            >
+                Yeah
+            </InfoBox>
         )
     }
 
     render() {
         const {
-            height,
+            height, 
             data
         } = this.props;
 
@@ -757,7 +765,7 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
                     >
-                        {this.modalPopup()}
+                        {this.renderInfoBox()}
                         {this.filteredColumnBar(selectColumnOption)}
                         <div style={{clear:"both"}}></div>
 
