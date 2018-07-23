@@ -6,6 +6,7 @@ import _ from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield'
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
+import EyeIcon  from 'react-icons/lib/fa/eye';
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -18,9 +19,12 @@ import { pick } from '../../utils/helpers'
 
 import SearchBar from "../../SearchBar"
 import InfoBox from "../../../../components/InfoBox"
+import Script from "../../../../components/Script"
+
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox']
+
 class Table extends AbstractGraph {
 
     constructor(props, context) {
@@ -339,16 +343,19 @@ class Table extends AbstractGraph {
 
                     if(columnObj.infoBox && columnData) {
                         columnData =  (
-                            <div onClick={(e) => {
-                                //e.stopPropagation();
-                                this.openInfoBox({ 
-                                    infoBoxRow: keyData, 
-                                    infoBoxColumn: columnObj.column,
-                                    infoBoxData: originalData,
-                                    infoBoxScript: columnObj.infoBox 
-                                })
-                            }}>
-                                {columnData}
+                            <div>
+                                {columnData}  
+                                <span style={{padding: "0px 5px"}} onClick={(e) => {
+                                    e.stopPropagation();
+                                    this.openInfoBox({ 
+                                        infoBoxRow: keyData, 
+                                        infoBoxColumn: columnObj.column,
+                                        infoBoxData: originalData,
+                                        infoBoxScript: columnObj.infoBox
+                                    })
+                                }}>
+                                    <EyeIcon size={this.state.fontSize + 2} color="#555555" />
+                                </span>
                             </div>
                         )
                     }
@@ -699,14 +706,14 @@ class Table extends AbstractGraph {
             infoBoxRow,
             infoBoxColumn,
             infoBoxData,
-            infoBoxScript
-        })
+            infoBoxScript,
+        });
     }
 
     onInfoBoxCloseHandler() {
         this.setState({
-            showInfoBox: false
-        })
+            showInfoBox: false,
+        });
     }
 
     renderInfoBox() {
@@ -715,13 +722,14 @@ class Table extends AbstractGraph {
         return (
             showInfoBox && 
             <InfoBox
-                infoBoxRow={infoBoxRow}
-                infoBoxColumn={infoBoxColumn}
-                infoBoxData={infoBoxData}
                 onInfoBoxClose={this.onInfoBoxCloseHandler}
-                infoBoxScript={infoBoxScript}
             >
-                Yeah
+                <Script
+                    row={infoBoxRow}
+                    key={infoBoxColumn}
+                    value={infoBoxData}
+                    script={infoBoxScript}
+                />
             </InfoBox>
         )
     }
