@@ -110,14 +110,66 @@ class GeoMap extends AbstractGraph {
     }
   }
 
+  displayNSGInfo = (data) => {
+      const {
+          localityColumn,
+          nameColumn,
+          //Adding additional information
+          criticalAlarmColumn,
+          majorAlarmColumn,
+          minorAlarmColumn,
+          infoAlarmColumn,
+          bootstrapStatusColumn,
+          NSGVersionColumn,
+      } = this.getConfiguredProperties();
+
+      const rowStyle = {
+          display: 'table-row'
+      };
+      const labelStyle = {
+          fontSize: 9,
+          color: 'rgb(106, 106, 106)',
+          whiteSpace: 'nowrap',
+          display: 'table-cell',
+          marginRight: '10px'
+      };
+
+      const dataStyle = {
+          whiteSpace: 'nowrap',
+          display: 'table-cell',
+          marginLeft: '10px'
+      }
+
+      const displayInfo = info => {
+          return info.map( row => (
+              <div style={rowStyle}>
+                  <small style={labelStyle}>{row.label}</small>
+                  <small style={dataStyle}>&nbsp;</small>
+                  <small style={dataStyle}>{row.text}</small>
+              </div>
+          ))
+      }
+      const minorAndInfoAlarms = new Number(data[minorAlarmColumn]) + new Number(data[infoAlarmColumn]);
+      return (
+          <div style={{display: 'table'}}>
+              {
+                displayInfo([
+                    {label: 'NSG', text: data[nameColumn]},
+                    {label: 'Address', text: data[localityColumn]},
+                    {label: 'Bootstrap Status', text: data[bootstrapStatusColumn] || 'No status found'},
+                    {label: 'NSG Version', text: data[NSGVersionColumn] || 'No version found'},
+                    {label: 'Critical Alarms', text: data[criticalAlarmColumn] || 'None'},
+                    {label: 'Major Alarms', text: data[majorAlarmColumn] || 'None'},
+                    {label: 'Minor/Info Alarms', text: minorAndInfoAlarms || 'None'}
+                ])
+              }
+          </div>
+      )
+  }
+
   // popup info window on marker's click
   renderInfowindow() {
-    const {
-      localityColumn,
-      nameColumn
-    } = this.getConfiguredProperties();
-
-    let { data, position } = this.state.infowindow
+    let { data, position } = this.state.infowindow;
 
     return (
       data && (
@@ -127,7 +179,7 @@ class GeoMap extends AbstractGraph {
             pixelOffset: new window.google.maps.Size(0,-25)
           }}
           onCloseClick={() => this.toggleInfoWindow}>
-          <div>{data[nameColumn]} <br/> {data[localityColumn]}</div>
+          { this.displayNSGInfo(data)}
         </InfoWindow>
       )
     )
