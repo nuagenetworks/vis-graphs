@@ -515,8 +515,8 @@ class GeoMap extends AbstractGraph {
                     { this.renderInfowindow() }
                 </GoogleMapsWrapper>
                 :
-                <div style={{position: 'absolute', top: '50%', left: '40%', fontSize: '14px'}}>
-                    Google Maps API Key has not been configured! Please configure the key through Nuage Dashboard
+                <div style={{position: 'absolute', top: '50%', left: '30%', fontSize: '14px'}}>
+                    Google Maps API Key has not been configured! Please configure the key through Nuage VSD Dashboard
                 </div>
         }
 
