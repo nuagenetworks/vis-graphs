@@ -451,7 +451,8 @@ class GeoMap extends AbstractGraph {
     const {
       data,
       height,
-      googleMapURL
+      googleMapURL,
+      googleMapsAPIKey
     } = this.props
 
     const {
@@ -480,37 +481,45 @@ class GeoMap extends AbstractGraph {
     return (
       <div>
         {this.renderSearchBarIfNeeded()}
-        <GoogleMapsWrapper
-          googleMapURL={googleMapURL}
-          onBoundsChanged={this.onBoundsChanged}
-          onZoomChanged={this.onZoomChanged}
-          center={defaultLatLng}
-          options={{
-            maxZoom,
-            minZoom,
-            mapTypeControlOptions: {
-              mapTypeIds: ['terrain']
-            },
-            streetViewControl:false,
-            mapTypeControl: false,
-            styles: mapStyles
-           }}
-          onMapMounted={this.onMapMounted}
-          containerElement={<div style={{ height: mapHeight }} />}>
-          { this.state.spiderifyLines }
-          { this.state.spiderifyMarkers }
-          <MarkerClusterer
-            ignoreHidden={false}
-            averageCenter
-            gridSize={60}
-            onClusteringEnd={ this.handleClustererEnd}
-            onClick={ this.handleClusterClick }
-          >
-            { this.renderMarkersIfNeeded() }
-            { this.renderPolylineIfNeeded() }
-          </MarkerClusterer>
-            { this.renderInfowindow() }
-        </GoogleMapsWrapper>
+        {
+            googleMapsAPIKey ?
+                <GoogleMapsWrapper
+                    googleMapURL={googleMapURL}
+                    onBoundsChanged={this.onBoundsChanged}
+                    onZoomChanged={this.onZoomChanged}
+                    center={defaultLatLng}
+                    options={{
+                        maxZoom,
+                        minZoom,
+                        mapTypeControlOptions: {
+                            mapTypeIds: ['terrain']
+                        },
+                        streetViewControl:false,
+                        mapTypeControl: false,
+                        styles: mapStyles
+                    }}
+                    onMapMounted={this.onMapMounted}
+                    containerElement={<div style={{ height: mapHeight }} />}>
+                    { this.state.spiderifyLines }
+                    { this.state.spiderifyMarkers }
+                    <MarkerClusterer
+                        ignoreHidden={false}
+                        averageCenter
+                        gridSize={60}
+                        onClusteringEnd={ this.handleClustererEnd}
+                        onClick={ this.handleClusterClick }
+                    >
+                        { this.renderMarkersIfNeeded() }
+                        { this.renderPolylineIfNeeded() }
+                    </MarkerClusterer>
+                    { this.renderInfowindow() }
+                </GoogleMapsWrapper>
+                :
+                <div style={{position: 'absolute', top: '50%', left: '40%', fontSize: '14px'}}>
+                    Google Maps API Key has not been configured! Please configure the key through Nuage Dashboard
+                </div>
+        }
+
       </div>
     )
   }
