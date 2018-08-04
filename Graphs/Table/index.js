@@ -14,12 +14,14 @@ import tooltipStyle from './tooltipStyle'
 import "./style.css"
 import style from './style'
 import {properties} from "./default.config"
-import { pick } from '../../utils/helpers'
+import { pick, expandExpression, labelToField } from '../../utils/helpers';
+import { events } from '../../utils/types';
 
 import SearchBar from "../../SearchBar"
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
+
 class Table extends AbstractGraph {
 
     constructor(props, context) {
@@ -37,9 +39,10 @@ class Table extends AbstractGraph {
 
         /**
         */
+        this.searchText = '';
+        this.scroll = props.scroll;
         this.originalData = []
         this.keyColumns = {}
-        this.currentPage = 1
         this.filterData = []
         this.selectedRows = {}
         this.htmlData = {}
@@ -87,6 +90,14 @@ class Table extends AbstractGraph {
         }
     }
 
+    updateTableStatus(param = {}) {
+        const {
+            updateScroll,
+        } = this.props;
+
+        updateScroll && updateScroll(param)
+    }
+
     isEmptyData(data) {
        return _.isEmpty(data);
     }
@@ -96,8 +107,20 @@ class Table extends AbstractGraph {
 
         const {
             context,
-            selectedColumns
+            selectedColumns,
+            page,
+            scroll,
+            pageSize,
+            size
         } = props
+
+        let startIndex = 0;
+        let endIndex = size - 1;
+
+        if(scroll) {
+            startIndex = (page - 1) * pageSize;
+            endIndex = startIndex + pageSize - 1;
+        }
 
         const {
             selectColumnOption,
@@ -123,25 +146,28 @@ class Table extends AbstractGraph {
             this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
         })
 
-        props.data.forEach( d => {
+        props.data.forEach( (d, i) => {
             let data = {};
-            for(let key in this.keyColumns) {
-                if(this.keyColumns.hasOwnProperty(key)) {
-                    const columnData = Object.assign({}, this.keyColumns[key]);
 
-                    delete columnData.totalCharacters;
+            if(i >= startIndex && i <= endIndex) {
+                for(let key in this.keyColumns) {
+                    if(this.keyColumns.hasOwnProperty(key)) {
+                        const columnData = Object.assign({}, this.keyColumns[key]);
 
-                    const accessor = columnAccessor(columnData);
-                    data[key] = accessor(d);
+                        delete columnData.totalCharacters;
 
-                    // add tooltip column data if it doesn't exist in column array
-                    if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
-                        data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
-                    }
+                        const accessor = columnAccessor(columnData);
+                        data[key] = accessor(d);
 
-                    // add matching row data if it doesn't exist in column array
-                    if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
-                        data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
+                        // add tooltip column data if it doesn't exist in column array
+                        if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                            data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
+                        }
+
+                        // add matching row data if it doesn't exist in column array
+                        if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                            data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
+                        }
                     }
                 }
             }
@@ -154,8 +180,8 @@ class Table extends AbstractGraph {
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
-        this.resetFilters();
 
+        this.resetFilters(page || 1);
         let columnsContext = false
 
         if(selectedColumns) {
@@ -197,27 +223,37 @@ class Table extends AbstractGraph {
         }
     }
 
-    resetFilters() {
-        this.currentPage = 1;
+    resetFilters(page = 1) {
+        this.currentPage = page;
         this.selectedRows = {};
     }
 
-    handleSearch(data, isSuccess) {
+    handleSearch(data, isSuccess, expression = null, searchText = null) {
         if(isSuccess) {
+            if(expression) {
+                const search = labelToField(expandExpression(expression), this.getKeyColumns())
+                this.filterData = data;
+
+                if(this.props.searchText !== searchText) {
+                    this.updateTableStatus({search, searchText , page: 1, event: events.SEARCH})
+                }
+            } else {
+                this.filterData = data;
+                this.updateData();
+            }
+
             this.resetFilters();
-            this.filterData = data;
-            this.updateData();
         }
     }
 
     updateData(columns = this.state.columns) {
         const {
-            limit,
-        } = this.getConfiguredProperties();
+            pageSize,
+        } = this.props;
 
-        const offset = limit * (this.currentPage - 1);
+        const offset = pageSize * (this.currentPage - 1);
         this.setState({
-            data : this.filterData.slice(offset, offset + limit),
+            data : this.filterData.slice(offset, offset + pageSize),
             selected: this.selectedRows[this.currentPage] ? this.selectedRows[this.currentPage]: [],
             columns
         });
@@ -347,30 +383,55 @@ class Table extends AbstractGraph {
     }
 
     handleSortOrderChange(column, order) {
-        this.filterData = this.filterData.sort(
-          (a, b) => {
-             if(order === 'desc')
-               return b[column] > a[column] ? 1 : -1
+        if(this.scroll) {
+            const { sort } = this.props;
+            let colOrder = 'asc';
+            let colName = this.getColumnNameByKey(column);
 
-            return a[column] > b[column] ? 1 : -1
-          }
-        );
+            if(sort && sort.column === colName) {
+                if(sort.order === 'desc') {
+                    colOrder = '';
+                } else if(sort.order === 'asc') {
+                    colOrder = 'desc';
+                }
+            }
 
-        /**
-         * Resetting the paging due to sorting
-         */
-        this.resetFilters();
-        this.updateData();
+            this.updateTableStatus({ 
+                sort: {column: colName, order: colOrder},
+                page: 1,
+                event: events.SORTING
+            })
+        } else {
+            this.filterData = this.filterData.sort(
+            (a, b) => {
+                if(order === 'desc')
+                    return b[column] > a[column] ? 1 : -1
+
+                return a[column] > b[column] ? 1 : -1
+            }
+            );
+            /**
+             * Resetting the paging due to sorting
+             */
+            this.resetFilters();
+            this.updateData();  
+        }
     }
 
     handlePreviousPageClick() {
-        --this.currentPage;
-        this.updateData();
+        --this.currentPage
+        if(this.scroll)
+            this.updateTableStatus({page: this.currentPage,  event: events.PAGING})
+        else
+            this.updateData();
     }
 
     handleNextPageClick() {
-        ++this.currentPage;
-        this.updateData();
+        ++this.currentPage
+        if(this.scroll)
+            this.updateTableStatus({page: this.currentPage, event: events.PAGING})
+        else
+            this.updateData();
     }
 
     handleClick(key) {
@@ -448,6 +509,14 @@ class Table extends AbstractGraph {
             }
         }
         return false
+    }
+
+    getColumnNameByKey(key) {
+        const columns = this.getKeyColumns()
+        if (key && columns && columns[key]) {
+            return columns[key].column
+        }
+        return key
     }
 
     getMenu() {
@@ -535,20 +604,27 @@ class Table extends AbstractGraph {
 
     renderSearchBarIfNeeded(headerData) {
         const {
+            searchText: searchString
+        } = this.props;
+
+        const {
             searchBar,
-            searchText
+            searchText,
         } = this.getConfiguredProperties();
 
         if(searchBar === false)
            return;
 
+        const search = searchString !== null ? searchString : searchText;
+
         return (
           <SearchBar
             data={this.originalData}
-            searchText={searchText}
+            searchText={search}
             options={headerData}
             handleSearch={this.handleSearch}
             columns={this.getColumns()}
+            scroll={this.props.scroll}
           />
         );
     }
@@ -665,25 +741,36 @@ class Table extends AbstractGraph {
         )
     }
 
+    renderNoData() {
+        const { data } = this.props;
+
+        if(this.isEmptyData(data)) {
+            return this.renderMessage('No data to visualize')
+        }
+
+        return null;
+    }
+
     render() {
         const {
             height,
-            data
+            size,
+            pageSize,
+            scroll,
+            searchText: searchString
         } = this.props;
 
         const {
-            limit,
             selectable,
             multiSelectable,
             showCheckboxes,
             hidePagination,
             searchBar,
-            selectColumnOption
+            selectColumnOption,
+            searchText
         } = this.getConfiguredProperties();
 
-        if(this.isEmptyData(data)) {
-            return this.renderMessage('No data to visualize')
-        }
+        
 
         let tableData  = this.getTableData(this.getColumns());
         const headerData = this.getHeaderData()
@@ -692,7 +779,9 @@ class Table extends AbstractGraph {
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
 
-        let showFooter = (data.length <= limit && hidePagination !== false) ? false : true,
+        let totalRecords =  scroll ? size : this.filterData.length;
+    
+        let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
           heightMargin  =  showFooter ?  100 : 80
 
           heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
@@ -708,30 +797,35 @@ class Table extends AbstractGraph {
                         <div style={{clear:"both"}}></div>
 
                         {this.renderSearchBarIfNeeded(headerData)}
-                        <DataTables
-                            columns={headerData}
-                            data={tableData}
-                            showHeaderToolbar={false}
-                            showFooterToolbar={showFooter}
-                            selectable={selectable}
-                            multiSelectable={multiSelectable}
-                            selectedRows={this.state.selected}
-                            showCheckboxes={showCheckboxes}
-                            showRowSizeControls={false}
-                            onNextPageClick={this.handleNextPageClick}
-                            onPreviousPageClick={this.handlePreviousPageClick}
-                            onSortOrderChange={this.handleSortOrderChange}
-                            onRowSelection={this.handleRowSelection}
-                            page={this.currentPage}
-                            count={this.filterData.length}
-                            rowSize={limit}
-                            tableStyle={style.table}
-                            tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
-                            tableRowStyle={style.row}
-                            tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize})}
-                            tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
-                            footerToolbarStyle={style.footerToolbar}
-                        />
+                        {this.renderNoData()}
+                        {
+                            scroll && searchText && searchString === null ?
+                            this.renderMessage("Filtering...")  : 
+                            <DataTables
+                                columns={headerData}
+                                data={tableData}
+                                showHeaderToolbar={false}
+                                showFooterToolbar={showFooter}
+                                selectable={selectable}
+                                multiSelectable={multiSelectable}
+                                selectedRows={this.state.selected}
+                                showCheckboxes={showCheckboxes}
+                                showRowSizeControls={false}
+                                onNextPageClick={this.handleNextPageClick}
+                                onPreviousPageClick={this.handlePreviousPageClick}
+                                onSortOrderChange={this.handleSortOrderChange}
+                                onRowSelection={this.handleRowSelection}
+                                page={this.currentPage}
+                                count={totalRecords}
+                                rowSize={pageSize}
+                                tableStyle={style.table}
+                                tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
+                                tableRowStyle={style.row}
+                                tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize})}
+                                tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
+                                footerToolbarStyle={style.footerToolbar}
+                            />
+                        }
                 </div>
             </MuiThemeProvider>
         );
