@@ -4,15 +4,12 @@ export const labelToField = (expression, columns) => {
 
       if(d.element && d.element.category) {
         for(let key in columns) {
+
           if(columns.hasOwnProperty(key)) {
             const column = columns[key];
-            if(column.label === d.element.category) {
-              d.element.category = column.column;
+            if(column.label === d.element.category || column.column === d.element.category) {
+              d.element.category = column.column
               break;
-            }
-            if(column.column === d.element.category) {
-              d.element.category = column.column;
-               break;
             }
           }
         }

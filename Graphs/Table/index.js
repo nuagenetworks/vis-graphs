@@ -127,10 +127,6 @@ class Table extends AbstractGraph {
             matchingRowColumn
         } = this.getConfiguredProperties()
 
-        if(this.isEmptyData(props.data)) {
-            return;
-        }
-
         const columns = this.getColumns();
 
         if (!columns)
@@ -145,6 +141,10 @@ class Table extends AbstractGraph {
             columnNameList.push(d.column)
             this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
         })
+
+        if(this.isEmptyData(props.data)) {
+            return;
+        }
 
         props.data.forEach( (d, i) => {
             let data = {};
