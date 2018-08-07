@@ -178,7 +178,6 @@ class Table extends AbstractGraph {
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
-
         this.resetFilters(page || 1);
         let columnsContext = false
 
@@ -238,9 +237,8 @@ class Table extends AbstractGraph {
             } else {
                 this.filterData = data;
                 this.updateData();
+                this.resetFilters();
             }
-
-            this.resetFilters();
         }
     }
 
