@@ -103,8 +103,6 @@ class Table extends AbstractGraph {
     }
 
     initiate(props) {
-
-
         const {
             context,
             selectedColumns,
@@ -382,56 +380,56 @@ class Table extends AbstractGraph {
         })
     }
 
-    handleSortOrderChange(column, order) {
-        if(this.scroll) {
-            const { sort } = this.props;
-            let colOrder = 'asc';
-            let colName = this.getColumnNameByKey(column);
+    // when scroll is enabled then call this function
+    handleScrollSorting(column, order) {
+        const { sort } = this.props;
+        let colOrder = 'asc';
+        let colName = this.getColumnNameByKey(column);
 
-            if(sort && sort.column === colName) {
-                if(sort.order === 'desc') {
-                    colOrder = '';
-                } else if(sort.order === 'asc') {
-                    colOrder = 'desc';
-                }
+        if (sort && sort.column === colName) {
+            if (sort.order === 'desc') {
+                colOrder = '';
+            } else if (sort.order === 'asc') {
+                colOrder = 'desc';
             }
+        }
 
-            this.updateTableStatus({ 
-                sort: {column: colName, order: colOrder},
-                page: 1,
-                event: events.SORTING
-            })
-        } else {
-            this.filterData = this.filterData.sort(
+        this.updateTableStatus({
+            sort: { column: colName, order: colOrder },
+            page: 1,
+            event: events.SORTING
+        })
+    }
+
+    handleStaticSorting(column, order) {
+        this.filterData = this.filterData.sort(
             (a, b) => {
-                if(order === 'desc')
+                if (order === 'desc')
                     return b[column] > a[column] ? 1 : -1
 
                 return a[column] > b[column] ? 1 : -1
             }
-            );
-            /**
-             * Resetting the paging due to sorting
-             */
-            this.resetFilters();
-            this.updateData();  
-        }
+        );
+
+        /**
+         * Resetting the paging due to sorting
+         */
+        this.resetFilters();
+        this.updateData();
+    }
+
+    handleSortOrderChange(column, order) {
+        this.scroll ? this.handleScrollSorting(column, order): this.handleStaticSorting(column, order)
     }
 
     handlePreviousPageClick() {
-        --this.currentPage
-        if(this.scroll)
-            this.updateTableStatus({page: this.currentPage,  event: events.PAGING})
-        else
-            this.updateData();
+        --this.currentPage;
+        this.scroll ? this.updateTableStatus({page: this.currentPage,  event: events.PAGING}) : this.updateData();
     }
 
     handleNextPageClick() {
         ++this.currentPage
-        if(this.scroll)
-            this.updateTableStatus({page: this.currentPage, event: events.PAGING})
-        else
-            this.updateData();
+        this.scroll ? this.updateTableStatus({page: this.currentPage, event: events.PAGING}) : this.updateData();
     }
 
     handleClick(key) {
@@ -773,19 +771,16 @@ class Table extends AbstractGraph {
         
 
         let tableData  = this.getTableData(this.getColumns());
-        const headerData = this.getHeaderData()
+        const headerData = this.getHeaderData(),
+            totalRecords = size || this.filterData.length;
 
 
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
 
-        let totalRecords =  scroll ? size : this.filterData.length;
-    
         let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
           heightMargin  =  showFooter ?  100 : 80
-
           heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
-
           heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
         
           return (
