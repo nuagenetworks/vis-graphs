@@ -68,21 +68,21 @@ class Table extends AbstractGraph {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+
         return !_.isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
           || !_.isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
     }
 
     componentWillReceiveProps(nextProps) {
+        
+        // reset font size on resize
+        if(this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
+            this.setState({ fontSize: style.defaultFontsize})
+        }
 
-        if (!_.isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))) {
-            // reset font size on resize
-            if(this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
-                this.setState({ fontSize: style.defaultFontsize})
-            }
-
-            if(this.props.context && this.props.context[this.columns] === nextProps.context[this.columns]) {
-                this.initiate(nextProps);
-            }
+        if((!_.isEqual(this.props.data, nextProps.data))
+         || (this.props.context && this.props.context[this.columns] === nextProps.context[this.columns])) {
+            this.initiate(nextProps);
         }
     }
 
@@ -94,11 +94,7 @@ class Table extends AbstractGraph {
         }
     }
 
-    isEmptyData() {
-        const {
-            data
-        } = this.props;
-
+    isEmptyData(data) {
        return _.isEmpty(data);
     }
 
@@ -115,7 +111,7 @@ class Table extends AbstractGraph {
             matchingRowColumn
         } = this.getConfiguredProperties()
 
-        if(this.isEmptyData()) {
+        if(this.isEmptyData(props.data)) {
             return;
         }
 
@@ -750,7 +746,7 @@ class Table extends AbstractGraph {
             selectColumnOption
         } = this.getConfiguredProperties();
 
-        if(this.isEmptyData()) {
+        if(this.isEmptyData(data)) {
             return this.renderMessage('No data to visualize')
         }
 
@@ -767,8 +763,8 @@ class Table extends AbstractGraph {
           heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
 
           heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
-
-        return (
+        
+          return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
