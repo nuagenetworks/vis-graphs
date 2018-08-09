@@ -1,3 +1,5 @@
+ import { theme } from "../../theme";
+
 const tableStyle = {
     defaultFontsize: 10,
     table: {
@@ -25,6 +27,21 @@ const tableStyle = {
     },
     footerToolbar: {
         height: "32px"
+    },
+
+    button: {
+        design: {
+            margin: '10px',
+            float: 'right',
+            height: '28px',
+            minWidth: '60px',
+            padding: '0',
+            background: theme.palette.greyLightColor
+        },
+        background: theme.palette.greyLightColor,
+        icon: {
+            color: theme.palette.blackLightColor
+        }
     }
   }
   

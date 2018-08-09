@@ -6,6 +6,9 @@ import _ from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield'
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
+import IconButton from 'material-ui/IconButton';
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -90,6 +93,7 @@ class Table extends AbstractGraph {
         }
     }
 
+    // update scroll data on pagination, searching and sorting.
     updateTableStatus(param = {}) {
         const {
             updateScroll,
@@ -713,7 +717,7 @@ class Table extends AbstractGraph {
         )
 
         return (
-            <div style={{float:'right', display: 'flex', paddingRight: 15}}>
+            <div style={{flex: "none"}}>
                 <SuperSelectField
                     name={id}
                     multiple
@@ -747,13 +751,33 @@ class Table extends AbstractGraph {
         return null;
     }
 
+    // reset scroll data.
+    resetScrollData() {
+
+        return (
+            this.scroll ?
+                <div style={{flex: "none"}}>
+                    <IconButton
+                        tooltip="Refresh"
+                        tooltipPosition={'top-left'}
+                        style={style.button.design}
+                        onClick={ () => this.updateTableStatus({page: 1, event: events.REFRESH})}
+                    >
+                        <RefreshIcon color={style.button.icon.color} />
+                    </IconButton>
+                </div>
+            : ''
+        )
+    }
+
     render() {
         const {
             height,
             size,
             pageSize,
             scroll,
-            searchText: searchString
+            searchText: searchString,
+            configuration,
         } = this.props;
 
         const {
@@ -780,13 +804,18 @@ class Table extends AbstractGraph {
           heightMargin  =  showFooter ?  100 : 80
           heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
           heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
+          heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
         
           return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
                     >
-                        {this.filteredColumnBar(selectColumnOption)}
+                        <div style={{float:'right', display: 'flex', paddingRight: 15}}>
+                            { this.resetScrollData() }
+                            { this.filteredColumnBar(selectColumnOption) }
+                        </div>
+
                         <div style={{clear:"both"}}></div>
 
                         {this.renderSearchBarIfNeeded(headerData)}
