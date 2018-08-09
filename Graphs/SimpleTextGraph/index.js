@@ -104,6 +104,15 @@ class SimpleTextGraph extends AbstractGraph {
         return data[0][targetedColumn];
     }
 
+    handleMarkerClick = e => {
+        e.stopPropagation();
+        const { data, onMarkClick } = this.props;
+        if (data && Array.isArray(data) && data.length && onMarkClick) {
+            onMarkClick(data[0])
+        }
+        return {};
+    }
+
     render() {
         const {
             height,
@@ -142,7 +151,7 @@ class SimpleTextGraph extends AbstractGraph {
                         display: "table",
                         fontSize: "16px"
                     }}
-                    onClick={onMarkClick}
+                    onClick={this.handleMarkerClick}
                     >
                         {this.renderTitleIfNeeded(titlePosition, "top")}
 

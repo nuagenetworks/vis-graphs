@@ -8,7 +8,7 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
-
+import EyeIcon  from 'react-icons/lib/fa/eye';
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -21,9 +21,12 @@ import { pick, expandExpression, labelToField } from '../../utils/helpers';
 import { events } from '../../utils/types';
 
 import SearchBar from "../../SearchBar"
+import InfoBox from "../../../../components/InfoBox"
+import Script from "../../../../components/Script"
+
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
-const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu']
+const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox']
 
 class Table extends AbstractGraph {
 
@@ -37,6 +40,7 @@ class Table extends AbstractGraph {
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.handleColumnSelection   = this.handleColumnSelection.bind(this)
         this.selectionColumnRenderer = this.selectionColumnRenderer.bind(this)
+        this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
 
         this.columns = `${props.configuration.id}-columns`
 
@@ -55,6 +59,7 @@ class Table extends AbstractGraph {
             fontSize: style.defaultFontsize,
             contextMenu: null,
             columns: [],
+            showInfoBox: false,
         }
     }
 
@@ -363,6 +368,25 @@ class Table extends AbstractGraph {
                     if (columnObj.colors && columnObj.colors[originalData]) {
                         columnData =  (
                             <div style={{ background:  columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+                        )
+                    }
+
+                    if(columnObj.infoBox && columnData) {
+                        columnData =  (
+                            <div>
+                                {columnData}
+                                <span style={{padding: "0px 5px"}} onClick={(e) => {
+                                    e.stopPropagation();
+                                    this.openInfoBox({
+                                        infoBoxRow: keyData,
+                                        infoBoxColumn: columnObj.column,
+                                        infoBoxData: originalData,
+                                        infoBoxScript: columnObj.infoBox
+                                    })
+                                }}>
+                                    <EyeIcon size={this.state.fontSize + 2} color="#555555" />
+                                </span>
+                            </div>
                         )
                     }
 
@@ -770,6 +794,45 @@ class Table extends AbstractGraph {
         )
     }
 
+    openInfoBox({
+        infoBoxRow,
+        infoBoxColumn,
+        infoBoxData,
+        infoBoxScript
+    }) {
+        this.setState({
+            showInfoBox: true,
+            infoBoxRow,
+            infoBoxColumn,
+            infoBoxData,
+            infoBoxScript,
+        });
+    }
+
+    onInfoBoxCloseHandler() {
+        this.setState({
+            showInfoBox: false,
+        });
+    }
+
+    renderInfoBox() {
+        let { showInfoBox, infoBoxRow, infoBoxColumn, infoBoxScript, infoBoxData  } = this.state;
+
+        return (
+            showInfoBox &&
+            <InfoBox
+                onInfoBoxClose={this.onInfoBoxCloseHandler}
+            >
+                <Script
+                    row={infoBoxRow}
+                    key={infoBoxColumn}
+                    value={infoBoxData}
+                    script={infoBoxScript}
+                />
+            </InfoBox>
+        )
+    }
+
     render() {
         const {
             height,
@@ -816,6 +879,7 @@ class Table extends AbstractGraph {
                             { this.filteredColumnBar(selectColumnOption) }
                         </div>
 
+                        {this.renderInfoBox()}
                         <div style={{clear:"both"}}></div>
 
                         {this.renderSearchBarIfNeeded(headerData)}
