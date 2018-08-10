@@ -76,6 +76,10 @@ export default class AbstractGraph extends React.Component {
         }
     }
 
+    generateRandom() {
+        return Math.floor(new Date().valueOf() * Math.random());
+    }
+
     componentWillReceiveProps(nextProps) {
         this.setConfiguredProperties(nextProps);
     }
