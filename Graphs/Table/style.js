@@ -41,6 +41,9 @@ const tableStyle = {
         background: theme.palette.greyLightColor,
         icon: {
             color: theme.palette.blackLightColor
+        },
+        labelStyle: {
+            fontWeight: 700
         }
     }
   }

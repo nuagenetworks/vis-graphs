@@ -3,7 +3,10 @@ import DataTables from 'material-ui-datatables'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
 import _ from 'lodash'
-import SuperSelectField from 'material-ui-superselectfield'
+import SuperSelectField from 'material-ui-superselectfield';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
+
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
@@ -26,7 +29,7 @@ import Script from "../../../../components/Script"
 
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns']
-const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox']
+const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox', 'showConfirmationPopup']
 
 class Table extends AbstractGraph {
 
@@ -60,6 +63,7 @@ class Table extends AbstractGraph {
             contextMenu: null,
             columns: [],
             showInfoBox: false,
+            showConfirmationPopup: false
         }
     }
 
@@ -215,6 +219,24 @@ class Table extends AbstractGraph {
         })
 
         this.updateData(filteredColumns);
+    }
+
+    isScrollExpired() {
+        const {
+            expiration
+        } = this.props;
+
+        return this.scroll && expiration && expiration <= Date.now()
+    }
+
+    isScrollDataExists(page) {
+        const {
+            pageSize,
+            data
+        } = this.props;
+
+        let startIndex = (page - 1) * pageSize;
+        return startIndex < data.length;
     }
 
     decrementFontSize() {
@@ -454,6 +476,12 @@ class Table extends AbstractGraph {
     }
 
     handleNextPageClick() {
+        // show confirmation popup to refresh data if scroll is enable
+        if(this.isScrollExpired() && !this.isScrollDataExists(this.currentPage + 1)) {
+            this.setState({showConfirmationPopup: true});
+            return;
+        }
+
         ++this.currentPage
         this.scroll ? this.updateTableStatus({page: this.currentPage, event: events.PAGING}) : this.updateData();
     }
@@ -833,6 +861,39 @@ class Table extends AbstractGraph {
         )
     }
 
+    // show confirmation popup to refresh data if scroll is enable
+    renderConfirmationDialog() {
+        const actions = [
+            <FlatButton
+                label="Stay on Current Page"
+                labelStyle={style.button.labelStyle}
+                primary={true}
+                onClick={ () => this.setState({showConfirmationPopup: false}) }
+            />,
+            <FlatButton
+                label="Continue"
+                labelStyle={style.button.labelStyle}
+                primary={true}
+                onClick={ () => this.updateTableStatus({page: 1, event: events.REFRESH}) }
+            />,
+        ];
+
+        return (
+            this.state.showConfirmationPopup &&
+            <div>
+                <Dialog
+                    title="Unable to fetch"
+                    actions={actions}
+                    modal={true}
+                    contentClassName='dialogBody'
+                    open={true}
+                >
+                    Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
+                </Dialog>
+            </div>
+        );
+    }
+
     render() {
         const {
             height,
@@ -878,8 +939,8 @@ class Table extends AbstractGraph {
                             { this.resetScrollData() }
                             { this.filteredColumnBar(selectColumnOption) }
                         </div>
-
-                        {this.renderInfoBox()}
+                        { this.renderConfirmationDialog()}
+                        { this.renderInfoBox() }
                         <div style={{clear:"both"}}></div>
 
                         {this.renderSearchBarIfNeeded(headerData)}
