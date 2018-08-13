@@ -102,6 +102,25 @@ class Table extends AbstractGraph {
         }
     }
 
+    getGraphProperties() {
+        const {
+            configuration,
+            scrollData,
+            data
+        } = this.props;
+
+        // Total, per page, current page must be set and only applicable for Table component only.
+        const limit = objectPath.get(configuration, 'data.limit') || 100;
+        return {
+            searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
+            sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
+            size: objectPath.has(scrollData, 'size') ? objectPath.get(scrollData, 'size') : data.length, // response length for normal table otherwise total hits for scroll based table.
+            pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : limit, // Calculate this from the config or (query in case of scroll)
+            currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
+            expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+        }
+    }
+
     // update scroll data on pagination, searching and sorting.
     updateTableStatus(param = {}) {
         const {
@@ -112,7 +131,7 @@ class Table extends AbstractGraph {
     }
 
     isEmptyData(data) {
-       return _.isEmpty(data);
+        return _.isEmpty(data);
     }
 
     initiate(props) {
