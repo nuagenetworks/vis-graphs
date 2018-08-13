@@ -119,17 +119,20 @@ class Table extends AbstractGraph {
         const {
             context,
             selectedColumns,
-            page,
             scroll,
+        } = props;
+
+        const {
+            currentPage,
             pageSize,
             size
-        } = props
+        } = this.getGraphProperties();
 
         let startIndex = 0;
         let endIndex = size - 1;
 
         if(scroll) {
-            startIndex = (page - 1) * pageSize;
+            startIndex = (currentPage - 1) * pageSize;
             endIndex = startIndex + pageSize - 1;
         }
 
@@ -191,7 +194,7 @@ class Table extends AbstractGraph {
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
-        this.resetFilters(page || 1);
+        this.resetFilters(currentPage || 1);
         let columnsContext = false
 
         if(selectedColumns) {
@@ -224,16 +227,19 @@ class Table extends AbstractGraph {
     isScrollExpired() {
         const {
             expiration
-        } = this.props;
+        } = this.getGraphProperties();
 
         return this.scroll && expiration && expiration <= Date.now()
     }
 
     isScrollDataExists(page) {
         const {
-            pageSize,
             data
         } = this.props;
+
+        const {
+            pageSize,
+        } = this.getGraphProperties();
 
         let startIndex = (page - 1) * pageSize;
         return startIndex < data.length;
@@ -259,11 +265,15 @@ class Table extends AbstractGraph {
     handleSearch(data, isSuccess, expression = null, searchText = null) {
         if(isSuccess) {
             if(expression) {
+                const {
+                    searchString
+                } = this.getGraphProperties();
+
                 const search = labelToField(expandExpression(expression), this.getKeyColumns())
                 this.filterData = data;
 
-                if(this.props.searchText !== searchText) {
-                    this.updateTableStatus({search, searchText , page: 1, event: events.SEARCH})
+                if(searchString !== searchText) {
+                    this.updateTableStatus({search, searchText , currentPage: 1, event: events.SEARCH})
                 }
             } else {
                 this.filterData = data;
@@ -276,7 +286,7 @@ class Table extends AbstractGraph {
     updateData(columns = this.state.columns) {
         const {
             pageSize,
-        } = this.props;
+        } = this.getGraphProperties();
 
         const offset = pageSize * (this.currentPage - 1);
         this.setState({
@@ -430,7 +440,7 @@ class Table extends AbstractGraph {
 
     // when scroll is enabled then call this function
     handleScrollSorting(column, order) {
-        const { sort } = this.props;
+        const { sort } = this.getGraphProperties();
         let colOrder = 'asc';
         let colName = this.getColumnNameByKey(column);
 
@@ -444,7 +454,7 @@ class Table extends AbstractGraph {
 
         this.updateTableStatus({
             sort: { column: colName, order: colOrder },
-            page: 1,
+            currentPage: 1,
             event: events.SORTING
         })
     }
@@ -472,7 +482,7 @@ class Table extends AbstractGraph {
 
     handlePreviousPageClick() {
         --this.currentPage;
-        this.scroll ? this.updateTableStatus({page: this.currentPage,  event: events.PAGING}) : this.updateData();
+        this.scroll ? this.updateTableStatus({currentPage: this.currentPage,  event: events.PAGING}) : this.updateData();
     }
 
     handleNextPageClick() {
@@ -483,7 +493,7 @@ class Table extends AbstractGraph {
         }
 
         ++this.currentPage
-        this.scroll ? this.updateTableStatus({page: this.currentPage, event: events.PAGING}) : this.updateData();
+        this.scroll ? this.updateTableStatus({currentPage: this.currentPage, event: events.PAGING}) : this.updateData();
     }
 
     handleClick(key) {
@@ -656,8 +666,8 @@ class Table extends AbstractGraph {
 
     renderSearchBarIfNeeded(headerData) {
         const {
-            searchText: searchString
-        } = this.props;
+            searchString
+        } = this.getGraphProperties();
 
         const {
             searchBar,
@@ -813,7 +823,7 @@ class Table extends AbstractGraph {
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
                         style={style.button.design}
-                        onClick={ () => this.updateTableStatus({page: 1, event: events.REFRESH})}
+                        onClick={ () => this.updateTableStatus({currentPage: 1, event: events.REFRESH})}
                     >
                         <RefreshIcon color={style.button.icon.color} />
                     </IconButton>
@@ -874,7 +884,7 @@ class Table extends AbstractGraph {
                 label="Continue"
                 labelStyle={style.button.labelStyle}
                 primary={true}
-                onClick={ () => this.updateTableStatus({page: 1, event: events.REFRESH}) }
+                onClick={ () => this.updateTableStatus({currentPage: 1, event: events.REFRESH}) }
             />,
         ];
 
@@ -897,10 +907,7 @@ class Table extends AbstractGraph {
     render() {
         const {
             height,
-            size,
-            pageSize,
             scroll,
-            searchText: searchString,
             configuration,
         } = this.props;
 
@@ -913,6 +920,12 @@ class Table extends AbstractGraph {
             selectColumnOption,
             searchText
         } = this.getConfiguredProperties();
+
+        const {
+            searchString,
+            pageSize,
+            size
+        } = this.getGraphProperties();
 
         
 

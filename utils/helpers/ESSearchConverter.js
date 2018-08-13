@@ -19,6 +19,63 @@ export const labelToField = (expression, columns) => {
   })
 }
 
+
+export const convertElementToElastic = (elem) => {
+  if(elem.element && elem.element.operator) {
+    const element = elem.element;
+    switch (element.operator) {
+      case '==':
+        return {
+          term: {
+            [element.category]: element.value
+          }
+        };
+
+      case 'contains':
+        return {
+          match: {
+            [element.category]: element.value
+          }
+        };
+
+      case 'startsWith':
+        return {
+          prefix: {
+            [element.category]: element.value
+          }
+        };
+
+      case '!=':
+        return {
+          bool: {
+            must_not: {
+              term: {
+                [element.category]: element.value
+              }
+            }
+          }
+        };
+
+      case 'notContains':
+        return {
+          bool: {
+            must_not: {
+              match: {
+                [element.category]: element.value
+              }
+            }
+          }
+        };
+
+      default:
+        break;
+
+    }
+  }
+
+  return elem;
+}
+
 // Expanding Exprassion with Paraenthesis
 export const expandExpression = (obj) => {
   let expressions = [];
@@ -57,14 +114,14 @@ export const convertToPosfix = (expression) => {
       if(pop) {
         switch (elem.operator) {
           case 'AND': 
-            if(pop.operator && pop.operator === 'OR' || pop.bracket ) {
+            if((pop.operator && pop.operator === 'OR') || pop.bracket ) {
               stack.push(pop);  
             } else {
               postfix.push(pop);
             }
             break;
 
-          case 'OR': 
+          default: // (for `OR` operator)
             if(pop.operator) {
               if(pop.operator === 'AND') {
                 postfix.push(pop);
@@ -84,11 +141,11 @@ export const convertToPosfix = (expression) => {
 
       stack.push({...elem});
 
-    } else if(elem.bracket == ')') {
+    } else if(elem.bracket === ')') {
       // POP elements from stack while element is not '('
       pop = stack.pop();
 
-      while(pop && (!pop.bracket || pop.bracket != '(')) {
+      while(pop && (!pop.bracket || pop.bracket !== '(')) {
         postfix.push({...pop});
         pop = stack.pop();
       }
@@ -112,7 +169,7 @@ export const convertToPosfix = (expression) => {
 export const evaluateToElastic = (postfix) => {
   const stack = [];
 
-  if(postfix.length == 1) {
+  if(postfix.length === 1) {
     return {
       'bool': {
         'must': [
@@ -139,58 +196,6 @@ export const evaluateToElastic = (postfix) => {
   });
 
   return stack[0];
-}
-
-export const convertElementToElastic = (elem) => {
-  if(elem.element && elem.element.operator) {
-    const element = elem.element;
-    switch (element.operator) {
-      case '==':
-        return {
-          term: {
-            [element.category]: element.value 
-          }
-        };
-
-      case 'contains':
-        return {
-          match: {
-            [element.category]: element.value 
-          }
-        };
-        
-      case 'startsWith':
-        return {
-          prefix: {
-            [element.category]: element.value 
-          }
-        };
-
-      case '!=': 
-        return {
-          bool: {
-            must_not: {
-              term: {
-                [element.category]: element.value 
-              }
-            }
-          }
-        };
-
-      case 'notContains': 
-        return {
-          bool: {
-            must_not: {
-              match: {
-                [element.category]: element.value 
-              }
-            }
-          }
-        };
-    }
-  }
-
-  return elem;
 }
 
 export default (expressions) => {
