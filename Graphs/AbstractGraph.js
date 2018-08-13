@@ -1,7 +1,6 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
-import objectPath from "object-path";
 
 import "./style.css"
 import { GraphManager } from "./index";
