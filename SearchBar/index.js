@@ -1,9 +1,9 @@
 import  React from 'react';
 import "react-filter-box/lib/react-filter-box.css";
-import "./index.css";
-
+import _ from 'lodash'
 import ReactFilterBox from "react-filter-box";
 
+import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
@@ -24,13 +24,15 @@ export default class SearchBar extends React.Component {
         const {
             options,
             data,
+            scroll
         } = this.props
         
-        this.autoCompleteHandler = new AutoCompleteHandler(data, options)
+        this.autoCompleteHandler = new AutoCompleteHandler(data, options, scroll)
         this.onChange = this.onChange.bind(this)
         this.onParseOk = this.onParseOk.bind(this)
-
-        this.setTimeout = null
+        this.setTimeout = null;
+        this.expressions = null;
+        this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
     }
 
     componentDidMount () {
@@ -42,17 +44,23 @@ export default class SearchBar extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return JSON.stringify(nextProps.data) !== JSON.stringify(this.props.data)
-          || JSON.stringify(nextState) !== JSON.stringify(this.state)
+        return !_.isEqual(nextProps.data, this.props.data)
+          || !_.isEqual(nextState, this.state)
     }
 
     componentDidUpdate () {
         const { query } = this.state
 
-        this.refs.filterBox.onSubmit(query)
+        if(query) {
+            this.refs.filterBox.onSubmit(query)
+        }
     }
 
     onChange (query, result) {
+        if(!result.isError) {
+            this.query = query;
+        }
+
         this.setState({
             isOk: !result.isError,
             query
@@ -63,15 +71,22 @@ export default class SearchBar extends React.Component {
         const {
             options,
             data,
+            scroll,
             columns = false
-        } = this.props
+        } = this.props;
 
-        clearTimeout(this.setTimeout)
-
-        this.setTimeout = setTimeout(() => {
-            const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-            this.props.handleSearch(filteredData, this.state.isOk)
-        }, 1000)
+        if (!_.isEqual(this.expressions, expressions)) {
+            this.expressions = expressions
+            clearTimeout(this.setTimeout)
+            this.setTimeout = setTimeout(() => {
+                if (scroll) {
+                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+                } else {
+                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                    this.props.handleSearch(filteredData, this.state.isOk)
+                }
+            }, 1000)
+        }
     }
 
     renderIcon () {
