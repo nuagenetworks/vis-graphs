@@ -168,6 +168,7 @@ class Table extends AbstractGraph {
         let columnNameList = []
         this.keyColumns    = {}
         this.filterData    = []
+        this.unformattedData = {}
 
         // generate random key for each column and assign that key to the values in data
         columns.forEach( d => {
@@ -180,7 +181,10 @@ class Table extends AbstractGraph {
         }
 
         props.data.forEach( (d, i) => {
-            let data = {};
+            const random = this.generateRandom();
+            const data = {
+                'row_id': random
+            };
 
             if(i >= startIndex && i <= endIndex) {
                 for(let key in this.keyColumns) {
@@ -206,6 +210,7 @@ class Table extends AbstractGraph {
             }
 
             this.filterData.push(data)
+            this.unformattedData[random] = d;
         })
 
         this.originalData = this.filterData
@@ -517,7 +522,8 @@ class Table extends AbstractGraph {
 
     handleClick(key) {
         if(this.props.onMarkClick && this.state.data[key])
-           this.props.onMarkClick(this.replaceKeyFromColumn(this.state.data[key]));
+           this.props.onMarkClick(this.unformattedData[this.state.data[key]['row_id']]);
+
     }
 
     handleRowSelection(selectedRows) {
