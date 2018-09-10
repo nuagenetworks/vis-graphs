@@ -1,0 +1,30 @@
+{
+    "data": {
+        "xColumn": "Application",
+        "xLabel": "Application",
+        "yColumn": "value",
+        "yLabel": "Total Bytes",
+        "stackColumn": "social",
+        "yTicks": 5,
+        "yTickFormat": ".2s",
+        "colors": [
+            "#7da3f7",
+            "#b3d645",
+            "#fec26a",
+            "#e78ac3",
+            "#f79e99"
+        ],
+        "tooltip": [
+            { "column": "social", "label": "Social" },
+            { "column": "value", "format": ",.2s"}
+        ]
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/aarEnterpriseDetail",
+            "params": {
+                "app": "Application"
+            }
+        }
+    ]
+}
