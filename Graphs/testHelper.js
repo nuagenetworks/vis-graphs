@@ -10,7 +10,7 @@ export const readJSON = (JSONFile) => {
     }
 }
 
-export const CheckTicks = (component, parentClass, childClass, selector) => {
+export const checkTicks = (component, parentClass, childClass, selector) => {
     const middleHtml = component.find(parentClass).find(childClass).html();
     const $ = cheerio.load(middleHtml);
     const xAxisTicks = $(childClass).find(selector).length;
