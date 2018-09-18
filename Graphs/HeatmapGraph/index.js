@@ -72,6 +72,11 @@ class HeatmapGraph extends XYGraph {
     })
   }
 
+  //generate unique key for graph
+  static getGraphKey(configuration = {}) {
+    return  d => d[configuration.data.xColumn] + d[configuration.data.yColumn];
+  }
+
   parseData(props) {
     const {
       data: cdata
