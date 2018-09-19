@@ -95,7 +95,7 @@ export default class ChordGraph extends AbstractGraph {
       this.filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
     }
 
-    getlableLength() {
+    getLabelLength() {
       const {
         chartWidthToPixel,
         chordSourceColumn,
@@ -134,7 +134,7 @@ export default class ChordGraph extends AbstractGraph {
             colors
         } = this.getConfiguredProperties();
 
-        const outerPadding = this.getlableLength();
+        const outerPadding = this.getLabelLength();
 
         // Pass values into the chord diagram via d3-style accessors.
         this.chordDiagram
