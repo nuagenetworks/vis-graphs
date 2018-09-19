@@ -1,0 +1,25 @@
+{
+    "id": "heatmap-data",
+    "data": {
+        "xColumn": "timestamp",
+        "brush": 2,
+        "xLabel": "Time",
+        "yColumn": "Application",
+        "yTickGrid": false,
+        "yLabel": "Application",
+        "legendColumn": "SlaStatus",
+        "cellColumn": "SlaStatus",
+        "legend": {
+            "show": true,
+            "orientation": "horizontal",
+            "circleSize": 3,
+            "labelOffset": 2
+        },
+        "tooltip": [
+            { "column": "timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
+            { "column": "Application", "label": "Application" },
+            { "column": "SlaStatus", "label": "Status" }
+        ]
+ 
+   }
+}
