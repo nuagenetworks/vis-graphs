@@ -1,6 +1,5 @@
 import React from 'react'
 import AbstractGraph from '../AbstractGraph'
-import { connect } from 'react-redux'
 import { Marker, InfoWindow, Polyline } from 'react-google-maps'
 import _ from 'lodash'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
@@ -581,4 +580,4 @@ GeoMap.propTypes = {
   data: React.PropTypes.array
 };
 
-export default connect(null, null)(GeoMap);
+export default GeoMap;
