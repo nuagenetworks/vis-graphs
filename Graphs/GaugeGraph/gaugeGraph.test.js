@@ -13,7 +13,14 @@ describe("GaugeGraph", () => {
     describe("positive-data-configuration", () => {
         let gaugeGraph, $;
         beforeAll(async () => {
-            gaugeGraph = mount(<GaugeGraph width={500} height={500} configuration={config.configuration} data={config.data}> </GaugeGraph>);
+            gaugeGraph = mount(
+                <GaugeGraph 
+                    width={500} 
+                    height={500} 
+                    configuration={config.configuration} 
+                    data={config.data}> 
+                </GaugeGraph>
+            );
             $ = getInnerHtml(gaugeGraph, 'svg');
         });
 
