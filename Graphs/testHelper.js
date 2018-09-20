@@ -10,11 +10,11 @@ export const readJSON = (JSONFile) => {
     }
 }
 
-export const checkTicks = (component, parentClass, childClass, selector) => {
+export const CheckTicks = (component, parentClass, childClass, selector) => {
     const middleHtml = component.find(parentClass).find(childClass).html();
     const $ = cheerio.load(middleHtml);
-    const xAxisTicks = $(childClass).find(selector).length;
-    return xAxisTicks;
+    const axisTicks = $(childClass).find(selector).length;
+    return axisTicks;
 }
 
 const readdirAsync = (path) => {
@@ -41,4 +41,10 @@ export const getDataAndConfig = (graphName) => {
         config['data'] = readJSON(dataFolder + '/data.json');
         resolve(config);
     });
+}
+
+export const getInnerHtml = (component,tag) => {
+    const middleHtml = component.find(tag).html();
+    const cheerioData = cheerio.load(middleHtml);
+    return cheerioData;
 }
