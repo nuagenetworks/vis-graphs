@@ -42,3 +42,9 @@ export const getDataAndConfig = (graphName) => {
         resolve(config);
     });
 }
+
+export const getHtml = (component,tag) => {
+    const graph = component.find(tag).html();
+    const cheerioData = cheerio.load(graph);
+    return cheerioData;
+}
