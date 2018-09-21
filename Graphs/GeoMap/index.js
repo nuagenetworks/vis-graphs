@@ -200,8 +200,9 @@ class GeoMap extends AbstractGraph {
       longitudeColumn
     } = this.getConfiguredProperties()
 
-    return this.state.data.map(d => {
-        if (d[latitudeColumn] && d[longitudeColumn]) {
+    return this.state.data.filter(d => {
+        return (d[latitudeColumn] && d[longitudeColumn]);
+      }).map(d => {
           return this.drawMarker({
             data: {...d},
             position: {
@@ -209,8 +210,7 @@ class GeoMap extends AbstractGraph {
               lng: d[longitudeColumn]
             }
           })
-        }
-      })
+      });
   }
 
   drawMarker({ data, position, labelOrigin = null}) {

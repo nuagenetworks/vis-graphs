@@ -15,7 +15,7 @@ export default ({
   return data.map((datum) => {
     let sumMin = 0, sumMax = 0
 
-    datum[column].map((d, i) => {
+    datum[column].forEach((d, i) => {
       if (d[stackColumn] < 0) {
         sumMin -= -(d[stackColumn]) - (i === 0 ? 1 : 0)
       } else {
