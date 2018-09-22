@@ -148,7 +148,7 @@ class GeoMap extends AbstractGraph {
               </div>
           ))
       }
-      const minorAndInfoAlarms = new Number(data[minorAlarmColumn]) + new Number(data[infoAlarmColumn]);
+      const minorAndInfoAlarms = Number(data[minorAlarmColumn]) + Number(data[infoAlarmColumn]);
       return (
           <div style={{display: 'table'}}>
               {
