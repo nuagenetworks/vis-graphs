@@ -1,10 +1,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getInnerHtml, getDataAndConfig, checkTicks } from '../testHelper';
+import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import HeatmapGraph from '.';
-
-const cheerio = require('cheerio');
 
 describe("HeatmapGraph", () => {
     let config;
@@ -12,46 +10,42 @@ describe("HeatmapGraph", () => {
         config = await getDataAndConfig('HeatmapGraph');
     });
 
-    describe("with-brush", () => {
-        let withBrush;
+    describe("withBrush", () => {
+        let withBrush, $;
         beforeAll(async () => {
             withBrush = mount(
-                <HeatmapGraph 
-                    width={500} 
-                    height={500} 
-                    configuration={config.withBrush} 
-                    data={config.data}> 
+                <HeatmapGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withBrush}
+                    data={config.data}>
                 </HeatmapGraph>
             );
+            $ = getHtml(withBrush, '.heatmap');
         });
 
-        it("SVG", () => {
-            const $ = getInnerHtml(withBrush, 'svg');
-            const svgHeight = $('svg').attr('height');
-            const svgWidth = $('svg').attr('width');
-            expect(svgHeight).toEqual("500");
-            expect(svgWidth).toEqual("500");
+        it("SVG Dimensions", () => {
+            const result = checkSvg(withBrush);
+            expect(result).toBeTruthy();
         });
 
-        it("Number of HeatmapGraph", () => {
-            const $ = getInnerHtml(withBrush, '.heatmap');
+        it("Total Heatmap Block", () => {
             const newHtml = $('.heatmap').find('g').length;
             expect(newHtml).toBe(30)
         });
 
         it("Heatmap block configuration", () => {
-            const $ = getInnerHtml(withBrush, '.heatmap');
             const newHtml = $('.heatmap').find('g rect').first();
             expect(parseInt(newHtml.attr('height'))).toBeCloseTo(214);
             expect(parseInt(newHtml.attr('width'))).toBeCloseTo(57);
         });
 
-        it("Check xAxis ticks", () => {
+        it("xAxis Ticks Length", () => {
             const xAxisTicks = checkTicks(withBrush, '.graph-container', '.xAxis', 'g');
             expect(xAxisTicks).toBe(6);
         });
 
-        it("Check yAxis ticks", () => {
+        it("yAxis Ticks Length", () => {
             const yAxisTicks = checkTicks(withBrush, '.graph-container', '.yAxis', 'g');
             expect(yAxisTicks).toBe(5);
         });
@@ -59,38 +53,42 @@ describe("HeatmapGraph", () => {
     });
 
     describe("withoutBrush", () => {
-        let withoutBrush;
+        let withoutBrush, $;
         beforeAll(async () => {
-            withoutBrush = mount(<HeatmapGraph width={500} height={500} configuration={config.withoutBrush} data={config.data}> </HeatmapGraph>);
+            withoutBrush = mount(
+                <HeatmapGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withoutBrush}
+                    data={config.data}>
+                </HeatmapGraph>
+            );
+            $ = getHtml(withoutBrush, '.heatmap');
         });
 
-        it("SVG", () => {
-            const $ = getInnerHtml(withoutBrush, 'svg');
-            const svgHeight = $('svg').attr('height');
-            const svgWidth = $('svg').attr('width');
-            expect(svgHeight).toEqual("500");
-            expect(svgWidth).toEqual("500");
+        it("SVG Dimensions", () => {
+            const result = checkSvg(withoutBrush);
+            expect(result).toBeTruthy();
         });
 
-        it("Number of HeatmapGraph", () => {
-            const $ = getInnerHtml(withoutBrush, '.heatmap');
+        it("Total Heatmap Block", () => {
             const newHtml = $('.heatmap').find('g').length;
             expect(newHtml).toBe(30)
         });
 
         it("Heatmap block configuration", () => {
-            const $ = getInnerHtml(withoutBrush, '.heatmap');
+            const $ = getHtml(withoutBrush, '.heatmap');
             const newHtml = $('.heatmap').find('g rect').first();
             expect(parseInt(newHtml.attr('height'))).toBeGreaterThan(0);
             expect(parseInt(newHtml.attr('width'))).toBeGreaterThan(0);
         });
 
-        it("Check xAxis ticks", () => {
+        it("xAxis Ticks Length", () => {
             const xAxisTicks = checkTicks(withoutBrush, '.graph-container', '.xAxis', 'g')
             expect(xAxisTicks).toBe(6);
         });
 
-        it("Check yAxis ticks", () => {
+        it("yAxis Ticks Length", () => {
             const yAxisTicks = checkTicks(withoutBrush, '.graph-container', '.yAxis', 'g')
             expect(yAxisTicks).toBe(5);
         });
