@@ -6,6 +6,11 @@
         "yLabel": "Total Bytes",
         "yTicks": 5,
         "yTickFormat": ".2s",
+        "otherOptions": {
+            "label": "Others",
+            "limit": 5,
+            "type": "number"
+        },       
         "colors": [
             "#7da3f7",
             "#b3d645",
@@ -13,11 +18,6 @@
             "#e78ac3",
             "#f79e99"
         ],
-        "otherOptions": {
-            "label": "Others",
-            "limit": 79,
-            "minimum": 5
-        },
         "tooltip": [
             { "column": "Application", "label": "Application" },
             { "column": "value", "format": ",.2s"}
@@ -25,9 +25,8 @@
     },
     "listeners": [
         {
-            "redirect": "/dashboards/aarEnterpriseDetail",
             "params": {
-                "app": "Application"
+                "app": "value"
             }
         }
     ]

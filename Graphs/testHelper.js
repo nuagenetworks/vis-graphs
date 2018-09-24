@@ -10,7 +10,7 @@ export const readJSON = (JSONFile) => {
     }
 }
 
-export const CheckTicks = (component, parentClass, childClass, selector) => {
+export const checkTicks = (component, parentClass, childClass, selector) => {
     const middleHtml = component.find(parentClass).find(childClass).html();
     const $ = cheerio.load(middleHtml);
     const xAxisTicks = $(childClass).find(selector).length;
@@ -41,4 +41,21 @@ export const getDataAndConfig = (graphName) => {
         config['data'] = readJSON(dataFolder + '/data.json');
         resolve(config);
     });
+}
+
+export const getHtml = (component,tag) => {
+    const graph = component.find(tag).html();
+    const cheerioData = cheerio.load(graph);
+    return cheerioData;
+}
+
+export const checkSvg = (component) => {
+    const $ = getHtml(component, 'svg');
+    const svgHeight = $('svg').attr('height');
+    const svgWidth = $('svg').attr('width');
+    if(svgHeight == "500" && svgWidth == "500"){
+        return true;
+    } else {
+        return false;
+    }
 }

@@ -4,7 +4,6 @@
         "xLabel": "Application",
         "yColumn": "value",
         "yLabel": "Total Bytes",
-        "stackColumn": "social",
         "yTicks": 5,
         "yTickFormat": ".2s",
         "colors": [
@@ -14,8 +13,13 @@
             "#e78ac3",
             "#f79e99"
         ],
+        "otherOptions": {
+            "label": "Others",
+            "limit": 79,
+            "minimum": 5
+        },
         "tooltip": [
-            { "column": "social", "label": "Social" },
+            { "column": "Application", "label": "Application" },
             { "column": "value", "format": ",.2s"}
         ]
     },
