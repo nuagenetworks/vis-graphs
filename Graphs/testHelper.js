@@ -43,8 +43,19 @@ export const getDataAndConfig = (graphName) => {
     });
 }
 
-export const getInnerHtml = (component,tag) => {
-    const middleHtml = component.find(tag).html();
-    const cheerioData = cheerio.load(middleHtml);
+export const getHtml = (component,tag) => {
+    const graph = component.find(tag).html();
+    const cheerioData = cheerio.load(graph);
     return cheerioData;
+}
+
+export const checkSvg = (component) => {
+    const $ = getHtml(component, 'svg');
+    const svgHeight = $('svg').attr('height');
+    const svgWidth = $('svg').attr('width');
+    if(svgHeight == "500" && svgWidth == "500"){
+        return true;
+    } else {
+        return false;
+    }
 }
