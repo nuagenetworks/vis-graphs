@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { checkTicks, getDataAndConfig, getHtml } from '../testHelper';
+import { checkTicks, getDataAndConfig, getHtml, checkSvg } from '../testHelper';
 import BarGraph from '.';
 
 const cheerio = require('cheerio');
@@ -32,11 +32,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(verticalNumber, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(verticalNumber);
+                expect(result).toBeTruthy();
             });
 
             it("Total Bars", () => {
@@ -45,12 +42,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(6);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalNumber, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(6);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalNumber, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(6);
             });
@@ -88,11 +85,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(verticalPercentage, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(verticalPercentage);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -101,7 +95,7 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalPercentage, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(10);
             });
@@ -144,11 +138,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(verticalWithoutBrush, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(verticalWithoutBrush);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -157,12 +148,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalWithoutBrush, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(10);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalWithoutBrush, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(5);
             });
@@ -200,11 +191,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(verticalStacked, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(verticalStacked);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -213,12 +201,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalStacked, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(10);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalStacked, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(5);
             });
@@ -256,11 +244,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(verticalBrush, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(verticalBrush);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -269,12 +254,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(6);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalBrush, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(6);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalBrush, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(6);
             });
@@ -314,11 +299,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(horizontalNumber, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(horizontalNumber);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -327,12 +309,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(6);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalNumber, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(6);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalNumber, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(6);
             });
@@ -370,11 +352,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(horizontalPercentage, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(horizontalPercentage);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -383,12 +362,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalPercentage, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(5);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalPercentage, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(10);
             });
@@ -426,11 +405,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(horizontalWithoutBrush, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(horizontalWithoutBrush);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -439,12 +415,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalWithoutBrush, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(5);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalWithoutBrush, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(10);
             });
@@ -484,11 +460,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(horizontalStacked, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(horizontalStacked);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -497,12 +470,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(10);
             });
 
-            it(" xAxis ticks length", () => {
+            it(" xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalStacked, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(5);
             });
 
-            it(" yAxis ticks length", () => {
+            it(" yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalStacked, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(10);
             });
@@ -540,11 +513,8 @@ describe("Bar Graph", () => {
             });
 
             it("SVG Dimensions", () => {
-                $ = getHtml(horizontalBrush, 'svg');
-                const svgHeight = $('svg').attr('height');
-                const svgWidth = $('svg').attr('width');
-                expect(svgHeight).toEqual("500");
-                expect(svgWidth).toEqual("500");
+                const result = checkSvg(horizontalBrush);
+                expect(result).toBeTruthy();
             });
 
             it("Number of Bars", () => {
@@ -553,12 +523,12 @@ describe("Bar Graph", () => {
                 expect(noOfBars).toBe(6);
             });
 
-            it("xAxis ticks length", () => {
+            it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalBrush, '.graph-container', '.xAxis', 'g')
                 expect(xAxisTicks).toBe(6);
             });
 
-            it("yAxis ticks length", () => {
+            it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalBrush, '.graph-container', '.yAxis', 'g')
                 expect(yAxisTicks).toBe(6);
             });
