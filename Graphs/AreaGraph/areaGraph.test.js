@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getInnerHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
+import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import AreaGraph from '.';
 
 describe("AreaGraph", () => {
@@ -21,11 +21,11 @@ describe("AreaGraph", () => {
                     data={config.data}>
                 </AreaGraph>
             );
-            $ = getInnerHtml(simple, 'svg');
+            $ = getHtml(simple, 'svg');
         });
 
         it("SVG Dimensions", () => {
-            const result = checkSvg(horizontalBrush);
+            const result = checkSvg(simple);
             expect(result).toBeTruthy();
         });
 
@@ -68,11 +68,11 @@ describe("AreaGraph", () => {
                     data={config.data}>
                 </AreaGraph>
             );
-            $ = getInnerHtml(stacked, 'svg');
+            $ = getHtml(stacked, 'svg');
         });
 
         it("SVG Dimensions", () => {
-            const result = checkSvg(horizontalBrush);
+            const result = checkSvg(stacked);
             expect(result).toBeTruthy();
         });
 
@@ -100,7 +100,7 @@ describe("AreaGraph", () => {
 
         it("yAxis Ticks Length", () => {
             const yAxisTicks = checkTicks(stacked, '.graph-container', '.yAxis', 'g');
-            expect(yAxisTicks).toBe(5);
+            expect(yAxisTicks).toBe(7);
         });
     });
 });
