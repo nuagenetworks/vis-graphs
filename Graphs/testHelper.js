@@ -59,3 +59,22 @@ export const checkSvg = (component) => {
         return false;
     }
 }
+
+export const totalRows = ($) => {
+    const noOfRows = $('table tbody tr').length;
+    return noOfRows;
+}
+
+export const totalColumn = ($) => {
+    const noOfColumns = $('table').find('thead').find('tr').children().length;
+    return noOfColumns;
+}
+
+export const checkSingleRowData = ($) => {
+    const value = $('table tbody tr').first().find('td').map(
+        function (i) {
+            return $(this).text();
+        }
+    ).get();
+    return value;
+}

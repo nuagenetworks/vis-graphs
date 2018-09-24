@@ -1,10 +1,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getDataAndConfig } from '../testHelper';
+import { getDataAndConfig, getHtml, numberRows, checkSingleRowData, totalColumn } from '../testHelper';
 import Table from '.';
 
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
 
 describe("Table", () => {
     let config;
@@ -13,7 +13,7 @@ describe("Table", () => {
     });
 
     describe("hidePagination", () => {
-        let hidePagination, table, $;
+        let hidePagination, $;
         beforeAll(async () => {
             hidePagination = mount(
                 <Table
@@ -23,17 +23,15 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            table = hidePagination.find('table').html();
-            $ = cheerio.load(table);
+            $ = getHtml(hidePagination, 'table');
         });
 
-        it("Number of column", () => {
-            const noOfColumns = $('table').find('thead').find('tr').children().length;
-            const totalCoulmn = hidePagination.root.props().configuration.data.columns.length;
-            expect(noOfColumns).toBe(totalCoulmn);
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(4);
         });
 
-        it("Check column names", () => {
+        it("Column Names", () => {
             var columnList = hidePagination.root.props().configuration.data.columns;
             var columns = Object.keys(columnList).map(function (key) {
                 return columnList[key].column;
@@ -46,23 +44,19 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Check row", () => {
-            const value = $('table tbody tr').first().find('td').map(
-                function (i) {
-                    return $(this).text();
-                }
-            ).get();
+        it("Row Data", () => {
+            const value = checkSingleRowData($);
             expect(value).toBeDefined();
         });
 
-        it("Number of rows", () => {
-            const noOfRows = $('table tbody tr').length;
+        it("Total Rows", () => {
+            const noOfRows = numberRows($);
             expect(noOfRows).toBe(3);
-        })
+        });
     });
 
     describe("hideSearchBar", () => {
-        let hideSearchBar, table, $;
+        let hideSearchBar, $;
         beforeAll(async () => {
             hideSearchBar = mount(
                 <Table
@@ -72,17 +66,15 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            table = hideSearchBar.find('table').html();
-            $ = cheerio.load(table);
+            $ = getHtml(hideSearchBar, 'table');
         });
 
-        it("Number of column", () => {
-            const noOfColumns = $('table').find('thead').find('tr').children().length;
-            const totalCoulmn = hideSearchBar.root.props().configuration.data.columns.length;
-            expect(noOfColumns).toBe(totalCoulmn);
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(4);
         });
 
-        it("Check column names", () => {
+        it("Column Names", () => {
             var columnList = hideSearchBar.root.props().configuration.data.columns;
             var columns = Object.keys(columnList).map(function (key) {
                 return columnList[key].column;
@@ -95,23 +87,19 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Check row", () => {
-            const value = $('table tbody tr').first().find('td').map(
-                function (i) {
-                    return $(this).text();
-                }
-            ).get();
+        it("Row Data", () => {
+            const value = checkSingleRowData($);
             expect(value).toBeDefined();
         });
 
-        it("Number of rows", () => {
-            const noOfRows = $('table tbody tr').length;
+        it("Total Rows", () => {
+            const noOfRows = numberRows($);
             expect(noOfRows).toBe(3);
-        })
+        });
     });
 
     describe("selectAll", () => {
-        let selectAll, table, $;
+        let selectAll, $;
         beforeAll(async () => {
             selectAll = mount(
                 <Table
@@ -121,17 +109,15 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            table = selectAll.find('table').html();
-            $ = cheerio.load(table);
+            $ = getHtml(selectAll, 'table');
         });
 
-        it("Number of column", () => {
-            const noOfColumns = $('table').find('thead').find('tr').children().length;
-            const totalCoulmn = selectAll.root.props().configuration.data.columns.length;
-            expect(noOfColumns).toBe(totalCoulmn + 1);
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(5);
         });
 
-        it("Check column names", () => {
+        it("Column Names", () => {
             var columnList = selectAll.root.props().configuration.data.columns;
             var columns = Object.keys(columnList).map(function (key) {
                 return columnList[key].column;
@@ -145,23 +131,19 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Check row", () => {
-            const value = $('table tbody tr').first().find('td').map(
-                function (i) {
-                    return $(this).text();
-                }
-            ).get();
+        it("Row Data", () => {
+            const value = checkSingleRowData($);
             expect(value).toBeDefined();
         });
 
-        it("Number of rows", () => {
-            const noOfRows = $('table tbody tr').length;
+        it("Total Rows", () => {
+            const noOfRows = numberRows($);
             expect(noOfRows).toBe(3);
-        })
+        });
     });
 
     describe("highlightColumn", () => {
-        let highlightColumn, table, $;
+        let highlightColumn, $;
         beforeAll(async () => {
             highlightColumn = mount(
                 <Table
@@ -171,17 +153,15 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            table = highlightColumn.find('table').html();
-            $ = cheerio.load(table);
+            $ = getHtml(highlightColumn, 'table');
         });
 
-        it("Number of column", () => {
-            const noOfColumns = $('table').find('thead').find('tr').children().length;
-            const totalCoulmn = highlightColumn.root.props().configuration.data.columns.length;
-            expect(noOfColumns).toBe(totalCoulmn);
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(4);
         });
 
-        it("Check column names", () => {
+        it("Column Names", () => {
             var columnList = highlightColumn.root.props().configuration.data.columns;
             var columns = Object.keys(columnList).map(function (key) {
                 return columnList[key].column;
@@ -194,18 +174,14 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Check row", () => {
-            const value = $('table tbody tr').first().find('td').map(
-                function (i) {
-                    return $(this).text();
-                }
-            ).get();
+        it("Row Data", () => {
+            const value = checkSingleRowData($);
             expect(value).toBeDefined();
         });
 
-        it("number of rows", () => {
-            const noOfRows = $('table tbody tr').length;
+        it("Total Rows", () => {
+            const noOfRows = numberRows($);
             expect(noOfRows).toBe(3);
-        })
+        });
     });
 });
