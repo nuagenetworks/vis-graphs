@@ -27,7 +27,7 @@ describe("VariationTextGraph", () => {
             $ = cheerio.load(graphData);
         });
 
-        it("Number of box", () => {
+        it("Total boxs", () => {
             const noOfBox = $('div').find('div').length;
             expect(noOfBox).toBe(2);
         });
@@ -41,7 +41,5 @@ describe("VariationTextGraph", () => {
             const value = $('span').last().text();
             expect(value).toEqual('1,300');
         });
-
     });
-
 });
