@@ -13,54 +13,54 @@ describe("SimpleTextGraph", () => {
     });
 
     describe("withoutTitle", () => {
-        let withoutTitle ,simpleTextGraph ,$;
+        let withoutTitle, simpleTextGraph, $;
         beforeAll(async () => {
             withoutTitle = mount(
-                <SimpleTextGraph 
-                    width={500} 
-                    height={500} 
-                    configuration={config.withoutTitle} 
-                    data={config.data}> 
+                <SimpleTextGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withoutTitle}
+                    data={config.data}>
                 </SimpleTextGraph>
             );
             simpleTextGraph = withoutTitle.html();
             $ = cheerio.load(simpleTextGraph);
         });
 
-        it("Check title", () => {
+        it("Title", () => {
             const text = $('div').first();
             const finalText = $(text).clone().children().remove().end().text();
             expect(finalText).toEqual('Untitled');
         });
 
-        it("Check value", () => {
+        it("Value", () => {
             const value = $('div').last().text();
             expect(value).toEqual('1000');
         });
     });
 
     describe("withTitle", () => {
-        let withTitle ,simpleTextGraph ,$;
+        let withTitle, simpleTextGraph, $;
         beforeAll(async () => {
             withTitle = mount(
-                <SimpleTextGraph 
+                <SimpleTextGraph
                     width={500}
-                    height={500} 
-                    configuration={config.withTitle} 
-                    data={config.data}> 
+                    height={500}
+                    configuration={config.withTitle}
+                    data={config.data}>
                 </SimpleTextGraph>
             );
             simpleTextGraph = withTitle.html();
             $ = cheerio.load(simpleTextGraph);
         });
 
-        it("Check title", () => {
+        it("Title", () => {
             const text = $('div').first();
             const finalText = $(text).clone().children().remove().end().text();
             expect(finalText).toEqual('withTitle');
         });
 
-        it("Check value", () => {
+        it("Value", () => {
             const value = $('div').last().text();
             expect(value).toEqual('1000');
         });
