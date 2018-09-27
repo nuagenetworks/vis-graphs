@@ -50,6 +50,26 @@ describe("HeatmapGraph", () => {
             expect(yAxisTicks).toBe(5);
         });
 
+        it("Total Rows in Brush", () => {
+            $ = getHtml(withBrush, '.min-heatmap');
+            const noOfBars = $('.min-heatmap').find('g').length;
+            expect(noOfBars).toBe(5);
+        });
+
+        it("Height and Width of Brush Selected Area", () => {
+            $ = getHtml(withBrush, '.brush');
+            const height = parseFloat($('.brush').find('.selection').attr('height'));
+            const width = parseFloat($('.brush').find('.selection').attr('width'));
+            expect(height).toEqual(171.6);
+            expect(width).toBeCloseTo( -1.70);
+        });
+
+        it("Legends", () => {
+            $ = getHtml(withBrush, '.legend');
+            const legend = $('.legend').children().length;
+            expect(legend).toEqual(3);
+        });
+
     });
 
     describe("withoutBrush", () => {
@@ -93,5 +113,10 @@ describe("HeatmapGraph", () => {
             expect(yAxisTicks).toBe(5);
         });
 
+        it("Legends", () => {
+            $ = getHtml(withoutBrush, '.legend');
+            const legend = $('.legend').children().length;
+            expect(legend).toEqual(3);
+        });
     });
 });
