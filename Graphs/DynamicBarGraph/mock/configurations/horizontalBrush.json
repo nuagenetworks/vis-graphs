@@ -6,10 +6,11 @@
     "author": "Curran Kelleher",
     "creationDate": "10/13/2016",
     "data": {
-        "xColumn": "Application",
-        "xLabel": "Application",
-        "yColumn": "value",
-        "yLabel": "Total Bytes",
+        "xColumn": "value",
+        "orientation": "horizontal",
+        "xLabel": "Total Bytes",
+        "yColumn": "Application",
+        "yLabel": "Application",
         "yTicks": 5,
         "yTickFormat": ".2s",
         "brush": 2,
@@ -26,8 +27,14 @@
             "type": "number"
         },
         "tooltip": [
-            { "column": "Application", "label": "L7 Signature" },
-            { "column": "value", "format": "s"}
+            {
+                "column": "Application",
+                "label": "L7 Signature"
+            },
+            {
+                "column": "value",
+                "format": "s"
+            }
         ],
         "legend": {
             "show": true,
