@@ -12,7 +12,6 @@
         "yTickFormat": ".2s",
         "xLabel": "Time",
         "yLabel": "Total # ACL Hits",
-        "xColumn": "timestamp",
         "yColumn": "CPU",
         "brushEnabled": false
     }

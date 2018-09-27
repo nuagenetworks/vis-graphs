@@ -27,7 +27,7 @@ describe("LineGraph", () => {
         });
 
         it("SVG Dimensions", () => {
-            const result = checkSvg(verticalWithoutBrush);
+            const result = checkSvg(multiline);
             expect(result).toBeTruthy();
         });
 
@@ -53,6 +53,11 @@ describe("LineGraph", () => {
             expect(d).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
         });
 
+        it("Legends", () => {
+            const legend = $('svg').find('g').get(1).nextSibling.children.length;
+            expect(legend).toBe(3);
+        });
+
     });
 
     describe("simple-lineGraph", () => {
@@ -70,7 +75,7 @@ describe("LineGraph", () => {
         });
 
         it("SVG Dimensions", () => {
-            const result = checkSvg(verticalWithoutBrush);
+            const result = checkSvg(simpleLine);
             expect(result).toBeTruthy();
         });
 
@@ -79,7 +84,7 @@ describe("LineGraph", () => {
             expect(noOfLines).toBe(3)
         });
 
-        iit("xAxis Ticks Length", () => {
+        it("xAxis Ticks Length", () => {
             const xAxisTicks = $('svg').find('g').get(1).firstChild.children.length;
             expect(xAxisTicks).toBe(11);
         });
@@ -96,5 +101,9 @@ describe("LineGraph", () => {
             expect(d).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
         });
 
+        it("Legends", () => {
+            const legend = $('svg').find('g').get(1).nextSibling.children.length;
+            expect(legend).toBe(3);
+        });
     });
 });
