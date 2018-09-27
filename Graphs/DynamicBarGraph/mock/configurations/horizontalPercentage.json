@@ -6,7 +6,7 @@
         "xLabel": "Total Bytes",
         "xTicks": 5,
         "xTickFormat": ".2s",
-"orientation": "horizontal",
+        "orientation": "horizontal",
         "yTickFormat": ".2s",
         "colors": [
             "#7da3f7",
@@ -21,8 +21,14 @@
             "minimum": 5
         },
         "tooltip": [
-            { "column": "Application", "label": "Application" },
-            { "column": "value", "format": ",.2s"}
+            {
+                "column": "Application",
+                "label": "Application"
+            },
+            {
+                "column": "value",
+                "format": ",.2s"
+            }
         ]
     },
     "listeners": [
