@@ -55,6 +55,12 @@ describe("AreaGraph", () => {
             const yAxisTicks = checkTicks(simple, '.graph-container', '.yAxis', 'g');
             expect(yAxisTicks).toBe(5);
         });
+
+        it("Legends", () => {
+            $ = getHtml(simple, '.legend');
+            const legend = $('.legend').children().length;
+            expect(legend).toEqual(3);
+        });
     });
 
     describe("Stacked", () => {
@@ -101,6 +107,12 @@ describe("AreaGraph", () => {
         it("yAxis Ticks Length", () => {
             const yAxisTicks = checkTicks(stacked, '.graph-container', '.yAxis', 'g');
             expect(yAxisTicks).toBe(7);
+        });
+
+        it("Legends", () => {
+            $ = getHtml(stacked, '.legend');
+            const legend = $('.legend').children().length;
+            expect(legend).toEqual(3);
         });
     });
 });
