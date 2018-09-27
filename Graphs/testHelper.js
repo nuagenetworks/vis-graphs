@@ -72,7 +72,6 @@ export const checkSingleRowData = ($) => {
     ).get();
     return value;
 }
-   
 
 export const checkBar = ($, length) => {
     let barData = new Object(), bar;
