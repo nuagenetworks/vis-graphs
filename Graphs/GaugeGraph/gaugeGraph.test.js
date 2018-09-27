@@ -43,5 +43,15 @@ describe("GaugeGraph", () => {
             const transform = $('svg').find('g').find('g').find('text').attr("transform");
             expect(transform).toEqual("rotate(-90) translate(0, -235)");
         });
+
+        it("GaugeGraph Needle path Definition", () => {
+            const needle = $('svg').find('g').find('path').last().attr("d");
+            expect(needle).toEqual("M5,0C3.333333333333333,-108,1.6666666666666667,-216,0,-216C-1.6666666666666667,-216,-3.333333333333333,0,-5,0C-3.333333333333333,0,-1.6666666666666667,5,0,5C1.6666666666666667,5,3.333333333333333,2.5,5,0");
+        });
+
+        it("GaugeGraph Needle Transform", () => {
+            const needle = $('svg').find('g').find('path').last().attr("transform");
+            expect(needle).toEqual("rotate(-90)");
+        });
     });
 });
