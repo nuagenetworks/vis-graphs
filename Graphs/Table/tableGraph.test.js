@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getDataAndConfig, getHtml, numberRows, checkSingleRowData, totalColumn } from '../testHelper';
+import { getDataAndConfig, getHtml, totalRows, checkSingleRowData, totalColumn } from '../testHelper';
 import Table from '.';
 
 const cheerio = require('cheerio');
@@ -50,7 +50,7 @@ describe("Table", () => {
         });
 
         it("Total Rows", () => {
-            const noOfRows = numberRows($);
+            const noOfRows = totalRows($);
             expect(noOfRows).toBe(3);
         });
     });
@@ -93,7 +93,7 @@ describe("Table", () => {
         });
 
         it("Total Rows", () => {
-            const noOfRows = numberRows($);
+            const noOfRows = totalRows($);
             expect(noOfRows).toBe(3);
         });
     });
@@ -137,7 +137,7 @@ describe("Table", () => {
         });
 
         it("Total Rows", () => {
-            const noOfRows = numberRows($);
+            const noOfRows = totalRows($);
             expect(noOfRows).toBe(3);
         });
     });
@@ -180,7 +180,7 @@ describe("Table", () => {
         });
 
         it("Total Rows", () => {
-            const noOfRows = numberRows($);
+            const noOfRows = totalRows($);
             expect(noOfRows).toBe(3);
         });
     });

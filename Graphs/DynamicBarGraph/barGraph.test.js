@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { checkTicks, getDataAndConfig, getHtml, checkSvg } from '../testHelper';
+import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar } from '../testHelper';
 import BarGraph from '.';
 
 const cheerio = require('cheerio');
@@ -49,20 +49,37 @@ describe("Bar Graph", () => {
 
             it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalNumber, '.graph-container', '.yAxis', 'g')
-                expect(yAxisTicks).toBe(6);
+                expect(yAxisTicks).toBe(5);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(verticalNumber, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(80.07);
-                expect(y).toBeCloseTo(284.54);
-                expect(height).toBeCloseTo(167.46);
-                expect(width).toBeCloseTo(65.51);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 96.73247264950544,
+                    "width": 66.39344262295081,
+                    "x": 81.14754098360653,
+                    "y": 355.26752735049456
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(verticalNumber, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 91.89560717375639,
+                    "width": 66.39344262295081,
+                    "x": 154.91803278688522,
+                    "y": 360.1043928262436
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(verticalNumber, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -92,12 +109,12 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(verticalPercentage, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(6);
             });
 
             it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalPercentage, '.graph-container', '.xAxis', 'g')
-                expect(xAxisTicks).toBe(10);
+                expect(xAxisTicks).toBe(6);
             });
 
             it("yAxis Ticks Length", () => {
@@ -105,17 +122,34 @@ describe("Bar Graph", () => {
                 expect(yAxisTicks).toBe(5);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(verticalPercentage, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(48.36);
-                expect(y).toBeCloseTo(60.87);
-                expect(height).toBeCloseTo(391.13);
-                expect(width).toBeCloseTo(39.56);
+                const firstBar = checkBar($, 'second');
+                const bar = {
+                    "height": 91.89560717375639,
+                    "width": 66.39344262295081,
+                    "x": 154.91803278688522,
+                    "y": 360.1043928262436
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(verticalPercentage, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 91.89560717375639,
+                    "width": 66.39344262295081,
+                    "x": 154.91803278688522,
+                    "y": 360.1043928262436
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(verticalPercentage, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -145,12 +179,12 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(verticalWithoutBrush, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(7);
             });
 
             it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalWithoutBrush, '.graph-container', '.xAxis', 'g')
-                expect(xAxisTicks).toBe(10);
+                expect(xAxisTicks).toBe(7);
             });
 
             it("yAxis Ticks Length", () => {
@@ -158,17 +192,34 @@ describe("Bar Graph", () => {
                 expect(yAxisTicks).toBe(5);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(verticalWithoutBrush, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(48.36);
-                expect(y).toBeCloseTo(60.87);
-                expect(height).toBeCloseTo(391.13);
-                expect(width).toBeCloseTo(39.56);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 96.73247264950544,
+                    "width": 57.04225352112676,
+                    "x": 69.71830985915491,
+                    "y": 355.26752735049456
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(verticalWithoutBrush, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 91.89560717375639,
+                    "width": 57.04225352112676,
+                    "x": 133.09859154929575,
+                    "y": 360.1043928262436
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(verticalWithoutBrush, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -198,12 +249,12 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(verticalStacked, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(7);
             });
 
             it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(verticalStacked, '.graph-container', '.xAxis', 'g')
-                expect(xAxisTicks).toBe(10);
+                expect(xAxisTicks).toBe(7);
             });
 
             it("yAxis Ticks Length", () => {
@@ -211,17 +262,40 @@ describe("Bar Graph", () => {
                 expect(yAxisTicks).toBe(5);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(verticalStacked, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(48.36);
-                expect(y).toBeCloseTo(60.87);
-                expect(height).toBeCloseTo(391.13);
-                expect(width).toBeCloseTo(39.56);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 96.73247264950544,
+                    "width": 57.04225352112676,
+                    "x": 69.71830985915491,
+                    "y": 355.26752735049456
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(verticalStacked, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 91.89560717375639,
+                    "width": 57.04225352112676,
+                    "x": 133.09859154929575,
+                    "y": 360.1043928262436
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Stacked Graph", () => {
+                $ = getHtml(verticalStacked, '.graph-bars');
+                const stacked = $('.graph-bars').children().first().find('rect').length;
+                expect(stacked).toBe(3);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(verticalStacked, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -261,20 +335,50 @@ describe("Bar Graph", () => {
 
             it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(verticalBrush, '.graph-container', '.yAxis', 'g')
-                expect(yAxisTicks).toBe(6);
+                expect(yAxisTicks).toBe(5);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(verticalBrush, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(214.23);
-                expect(y).toBeCloseTo(213.40);
-                expect(height).toBeCloseTo(125.60);
-                expect(width).toBeCloseTo(175.28);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 72.54935448712911,
+                    "width": 177.9344262295082,
+                    "x": 217.47540983606555,
+                    "y": 266.4506455128709
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(verticalBrush, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 68.92170538031729,
+                    "width": 177.9344262295082,
+                    "x": 415.18032786885243,
+                    "y": 270.0782946196827
+                }
+                expect(secondBar).toEqual(bar);
+            });
+            it("Total Bars in Brush", () => {
+                $ = getHtml(verticalBrush, '.min-graph-bars');
+                const noOfBars = $('.min-graph-bars').find('g').length;
+                expect(noOfBars).toBe(6);
+            });
+
+            it("Height and Width of Brush Selected Area", () => {
+                $ = cheerio.load(verticalBrush.find('.brush').html());
+                const height = parseFloat($('.brush').find('.selection').attr('height'));
+                const width = parseFloat($('.brush').find('.selection').attr('width'));
+                expect(height).toEqual(83);
+                expect(width).toBeCloseTo(134);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(verticalBrush, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(12);
             });
         });
     });
@@ -311,7 +415,7 @@ describe("Bar Graph", () => {
 
             it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalNumber, '.graph-container', '.xAxis', 'g')
-                expect(xAxisTicks).toBe(6);
+                expect(xAxisTicks).toBe(5);
             });
 
             it("yAxis Ticks Length", () => {
@@ -319,17 +423,34 @@ describe("Bar Graph", () => {
                 expect(yAxisTicks).toBe(6);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(horizontalNumber, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(0);
-                expect(y).toBeCloseTo(81.51);
-                expect(height).toBeCloseTo(66.69);
-                expect(width).toBeCloseTo(160.05);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 66.68852459016392,
+                    "width": 92.45227474466006,
+                    "x": 0,
+                    "y": 81.50819672131148
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(horizontalNumber, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 66.68852459016392,
+                    "width": 87.82942986518307,
+                    "x": 0,
+                    "y": 155.60655737704917
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(horizontalNumber, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -359,7 +480,7 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(horizontalPercentage, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(6);
             });
 
             it("xAxis Ticks Length", () => {
@@ -369,20 +490,37 @@ describe("Bar Graph", () => {
 
             it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalPercentage, '.graph-container', '.yAxis', 'g')
-                expect(yAxisTicks).toBe(10);
+                expect(yAxisTicks).toBe(6);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(horizontalPercentage, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(0);
-                expect(y).toBeCloseTo(49.23);
-                expect(height).toBeCloseTo(40.28);
-                expect(width).toBeGreaterThan(0);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 66.68852459016392,
+                    "width": 95.02039348756728,
+                    "x": 0,
+                    "y": 81.50819672131148
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(horizontalPercentage, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 66.68852459016392,
+                    "width": 90.26913625032705,
+                    "x": 0,
+                    "y": 155.60655737704917
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(horizontalPercentage, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -412,7 +550,7 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(horizontalWithoutBrush, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(7);
             });
 
             it("xAxis Ticks Length", () => {
@@ -422,20 +560,37 @@ describe("Bar Graph", () => {
 
             it("yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalWithoutBrush, '.graph-container', '.yAxis', 'g')
-                expect(yAxisTicks).toBe(10);
+                expect(yAxisTicks).toBe(7);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(horizontalWithoutBrush, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(0);
-                expect(y).toBeCloseTo(49.23);
-                expect(height).toBeCloseTo(40.28);
-                expect(width).toBeCloseTo(384.21);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 57.29577464788732,
+                    "width": 95.02039348756728,
+                    "x": 0,
+                    "y": 70.02816901408451
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(horizontalWithoutBrush, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 57.29577464788732,
+                    "width": 90.26913625032705,
+                    "x": 0,
+                    "y": 133.6901408450704
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(horizontalWithoutBrush, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -455,8 +610,7 @@ describe("Bar Graph", () => {
                     horizontalStacked.update();
                     done();
                 }, 350);
-                const graphBar = horizontalStacked.find('.graph-bars').html();
-                const $ = cheerio.load(graphBar);
+                const $ = cheerio.load(horizontalStacked.find('.graph-bars').html());
             });
 
             it("SVG Dimensions", () => {
@@ -467,7 +621,7 @@ describe("Bar Graph", () => {
             it("Number of Bars", () => {
                 $ = getHtml(horizontalStacked, '.graph-bars');
                 const noOfBars = $('.graph-bars').find('g').length;
-                expect(noOfBars).toBe(10);
+                expect(noOfBars).toBe(7);
             });
 
             it(" xAxis Ticks Length", () => {
@@ -477,20 +631,43 @@ describe("Bar Graph", () => {
 
             it(" yAxis Ticks Length", () => {
                 const yAxisTicks = checkTicks(horizontalStacked, '.graph-container', '.yAxis', 'g')
-                expect(yAxisTicks).toBe(10);
+                expect(yAxisTicks).toBe(7);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(horizontalStacked, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(0);
-                expect(y).toBeCloseTo(49.23);
-                expect(height).toBeCloseTo(40.28);
-                expect(width).toBeCloseTo(384.21);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 57.29577464788732,
+                    "width": 95.02039348756728,
+                    "x": 0,
+                    "y": 70.02816901408451
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(horizontalStacked, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 57.29577464788732,
+                    "width": 90.26913625032705,
+                    "x": 0,
+                    "y": 133.6901408450704
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Stacked Graph", () => {
+                $ = getHtml(horizontalStacked, '.graph-bars');
+                const stacked = $('.graph-bars').children().first().find('rect').length;
+                expect(stacked).toBe(3);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(horizontalStacked, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(0);
             });
         });
 
@@ -525,7 +702,7 @@ describe("Bar Graph", () => {
 
             it("xAxis Ticks Length", () => {
                 const xAxisTicks = checkTicks(horizontalBrush, '.graph-container', '.xAxis', 'g')
-                expect(xAxisTicks).toBe(6);
+                expect(xAxisTicks).toBe(10);
             });
 
             it("yAxis Ticks Length", () => {
@@ -533,17 +710,48 @@ describe("Bar Graph", () => {
                 expect(yAxisTicks).toBe(6);
             });
 
-            it("Bar Dimensions Height, Width and Positions", () => {
+            it("First Bar Dimensions Height, Width and Positions", () => {
                 $ = getHtml(horizontalBrush, '.graph-bars');
-                const bar = $('.graph-bars').children().first().next().find('rect');
-                const x = parseFloat(bar.attr('x'));
-                const y = parseFloat(bar.attr('y'));
-                const height = parseFloat(bar.attr('height'));
-                const width = parseFloat(bar.attr('width'));
-                expect(x).toBeCloseTo(240.2);
-                expect(y).toBeCloseTo(197.04);
-                expect(height).toBeCloseTo(115.96);
-                expect(width).toBeCloseTo(196.52);
+                const firstBar = checkBar($, 'first');
+                const bar = {
+                    "height": 188.55737704918033,
+                    "width": 76.01631479005383,
+                    "x": 0,
+                    "y": 230.45901639344262
+                }
+                expect(firstBar).toEqual(bar);
+            });
+
+            it("Second Bar Dimensions Height, Width and Positions", () => {
+                $ = getHtml(horizontalBrush, '.graph-bars');
+                const secondBar = checkBar($, 'second');
+                const bar = {
+                    "height": 188.55737704918033,
+                    "width": 72.21530900026164,
+                    "x": 0,
+                    "y": 439.9672131147541
+                }
+                expect(secondBar).toEqual(bar);
+            });
+
+            it("Total Bars in Brush", () => {
+                $ = getHtml(horizontalBrush, '.min-graph-bars');
+                const noOfBars = $('.min-graph-bars').find('g').length;
+                expect(noOfBars).toBe(6);
+            });
+
+            it("Height and Width of Brush Selected Area", () => {
+                $ = getHtml(horizontalBrush, '.brush');
+                const height = parseFloat($('.brush').find('.selection').attr('height'));
+                const width = parseFloat($('.brush').find('.selection').attr('width'));
+                expect(height).toEqual(142);
+                expect(width).toBeCloseTo(68.80);
+            });
+
+            it("Legends", () => {
+                $ = getHtml(horizontalBrush, '.legend');
+                const legend = $('.legend').children().length;
+                expect(legend).toEqual(12);
             });
         });
     });
