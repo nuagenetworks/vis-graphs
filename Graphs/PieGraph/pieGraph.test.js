@@ -50,6 +50,11 @@ describe("PieGrpah", () => {
         it("PieGraph Text", () => {
             const graphTransform = $('svg').find('g').find('g').find('text').first().text();
             expect(graphTransform).toEqual("48.1%");
-        })
+        });
+
+        it("Legends", () => {
+            const legend = $('svg').find('g').get(0).nextSibling.children.length;
+            expect(legend).toBe(4);
+        });
     });
 });
