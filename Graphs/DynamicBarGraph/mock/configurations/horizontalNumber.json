@@ -11,7 +11,7 @@
             "limit": 5,
             "type": "number"
         },
-        "orientation": "horizontal",        
+        "orientation": "horizontal",
         "colors": [
             "#7da3f7",
             "#b3d645",
@@ -20,8 +20,14 @@
             "#f79e99"
         ],
         "tooltip": [
-            { "column": "Application", "label": "Application" },
-            { "column": "value", "format": ",.2s"}
+            {
+                "column": "Application",
+                "label": "Application"
+            },
+            {
+                "column": "value",
+                "format": ",.2s"
+            }
         ]
     },
     "listeners": [
