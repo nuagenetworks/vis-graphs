@@ -15,6 +15,9 @@
             "orientation": "horizontal",
             "circleSize": 4,
             "labelOffset": 2
+        },"otherOptions": {
+            "label": "Others",
+            "limit": 85
         }
     }
 }
