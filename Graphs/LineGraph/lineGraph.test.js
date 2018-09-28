@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
+import { getHtml, getDataAndConfig, checkSvg, checkLine } from '../testHelper';
 import LineGraph from '.';
 
 const cheerio = require('cheerio');
@@ -12,7 +12,7 @@ describe("LineGraph", () => {
         config = await getDataAndConfig('LineGraph');
     });
 
-    describe("multipleLines", () => {
+    describe("Multi Lines", () => {
         let multiline, $;
         beforeAll(async () => {
             multiline = mount(
@@ -46,14 +46,17 @@ describe("LineGraph", () => {
             expect(yAxisTicks).toBe(6);
         });
 
-        it("Check Line", () => {
-            const linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
-            const line = cheerio.load(linePath);
-            const d = line('path').attr('d');
-            expect(d).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
+        it("First Line", () => {
+            const line = checkLine($, 'first');
+            expect(line).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
         });
 
-        it("Legends", () => {
+        it("Second Line", () => {
+            const line = checkLine($, 'second');
+            expect(line).toEqual("M0,323.5909090909091L142.6451612903226,195.1818181818182L272.3225806451613,41.09090909090912L402,169.5");
+        });
+
+        it("Number of Legends", () => {
             const legend = $('svg').find('g').get(1).nextSibling.children.length;
             expect(legend).toBe(3);
         });
@@ -67,7 +70,7 @@ describe("LineGraph", () => {
                 <LineGraph
                     width={500}
                     height={500}
-                    configuration={config.multiline}
+                    configuration={config.simple}
                     data={config.data}>
                 </LineGraph>
             );
@@ -81,7 +84,7 @@ describe("LineGraph", () => {
 
         it("Total LineGraph", () => {
             const noOfLines = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children.length;
-            expect(noOfLines).toBe(3)
+            expect(noOfLines).toBe(1)
         });
 
         it("xAxis Ticks Length", () => {
@@ -91,19 +94,17 @@ describe("LineGraph", () => {
 
         it("yAxis Ticks Length", () => {
             const yAxisTicks = $('svg').find('g').get(1).firstChild.nextSibling.children.length;
-            expect(yAxisTicks).toBe(6);
+            expect(yAxisTicks).toBe(5);
         });
 
-        it("Check Line", () => {
-            const linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
-            const line = cheerio.load(linePath);
-            const d = line('path').attr('d');
-            expect(d).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
+        it("First Line", () => {
+            const line = checkLine($, 'first');
+            expect(line).toEqual("M0,388.7832167832168L149.03225806451613,293.958041958042L284.51612903225805,357.1748251748252L420,41.09090909090912");
         });
 
-        it("Legends", () => {
+        it("Number of Legends", () => {
             const legend = $('svg').find('g').get(1).nextSibling.children.length;
-            expect(legend).toBe(3);
+            expect(legend).toBe(1);
         });
     });
 
@@ -141,36 +142,23 @@ describe("LineGraph", () => {
             expect(yAxisTicks).toBe(5);
         });
 
-        it("Check Line", () => {
-            const linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
-            const line = cheerio.load(linePath);
-            const d = line('path').attr('d');
-            expect(d).toEqual("M0,445.9741367817624L149.03225806451613,436.93534195440606L284.51612903225805,442.96120517264364L420,412.8318890814558");
+        it("First Line", () => {
+            const line = checkLine($, 'first');
+            expect(line).toEqual("M0,445.9741367817624L149.03225806451613,436.93534195440606L284.51612903225805,442.96120517264364L420,412.8318890814558");
         });
 
-        it("Legends", () => {
+        it("Number of Legends", () => {
             const legend = $('svg').find('g').get(1).nextSibling.children.length;
             expect(legend).toBe(1);
         });
 
         it("Straight Line", () => {
-            const straightLine = $('svg').
-                find('g')
-                .get(1)
-                .firstChild
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .children
-                .length;
+            const straightLine = $('svg').find('g').next().get(3).children.length;
             expect(straightLine).toBe(2);
         });
     });
 
-    describe("Multiline LineGraph With Ycolumn ", () => {
+    describe("Multi Line LineGraph With Ycolumn ", () => {
         let multilineYcolumn, $;
         beforeAll(async () => {
             multilineYcolumn = mount(
@@ -204,31 +192,23 @@ describe("LineGraph", () => {
             expect(yAxisTicks).toBe(6);
         });
 
-        it("Check Line", () => {
-            const linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
-            const line = cheerio.load(linePath);
-            const d = line('path').attr('d');
-            expect(d).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
+        it("First Line", () => {
+            const line = checkLine($, 'first');
+            expect(line).toEqual("M0,400.6363636363636L142.6451612903226,323.5909090909091L272.3225806451613,374.95454545454544L402,118.13636363636363");
         });
 
-        it("Legends", () => {
+        it("Second Line", () => {
+            const line = checkLine($, 'second');
+            expect(line).toEqual("M0,323.5909090909091L142.6451612903226,195.1818181818182L272.3225806451613,41.09090909090912L402,169.5");
+        });
+
+        it("Number of Legends", () => {
             const legend = $('svg').find('g').get(1).nextSibling.children.length;
             expect(legend).toBe(3);
         });
 
         it("Straight Line", () => {
-            const straightLine = $('svg').
-                find('g')
-                .get(1)
-                .firstChild
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .nextSibling
-                .children
-                .length;
+            const straightLine = $('svg').find('g').next().get(3).children.length;
             expect(straightLine).toBe(2);
         });
     });
