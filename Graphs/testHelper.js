@@ -64,8 +64,12 @@ export const totalColumn = ($) => {
     return noOfColumns;
 }
 
-export const checkSingleRowData = ($) => {
-    const value = $('table tbody tr').first().find('td').map(
+export const checkRowData = ($, rowNo) => {
+    let table, value;
+    table = $('table tbody tr').first();
+    if (rowNo == "second")
+        table = table.next();
+    value = table.find('td').map(
         function (i) {
             return $(this).text();
         }

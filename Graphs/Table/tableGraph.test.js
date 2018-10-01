@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { getDataAndConfig, getHtml, totalRows, checkSingleRowData, totalColumn } from '../testHelper';
+import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn } from '../testHelper';
 import Table from '.';
 
 const cheerio = require('cheerio');
@@ -44,9 +44,26 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Row Data", () => {
-            const value = checkSingleRowData($);
-            expect(value).toBeDefined();
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '200.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '300.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
@@ -87,9 +104,26 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Row Data", () => {
-            const value = checkSingleRowData($);
-            expect(value).toBeDefined();
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '200.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '300.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
@@ -131,9 +165,28 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Row Data", () => {
-            const value = checkSingleRowData($);
-            expect(value).toBeDefined();
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                '',
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '200.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                '',
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '300.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
@@ -174,9 +227,26 @@ describe("Table", () => {
             expect(tableColumns).toEqual(columns);
         });
 
-        it("Row Data", () => {
-            const value = checkSingleRowData($);
-            expect(value).toBeDefined();
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '200.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                ' NaN, NaN 12:NaN:NaN AM',
+                'Application 2',
+                '300.54545454545456',
+                ''
+            ];
+            expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
