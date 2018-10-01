@@ -49,6 +49,8 @@ class Table extends AbstractGraph {
 
         /**
         */
+        const { limit } = this.getConfiguredProperties();
+        this.pageSize =  limit || 500;
         this.searchText = '';
         this.scroll = props.scroll;
         this.originalData = []
@@ -78,7 +80,7 @@ class Table extends AbstractGraph {
     shouldComponentUpdate(nextProps, nextState) {
 
         return !_.isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
-          || !_.isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
+            || !_.isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
     }
 
     componentWillReceiveProps(nextProps) {
@@ -104,18 +106,16 @@ class Table extends AbstractGraph {
 
     getGraphProperties() {
         const {
-            configuration,
             scrollData,
             data
         } = this.props;
 
         // Total, per page, current page must be set and only applicable for Table component only.
-        const limit = objectPath.get(configuration, 'data.limit') || 100;
         return {
             searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
             sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
             size: objectPath.has(scrollData, 'size') ? objectPath.get(scrollData, 'size') : data.length, // response length for normal table otherwise total hits for scroll based table.
-            pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : limit, // Calculate this from the config or (query in case of scroll)
+            pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
         }
@@ -126,7 +126,6 @@ class Table extends AbstractGraph {
         const {
             updateScroll,
         } = this.props;
-
         updateScroll && updateScroll(param)
     }
 
@@ -155,6 +154,10 @@ class Table extends AbstractGraph {
             startIndex = (currentPage - 1) * pageSize;
             endIndex = startIndex + pageSize - 1;
             this.selectedRows = objectPath.has(scrollData, 'selectedRows') ? objectPath.get(scrollData, 'selectedRows') : {};
+
+            if (!objectPath.has(scrollData, 'pageSize')) {
+                this.updateTableStatus({ pageSize: this.pageSize })
+            }
         }
 
         const {
@@ -350,7 +353,7 @@ class Table extends AbstractGraph {
                         columField: index,
                         type: columnRow.selection ? "selection" : "text",
                         style: {
-                          textIndent: '2px'
+                            textIndent: '2px'
                         }
                     })
                 }
@@ -369,12 +372,12 @@ class Table extends AbstractGraph {
         if(!columns)
             return []
 
-        const keyColumns = this.getKeyColumns()
+        const keyColumns = this.getKeyColumns();
 
         return this.state.data.map((d, j) => {
 
             let data = {},
-              highlighter = false;
+                highlighter = false;
 
             const keyData = this.replaceKeyFromColumn(d)
 
@@ -525,7 +528,7 @@ class Table extends AbstractGraph {
 
     handleClick(key) {
         if(this.props.onMarkClick && this.state.data[key])
-           this.props.onMarkClick(this.unformattedData[this.state.data[key]['row_id']]);
+            this.props.onMarkClick(this.unformattedData[this.state.data[key]['row_id']]);
 
     }
 
@@ -702,19 +705,19 @@ class Table extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         if(searchBar === false)
-           return;
+            return;
 
         const search = searchString !== null ? searchString : searchText;
 
         return (
-          <SearchBar
-            data={this.originalData}
-            searchText={search}
-            options={headerData}
-            handleSearch={this.handleSearch}
-            columns={this.getColumns()}
-            scroll={this.props.scroll}
-          />
+            <SearchBar
+                data={this.originalData}
+                searchText={search}
+                options={headerData}
+                handleSearch={this.handleSearch}
+                columns={this.getColumns()}
+                scroll={this.props.scroll}
+            />
         );
     }
 
@@ -724,7 +727,7 @@ class Table extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         if(!data.length)
-          return data
+            return data
 
         if(highlight) {
             this.state.selected.forEach( (key) => {
@@ -763,20 +766,21 @@ class Table extends AbstractGraph {
 
     getColumnListItem() {
 
-        return  this.getColumns().map( column => {
-          return (
-            <div style={{
-                whiteSpace: 'normal',
-                display: 'flex',
-                justifyContent: 'space-between',
-                lineHeight: 'normal',
-                fontSize: '0.8em'
-              }}
-              key={column.label}
-              label={column.label}
-              value={column.label}>
-                {column.label}
-            </div>)
+        return this.getColumns().map(column => {
+            return (
+                <div style={{
+                    whiteSpace: 'normal',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    lineHeight: 'normal',
+                    fontSize: '0.8em'
+                }}
+                    key={column.label}
+                    label={column.label}
+                    value={column.label}>
+                    {column.label}
+                </div>
+            )
         })
     }
 
@@ -784,9 +788,9 @@ class Table extends AbstractGraph {
         if (!values) return hintText
         const { value, label } = values
         if (Array.isArray(values)) {
-           return values.length
-              ? `Select Columns`
-              : hintText
+            return values.length
+                ? `Select Columns`
+                : hintText
         }
         else if (label || value) return label || value
         else return hintText
@@ -965,12 +969,13 @@ class Table extends AbstractGraph {
         tableData = this.removeHighlighter(tableData)
 
         let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
-          heightMargin  =  showFooter ?  100 : 80
-          heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
-          heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
-          heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
-        
-          return (
+            heightMargin = showFooter ? 100 : 80;
+
+        heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
+        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
+        heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
+
+        return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
@@ -1020,8 +1025,8 @@ class Table extends AbstractGraph {
 }
 
 Table.propTypes = {
-  configuration: React.PropTypes.object,
-  response: React.PropTypes.object
+    configuration: React.PropTypes.object,
+    response: React.PropTypes.object
 };
 
 export default Table;
