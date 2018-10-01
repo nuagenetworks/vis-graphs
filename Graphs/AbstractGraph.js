@@ -3,7 +3,7 @@ import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
 
 import "./style.css"
-import { GraphManager } from "./index";
+import defaultProperties from "./defaultProperties";
 import columnAccessor from "../utils/columnAccessor";
 
 import {
@@ -31,14 +31,12 @@ export default class AbstractGraph extends React.Component {
 
         this.setGraphId();
 
-        this.defaults = GraphManager.getDefaultProperties(properties);
-
         // set all configuration into single object
-        this.setConfiguredProperties(this.props);
+        this.setConfiguredProperties(this.props, properties);
 
         // Provide tooltips for subclasses.
         const { tooltip, defaultY } = this.getConfiguredProperties();
-        if(tooltip) {
+        if (tooltip) {
 
             this.setTooltipAccessor(tooltip);
             this.setTooltipAccessor(defaultY ? defaultY.tooltip : null, 'defaultY')
@@ -49,13 +47,13 @@ export default class AbstractGraph extends React.Component {
             // This JSX object can be used by subclasses to enable tooltips.
             this.tooltip = (
                 <ReactTooltip
-                    id={ this.tooltipId }
+                    id={this.tooltipId}
                     place="top"
                     type="dark"
                     effect="float"
                     getContent={[() => this.getTooltipContent(this.hoveredDatum), 200]}
-                    afterHide={() =>  this.handleHideEvent()}
-                    afterShow={() =>  this.handleShowEvent()}
+                    afterHide={() => this.handleHideEvent()}
+                    afterShow={() => this.handleShowEvent()}
                 />
             );
 
@@ -85,7 +83,7 @@ export default class AbstractGraph extends React.Component {
     }
 
     setTooltipAccessor(tooltip, type = 'default') {
-        if(!tooltip)
+        if (!tooltip)
             return;
 
         this.tooltips[type] = tooltip
@@ -98,33 +96,33 @@ export default class AbstractGraph extends React.Component {
             // on mouseEnter and mouseMove of visual marks
             // to the data entry corresponding to the hovered mark.
 
-            if(this.hoveredDatum) {
+            if (this.hoveredDatum) {
                 let type = this.hoveredDatum.tooltipName || 'default'
-                return this.tooltipContent({tooltip: this.tooltips[type], accessors: this.accessors[type]})
+                return this.tooltipContent({ tooltip: this.tooltips[type], accessors: this.accessors[type] })
             } else {
                 return null;
             }
         }
     }
 
-    tooltipContent({tooltip, accessors}) {
+    tooltipContent({ tooltip, accessors }) {
         return (
             <div>
                 {/* Display each tooltip column as "label : value". */}
-                {tooltip.map(({column, label}, i) => {
+                {tooltip.map(({ column, label }, i) => {
                     let data = accessors[i](this.hoveredDatum)
 
                     return (data !== null && data !== 'undefined') ?
-                     (<div key={column}>
-                        <strong>
-                            {/* Use label if present, fall back to column name. */}
-                            {label || column}
-                        </strong> : <span>
-                            {/* Apply number and date formatting to the value. */}
-                            {data}
-                        </span>
-                    </div>
-                    ) : null
+                        (<div key={column}>
+                            <strong>
+                                {/* Use label if present, fall back to column name. */}
+                                {label || column}
+                            </strong> : <span>
+                                {/* Apply number and date formatting to the value. */}
+                                {data}
+                            </span>
+                        </div>
+                        ) : null
                 })}
             </div>
         )
@@ -134,7 +132,7 @@ export default class AbstractGraph extends React.Component {
         this.graphId = new Date().valueOf();
     }
 
-    getGraphId () {
+    getGraphId() {
         return this.graphId;
     }
 
@@ -142,9 +140,9 @@ export default class AbstractGraph extends React.Component {
         return d3.select(this.node);
     }
 
-    handleShowEvent() {}
+    handleShowEvent() { }
 
-    handleHideEvent() {}
+    handleHideEvent() { }
 
     wrapD3Text(text, width) {
         text.each(function () {
@@ -163,8 +161,8 @@ export default class AbstractGraph extends React.Component {
         });
     };
 
-    setConfiguredProperties(props) {
-        this.configuredProperties = Object.assign({}, this.defaults, props.configuration.data, { multiMenu: props.configuration.multiMenu,  menu: props.configuration.menu });
+    setConfiguredProperties(props, properties) {
+        this.configuredProperties = Object.assign({}, defaultProperties, properties, props.configuration.data, { multiMenu: props.configuration.multiMenu, menu: props.configuration.menu });
     }
 
     getConfiguredProperties() {
@@ -188,7 +186,7 @@ export default class AbstractGraph extends React.Component {
         let propColors = [];
         let index = 0;
         domainData.forEach((d) => {
-            if(colors[d]) {
+            if (colors[d]) {
                 propColors.push(colors[d]);
             } else {
                 propColors.push(otherColors[index++]);
@@ -203,22 +201,22 @@ export default class AbstractGraph extends React.Component {
     }
 
     updateYExtent(yExtent, zeroStart) {
-      let padding = 0.10;
+        let padding = 0.10;
 
-      if(zeroStart && yExtent[0] > 0) {
-        yExtent[0] = 0;
-      }
+        if (zeroStart && yExtent[0] > 0) {
+            yExtent[0] = 0;
+        }
 
-      if(zeroStart && yExtent[1] < 0) {
-        yExtent[1] = 0;
-      }
+        if (zeroStart && yExtent[1] < 0) {
+            yExtent[1] = 0;
+        }
 
-      let diff = Math.floor((yExtent[1] - yExtent[0]) * padding, 0);
+        let diff = Math.floor((yExtent[1] - yExtent[0]) * padding, 0);
 
-      yExtent[0] = (yExtent[0] >= 0 && (yExtent[0] - diff) < 0) ? 0 : yExtent[0] - diff;
-      yExtent[1] = (yExtent[1] <= 0 && (yExtent[1] + diff) > 0) ? 0 : yExtent[1] + diff;
+        yExtent[0] = (yExtent[0] >= 0 && (yExtent[0] - diff) < 0) ? 0 : yExtent[0] - diff;
+        yExtent[1] = (yExtent[1] <= 0 && (yExtent[1] + diff) > 0) ? 0 : yExtent[1] + diff;
 
-      return yExtent;
+        return yExtent;
     }
 
     scaleColor(data, defaultColumn) {
@@ -266,7 +264,7 @@ export default class AbstractGraph extends React.Component {
         let labelSize = format(longestLabel).length
 
         // and return its length + 2 to ensure we have enough space
-        return  labelSize > 8 ?  labelSize : labelSize + 2
+        return labelSize > 8 ? labelSize : labelSize + 2
     }
 
     renderLegend(data, legend, getColor, label) {
@@ -283,41 +281,40 @@ export default class AbstractGraph extends React.Component {
         } = this.props;
 
         const {
-          margin,
-          fontColor,
-          circleToPixel,
+            margin,
+            fontColor,
+            circleToPixel,
         } = this.getConfiguredProperties();
 
         const isVertical = legend.orientation === 'vertical';
         const lineHeight = legend.circleSize * circleToPixel;
 
-        if (isVertical)
-        {
+        if (isVertical) {
             // Place the legends in the bottom left corner
             let left = margin.left;
-            let top  = height - (margin.bottom + ((data.length - 1) * lineHeight));
+            let top = height - (margin.bottom + ((data.length - 1) * lineHeight));
 
             return (
                 <g>
                     {data.map((d, i) => {
                         const x = left;
-                        const y = top + (i *  lineHeight);
+                        const y = top + (i * lineHeight);
                         return (
                             <g
                                 key={i}
-                                transform={ `translate(${x}, ${y})` }>
+                                transform={`translate(${x}, ${y})`}>
 
                                 <circle
-                                  r={ legend.circleSize }
-                                  fill={ getColor(d) }
+                                    r={legend.circleSize}
+                                    fill={getColor(d)}
                                 />
 
                                 <text
-                                  fill={ fontColor }
-                                  alignmentBaseline="central"
-                                  x={ legend.circleSize + legend.labelOffset }
+                                    fill={fontColor}
+                                    alignmentBaseline="central"
+                                    x={legend.circleSize + legend.labelOffset}
                                 >
-                                    { label(d) }
+                                    {label(d)}
                                 </text>
                             </g>
                         );
@@ -327,12 +324,12 @@ export default class AbstractGraph extends React.Component {
         }
 
         // Place legends horizontally
-        const availableWidth    = width - margin.left - margin.right;
-        const legendWidth       = legend.width + legend.circleSize + 2 * legend.labelOffset;
+        const availableWidth = width - margin.left - margin.right;
+        const legendWidth = legend.width + legend.circleSize + 2 * legend.labelOffset;
         const nbElementsPerLine = parseInt(availableWidth / legendWidth, 10);
-        const nbLines           = parseInt(data.length / nbElementsPerLine, 10);
-        const left              = margin.left;
-        const top               = height - (margin.bottom + (nbLines * lineHeight));
+        const nbLines = parseInt(data.length / nbElementsPerLine, 10);
+        const left = margin.left;
+        const top = height - (margin.bottom + (nbLines * lineHeight));
 
         return (
             <g>
@@ -342,19 +339,19 @@ export default class AbstractGraph extends React.Component {
                     return (
                         <g
                             key={i}
-                            transform={ `translate(${x}, ${y})` }>
+                            transform={`translate(${x}, ${y})`}>
 
                             <circle
-                              r={ legend.circleSize }
-                              fill={ getColor(d) }
+                                r={legend.circleSize}
+                                fill={getColor(d)}
                             />
 
                             <text
-                              fill={ fontColor }
-                              alignmentBaseline="central"
-                              x={ legend.circleSize + legend.labelOffset }
+                                fill={fontColor}
+                                alignmentBaseline="central"
+                                x={legend.circleSize + legend.labelOffset}
                             >
-                                { label(d) }
+                                {label(d)}
                             </text>
                         </g>
                     );
@@ -366,15 +363,15 @@ export default class AbstractGraph extends React.Component {
 
     setYlabelWidth(data, yColumn = null) {
         const {
-          chartWidthToPixel,
-          yTickFormat,
-          yLabelLimit,
-          appendCharLength
+            chartWidthToPixel,
+            yTickFormat,
+            yLabelLimit,
+            appendCharLength
         } = this.getConfiguredProperties();
 
         yColumn = yColumn ? yColumn : 'yColumn'
         const yLabelFn = (d) => {
-            if(!yTickFormat) {
+            if (!yTickFormat) {
                 return d[yColumn];
             }
             const formatter = format(yTickFormat);
@@ -410,36 +407,37 @@ export default class AbstractGraph extends React.Component {
     isBrush() {
         return this.brush
     }
-    
+
     setLeftMargin() {
-      const {
-          margin
+        const {
+            margin
         } = this.getConfiguredProperties();
 
-        this.leftMargin   = margin.left + this.getYlabelWidth();
+        this.leftMargin = margin.left + this.getYlabelWidth();
     }
 
     getLeftMargin() {
         return this.leftMargin;
     }
 
-    setAvailableWidth({width}) {
+    setAvailableWidth({ width }) {
         const {
-          margin,
-          brushArea
+            margin,
+            brushArea
         } = this.getConfiguredProperties();
 
         this.availableWidth = width - (margin.left + margin.right + this.getYlabelWidth());
 
-        if(this.isBrush() && !this.isVertical()) {
-            this.availableWidth = this.availableWidth * (100 - brushArea)/100
-            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right + margin.left )
-            this.minMarginLeft = this.availableWidth + this.getLeftMargin() + margin.left           
+        if (this.isBrush() && !this.isVertical()) {
+            this.availableWidth = this.availableWidth * (100 - brushArea) / 100
+            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right + margin.left)
+            this.minMarginLeft = this.availableWidth + this.getLeftMargin() + margin.left;
+
         }
     }
 
     getAvailableWidth() {
-       return this.availableWidth;
+        return this.availableWidth;
     }
 
     getAvailableMinWidth() {
@@ -453,25 +451,25 @@ export default class AbstractGraph extends React.Component {
     // height of x-axis
     getXAxisHeight() {
         const {
-          chartHeightToPixel,
-          xLabel
+            chartHeightToPixel,
+            xLabel
         } = this.getConfiguredProperties();
 
         return xLabel ? chartHeightToPixel : 0;
     }
 
-    setAvailableHeight({height}) {
+    setAvailableHeight({ height }) {
         const {
-          chartHeightToPixel,
-          margin
+            chartHeightToPixel,
+            margin
         } = this.getConfiguredProperties();
 
-        this.availableHeight   = height - (margin.top + margin.bottom + chartHeightToPixel + this.getXAxisHeight())        
+        this.availableHeight = height - (margin.top + margin.bottom + chartHeightToPixel + this.getXAxisHeight())
 
-        if(this.isVertical() && this.isBrush()) {
-            this.availableHeight     = this.availableHeight * 0.75
-            this.availableMinHeight  = height - (this.availableHeight + (margin.top * 4) + margin.bottom + chartHeightToPixel + this.getXAxisHeight());
-            this.minMarginTop        = this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight()
+        if (this.isVertical() && this.isBrush()) {
+            this.availableHeight = this.availableHeight * 0.75
+            this.availableMinHeight = height - (this.availableHeight + (margin.top * 4) + margin.bottom + chartHeightToPixel + this.getXAxisHeight());
+            this.minMarginTop = this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight()
         }
     }
 
@@ -490,7 +488,7 @@ export default class AbstractGraph extends React.Component {
     // Check whether to display chart as vertical or horizontal
     isVertical() {
         const {
-          orientation
+            orientation
         } = this.getConfiguredProperties()
 
         return orientation === 'vertical'
@@ -499,7 +497,7 @@ export default class AbstractGraph extends React.Component {
     // Check whether to display legend as vertical or horizontal
     checkIsVerticalLegend() {
         const {
-          legend
+            legend
         } = this.getConfiguredProperties();
 
         return legend.orientation === 'vertical';
@@ -508,7 +506,7 @@ export default class AbstractGraph extends React.Component {
     // to show message at the center of container
     renderMessage(message) {
         return (
-            <div style={{display: "table", width: this.props.width, height: this.props.height}}>
+            <div style={{ display: "table", width: this.props.width, height: this.props.height }}>
                 <div className="center-content">
                     {message}
                 </div>
@@ -521,8 +519,8 @@ export default class AbstractGraph extends React.Component {
         if (!legendConfig || !legendConfig.show)
             return;
 
-        if(!label)
-          label = (d) => d;
+        if (!label)
+            label = (d) => d;
 
         const {
             width,
@@ -537,53 +535,52 @@ export default class AbstractGraph extends React.Component {
 
         const isVertical = legendConfig.orientation === 'vertical';
         const lineHeight = legendConfig.circleSize * circleToPixel;
-        const x          = legendConfig.circleSize + legendConfig.labelOffset;
-        const radius     = legendConfig.circleSize;
+        const x = legendConfig.circleSize + legendConfig.labelOffset;
+        const radius = legendConfig.circleSize;
         let transform;
 
-        if (isVertical)
-        {
-            let top  = height - (margin.bottom + ((data.length - 1) * lineHeight));
-            transform = (d,i) => `translate(${margin.left}, ${top + (i *  lineHeight)})`;
+        if (isVertical) {
+            let top = height - (margin.bottom + ((data.length - 1) * lineHeight));
+            transform = (d, i) => `translate(${margin.left}, ${top + (i * lineHeight)})`;
 
         } else {
             // Place legends horizontally
-            const availableWidth    = width - margin.left - margin.right;
-            const legendWidth       = legendConfig.width + legendConfig.circleSize + 2 * legendConfig.labelOffset;
+            const availableWidth = width - margin.left - margin.right;
+            const legendWidth = legendConfig.width + legendConfig.circleSize + 2 * legendConfig.labelOffset;
             const nbElementsPerLine = parseInt(availableWidth / legendWidth, 10);
-            const nbLines           = parseInt(data.length / nbElementsPerLine, 10);
-            const top               = height - (margin.bottom + (nbLines * lineHeight));
+            const nbLines = parseInt(data.length / nbElementsPerLine, 10);
+            const top = height - (margin.bottom + (nbLines * lineHeight));
 
             transform = (d, i) => `translate(${margin.left + ((i % nbElementsPerLine) * legendWidth)}, ${top + parseInt(i / nbElementsPerLine, 10) * lineHeight})`;
         }
 
         const legends = this.getSVG().select('.legend').selectAll('.legend-item')
-          .data(data);
+            .data(data);
 
         const newLegends = legends.enter().append('g')
-          .attr('class', 'legend-item');
+            .attr('class', 'legend-item');
 
         newLegends.append('circle')
-          .attr('class', 'item-circle');
+            .attr('class', 'item-circle');
 
         newLegends.append('text')
-          .attr('class', 'item-text')
-          .style('alignment-baseline', 'central');
+            .attr('class', 'item-text')
+            .style('alignment-baseline', 'central');
 
 
         const allLegends = newLegends.merge(legends);
 
         allLegends
-          .attr("transform", transform );
+            .attr("transform", transform);
 
         allLegends.selectAll('.item-circle')
-          .attr('r', radius)
-          .style('fill', d => getColor(d));
+            .attr('r', radius)
+            .style('fill', d => getColor(d));
 
         allLegends.selectAll('.item-text')
-          .attr('x', x)
-          .style('fill', fontColor)
-          .text( d => label(d));
+            .attr('x', x)
+            .style('fill', fontColor)
+            .text(d => label(d));
 
         legends.exit().remove();
     }
