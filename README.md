@@ -519,12 +519,14 @@ or
 
 "markerIcon": {
     "default": "default-icon", // optional
+    "defaultUrgency": "GREEN", // optional
     "criteria": [
         {
             "icon": "icon1",
             "fields": {
                 "nsg.status": "deactivated"
-            }
+            },
+            "urgency": "GRAY" // Either of "GREY", "RED", "YELLOW", "BLUE", as per criticaliy.
         },
         {
             "icon": "icon2",

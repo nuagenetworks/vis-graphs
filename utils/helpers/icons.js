@@ -7,6 +7,7 @@ const icons = {
 };
 
 const defaultIcon = 'nsGatewayBlue';
+const defaultUrgency = 'BLUE';
 
 export default (iconKey = null, data = []) => {
 
@@ -31,6 +32,8 @@ export default (iconKey = null, data = []) => {
    *  }
    */
     let icon;
+    let urgency;
+
     if (iconKey && typeof iconKey === "object") {
       if (iconKey.criteria) {
         iconKey.criteria.forEach(d => {
@@ -48,6 +51,9 @@ export default (iconKey = null, data = []) => {
 
           if (Object.keys(d.fields).length === counter) {
             icon = d.icon;
+            if (d.urgency) {
+              urgency = d.urgency;
+            }
           }
         })
       }
@@ -55,12 +61,25 @@ export default (iconKey = null, data = []) => {
       // if default icon defined in configuration then pick default icon
       if (!icon && iconKey.default)
         icon = iconKey.default;
+
+      if (!urgency && iconKey.defaultUrgency)
+        urgency = iconKey.defaultUrgency;
+
+
     } else {
         icon = iconKey;
     }
 
-    if(!icon)
-        icon = defaultIcon;
+    if (!icon) {
+      icon = defaultIcon;
+    }
 
-    return `${process.env.PUBLIC_URL}/icons/${icons[icon] || icons[defaultIcon]}`;
+    if (!urgency) {
+      urgency = defaultUrgency;
+    }
+
+    return {
+      url: `${process.env.PUBLIC_URL}/icons/${icons[icon] || icons[defaultIcon]}`,
+      urgency,
+    };
 }
