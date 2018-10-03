@@ -33,14 +33,16 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "lodash": "^4.17.4",
     "material-ui": "^0.16.7",
     "material-ui-datatables": "0.18.2",
-    "material-ui-superselectfield": "^1.8.11",
+    "material-ui-superselectfield": "^1.9.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-filter-box": "^2.0.0",
     "react-fontawesome": "1.3.1",
     "react-icons": "^2.2.7",
     "react-lightweight-tooltip": "0.0.4",
     "react-tap-event-plugin": "2.0.1",
-    "react-tooltip": "^3.2.1"
+    "react-tooltip": "^3.2.1",
+    "object-path": "^0.11.4",
+    "react-google-maps": "^9.4.5"
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
@@ -517,12 +519,14 @@ or
 
 "markerIcon": {
     "default": "default-icon", // optional
+    "defaultUrgency": "GREEN", // optional
     "criteria": [
         {
             "icon": "icon1",
             "fields": {
                 "nsg.status": "deactivated"
-            }
+            },
+            "urgency": "GRAY" // Either of "GREY", "RED", "YELLOW", "BLUE", as per criticaliy.
         },
         {
             "icon": "icon2",
