@@ -1,6 +1,5 @@
 import React from 'react'
 import AbstractGraph from '../AbstractGraph'
-import { connect } from 'react-redux'
 import { Marker, InfoWindow, Polyline } from 'react-google-maps'
 import _ from 'lodash'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
@@ -149,7 +148,7 @@ class GeoMap extends AbstractGraph {
               </div>
           ))
       }
-      const minorAndInfoAlarms = new Number(data[minorAlarmColumn]) + new Number(data[infoAlarmColumn]);
+      const minorAndInfoAlarms = Number(data[minorAlarmColumn]) + Number(data[infoAlarmColumn]);
       return (
           <div style={{display: 'table'}}>
               {
@@ -201,8 +200,9 @@ class GeoMap extends AbstractGraph {
       longitudeColumn
     } = this.getConfiguredProperties()
 
-    return this.state.data.map(d => {
-        if (d[latitudeColumn] && d[longitudeColumn]) {
+    return this.state.data.filter(d => {
+        return (d[latitudeColumn] && d[longitudeColumn]);
+      }).map(d => {
           return this.drawMarker({
             data: {...d},
             position: {
@@ -210,8 +210,7 @@ class GeoMap extends AbstractGraph {
               lng: d[longitudeColumn]
             }
           })
-        }
-      })
+      });
   }
 
   drawMarker({ data, position, labelOrigin = null}) {
@@ -581,4 +580,4 @@ GeoMap.propTypes = {
   data: React.PropTypes.array
 };
 
-export default connect(null, null)(GeoMap);
+export default GeoMap;
