@@ -31,10 +31,6 @@ class SimpleTextGraph extends AbstractGraph {
     }
 
     componentWillReceiveProps(nextProps) {
-
-        const {
-            fontSize
-          } = this.getConfiguredProperties();
         // reset font size on resize
         if(this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
             this.setState({ fontSize: INITIAL_FONT_SIZE})
@@ -133,7 +129,6 @@ class SimpleTextGraph extends AbstractGraph {
           textAlign,
           titlePosition,
           targetedColumn,
-          chartWidthToPixel
         } = this.getConfiguredProperties();
 
         if (!data || !data.length)
