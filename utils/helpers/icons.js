@@ -7,40 +7,79 @@ const icons = {
 };
 
 const defaultIcon = 'nsGatewayBlue';
+const defaultUrgency = 'BLUE';
 
 export default (iconKey = null, data = []) => {
 
-    let icon
+  /**
+   * get path of the image by key
+   *const iconKey = {
+   *    criteria : [
+   *        {
+                "icon": "icon1",
+                "fields": {
+                    "nsg.status": "deactivated"
+                }
+            },
+            {
+                "icon": "icon2",
+                "fields": {
+                    "nsg.status": "activated",
+                    "nsg.signal": "yellow"
+                }
+            }
+   *    ]
+   *  }
+   */
+    let icon;
+    let urgency;
+
     if (iconKey && typeof iconKey === "object") {
       if (iconKey.criteria) {
         iconKey.criteria.forEach(d => {
 
-          let counter = 0
+          let counter = 0;
           // match all criteria's field with given data, if matched then pick criteria's icon
           for (let key in d.fields) {
             if(d.fields.hasOwnProperty(key)) {
-              let value = objectPath.get(data, key)
-              if (d.fields.hasOwnProperty(key) && value && d.fields[key] === value) {
-                counter++
+              const value = objectPath.has(data, key) ? objectPath.get(data, key) : null;
+              if ((value || value === 0) && d.fields[key] === value) {
+                counter++;
               }
             }
           }
 
           if (Object.keys(d.fields).length === counter) {
-            icon = d.icon
+            icon = d.icon;
+            if (d.urgency) {
+              urgency = d.urgency;
+            }
           }
         })
       }
 
       // if default icon defined in configuration then pick default icon
       if (!icon && iconKey.default)
-        icon = iconKey.default
+        icon = iconKey.default;
+
+      if (!urgency && iconKey.defaultUrgency)
+        urgency = iconKey.defaultUrgency;
+
+
     } else {
-        icon = iconKey
+        icon = iconKey;
     }
 
-    if(!icon)
-        icon = defaultIcon
+    if (!icon) {
+      icon = defaultIcon;
+    }
 
-    return `${process.env.PUBLIC_URL}/icons/${icons[icon] || icons[defaultIcon]}`
+    if (!urgency) {
+      urgency = defaultUrgency;
+    }
+
+    return {
+      url: `${process.env.PUBLIC_URL}/icons/${icons[icon] || icons[defaultIcon]}`,
+      urgency,
+    };
 }

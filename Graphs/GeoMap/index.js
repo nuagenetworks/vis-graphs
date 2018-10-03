@@ -1,6 +1,5 @@
 import React from 'react'
 import AbstractGraph from '../AbstractGraph'
-import { connect } from 'react-redux'
 import { Marker, InfoWindow, Polyline } from 'react-google-maps'
 import _ from 'lodash'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
@@ -33,6 +32,7 @@ class GeoMap extends AbstractGraph {
     this.center        = null
     this.map           = null
     this.clusterCenter = null
+    this.timerId = null
 
     this.onMapMounted         = this.onMapMounted.bind(this)
     this.handleClusterClick   = this.handleClusterClick.bind(this)
@@ -49,6 +49,10 @@ class GeoMap extends AbstractGraph {
   componentWillReceiveProps(nextProps) {
     if (!_.isEqual(this.props.data, nextProps.data))
       this.initiate(nextProps)
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timerId);
   }
 
   initiate(props) {
@@ -141,15 +145,15 @@ class GeoMap extends AbstractGraph {
       }
 
       const displayInfo = info => {
-          return info.map( row => (
-              <div style={rowStyle}>
+          return info.map( (row, i) => (
+              <div key={i} style={rowStyle}>
                   <small style={labelStyle}>{row.label}</small>
                   <small style={dataStyle}>&nbsp;</small>
                   <small style={dataStyle}>{row.text}</small>
               </div>
           ))
       }
-      const minorAndInfoAlarms = new Number(data[minorAlarmColumn]) + new Number(data[infoAlarmColumn]);
+      const minorAndInfoAlarms = Number(data[minorAlarmColumn]) + Number(data[infoAlarmColumn]);
       return (
           <div style={{display: 'table'}}>
               {
@@ -201,8 +205,9 @@ class GeoMap extends AbstractGraph {
       longitudeColumn
     } = this.getConfiguredProperties()
 
-    return this.state.data.map(d => {
-        if (d[latitudeColumn] && d[longitudeColumn]) {
+    return this.state.data.filter(d => {
+        return (d[latitudeColumn] && d[longitudeColumn]);
+      }).map(d => {
           return this.drawMarker({
             data: {...d},
             position: {
@@ -210,8 +215,7 @@ class GeoMap extends AbstractGraph {
               lng: d[longitudeColumn]
             }
           })
-        }
-      })
+      });
   }
 
   drawMarker({ data, position, labelOrigin = null}) {
@@ -220,12 +224,14 @@ class GeoMap extends AbstractGraph {
       markerIcon
     } = this.getConfiguredProperties()
 
+    const iconData = getIconPath(markerIcon, data);
     return (
       <Marker
         noRedraw={false}
         options={{
           id: data[idColumn],
-          data
+          data,
+          urgency: iconData.urgency
         }}
         key={data[idColumn]}
         position={position}
@@ -233,7 +239,7 @@ class GeoMap extends AbstractGraph {
         onMouseOver={() => this.toggleInfoWindow(data, position)}
         onMouseOut={() => this.toggleInfoWindow()}
         icon={{
-          url: getIconPath(markerIcon, data),
+          url: iconData.url,
           labelOrigin,
           anchor: labelOrigin
         }}
@@ -329,6 +335,7 @@ class GeoMap extends AbstractGraph {
   }
 
   handleClustererEnd(clusters) {
+    clearTimeout(this.timerId);
 
     let markers = new Map()
 
@@ -339,10 +346,45 @@ class GeoMap extends AbstractGraph {
       })
     })
 
+    this.timerId = setTimeout(
+      () => this.setClusterIcons(clusters),
+      0
+    );
+
     if (!_.isEqual(this.markers, markers)) {
       this.markers = markers
       this.calculatePolylines(markers)
     }
+  }
+
+  setClusterIcons(clusters) {
+    const { urgency } = this.getConfiguredProperties();
+    clusters.getClusters().forEach( cluster => {
+      const clusterMarkers = cluster.getMarkers();
+      const urgencyData = {};
+
+      clusterMarkers.forEach(d => {
+        if(d.urgency && !urgencyData[d.urgency]) {
+          urgencyData[d.urgency] = 0;
+        }
+        urgencyData[d.urgency]++;
+      });
+
+      if (clusterMarkers.length > 1 && cluster.clusterIcon_.div_) {
+        for (let i = 0; i < urgency.length; i++) {
+          if(urgencyData.hasOwnProperty(urgency[i])) {
+            const url = `${process.env.PUBLIC_URL}/icons/${urgency[i]}.png`;
+            const image = cluster.clusterIcon_.div_.children[0];
+            const divLabel = cluster.clusterIcon_.div_.children[1];
+            image.src = url;
+            image.style = "position: 56px; top: 0px; left: 0px; width: 56px";
+            divLabel.style.width = '56px';
+            divLabel.style.lineHeight = '56px';
+            break;
+          }
+        }
+      }
+    })
   }
 
   // calculate the lines need to be drawn to shown connected markers
@@ -581,4 +623,4 @@ GeoMap.propTypes = {
   data: React.PropTypes.array
 };
 
-export default connect(null, null)(GeoMap);
+export default GeoMap;

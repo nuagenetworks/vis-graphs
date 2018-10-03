@@ -585,4 +585,9 @@ export default class AbstractGraph extends React.Component {
         legends.exit().remove();
     }
 
+    // override this method from respective graphs to generate unique key for graph.
+    static getGraphKey(configuration = {}) {
+        return null;
+    }
+
 }
