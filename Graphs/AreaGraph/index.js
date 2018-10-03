@@ -2,7 +2,7 @@ import React from 'react'
 import XYGraph from '../XYGraph'
 import ReactTooltip from 'react-tooltip'
 
-import { nest, nestStack, nestMax, merge, sorter } from "../../utils/helpers"
+import { nest, nestStack, merge, sorter } from "../../utils/helpers"
 
 import {
     line,
@@ -246,7 +246,7 @@ class AreaGraph extends XYGraph {
             return index !== -1
               ? Object.assign({}, d.values[index])
               : {
-                [xColumn]: parseInt(d.key),
+                [xColumn]: parseInt(d.key, 10),
                 [this.yKey]: key,
                 [this.yValue]: 0
               }
@@ -492,7 +492,7 @@ class AreaGraph extends XYGraph {
     const svg =  this.getGraph();
 
     //Add the X Axis
-    const xAxis = svg.select('.xAxis')
+    svg.select('.xAxis')
       .style('font-size', xTickFontSize)
       .attr('transform', 'translate(0,'+ this.getAvailableHeight() +')')
       .call(this.getAxis().x);
@@ -530,7 +530,6 @@ class AreaGraph extends XYGraph {
       colors
     } = this.getConfiguredProperties();
 
-    const label    = (d) => d.value ? d.value : d.key;
     const scale    = this.scaleColor(this.getYColumns(), 'key');
     this.getColor  = (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
     
