@@ -11,8 +11,7 @@ export const readJSON = (JSONFile) => {
 }
 
 export const checkTicks = (component, parentClass, childClass, selector) => {
-    const middleHtml = component.find(parentClass).find(childClass).html();
-    const $ = cheerio.load(middleHtml);
+    const $ = cheerio.load(component.find(parentClass).find(childClass).html());
     const xAxisTicks = $(childClass).find(selector).length;
     return xAxisTicks;
 }
@@ -43,9 +42,8 @@ export const getDataAndConfig = (graphName) => {
     });
 }
 
-export const getHtml = (component,tag) => {
-    const graph = component.find(tag).html();
-    const cheerioData = cheerio.load(graph);
+export const getHtml = (component, tag) => {
+    const cheerioData = cheerio.load(component.find(tag).html());
     return cheerioData;
 }
 
@@ -53,9 +51,27 @@ export const checkSvg = (component) => {
     const $ = getHtml(component, 'svg');
     const svgHeight = $('svg').attr('height');
     const svgWidth = $('svg').attr('width');
-    if(svgHeight == "500" && svgWidth == "500"){
-        return true;
-    } else {
-        return false;
-    }
+    return svgHeight == "500" && svgWidth == "500";
+}
+
+export const checkBar = ($, length) => {
+    let barData = new Object(), bar;
+    bar = $('.graph-bars').children().first().next().find('rect');
+    if (length == "second")
+        bar = $('.graph-bars').children().first().next().next().find('rect');
+    barData.height = parseFloat(bar.attr('height'));
+    barData.width = parseFloat(bar.attr('width'));
+    barData.x = parseFloat(bar.attr('x'));
+    barData.y = parseFloat(bar.attr('y'));
+    return barData;
+}
+
+export const checkLine = ($, length) => {
+    let d, linePath, line;
+    linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
+    line = cheerio.load(linePath);
+    d = line('path').attr('d');
+    if (length == "second")
+        d = line('path').next().attr('d');
+    return d;
 }

@@ -269,9 +269,6 @@ class BarGraph extends XYGraph {
   // update elements on component mount
   updateElements() {
     const {
-      yTickFormat,
-      chartWidthToPixel,
-      yColumn,
       dateHistogram,
       yLabelLimit
     } = this.getConfiguredProperties()
@@ -300,8 +297,6 @@ class BarGraph extends XYGraph {
     if(this.isVertical()) {
       xAxis.call(this.wrapD3Text, this.getBarWidth())
     }
-
-    const yLabelFn = (d) => d[yColumn]
 
     //Add the Y Axis
     const yAxis = svg.select('.yAxis')
@@ -462,11 +457,11 @@ class BarGraph extends XYGraph {
       .attr('width', initialWidth)
       .attr("data-tip", true)
       .attr("data-for", this.tooltipId)
-      .on('click', d => {
+      .on('click', d => (
           onMarkClick && (!otherOptions || d[self.getDimension()] !== otherOptions.label)
           ?  onMarkClick(d) 
           : ''
-        }
+        )
       )
 
       .transition()
