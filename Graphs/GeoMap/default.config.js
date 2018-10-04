@@ -1,6 +1,12 @@
 export const properties = {
     maxZoom: 18,
     minZoom: 3,
+    urgency: [
+      "GREY",
+      "RED",
+      "YELLOW",
+      "BLUE",
+    ],
     mapStyles: [
       {
         "featureType": "administrative",

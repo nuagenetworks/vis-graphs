@@ -8,6 +8,8 @@ import * as d3 from "d3";
 import "./style.css";
 import {properties} from "./default.config"
 
+const MAX_LABEL_LENGTH = 15;
+
 export default class ChordGraph extends AbstractGraph {
     chordDiagram = null;
 
@@ -93,6 +95,22 @@ export default class ChordGraph extends AbstractGraph {
       this.filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
     }
 
+    getLabelLength() {
+      const {
+        chartWidthToPixel,
+        chordSourceColumn,
+        outerPadding
+      } = this.getConfiguredProperties();
+
+      let lableLength = this.longestLabelLength(this.filterData, (d) => d[chordSourceColumn]);
+
+      if(lableLength && lableLength > MAX_LABEL_LENGTH) {
+        lableLength = MAX_LABEL_LENGTH;
+      }
+
+      return (lableLength * chartWidthToPixel) || outerPadding;
+    }
+
     updateChord(props) {
         const {
           width,
@@ -107,7 +125,6 @@ export default class ChordGraph extends AbstractGraph {
             chordWeightColumn,
             chordSourceColumn,
             chordDestinationColumn,
-            outerPadding,
             arcThickness,
             padAngle,
             labelPadding,
@@ -116,6 +133,8 @@ export default class ChordGraph extends AbstractGraph {
             fadedOpacity,
             colors
         } = this.getConfiguredProperties();
+
+        const outerPadding = this.getLabelLength();
 
         // Pass values into the chord diagram via d3-style accessors.
         this.chordDiagram
@@ -372,7 +391,9 @@ function ChordDiagram(svg){
           })
           .attr("alignment-baseline", "central")
           .text(function(group) {
-            return matrix.names[group.index];
+            let label = matrix.names[group.index];
+            return label.length > MAX_LABEL_LENGTH ?
+              label.substr(0, MAX_LABEL_LENGTH) + '...' : label;
           })
           .style("cursor", "default")
           .style("font-weight", function(group){
