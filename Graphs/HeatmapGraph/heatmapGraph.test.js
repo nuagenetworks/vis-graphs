@@ -30,14 +30,20 @@ describe("HeatmapGraph", () => {
         });
 
         it("Total Heatmap Block", () => {
-            const newHtml = $('.heatmap').find('g').length;
-            expect(newHtml).toBe(30)
+            const rect = $('.heatmap').find('g').length;
+            expect(rect).toBe(30)
         });
 
-        it("Heatmap block configuration", () => {
-            const newHtml = $('.heatmap').find('g rect').first();
-            expect(parseInt(newHtml.attr('height'))).toBeCloseTo(214);
-            expect(parseInt(newHtml.attr('width'))).toBeCloseTo(57);
+        it("Heatmap First Block Configuration", () => {
+            const rect = $('.heatmap').find('g rect').first();
+            expect(parseInt(rect.attr('height'))).toBeCloseTo(214);
+            expect(parseInt(rect.attr('width'))).toBeCloseTo(57);
+        });
+
+        it("Heatmap Last Block Configuration", () => {
+            const rect = $('.heatmap').find('g rect').last();
+            expect(parseInt(rect.attr('height'))).toBeCloseTo(214);
+            expect(parseInt(rect.attr('width'))).toBeCloseTo(57);
         });
 
         it("xAxis Ticks Length", () => {
@@ -92,15 +98,22 @@ describe("HeatmapGraph", () => {
         });
 
         it("Total Heatmap Block", () => {
-            const newHtml = $('.heatmap').find('g').length;
-            expect(newHtml).toBe(30)
+            const rect = $('.heatmap').find('g').length;
+            expect(rect).toBe(30)
         });
 
-        it("Heatmap block configuration", () => {
+        it("Heatmap First Block Configuration", () => {
             const $ = getHtml(withoutBrush, '.heatmap');
-            const newHtml = $('.heatmap').find('g rect').first();
-            expect(parseInt(newHtml.attr('height'))).toBeGreaterThan(0);
-            expect(parseInt(newHtml.attr('width'))).toBeGreaterThan(0);
+            const rect = $('.heatmap').find('g rect').first();
+            expect(parseInt(rect.attr('height'))).toBeCloseTo(85);
+            expect(parseInt(rect.attr('width'))).toBeCloseTo(61);
+        });
+
+        it("Heatmap Last Block Configuration", () => {
+            const $ = getHtml(withoutBrush, '.heatmap');
+            const rect = $('.heatmap').find('g rect').first();
+            expect(parseInt(rect.attr('height'))).toBeCloseTo(85);
+            expect(parseInt(rect.attr('width'))).toBeCloseTo(61);
         });
 
         it("xAxis Ticks Length", () => {
