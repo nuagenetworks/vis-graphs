@@ -72,6 +72,11 @@ class HeatmapGraph extends XYGraph {
     })
   }
 
+  //generate unique key for graph
+  static getGraphKey(configuration = {}) {
+    return  d => d[configuration.data.xColumn] + d[configuration.data.yColumn];
+  }
+
   parseData(props) {
     const {
       data: cdata
@@ -126,7 +131,7 @@ class HeatmapGraph extends XYGraph {
           this.filterData.push({
             [yColumn]: d.key,
             [legendColumn]: 'Empty',
-            [xColumn]: parseInt(list.key)
+            [xColumn]: parseInt(list.key, 10)
           })
         }
       })
@@ -332,10 +337,6 @@ class HeatmapGraph extends XYGraph {
   // update data on props change or resizing
   updateElements() {
     const {
-      data
-    } = this.props
-
-    const {
       xTickFontSize,
       yTickFontSize,
       yLabelLimit
@@ -484,10 +485,7 @@ class HeatmapGraph extends XYGraph {
       .attr('width', box.width)
       .attr("data-tip", true)
       .attr("data-for", this.tooltipId)
-      .on('click', d => {
-          onMarkClick ?  onMarkClick(d) : ''
-        }
-      )
+      .on('click', d =>  onMarkClick ?  onMarkClick(d) : '')
       .on('mousemove', d => {
           self.hoveredDatum = d
         }

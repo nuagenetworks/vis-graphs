@@ -234,9 +234,9 @@ class LineGraph extends XYGraph {
         if(xExtent[0] === xExtent[1]) {
 
             //Checking Time format either Year or Milliseconds - therefore adding 4 years or 1 HR respectively
-            let adder = xExtent[1].toString().length == 4 ? 4 : 3600000;
-            xExtent[0] = xExtent[0] - adder
-            xExtent[1] = xExtent[1] + adder
+            let adder = xExtent[1].toString().length === 4 ? 4 : 3600000;
+            xExtent[0] -= adder
+            xExtent[1] += adder
         }
 
         xScale.domain(xExtent);

@@ -27,7 +27,7 @@ export default class PieGraph extends AbstractGraph {
 
 
         if (!originalData || !originalData.length)
-           return this.renderMessage("No Data Found");
+           return this.renderMessage("No data to visualize");
 
         const {
           chartWidthToPixel,
@@ -73,7 +73,7 @@ export default class PieGraph extends AbstractGraph {
         })
 
         if (!data || !data.length)
-            return this.renderMessage("No Data Found")
+            return this.renderMessage("No data to visualize")
 
         let availableWidth     = width - (margin.left + margin.right);
         let availableHeight    = height - (margin.top + margin.bottom);
