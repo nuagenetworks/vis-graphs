@@ -49,7 +49,8 @@ class HeatmapGraph extends XYGraph {
     if (!data || !data.length || !this.getFilterData().length)
       return
 
-    this.updateElements()
+    this.elementGenerator();
+    this.updateElements();
   }
 
   initiate(props) {
