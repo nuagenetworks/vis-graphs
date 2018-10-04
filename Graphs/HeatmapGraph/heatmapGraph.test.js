@@ -40,10 +40,24 @@ describe("HeatmapGraph", () => {
             expect(parseInt(rect.attr('width'))).toBeCloseTo(57);
         });
 
+        it("Heatmap Null Block Color", () => {
+            const rect = $('.heatmap').find('g rect').first();
+            expect(rect.attr('style')).toEqual(
+                "stroke: grey; stroke-width: 0.5px; fill: #f2f2f2; opacity: 1;"
+            );
+        });
+
         it("Heatmap Last Block Configuration", () => {
             const rect = $('.heatmap').find('g rect').last();
             expect(parseInt(rect.attr('height'))).toBeCloseTo(214);
             expect(parseInt(rect.attr('width'))).toBeCloseTo(57);
+        });
+
+        it("Heatmap Colored Block Color", () => {
+            const rect = $('.heatmap').find('g rect').last();
+            expect(rect.attr('style')).toEqual(
+                "stroke: grey; stroke-width: 0.5px; fill: #b3d645; opacity: 1;"
+            );
         });
 
         it("xAxis Ticks Length", () => {
@@ -67,7 +81,7 @@ describe("HeatmapGraph", () => {
             const height = parseFloat($('.brush').find('.selection').attr('height'));
             const width = parseFloat($('.brush').find('.selection').attr('width'));
             expect(height).toEqual(171.6);
-            expect(width).toBeCloseTo( -1.70);
+            expect(width).toBeCloseTo(-1.70);
         });
 
         it("Legends", () => {
@@ -109,11 +123,25 @@ describe("HeatmapGraph", () => {
             expect(parseInt(rect.attr('width'))).toBeCloseTo(61);
         });
 
+        it("Heatmap Null Block Color", () => {
+            const rect = $('.heatmap').find('g rect').first();
+            expect(rect.attr('style')).toEqual(
+                "stroke: grey; stroke-width: 0.5px; fill: #f2f2f2; opacity: 1;"
+            );
+        });
+
         it("Heatmap Last Block Configuration", () => {
             const $ = getHtml(withoutBrush, '.heatmap');
             const rect = $('.heatmap').find('g rect').first();
             expect(parseInt(rect.attr('height'))).toBeCloseTo(85);
             expect(parseInt(rect.attr('width'))).toBeCloseTo(61);
+        });
+
+        it("Heatmap Colored Block Color", () => {
+            const rect = $('.heatmap').find('g rect').last();
+            expect(rect.attr('style')).toEqual(
+                "stroke: grey; stroke-width: 0.5px; fill: #b3d645; opacity: 1;"
+            );
         });
 
         it("xAxis Ticks Length", () => {
