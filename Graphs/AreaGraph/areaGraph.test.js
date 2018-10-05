@@ -115,4 +115,57 @@ describe("AreaGraph", () => {
             expect(legend).toEqual(3);
         });
     });
+
+    describe("Null Data", () => {
+        let stacked, $;
+        beforeAll(async () => {
+            stacked = mount(
+                <AreaGraph
+                    width={500}
+                    height={500}
+                    configuration={config.stacked}
+                    data={config.nullData}>
+                </AreaGraph>
+            );
+            $ = getHtml(stacked, 'svg');
+        });
+
+        it("SVG Dimensions", () => {
+            const result = checkSvg(stacked);
+            expect(result).toBeTruthy();
+        });
+
+        it("Total AreaGraph", () => {
+            const noOfAreaBlock = $('.area-chart').find('.area-block').length;
+            const noOfLineBlock = $('.area-chart').find('.line-block').length;
+            expect(noOfAreaBlock).toBe(3);
+            expect(noOfLineBlock).toBe(3)
+        });
+
+        it("AreaGraph Dimensions", () => {
+            const areaGraph = $('svg').find('g').find('g').find('path').attr("d");
+            expect(areaGraph).toEqual("M0,274.6469937359679L0,181.27116693497976L55.71428571428571,320.77530264701136L111.42857142857142,311.94747711066543L167.14285714285714,172.5607581157301L222.85714285714283,65.69760688627963L278.57142857142856,56.21930999462393L334.2857142857143,204.89847692255512L390,37.63441412863256L390,163.2371804821588");
+        });
+
+        it("AreaGraph Legends", () => {
+            const noOfLegends = $('.legend').children().length;
+            expect(noOfLegends).toBe(3);
+        });
+
+        it("xAxis Ticks Length", () => {
+            const xAxisTicks = checkTicks(stacked, '.graph-container', '.xAxis', 'g')
+            expect(xAxisTicks).toBe(15);
+        });
+
+        it("yAxis Ticks Length", () => {
+            const yAxisTicks = checkTicks(stacked, '.graph-container', '.yAxis', 'g');
+            expect(yAxisTicks).toBe(5);
+        });
+
+        it("Legends", () => {
+            $ = getHtml(stacked, '.legend');
+            const legend = $('.legend').children().length;
+            expect(legend).toEqual(3);
+        });
+    });
 });
