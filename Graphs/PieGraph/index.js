@@ -44,7 +44,8 @@ export default class PieGraph extends AbstractGraph {
           fontColor,
           percentages,
           percentagesFormat,
-          otherOptions
+          otherOptions,
+          showZero
         } = this.getConfiguredProperties();
 
 
@@ -67,7 +68,8 @@ export default class PieGraph extends AbstractGraph {
         const data =  limit({
             data: filterEmptyData({
                 data: originalData,
-                column: sliceColumn
+                column: sliceColumn,
+                showZero:showZero
             }),
             ...settings
         })
