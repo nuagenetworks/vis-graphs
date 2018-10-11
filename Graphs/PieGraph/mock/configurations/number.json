@@ -1,0 +1,25 @@
+{
+    "data": {
+        "sliceColumn": "value",
+        "labelColumn": "Application",
+        "tooltip": [
+            { "column": "Application", "label": "Application" },
+            { "column": "value", "format": ",.1f"}
+        ],
+        "percentages": true,
+        "percentagesFormat": ",.1%",
+        "pieLabelRadius": 0.55,
+        "pieOuterRadius": 0.95,
+        "legend": {
+            "show": true,
+            "orientation": "horizontal",
+            "circleSize": 4,
+            "labelOffset": 2
+        },
+        "otherOptions": {
+            "type" : "number",
+            "label": "Others",
+            "limit": 5
+        }
+    }
+}

@@ -87,4 +87,14 @@ export const checkBar = ($, length) => {
     barData.x = parseFloat(bar.attr('x'));
     barData.y = parseFloat(bar.attr('y'));
     return barData;
-} 
+}
+
+export const checkLine = ($, length) => {
+    let d, linePath, line;
+    linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
+    line = cheerio.load(linePath);
+    d = line('path').attr('d');
+    if (length == "second")
+        d = line('path').next().attr('d');
+    return d;
+}
