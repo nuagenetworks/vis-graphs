@@ -107,7 +107,7 @@ class TreeGraph extends AbstractGraph {
         if (!data || !data.length)
             return;
 
-        this.root = d3.hierarchy(data, (d) => { return d.children; });
+        this.root = d3.hierarchy(data[0], (d) => { return d.children; });
         this.root.x0 = height / 2;
         this.root.y0 = 0;
 
