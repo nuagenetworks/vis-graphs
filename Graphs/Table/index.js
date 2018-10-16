@@ -742,7 +742,6 @@ class Table extends AbstractGraph {
 
 
     handleColumnSelection(columns, name) {
-        console.log("hello")
         const {
             onColumnSelection,
             goTo,
