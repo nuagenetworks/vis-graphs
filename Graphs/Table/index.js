@@ -179,11 +179,7 @@ class Table extends AbstractGraph {
         columns.forEach( d => {
             columnNameList.push(d.column)
             this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
-        })
-
-        if(this.isEmptyData(props.data)) {
-            return;
-        }
+        });
 
         props.data.forEach( (d, i) => {
             const random = this.generateRandom();
@@ -746,6 +742,7 @@ class Table extends AbstractGraph {
 
 
     handleColumnSelection(columns, name) {
+        console.log("hello")
         const {
             onColumnSelection,
             goTo,
@@ -810,7 +807,7 @@ class Table extends AbstractGraph {
         )
 
         return (
-            <div style={{flex: "none"}}>
+            <div className={'select-column'} style={{flex: "none"}}>
                 <SuperSelectField
                     name={id}
                     multiple

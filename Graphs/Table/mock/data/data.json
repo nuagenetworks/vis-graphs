@@ -1,35 +1,35 @@
 [
    {
-      "timestamp":15008863469,
-      "Application":"Application 2",
+      "Timestamp":15008863469,
+      "Application":"Testing",
       "key_as_string":"2017-07-27T03:00:00.000Z",
       "SlaStatus":"InSla",
       "timezones":"Last 24",
       "CPU":46.72727272727273,
       "DISK":90.09090909090909,
       "MEMORY":200.54545454545455,
-      "value":2422791762
+      "Value":2422791762
    },
    {
-      "timestamp":25008863469,
-      "Application":"Application 2",
+      "Timestamp":25008863469,
+      "Application":"Developing",
       "key_as_string":"2017-07-27T03:00:00.000Z",
       "SlaStatus":"InSla",
       "timezones":"Prev 24",
       "CPU":46.72727272727273,
       "DISK":90.09090909090909,
       "MEMORY":300.54545454545455,
-      "value":2422791762
+      "Value":2422791762
    },
    {
-      "timestamp":35008863469,
-      "Application":"Application 2",
+      "Timestamp":35008863469,
+      "Application":"Application",
       "key_as_string":"2017-07-27T03:00:00.000Z",
       "SlaStatus":"InSla",
       "timezones":"Last 24",
       "CPU":46.72727272727273,
       "DISK":90.09090909090909,
       "MEMORY":300.54545454545455,
-      "value":2422791762
+      "Value":2422791762
    }
 ]

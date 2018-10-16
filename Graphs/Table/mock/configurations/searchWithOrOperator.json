@@ -1,8 +1,7 @@
 {
     "data": {
         "limit" : 50,
-        "hidePagination": true,
-        "searchBar": false,
+        "searchText": "Application == Developing OR Application == Testing",
         "columns": [
             { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
             { "column": "Application", "label": "Application" },
