@@ -3,7 +3,8 @@ import objectPath from "object-path"
 const icons = {
     'nsGatewayBlue': 'icon-nsgateway-blue-26x26.png',
     'nsGatewayRed': 'icon-nsgateway-red-26x26.png',
-    'nsGatewayYellow': 'icon-nsgateway-yellow-26x26.png'
+    'nsGatewayYellow': 'icon-nsgateway-yellow-26x26.png',
+    'nsGatewayGrey': 'icon-nsgateway-grey-26x26.png'
 };
 
 const defaultIcon = 'nsGatewayBlue';
