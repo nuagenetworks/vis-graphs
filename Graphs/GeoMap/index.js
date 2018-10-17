@@ -348,7 +348,7 @@ class GeoMap extends AbstractGraph {
 
     this.timerId = setTimeout(
       () => this.setClusterIcons(clusters),
-      0
+      100
     );
 
     if (!_.isEqual(this.markers, markers)) {
