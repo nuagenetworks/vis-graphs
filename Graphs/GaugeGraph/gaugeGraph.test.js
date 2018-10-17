@@ -1,8 +1,10 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
 import GaugeGraph from '.';
+
+const cheerio = require('cheerio');
 
 describe("GaugeGraph", () => {
     let config;
@@ -12,21 +14,32 @@ describe("GaugeGraph", () => {
 
     describe("Initial Configurations", () => {
         let gaugeGraph, $;
-        beforeAll(async () => {
-            gaugeGraph = mount(
-                <GaugeGraph 
-                    width={500} 
-                    height={500} 
-                    configuration={config.configuration} 
-                    data={config.data}> 
-                </GaugeGraph>
-            );
-            $ = getHtml(gaugeGraph, 'svg');
+        beforeAll((done) => {
+            var app = document.createElement("div");
+            document.body.appendChild(app);
+            gaugeGraph = ReactDOM.render(
+                <GaugeGraph
+                    width={500}
+                    height={500}
+                    configuration={config.configuration}
+                    data={config.data} />,
+                app
+            )
+            setTimeout(() => {
+                done();
+                $ = cheerio.load(app.innerHTML);
+            }, 3000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(app);
         });
 
         it("SVG Dimensions", () => {
-            const result = checkSvg(gaugeGraph);
-            expect(result).toBeTruthy();
+            const height = $('svg').attr('height');
+            const width = $('svg').attr('width');
+            expect(height).toEqual("500");
+            expect(width).toEqual("500");
         });
 
         it("Total GaugeGraph", () => {
@@ -53,5 +66,11 @@ describe("GaugeGraph", () => {
             const needle = $('svg').find('g').find('path').last().attr("transform");
             expect(needle).toEqual("rotate(-90)");
         });
+
+        it("GaugeGraph Counter", () => {
+            const transform = $('svg').find('#gauge-counter-test').text();
+            expect(transform).toEqual("70 %");
+        });
+
     });
 });

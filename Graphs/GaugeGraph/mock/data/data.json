@@ -1,6 +1,5 @@
 [
     {
-        "maxValue": 500,
-        "currentValue":100
+        "disk": 70
     }
 ]

@@ -16,6 +16,7 @@ export default class AbstractGraph extends React.Component {
     constructor(props, properties = {}) {
         super(props);
 
+        this.properties = properties;
         this.configuredProperties = {};
         this.node = {};
         this.origin = {
@@ -79,7 +80,7 @@ export default class AbstractGraph extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        this.setConfiguredProperties(nextProps);
+        this.setConfiguredProperties(nextProps, this.properties);
     }
 
     setTooltipAccessor(tooltip, type = 'default') {
