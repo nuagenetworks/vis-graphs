@@ -39,22 +39,24 @@ export default (iconKey = null, data = []) => {
     if (iconKey && typeof iconKey === "object") {
       if (iconKey.criteria) {
         iconKey.criteria.forEach(d => {
-
-          let counter = 0;
-          // match all criteria's field with given data, if matched then pick criteria's icon
-          for (let key in d.fields) {
-            if(d.fields.hasOwnProperty(key)) {
-              const value = objectPath.has(data, key) ? objectPath.get(data, key) : null;
-              if ((value || value === 0) && d.fields[key] === value) {
-                counter++;
+          // if there is no icon selected, browse through the next criteria to match the conditions, if all met, assign the icon
+          if(!icon) {
+            let counter = 0;
+            // match all criteria's field with given data, if matched then pick criteria's icon
+            for (let key in d.fields) {
+              if(d.fields.hasOwnProperty(key)) {
+                const value = objectPath.has(data, key) ? objectPath.get(data, key) : null;
+                if ((value || value === 0) && d.fields[key] === value) {
+                  counter++;
+                }
               }
             }
-          }
 
-          if (Object.keys(d.fields).length === counter) {
-            icon = d.icon;
-            if (d.urgency) {
-              urgency = d.urgency;
+            if (Object.keys(d.fields).length === counter) {
+              icon = d.icon;
+              if (d.urgency) {
+                urgency = d.urgency;
+              }
             }
           }
         })
