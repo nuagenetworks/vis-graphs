@@ -22,11 +22,8 @@ import style from './style'
 import {properties} from "./default.config"
 import { pick, expandExpression, labelToField } from '../../utils/helpers';
 import { events } from '../../utils/types';
-
-import SearchBar from "../../SearchBar"
-import InfoBox from "../../../../components/InfoBox"
-import Script from "../../../../components/Script"
-
+import SearchBar from "../../SearchBar";
+import InfoBox from "../../InfoBox";
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns', 'scrollData']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox', 'showConfirmationPopup']
@@ -885,6 +882,10 @@ class Table extends AbstractGraph {
     }
 
     renderInfoBox() {
+        const {
+            Script
+        } = this.props;
+
         let { showInfoBox, infoBoxRow, infoBoxColumn, infoBoxScript, infoBoxData  } = this.state;
 
         return (
