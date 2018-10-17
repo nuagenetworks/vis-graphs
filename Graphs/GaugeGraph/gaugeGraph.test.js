@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
+import { getDataAndConfig } from '../testHelper';
 import GaugeGraph from '.';
 
 const cheerio = require('cheerio');
@@ -71,6 +71,5 @@ describe("GaugeGraph", () => {
             const transform = $('svg').find('#gauge-counter-test').text();
             expect(transform).toEqual("70 %");
         });
-
     });
 });
