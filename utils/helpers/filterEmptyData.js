@@ -17,6 +17,9 @@ export default ({
     column,
     showZero
 }) => {
-    if (showZero) { return data.filter( d => !['null', null, false, 'undefined'].includes(d[column]))}
-    else {return data.filter( d => !['null', null, false, 0,'undefined', "0"].includes(d[column]))}
+    if (showZero) { 
+        return data.filter( d => !['null', null, false, 'undefined'].includes(d[column]))
+    } else {
+        return data.filter( d => !['null', null, false, 0,'undefined', "0"].includes(d[column]))
+    }
 }
