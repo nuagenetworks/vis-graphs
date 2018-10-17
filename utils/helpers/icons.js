@@ -52,7 +52,7 @@ export default (iconKey = null, data = []) => {
               }
             }
 
-            if (!icon && Object.keys(d.fields).length === counter) {
+            if (Object.keys(d.fields).length === counter) {
               icon = d.icon;
               if (d.urgency) {
                 urgency = d.urgency;
