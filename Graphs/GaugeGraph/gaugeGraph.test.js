@@ -15,24 +15,25 @@ describe("GaugeGraph", () => {
     describe("Initial Configurations", () => {
         let gaugeGraph, $;
         beforeAll((done) => {
-            var app = document.createElement("div");
-            document.body.appendChild(app);
+            const element = document.createElement("div");
+            document.body.appendChild(element);
             gaugeGraph = ReactDOM.render(
                 <GaugeGraph
                     width={500}
                     height={500}
                     configuration={config.configuration}
-                    data={config.data} />,
-                app
+                    data={config.data}
+                />,
+                element
             )
             setTimeout(() => {
                 done();
-                $ = cheerio.load(app.innerHTML);
+                $ = cheerio.load(element.innerHTML);
             }, 3000);
         });
 
         afterAll(() => {
-            document.body.removeChild(app);
+            document.body.removeChild(element);
         });
 
         it("SVG Dimensions", () => {
