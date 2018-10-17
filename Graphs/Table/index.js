@@ -753,13 +753,13 @@ class Table extends AbstractGraph {
         } = this.props
 
         let columnsData = []
-        columns.forEach( d => {columnsData.push(d.label)})
-        this.setState({ columns })
+        columns.forEach( d => {columnsData.push(d.label)});
 
         if(onColumnSelection) {
-            onColumnSelection(columnsData)
+            onColumnSelection({[this.columns]: columnsData});
         }
 
+        this.setState({ columns });
         goTo && goTo(window.location.pathname, Object.assign({}, context, {[this.columns]: JSON.stringify(columnsData)}))
 
     }
