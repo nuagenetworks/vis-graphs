@@ -1,7 +1,9 @@
+
 import React from "react";
 import * as d3 from "d3";
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
+import { List } from 'immutable';
 import './styles.css'
 
 const diagonal = (s, d) => {
@@ -21,6 +23,10 @@ class TreeGraph extends AbstractGraph {
     path = null;
     root = null;
     colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    treeData = null;
+    treemap = null;
+
+    state = { refresh: false };
 
     constructor(props) {
         super(props, properties);
@@ -39,7 +45,6 @@ class TreeGraph extends AbstractGraph {
             return
 
         this.elementGenerator();
-        // this.update();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -56,45 +61,190 @@ class TreeGraph extends AbstractGraph {
         if (!data || !data.length)
             return
 
-        // this.update();
+        this.elementGenerator();
     }
 
-    getGraph() {
+    getGraph = () => {
         return this.getSVG();
     }
 
-     /////////////////// PGING FUNCS
+    getGraphContainer = () => {
+        return this.getGraph().select('.line-graph-container');
+    }
+
+    // generate methods which helps to create charts
+    elementGenerator = () => {
+        const svg = this.getGraph();
+
+        // for generating transition
+        svg.select('.line-graph-container')
+            .attr("transform", "translate(100, 0)")
+
+        this.update(this.root)
+    }
 
     paginate = (d) => {
-        d.parent.page = d.no;
-        this.setPage(d.parent);
-        this.update(this.root);
+        this.setPage(d.parent, d.no);
+        // this.update(this.root);
+        this.update(d.parent);
+        this.setState({ refresh: !this.state.refresh })
     }
 
-    setPage = (d) => {
-        if (d && d.kids) {
-            d.children = [];
-            d.kids.forEach((d1, i) => {
-                if (d.page === d1.pageNo) {
-                    d.children.push(d1);
-                }
-            })
+    setPage = (d, currentPage) => {
+        const newChild = new List(d.children);
+        const newAltChild = new List(d._children);
+
+        const updatedChildren = newAltChild.filter((d1) => currentPage === d1.pageNo).toJS();
+        const updatedAltChildren = newAltChild.concat(newChild).filter((d1) => currentPage !== d1.pageNo).toJS();
+
+        d.currentPage = currentPage;
+        d.children = updatedChildren;
+        d._children = updatedAltChildren;
+    }
+
+    reset = (d, depth = 0) => {
+        // TODO
+    }
+
+    parseData = () => {
+        // TODO
+    }
+
+    // Toggle children on click.
+    click = (d) => {
+        if (d.children) {
+            this.collapse(d);
+        } else {
+            this.initializePageDetails(d, true)
+            const { currentPage } = d;
+            const hiddenChildrenList = new List(d._children);
+            const updatedChildren = hiddenChildrenList.filter((d1) => currentPage === d1.pageNo).toJS();
+            const updatedAltChildren = hiddenChildrenList.filter((d1) => currentPage !== d1.pageNo).toJS();
+
+            d.children = updatedChildren;
+            d._children = updatedAltChildren;
+        }
+        this.update(d);
+        this.setState({ refresh: !this.state.refresh })
+    }
+
+    collapse = (d) => {
+        if (d.children) {
+            const _childrenList = new List(d._children);
+            const childrenList = new List(d.children);
+            if (!d._children) {
+                d._children = childrenList.toJS();
+            } else {
+                d._children = childrenList.concat(_childrenList).toJS();
+            }
+            d._children.forEach(this.collapse)
+            d.children = null;
         }
     }
 
-    reset = (d) => {
+    showPerPage = (d) => {
+        if (d.children) {
+            this.initializePageDetails(d)
+            const { currentPage } = d;
+            const childrenList = new List(d.children);
 
-        if (d && d.kids) {
-            d.page = 1;
-            d.children = [];
-            d.kids.forEach((d1, i) => {
+            const updatedChildren = childrenList.filter((d1) => currentPage === d1.pageNo).toJS();
+            const updatedAltChildren = childrenList.filter((d1) => currentPage !== d1.pageNo).toJS();
+
+            d.children = updatedChildren;
+            d._children = updatedAltChildren;
+        }
+    }
+
+    initializePageDetails = (d, nodeWillOpen) => {
+        if (nodeWillOpen && d._children) {
+            d.currentPage = 1;
+            d._children.forEach((d1, i) => {
                 d1.pageNo = Math.ceil((i + 1) / PAGINATION);
-                if (d.page === d1.pageNo) {
-                    d.children.push(d1)
-                }
-                this.reset(d1);
+                // this.initializePageDetails(d1);
             })
         }
+        else if (d.children) {
+            d.currentPage = 1;
+            d.children.forEach((d1, i) => {
+                d1.pageNo = Math.ceil((i + 1) / PAGINATION);
+                // this.initializePageDetails(d1);
+            })
+        }
+    }
+
+    updatePageLinks = (d) => {
+        const svg = this.getGraphContainer();
+        const nodes = this.treeData.descendants();
+
+        let parents = nodes.filter((d) => {
+            return d.children && d.data.children && (d.data.children.length > PAGINATION);
+        });
+
+        svg.selectAll(".page").remove();
+
+        parents.forEach((p) => {
+            if (!p.children)
+                return;
+
+            const totalChildren = p.data.children.length;
+            const totalPages = Math.ceil(totalChildren / PAGINATION);
+            const currentPage = p.currentPage;
+
+            let p1 = p.children[p.children.length - 1];
+            let p2 = p.children[0];
+
+            let pagingData = [];
+            if (currentPage > 1) {
+                pagingData.push({
+                    type: "prev",
+                    parent: p,
+                    no: (currentPage - 1)
+                });
+            }
+
+            if (currentPage < totalPages) {
+                pagingData.push({
+                    type: "next",
+                    parent: p,
+                    no: (currentPage + 1)
+                });
+            }
+
+            let pageControl = svg.selectAll(".page");
+
+            pageControl.data(pagingData, (d) => {
+                return (d.parent.id + d.type);
+            }).enter()
+                .append("g")
+                .attr("class", "page")
+                .attr("transform", (d) => {
+                    const x = (d.type == "next") ? p2.y : p1.y;
+                    const y = (d.type == "prev") ? (p2.x - 30) : (p1.x + 30);
+                    return "translate(" + x + "," + y + ")";
+                }).on("click", this.paginate);
+
+            pageControl
+                .append("circle")
+                .attr("r", 15)
+                .style("fill", (d) => {
+                    return d.parent ? this.colorScale(d.parent.id) : this.colorScale();
+                })
+            pageControl
+                .append("image")
+                .attr("xlink:href", (d) => {
+                    // TODO: Move icons inside vis-graphs repo
+                    if (d.type == "next") {
+                        return "https://dl.dropboxusercontent.com/s/p7qjclv1ulvoqw3/icon1.png"
+                    } else {
+                        return "https://dl.dropboxusercontent.com/s/mdzt36poc1z39s3/icon3.png"
+                    }
+                })
+                .attr("x", -12.5)
+                .attr("y", -12.5)
+                .attr("width", 25)
+                .attr("height", 25);
+        });
     }
 
     initiate = (props) => {
@@ -107,54 +257,49 @@ class TreeGraph extends AbstractGraph {
         if (!data || !data.length)
             return;
 
-        this.root = d3.hierarchy(data[0], (d) => { return d.children; });
+        this.root = d3.hierarchy(data[0], (d) => {
+            return d.children
+        });
         this.root.x0 = height / 2;
         this.root.y0 = 0;
+        this.treemap = d3.tree().size([height, width]);
+        this.treeData = this.treemap(this.root);
 
-        this.reset(this.root.data)
+        // collapse all nodes
+        this.root.children.forEach(this.collapse);
 
-        // Collapse after the second level
-        // this.root.kids.forEach(this.collapse);
-        // this.update(this.root);
-    }
-
-    // generate methods which helps to create charts
-    elementGenerator = () => {
-        const svg = this.getGraph();
-
-        // for generating transition   
-        svg.select('.line-graph-container')
-            .attr("transform", "translate(100, 0)")
-
-        this.update(this.root)
-    }
-
-    parseData = (props) => {
-        // TODO: parse input data from redux into graph format
+        this.initializePageDetails(this.root);
+        this.showPerPage(this.root);
     }
 
     update = (source) => {
-        // update graph
-        const svg = this.getGraph().select('.line-graph-container');
-
-        let i = 0,
-            duration = 750;
-
-        // declares a tree layout and assigns the size
-        const treemap = d3.tree().size([this.props.height, this.props.width])
-            .separation((a, b) => {
-                return a.parent == b.parent ? 1 : 3;
-            });
-
         // Assigns the x and y position for the nodes
-        const treeData = treemap(this.root);
+        this.treeData = this.treemap(this.root);
 
         // Compute the new tree layout.
-        const nodes = treeData.descendants(),
-            links = treeData.descendants().slice(1);
+        const nodes = this.treeData.descendants(),
+            links = this.treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
         nodes.forEach((d) => { d.y = d.depth * 180 });
+
+        this.updateNodes(source, nodes);
+        this.updateLinks(source, links);
+        this.updatePageLinks();
+
+        // Store the old positions for transition.
+        nodes.forEach((d) => {
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+    }
+
+    updateNodes = (source, nodes) => {
+        // update graph
+        const svg = this.getGraphContainer();
+
+        let i = 0,
+            duration = 750;
 
         // ****************** Nodes section ***************************
 
@@ -182,7 +327,7 @@ class TreeGraph extends AbstractGraph {
         nodeEnter.append('text')
             .attr("dy", ".35em")
             .attr("x", (d) => {
-                return d.children || d._children ? -10 : 10;
+                return d.children || d._children ? -13 : 13;
             })
             .attr("text-anchor", (d) => {
                 return d.children || d._children ? "end" : "start";
@@ -203,10 +348,11 @@ class TreeGraph extends AbstractGraph {
         nodeUpdate.select('circle.node')
             .attr('r', 10)
             .style("fill", (d) => {
-                const sam = d.parent ? this.colorScale(d.parent.id) : this.colorScale();
-                return d._children ? "white" : sam;
+                const nodeColor = d.parent ? this.colorScale(d.parent.id) : this.colorScale();
+                return d.data.children ? nodeColor : "white";
             })
             .attr('cursor', 'pointer');
+
 
         // Remove any exiting nodes
         const nodeExit = node.exit().transition()
@@ -223,6 +369,14 @@ class TreeGraph extends AbstractGraph {
         // On exit reduce the opacity of text labels
         nodeExit.select('text')
             .style('fill-opacity', 1e-6);
+    }
+
+    updateLinks = (source, links) => {
+        // update graph
+        const svg = this.getGraphContainer();;
+
+        let i = 0,
+            duration = 750;
 
         // ****************** links section ***************************
 
@@ -244,7 +398,9 @@ class TreeGraph extends AbstractGraph {
         // Transition back to the parent element position
         linkUpdate.transition()
             .duration(duration)
-            .attr('d', (d) => { return diagonal(d, d.parent) });
+            .attr('d', (d) => {
+                return diagonal(d, d.parent)
+            });
 
         // Remove any exiting links
         const linkExit = link.exit().transition()
@@ -254,103 +410,16 @@ class TreeGraph extends AbstractGraph {
                 return diagonal(o, o)
             })
             .remove();
-
-        // Store the old positions for transition.
-        nodes.forEach((d) => {
-            d.x0 = d.x;
-            d.y0 = d.y;
-        });
-
-        const parents = nodes.filter((d) => {
-            return (d.kids && d.kids.length > PAGINATION) ? true : false;
-        });
-        svg.selectAll(".page").remove();
-        parents.forEach((p) => {
-            if (p._children)
-                return;
-            const p1 = p.children[p.children.length - 1];
-            const p2 = p.children[0];
-            let pagingData = [];
-            if (p.page > 1) {
-                pagingData.push({
-                    type: "prev",
-                    parent: p,
-                    no: (p.page - 1)
-                });
-            }
-            if (p.page < Math.ceil(p.kids.length / PAGINATION)) {
-                pagingData.push({
-                    type: "next",
-                    parent: p,
-                    no: (p.page + 1)
-                });
-            }
-
-            const pageControl = svg.selectAll(".page");
-            
-            pageControl.data(pagingData, (d) => {
-                return (d.parent.id + d.type);
-            }).enter()
-            .append("g")
-            .attr("class", "page")
-            .attr("transform", (d) => {
-                const x = (d.type == "next") ? p2.y : p1.y;
-                const y = (d.type == "prev") ? (p2.x - 30) : (p1.x + 30);
-                return "translate(" + x + "," + y + ")";
-            }).on("click", this.paginate);
-
-            pageControl
-                .append("circle")
-                .attr("r", 15)
-                .style("fill", (d) => {
-                    return d.parent ? this.colorScale(d.parent.id) : this.colorScale();
-                })
-            pageControl
-                .append("image")
-                .attr("xlink:href", (d) => {
-                    // TODO: Move icons inside vis-graphs repo
-                    if (d.type == "next") {
-                        return "https://dl.dropboxusercontent.com/s/p7qjclv1ulvoqw3/icon1.png"
-                    } else {
-                        return "https://dl.dropboxusercontent.com/s/mdzt36poc1z39s3/icon3.png"
-                    }
-                })
-                .attr("x", -12.5)
-                .attr("y", -12.5)
-                .attr("width", 25)
-                .attr("height", 25);
-        });
-    }
-
-    collapse = (d) => {
-        // collapse graph
-        if (d.children) {
-            d._children = d.children
-            d._children.forEach(this.collapse)
-            d.children = null
-        }
-    }
-
-    click = (d) => {
-        // Toggle children on click.
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else {
-            d.children = d._children;
-            d._children = null;
-        }
-        this.update(d);
     }
 
     render() {
         const { width, height } = this.props;
+        const { refresh } = this.state;
         return (
             <div className="line-graph">
-                <svg width={width} height={height}>
-                    <g ref={node => this.node = node} height={width} height={height}>
-                        <g className='line-graph-container' ></g>
-                        <g className='legend'></g>
+                <svg width={width} height={height} updateSVG={refresh}>
+                    <g ref={node => this.node = node} width={width} height={height} updateSVG={refresh}>
+                        <g className='line-graph-container' updateSVG={refresh} ></g>
                     </g>
                 </svg>
             </div>
@@ -359,7 +428,9 @@ class TreeGraph extends AbstractGraph {
 }
 TreeGraph.propTypes = {
     configuration: React.PropTypes.object,
-    response: React.PropTypes.object
+    response: React.PropTypes.object,
+    parseData: React.PropTypes.func,
+    fetchChildren: React.PropTypes.func,
 };
 
-export default TreeGraph
+export default TreeGraph;
