@@ -14,8 +14,8 @@ describe("GaugeGraph", () => {
 
     describe("Initial Configurations", () => {
         let gaugeGraph, $;
+        const element = document.createElement("div");
         beforeAll((done) => {
-            const element = document.createElement("div");
             document.body.appendChild(element);
             gaugeGraph = ReactDOM.render(
                 <GaugeGraph
