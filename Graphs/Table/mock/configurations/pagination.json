@@ -1,6 +1,7 @@
 {
     "data": {
-        "searchText": "Application == Developing OR Application == Testing",
+        "id" : "pagination",
+        "searchBar": false,
         "columns": [
             { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
             { "column": "Application", "label": "Application" },

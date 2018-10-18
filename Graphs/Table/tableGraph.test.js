@@ -1,6 +1,9 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
+
 import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn } from '../testHelper';
 import Table from '.';
 
@@ -11,13 +14,13 @@ describe("Table", () => {
     beforeAll(async () => {
         config = await getDataAndConfig('Table');
         global.document.body.createTextRange = () => {
-            return { 
-                setEnd: () => {},
-                setStart: () => {},
-                getBoundingClientRect: () => {},
+            return {
+                setEnd: () => { },
+                setStart: () => { },
+                getBoundingClientRect: () => { },
                 getClientRects: () => []
-               }
-           }
+            }
+        }
     });
 
     describe("hidePagination", () => {
@@ -56,8 +59,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -66,9 +69,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -76,7 +79,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(3);
+            expect(noOfRows).toBe(100);
         });
     });
 
@@ -116,8 +119,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -126,9 +129,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -136,7 +139,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(3);
+            expect(noOfRows).toBe(100);
         });
     });
 
@@ -178,8 +181,8 @@ describe("Table", () => {
             const firstRow = [
                 "",
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -189,9 +192,9 @@ describe("Table", () => {
             const value = checkRowData($, "second");
             const secondRow = [
                 "",
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -199,7 +202,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(3);
+            expect(noOfRows).toBe(100);
         });
     });
 
@@ -239,8 +242,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -249,9 +252,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -259,7 +262,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(3);
+            expect(noOfRows).toBe(100);
         });
     });
 
@@ -274,8 +277,8 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            setTimeout( () => {
-                 search.update();
+            setTimeout(() => {
+                search.update();
                 done();
             }, 2000);
             $ = cheerio.load(search.html());;
@@ -302,9 +305,9 @@ describe("Table", () => {
         it("First Row Data", () => {
             const value = checkRowData($);
             const firstRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -312,13 +315,18 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
-            const secondRow = [];
+            const secondRow = [
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
+                "2422791762"
+            ];
             expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(1);
+            expect(noOfRows).toBe(12);
         });
 
         it("SearchBar Text", () => {
@@ -344,7 +352,7 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            setTimeout( () => {
+            setTimeout(() => {
                 searchWithAndOperator.update();
                 done();
             }, 2000);
@@ -372,9 +380,9 @@ describe("Table", () => {
         it("First Row Data", () => {
             const value = checkRowData($);
             const firstRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -382,13 +390,18 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
-            const secondRow = [];
+            const secondRow = [
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
+                "2422791762"
+            ];
             expect(value).toEqual(secondRow);
         });
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(1);
+            expect(noOfRows).toBe(12);
         });
 
         it("SearchBar Text", () => {
@@ -414,7 +427,7 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            setTimeout( () => {
+            setTimeout(() => {
                 searchWithOrOperator.update();
                 done();
             }, 2000);
@@ -443,8 +456,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -453,9 +466,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -463,7 +476,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(2);
+            expect(noOfRows).toBe(24);
         });
 
         it("SearchBar Text", () => {
@@ -489,7 +502,7 @@ describe("Table", () => {
                     data={config.data}>
                 </Table>
             );
-            setTimeout( () => {
+            setTimeout(() => {
                 searchWithNotOperator.update();
                 done();
             }, 2000);
@@ -518,8 +531,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -528,9 +541,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Feb 10, 71 10:11:03 AM", 
+                "Feb 10, 71 10:11:03 AM",
                 "Application",
-                "300.54545454545456", 
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -538,7 +551,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(2);
+            expect(noOfRows).toBe(100);
         });
 
         it("SearchBar Text", () => {
@@ -589,8 +602,8 @@ describe("Table", () => {
             const value = checkRowData($);
             const firstRow = [
                 "Jun 23, 70 10:37:43 PM",
-                "Testing", 
-                "200.54545454545456", 
+                "Testing",
+                "200.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(firstRow);
@@ -599,9 +612,9 @@ describe("Table", () => {
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM", 
-                "Developing", 
-                "300.54545454545456", 
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
                 "2422791762"
             ];
             expect(value).toEqual(secondRow);
@@ -609,7 +622,7 @@ describe("Table", () => {
 
         it("Total Rows", () => {
             const noOfRows = totalRows($);
-            expect(noOfRows).toBe(3);
+            expect(noOfRows).toBe(100);
         });
 
         it("Select Column DropDown", () => {
@@ -617,5 +630,141 @@ describe("Table", () => {
             const dropDownText = cheerioNew('.select-column').text();
             expect(dropDownText).toEqual("Select Columns");
         });
+    });
+
+    describe("toolTip", () => {
+        let toolTip, $;
+        beforeAll(async () => {
+            toolTip = mount(
+                <Table
+                    width={500}
+                    height={500}
+                    configuration={config.toolTip}
+                    data={config.data}>
+                </Table>
+            );
+            $ = getHtml(toolTip, 'table');
+        });
+
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(4);
+        });
+
+        it("Column Names", () => {
+            var columnList = toolTip.root.props().configuration.data.columns;
+            var columns = Object.keys(columnList).map(function (key) {
+                return columnList[key].column;
+            });
+            const tableColumns = $('table thead th').map(
+                function (i) {
+                    return $(this).text();
+                }
+            ).get();
+            expect(tableColumns).toEqual(columns);
+        });
+
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                "Jun 23, 70 10:37:43 PM",
+                "Testin...",
+                "200.54545454545456",
+                "2422791762"
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                "Oct 17, 70 4:24:23 PM",
+                "Develo...",
+                "300.54545454545456",
+                "2422791762"
+            ];
+            expect(value).toEqual(secondRow);
+        });
+
+        it("Total Rows", () => {
+            const noOfRows = totalRows($);
+            expect(noOfRows).toBe(100);
+        });
+    });
+
+    describe("pagination", () => {
+        let pagination, $, page;
+        beforeAll(async () => {
+            pagination = mount(
+                <Table
+                    width={500}
+                    height={500}
+                    configuration={config.pagination}
+                    data={config.data}>
+                </Table>
+            );
+            $ = getHtml(pagination, 'table');
+            page = cheerio.load(pagination.html());
+        });
+
+        it("Total Column", () => {
+            const noOfColumns = totalColumn($);
+            expect(noOfColumns).toBe(4);
+        });
+
+        it("Column Names", () => {
+            var columnList = config.pagination.data.columns
+            var columns = Object.keys(columnList).map(function (key) {
+                return columnList[key].column;
+            });
+            const tableColumns = $('table thead th').map(
+                function (i) {
+                    return $(this).text();
+                }
+            ).get();
+            expect(tableColumns).toEqual(columns);
+        });
+
+        it("First Row Data", () => {
+            const value = checkRowData($);
+            const firstRow = [
+                "Jun 23, 70 10:37:43 PM",
+                "Testing",
+                "200.54545454545456",
+                "2422791762"
+            ];
+            expect(value).toEqual(firstRow);
+        });
+
+        it("Second Row Data", () => {
+            const value = checkRowData($, "second");
+            const secondRow = [
+                "Oct 17, 70 4:24:23 PM",
+                "Developing",
+                "300.54545454545456",
+                "2422791762"
+            ];
+            expect(value).toEqual(secondRow);
+        });
+
+        it("Total Rows", () => {
+            const noOfRows = totalRows($);
+            expect(noOfRows).toBe(100);
+        });
+
+        it("Pagination Text", () => {
+            const text = page('table').parent().parent().next().find('div').first().text();
+            expect(text).toEqual("1 - 100 of 144");
+        });
+
+        it("Pagination Previous", () => {
+            const prev = page('table').parent().parent().next().find('button').attr('disabled');
+            expect(prev).toEqual("disabled");
+        })
+
+        it("Pagination Next", () => {
+            const next = page('table').parent().parent().next().find('button').next().attr('disabled');
+            expect(next).toEqual(undefined);
+        })
     });
 });

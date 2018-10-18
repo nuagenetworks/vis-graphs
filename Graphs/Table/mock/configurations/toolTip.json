@@ -1,9 +1,10 @@
 {
     "data": {
-        "searchText": "Application == Developing OR Application == Testing",
+        "hidePagination": true,
+        "searchBar": false,
         "columns": [
             { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
-            { "column": "Application", "label": "Application" },
+            { "column": "Application", "label": "Application", "totalCharacters": 6 },
             { "column": "MEMORY", "label": "MEMORY" },
             { "column": "Value", "label": "Value" }
         ]

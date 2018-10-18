@@ -1,6 +1,5 @@
 {
     "data": {
-        "limit" : 50,
         "searchText": "Application != Developing",
         "columns": [
             { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},

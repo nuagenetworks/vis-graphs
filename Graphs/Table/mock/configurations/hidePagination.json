@@ -1,6 +1,5 @@
 {
     "data": {
-        "limit" : 50,
         "hidePagination": true,
         "searchBar": false,
         "columns": [
