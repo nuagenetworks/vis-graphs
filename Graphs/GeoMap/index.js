@@ -122,7 +122,6 @@ class GeoMap extends AbstractGraph {
           criticalAlarmColumn,
           majorAlarmColumn,
           minorAlarmColumn,
-          infoAlarmColumn,
           bootstrapStatusColumn,
           NSGVersionColumn,
       } = this.getConfiguredProperties();
@@ -153,7 +152,6 @@ class GeoMap extends AbstractGraph {
               </div>
           ))
       }
-      const minorAndInfoAlarms = Number(data[minorAlarmColumn]) + Number(data[infoAlarmColumn]);
       return (
           <div style={{display: 'table'}}>
               {
@@ -164,7 +162,7 @@ class GeoMap extends AbstractGraph {
                     {label: 'NSG Version', text: data[NSGVersionColumn] || 'No version found'},
                     {label: 'Critical Alarms', text: data[criticalAlarmColumn] || 'None'},
                     {label: 'Major Alarms', text: data[majorAlarmColumn] || 'None'},
-                    {label: 'Minor/Info Alarms', text: minorAndInfoAlarms || 'None'}
+                    {label: 'Minor Alarms', text: data[minorAlarmColumn] || 'None'}
                 ])
               }
           </div>
@@ -348,7 +346,7 @@ class GeoMap extends AbstractGraph {
 
     this.timerId = setTimeout(
       () => this.setClusterIcons(clusters),
-      0
+      100
     );
 
     if (!_.isEqual(this.markers, markers)) {
