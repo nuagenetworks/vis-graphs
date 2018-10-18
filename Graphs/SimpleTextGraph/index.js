@@ -4,7 +4,7 @@ import AbstractGraph from "../AbstractGraph";
 
 import "./style.css";
 
-import {properties} from "./default.config"
+import { properties } from "./default.config"
 
 /*
     This is a very basic graph that displays a text message
@@ -32,8 +32,8 @@ class SimpleTextGraph extends AbstractGraph {
 
     componentWillReceiveProps(nextProps) {
         // reset font size on resize
-        if(this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
-            this.setState({ fontSize: INITIAL_FONT_SIZE})
+        if (this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
+            this.setState({ fontSize: INITIAL_FONT_SIZE })
         }
     }
 
@@ -45,10 +45,10 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-          innerWidth,
-          innerHeight,
-          targetedColumn,
-          defaultFontSize
+            innerWidth,
+            innerHeight,
+            targetedColumn,
+            defaultFontSize
         } = this.getConfiguredProperties();
 
         if (!data || !data.length)
@@ -60,12 +60,12 @@ class SimpleTextGraph extends AbstractGraph {
         const blockHeight = height * innerHeight
         const textSize = this.state.fontSize * text.toString().length * 0.7
 
-        if(text.toString().length <= 3 && this.state.fontSize !== defaultFontSize) {
+        if (text.toString().length <= 3 && this.state.fontSize !== defaultFontSize) {
             this.setState({
                 fontSize: defaultFontSize
             })
         }
-        else if(blockWidth > textSize && blockHeight > textSize) {
+        else if (blockWidth > textSize && blockHeight > textSize) {
             this.setState({
                 fontSize: this.state.fontSize + 1
             })
@@ -84,10 +84,15 @@ class SimpleTextGraph extends AbstractGraph {
     }
 
     renderTitleIfNeeded(requestedPosition, currentPosition) {
+        const { labelFontSize } = this.getConfiguredProperties();
         if (requestedPosition !== currentPosition)
             return;
 
-        return this.currentTitle();
+        return (
+            <div style={{ fontSize: labelFontSize }}>
+                {this.currentTitle()}
+            </div>
+        );
     }
 
     displayText(data, targetedColumn) {
@@ -118,17 +123,18 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-          borderRadius,
-          colors,
-          fontColor,
-          innerHeight,
-          innerWidth,
-          margin,
-          padding,
-          stroke,
-          textAlign,
-          titlePosition,
-          targetedColumn,
+            borderRadius,
+            colors,
+            fontColor,
+            innerHeight,
+            innerWidth,
+            margin,
+            padding,
+            stroke,
+            textAlign,
+            titlePosition,
+            targetedColumn,
+            labelFontSize
         } = this.getConfiguredProperties();
 
         if (!data || !data.length)
@@ -139,53 +145,53 @@ class SimpleTextGraph extends AbstractGraph {
         const blockHeight = height * innerHeight
 
         return (
-                <div
-                    style={{
-                        margin: [margin.top, margin.right, margin.bottom, margin.left].join(" "),
-                        textAlign: textAlign,
-                        display: "table",
-                        fontSize: "16px"
-                    }}
-                    onClick={this.handleMarkerClick}
-                    >
-                        {this.renderTitleIfNeeded(titlePosition, "top")}
+            <div
+                style={{
+                    margin: [margin.top, margin.right, margin.bottom, margin.left].join(" "),
+                    textAlign: textAlign,
+                    display: "table",
+                    fontSize: labelFontSize
+                }}
+                onClick={this.handleMarkerClick}
+            >
+                {this.renderTitleIfNeeded(titlePosition, "top")}
 
-                        <div style={{
-                            width: blockWidth,
-                            height: blockHeight,
-                            borderRadius: borderRadius,
-                            borderColor: stroke.color,
-                            borderWidth: stroke.width,
-                            background: colors[0],
-                            color: fontColor,
-                            fontSize: this.state.fontSize,
-                            cursor:cursor,
-                            margin: 'auto',
-                            marginTop: 20
-                            }}
-                          >
-                          <div style={{
-                              marginLeft: "auto",
-                              marginRight: "auto",
-                              width: blockWidth,
-                              padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
-                              height: blockHeight,
-                              display: "table-cell",
-                              verticalAlign: "middle"
-                            }}>
-                              {this.displayText(data, targetedColumn)}
-                            </div>
-                        </div>
-
+                <div style={{
+                    width: blockWidth,
+                    height: blockHeight,
+                    borderRadius: borderRadius,
+                    borderColor: stroke.color,
+                    borderWidth: stroke.width,
+                    background: colors[0],
+                    color: fontColor,
+                    fontSize: this.state.fontSize,
+                    cursor: cursor,
+                    margin: 'auto',
+                    marginTop: 10
+                }}
+                >
+                    <div style={{
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        width: blockWidth,
+                        padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
+                        height: blockHeight,
+                        display: "table-cell",
+                        verticalAlign: "middle"
+                    }}>
+                        {this.displayText(data, targetedColumn)}
                         {this.renderTitleIfNeeded(titlePosition, "bottom")}
+                    </div>
                 </div>
+
+            </div>
         );
 
     }
 }
 
 SimpleTextGraph.propTypes = {
-  configuration: React.PropTypes.object
+    configuration: React.PropTypes.object
 };
 
 export default SimpleTextGraph
