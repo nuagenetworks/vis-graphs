@@ -56,7 +56,7 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                         display: "inline-block",
                         verticalAlign: "middle",
                         textAlign: "left",
-                        fontSize: "1em",
+                        fontSize: ".65em",
                         width: "75%"
                     }}>{texts[index]}</span>
                 </div>
