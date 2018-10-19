@@ -10,6 +10,11 @@ import SimpleTextGraph from "../SimpleTextGraph";
 
 class MultiColumnStatusTextGraph extends SimpleTextGraph {
 
+    renderTitleIfNeeded = (requestedPosition, currentPosition) => {
+        const { disableTitle } = this.getConfiguredProperties();
+        return disableTitle ? "" : super.renderTitleIfNeeded(requestedPosition, currentPosition);
+    }
+
     renderText = ({
                   blockWidth,
                   blockHeight,
