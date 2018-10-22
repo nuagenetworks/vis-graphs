@@ -11,6 +11,7 @@ import AreaGraph from "./AreaGraph"
 import DynamicBarGraph from "./DynamicBarGraph"
 import Table from "./Table"
 import GeoMap from "./GeoMap"
+import MultiColumnStatusTextGraph from './MultiColumnStatusTextGraph'
 
 import { theme } from "../theme"
 
@@ -30,7 +31,8 @@ let registry = {
     HeatmapGraph,
     AreaGraph,
     DynamicBarGraph,
-    GeoMap
+    GeoMap,
+    MultiColumnStatusTextGraph
 };
 
 /*

@@ -176,13 +176,14 @@ export default class AbstractGraph extends React.Component {
             otherColors,
             mapColors,
             colorColumn,
+            mappedColors,
         } = this.getConfiguredProperties();
 
         if (!colorColumn && !defaultColumn)
             return;
 
         let domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys().sort();
-        let colors = Object.assign({}, mapColors, heatmapColor ? heatmapColor : {})
+        let colors = Object.assign({}, mapColors, heatmapColor ? heatmapColor : {}, mappedColors ? mappedColors : {});
 
         let propColors = [];
         let index = 0;

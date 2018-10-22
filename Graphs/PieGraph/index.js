@@ -16,6 +16,34 @@ export default class PieGraph extends AbstractGraph {
         super(props, properties);
     }
 
+    getColor = (scale) => {
+        const {
+            stroke,
+            colorColumn,
+            colors,
+            legendColumn,
+            emptyBoxColor
+        } = this.getConfiguredProperties()
+
+
+        return (d) => {
+            let value = null
+            if (d.hasOwnProperty(legendColumn)) {
+                value = d[legendColumn]
+            } else if (d.hasOwnProperty(colorColumn)) {
+                value = d[colorColumn]
+            } else if (d.hasOwnProperty("key")) {
+                value = d["key"]
+            }
+
+            if (value === 'Empty') {
+                return emptyBoxColor
+            }
+            return scale ? scale(value) : stroke.color || colors[0];
+        }
+
+    }
+
     render() {
 
         const {
@@ -45,7 +73,8 @@ export default class PieGraph extends AbstractGraph {
           percentages,
           percentagesFormat,
           otherOptions,
-          showZero
+          showZero,
+          mappedColors
         } = this.getConfiguredProperties();
 
 
@@ -83,8 +112,11 @@ export default class PieGraph extends AbstractGraph {
         const isVerticalLegend = legend.orientation === 'vertical';
         const value            = (d) => d[sliceColumn];
         const label            = (d) => d[labelColumn];
-        const scale            = this.scaleColor(data, labelColumn);
-        const getColor         = (d) => scale ? scale(d[colorColumn || labelColumn]) : null;
+        const scale            = mappedColors ?
+            this.getMappedScaleColor(data, labelColumn) : this.scaleColor(data, labelColumn);
+
+        const getColor         = mappedColors ?
+            this.getColor(scale) : (d) => scale ? scale(d[colorColumn || labelColumn]) : null;
 
         if (legend.show && data.length > 1)
         {

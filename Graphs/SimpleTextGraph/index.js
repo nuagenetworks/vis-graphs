@@ -4,7 +4,9 @@ import AbstractGraph from "../AbstractGraph";
 
 import "./style.css";
 
-import { properties } from "./default.config"
+import { properties } from "./default.config";
+
+import objectPath from "object-path";
 
 /*
     This is a very basic graph that displays a text message
@@ -102,7 +104,7 @@ class SimpleTextGraph extends AbstractGraph {
         if (!targetedColumn)
             return data.length
 
-        return data[0][targetedColumn];
+        return objectPath.get(data[0], targetedColumn);
     }
 
     handleMarkerClick = e => {
@@ -114,6 +116,49 @@ class SimpleTextGraph extends AbstractGraph {
         return {};
     }
 
+    renderText = ({blockWidth,
+                      blockHeight,
+                      borderRadius,
+                      stroke,
+                      fontColor,
+                      padding,
+                      colors,
+                      cursor,
+                      data,
+                      targetedColumn,
+                      titlePosition
+                  }) => {
+        return (
+            <div style={{
+                width: blockWidth,
+                height: blockHeight,
+                borderRadius: borderRadius,
+                borderColor: stroke.color,
+                borderWidth: stroke.width,
+                background: colors[0],
+                color: fontColor,
+                fontSize: this.state.fontSize,
+                cursor: cursor,
+                margin: 'auto',
+                marginTop: 10
+            }}
+            >
+                <div style={{
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                    width: blockWidth,
+                    padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
+                    height: blockHeight,
+                    display: "table-cell",
+                    verticalAlign: "middle"
+                }}>
+                    {this.displayText(data, targetedColumn)}
+                    {this.renderTitleIfNeeded(titlePosition, "bottom")}
+                </div>
+            </div>
+        );
+    }
+
     render() {
         const {
             height,
@@ -123,17 +168,11 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-            borderRadius,
-            colors,
-            fontColor,
             innerHeight,
             innerWidth,
             margin,
-            padding,
-            stroke,
             textAlign,
             titlePosition,
-            targetedColumn,
             labelFontSize
         } = this.getConfiguredProperties();
 
@@ -156,33 +195,15 @@ class SimpleTextGraph extends AbstractGraph {
             >
                 {this.renderTitleIfNeeded(titlePosition, "top")}
 
-                <div style={{
-                    width: blockWidth,
-                    height: blockHeight,
-                    borderRadius: borderRadius,
-                    borderColor: stroke.color,
-                    borderWidth: stroke.width,
-                    background: colors[0],
-                    color: fontColor,
-                    fontSize: this.state.fontSize,
-                    cursor: cursor,
-                    margin: 'auto',
-                    marginTop: 10
-                }}
-                >
-                    <div style={{
-                        marginLeft: "auto",
-                        marginRight: "auto",
-                        width: blockWidth,
-                        padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
-                        height: blockHeight,
-                        display: "table-cell",
-                        verticalAlign: "middle"
-                    }}>
-                        {this.displayText(data, targetedColumn)}
-                        {this.renderTitleIfNeeded(titlePosition, "bottom")}
-                    </div>
-                </div>
+                {
+                    this.renderText({
+                        ...this.getConfiguredProperties(),
+                        blockWidth,
+                        blockHeight,
+                        cursor,
+                        data
+                    })
+                }
 
             </div>
         );
