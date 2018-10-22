@@ -8,8 +8,8 @@ const icons = {
   'nsGatewayGreen': 'icon-nsgateway-green-26x26.png'
 };
 
-const defaultIcon = 'nsGatewayBlue';
-const defaultUrgency = 'BLUE';
+const defaultIcon = 'nsGatewayGreen';
+const defaultUrgency = 'GREEN';
 
 export default (iconKey = null, data = []) => {
 
