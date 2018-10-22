@@ -117,15 +117,20 @@ class TreeGraph extends AbstractGraph {
         if (d.children) {
             this.collapse(d);
         } else {
-            // NOTE: Uncomment the lines below to activate paging
-            // this.initializePageDetails(d, true)
-            const { currentPage } = d;
-            const hiddenChildrenList = new List(d._children);
-            const updatedChildren = hiddenChildrenList.filter((d1) => currentPage === d1.pageNo).toJS();
-            const updatedAltChildren = hiddenChildrenList.filter((d1) => currentPage !== d1.pageNo).toJS();
+            d.children = new List(d._children).toJS();
+            d._children = null;
 
-            d.children = updatedChildren;
-            d._children = updatedAltChildren;
+            // NOTE: Replace the above with lines below to activate paging
+            /*
+                this.initializePageDetails(d, true)
+                const { currentPage } = d;
+                const hiddenChildrenList = new List(d._children);
+                const updatedChildren = hiddenChildrenList.filter((d1) => currentPage === d1.pageNo).toJS();
+                const updatedAltChildren = hiddenChildrenList.filter((d1) => currentPage !== d1.pageNo).toJS();
+
+                d.children = updatedChildren;
+                d._children = updatedAltChildren;
+            */
         }
         this.update(d);
         // NOTE: Uncomment the lines below to activate paging
@@ -134,15 +139,22 @@ class TreeGraph extends AbstractGraph {
 
     collapse = (d) => {
         if (d.children) {
-            const _childrenList = new List(d._children);
-            const childrenList = new List(d.children);
-            if (!d._children) {
-                d._children = childrenList.toJS();
-            } else {
-                d._children = childrenList.concat(_childrenList).toJS();
-            }
+            d._children = new List(d.children).toJS();
             d._children.forEach(this.collapse)
             d.children = null;
+
+            // NOTE: Replace the above with lines below to activate paging
+            /*
+                const _childrenList = new List(d._children);
+                const childrenList = new List(d.children);
+                if (!d._children) {
+                    d._children = childrenList.toJS();
+                } else {
+                    d._children = childrenList.concat(_childrenList).toJS();
+                }
+                d._children.forEach(this.collapse)
+                d.children = null;
+            */
         }
     }
 
