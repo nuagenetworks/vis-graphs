@@ -83,6 +83,7 @@ class TreeGraph extends AbstractGraph {
         this.update(this.root)
     }
 
+    // NOTE: Function used in paging
     paginate = (d) => {
         this.setPage(d.parent, d.no);
         // this.update(this.root);
@@ -90,6 +91,7 @@ class TreeGraph extends AbstractGraph {
         this.setState({ refresh: !this.state.refresh })
     }
 
+    // NOTE: Function used in paging
     setPage = (d, currentPage) => {
         const newChild = new List(d.children);
         const newAltChild = new List(d._children);
@@ -115,7 +117,8 @@ class TreeGraph extends AbstractGraph {
         if (d.children) {
             this.collapse(d);
         } else {
-            this.initializePageDetails(d, true)
+            // NOTE: Uncomment the lines below to activate paging
+            // this.initializePageDetails(d, true)
             const { currentPage } = d;
             const hiddenChildrenList = new List(d._children);
             const updatedChildren = hiddenChildrenList.filter((d1) => currentPage === d1.pageNo).toJS();
@@ -125,7 +128,8 @@ class TreeGraph extends AbstractGraph {
             d._children = updatedAltChildren;
         }
         this.update(d);
-        this.setState({ refresh: !this.state.refresh })
+        // NOTE: Uncomment the lines below to activate paging
+        // this.setState({ refresh: !this.state.refresh })
     }
 
     collapse = (d) => {
@@ -142,9 +146,11 @@ class TreeGraph extends AbstractGraph {
         }
     }
 
+    // NOTE: Function used in paging
     showPerPage = (d) => {
         if (d.children) {
-            this.initializePageDetails(d)
+            // NOTE: Uncomment the lines below to activate paging
+            // this.initializePageDetails(d)
             const { currentPage } = d;
             const childrenList = new List(d.children);
 
@@ -156,6 +162,7 @@ class TreeGraph extends AbstractGraph {
         }
     }
 
+    // NOTE: Function used in paging
     initializePageDetails = (d, nodeWillOpen) => {
         if (nodeWillOpen && d._children) {
             d.currentPage = 1;
@@ -173,6 +180,7 @@ class TreeGraph extends AbstractGraph {
         }
     }
 
+    // NOTE: Function used in paging
     updatePageLinks = (d) => {
         const svg = this.getGraphContainer();
         const nodes = this.treeData.descendants();
@@ -268,8 +276,9 @@ class TreeGraph extends AbstractGraph {
         // collapse all nodes
         this.root.children.forEach(this.collapse);
 
-        this.initializePageDetails(this.root);
-        this.showPerPage(this.root);
+        // NOTE: Uncomment the lines below to activate paging
+        // this.initializePageDetails(this.root);
+        // this.showPerPage(this.root);
     }
 
     update = (source) => {
@@ -285,7 +294,8 @@ class TreeGraph extends AbstractGraph {
 
         this.updateNodes(source, nodes);
         this.updateLinks(source, links);
-        this.updatePageLinks();
+        // NOTE: Uncomment the lines below to activate paging
+        // this.updatePageLinks();
 
         // Store the old positions for transition.
         nodes.forEach((d) => {
@@ -417,9 +427,9 @@ class TreeGraph extends AbstractGraph {
         const { refresh } = this.state;
         return (
             <div className="line-graph">
-                <svg width={width} height={height} updateSVG={refresh}>
-                    <g ref={node => this.node = node} width={width} height={height} updateSVG={refresh}>
-                        <g className='line-graph-container' updateSVG={refresh} ></g>
+                <svg width={width} height={height} key={refresh}>
+                    <g ref={node => this.node = node} width={width} height={height}>
+                        <g className='line-graph-container'></g>
                     </g>
                 </svg>
             </div>
