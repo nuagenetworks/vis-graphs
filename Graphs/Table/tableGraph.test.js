@@ -24,7 +24,7 @@ describe("Table", () => {
     });
 
     describe("hidePagination", () => {
-        let hidePagination, $;
+        let hidePagination, $, page;
         beforeAll(async () => {
             hidePagination = mount(
                 <Table
@@ -35,6 +35,7 @@ describe("Table", () => {
                 </Table>
             );
             $ = getHtml(hidePagination, 'table');
+            page = cheerio.load(hidePagination.html());
         });
 
         it("Total Column", () => {
@@ -81,9 +82,24 @@ describe("Table", () => {
             const noOfRows = totalRows($);
             expect(noOfRows).toBe(100);
         });
+
+        it("Pagination Text", () => {
+            const text = page('table').parent().parent().next().find('div').first().text();
+            expect(text).toEqual("");
+        });
+
+        it("Pagination Previous", () => {
+            const prev = page('table').parent().parent().next().find('button').attr('disabled');
+            expect(prev).toEqual(undefined);
+        })
+
+        it("Pagination Next", () => {
+            const next = page('table').parent().parent().next().find('button').next().attr('disabled');
+            expect(next).toEqual(undefined);
+        })
     });
 
-    describe("hideSearchBar", () => {
+    describe("Hide SearchBar", () => {
         let hideSearchBar, $;
         beforeAll(async () => {
             hideSearchBar = mount(
@@ -140,6 +156,16 @@ describe("Table", () => {
         it("Total Rows", () => {
             const noOfRows = totalRows($);
             expect(noOfRows).toBe(100);
+        });
+
+        it("SearchBar Text", () => {
+            const search = $('.search-label').text();
+            expect(search).toEqual('');
+        });
+
+        it("SearchBar", () => {
+            const searchBarAndButton = $('.filter').children().length;
+            expect(searchBarAndButton).toEqual(0);
         });
     });
 

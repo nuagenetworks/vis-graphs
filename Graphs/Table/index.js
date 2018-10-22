@@ -964,8 +964,8 @@ class Table extends AbstractGraph {
 
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
-
-        let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
+        
+        let showFooter = (totalRecords >= pageSize && hidePagination === true) ? false : true,
             heightMargin = showFooter ? 100 : 80;
 
         heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
