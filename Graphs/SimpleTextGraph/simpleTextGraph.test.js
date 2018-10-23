@@ -28,9 +28,8 @@ describe("SimpleTextGraph", () => {
         });
 
         it("Title", () => {
-            const text = $('div').first();
-            const finalText = $(text).clone().children().remove().end().text();
-            expect(finalText).toEqual('Untitled');
+            const text = $('.simpleText').text();
+            expect(text).toEqual('Untitled');
         });
 
         it("Value", () => {
@@ -55,9 +54,8 @@ describe("SimpleTextGraph", () => {
         });
 
         it("Title", () => {
-            const text = $('div').first();
-            const finalText = $(text).clone().children().remove().end().text();
-            expect(finalText).toEqual('withTitle');
+            const text = $('.simpleText').text();
+            expect(text).toEqual('withTitle');
         });
 
         it("Value", () => {
