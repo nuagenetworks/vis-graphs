@@ -1,4 +1,7 @@
 import fsmo from 'fs';
+import { format, timeFormat } from "d3";
+
+const d3 = { format, timeFormat };
 const cheerio = require('cheerio');
 
 
@@ -97,4 +100,10 @@ export const checkLine = ($, length) => {
     if (length == "second")
         d = line('path').next().attr('d');
     return d;
+}
+
+export const checkTime = (date) => {
+    const timeFormat = '%b %d, %y %X';
+    const formatter = d3.timeFormat(timeFormat);
+    return formatter(new Date(date))
 }
