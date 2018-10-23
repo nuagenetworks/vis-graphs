@@ -54,6 +54,29 @@ export const checkSvg = (component) => {
     return svgHeight == "500" && svgWidth == "500";
 }
 
+export const totalRows = ($) => {
+    const noOfRows = $('table tbody tr').length;
+    return noOfRows;
+}
+
+export const totalColumn = ($) => {
+    const noOfColumns = $('table').find('thead').find('tr').children().length;
+    return noOfColumns;
+}
+
+export const checkRowData = ($, rowNo) => {
+    let table, value;
+    table = $('table tbody tr').first();
+    if (rowNo == "second")
+        table = table.next();
+    value = table.find('td').map(
+        function (i) {
+            return $(this).text();
+        }
+    ).get();
+    return value;
+}
+
 export const checkBar = ($, length) => {
     let barData = new Object(), bar;
     bar = $('.graph-bars').children().first().next().find('rect');

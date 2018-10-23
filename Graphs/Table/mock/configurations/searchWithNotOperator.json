@@ -1,0 +1,11 @@
+{
+    "data": {
+        "searchText": "Application != Developing",
+        "columns": [
+            { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
+            { "column": "Application", "label": "Application" },
+            { "column": "MEMORY", "label": "MEMORY" },
+            { "column": "Value", "label": "Value" }
+        ]
+    }
+}
