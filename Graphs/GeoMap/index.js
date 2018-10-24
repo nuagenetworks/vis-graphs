@@ -85,7 +85,6 @@ class GeoMap extends AbstractGraph {
       latitudeColumn,
       longitudeColumn
     } = this.getConfiguredProperties()
-
     const bounds = new window.google.maps.LatLngBounds()
 
     this.state.data.forEach(marker => {
@@ -97,8 +96,13 @@ class GeoMap extends AbstractGraph {
     let newCenter = bounds.getCenter().toJSON()
 
     if (newCenter && !_.isEqual(this.center, newCenter)) {
-      this.center = newCenter
-      this.setState({ defaultCenter: newCenter })
+
+      if (!this.center) {
+        this.map.fitBounds(bounds);
+      }
+
+      this.center = newCenter;
+      this.setState({ defaultCenter: newCenter });
     }
   }
 
@@ -342,7 +346,7 @@ class GeoMap extends AbstractGraph {
       cluster.getMarkers().forEach( d => {
         markers.set(d.id, cluster.getCenter().toJSON())
       })
-    })
+    });
 
     this.timerId = setTimeout(
       () => this.setClusterIcons(clusters),
@@ -489,13 +493,14 @@ class GeoMap extends AbstractGraph {
   // handle response after searching
   handleSearch(data, isSuccess) {
     if(isSuccess && !_.isEqual(this.state.data, data)) {
-      this.clusterCenter = null
+      this.clusterCenter = null;
       this.setState({
         spiderifyLines: [],
         spiderifyMarkers: [],
         lines: [],
         data
-      })
+      });
+      this.onBoundsChanged();
     }
   }
 
