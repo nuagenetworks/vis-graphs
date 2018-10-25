@@ -76,21 +76,16 @@ export default class SearchBar extends React.Component {
 
         if (!_.isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
+            clearTimeout(this.setTimeout);
 
-            if (this.props.searchText) {
-                const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                this.props.handleSearch(filteredData, this.state.isOk)
-            } else { 
-                clearTimeout(this.setTimeout)
-                this.setTimeout = setTimeout(() => {
-                    if (scroll) {
-                        this.props.handleSearch(data, this.state.isOk, expressions, this.query)
-                    } else {
-                        const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                        this.props.handleSearch(filteredData, this.state.isOk)
-                    }
-                }, 1500);
-            }
+            this.setTimeout = setTimeout(() => {
+                if (scroll) {
+                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+                } else {
+                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                    this.props.handleSearch(filteredData, this.state.isOk)
+                }
+            }, 1000);
         }
     }
 

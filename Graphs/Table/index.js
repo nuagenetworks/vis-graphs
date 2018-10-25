@@ -294,7 +294,7 @@ class Table extends AbstractGraph {
                 const search = labelToField(expandExpression(expression), this.getKeyColumns())
                 this.filterData = data;
 
-                if(searchString !== searchText) {
+                if(!searchText || searchString !== searchText) {
                     this.updateTableStatus({search, searchText , selectedRows: {}, currentPage: 1, event: events.SEARCH})
                 }
             } else {

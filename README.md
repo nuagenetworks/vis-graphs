@@ -502,7 +502,7 @@ __filters__ - List down columns in search bar
             },
             {
                 "columField": "status",
-                "type": "selection" // for `selection`, columnText must be empty and value of status field should be string
+                "type": "selection" // for `selection`, value of status field should be string
             }
 
         ]

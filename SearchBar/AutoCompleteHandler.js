@@ -7,22 +7,26 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
         this.scroll = scroll;
     }
     needOperators(parsedCategory) {
-        var result = super.needOperators(parsedCategory);
+        const result = super.needOperators(parsedCategory);
         return this.scroll ? ["==", "!="] : result.concat(["startsWith"]);
     }
 
     needValues(parsedCategory, parsedOperator) {
-        const found = _.find(this.options, f => f.columField == parsedCategory || f.columnText == parsedCategory);
-        const parsedField = found ? found.columField : null;
+        const found = _.find(this.options, f => f.columField === parsedCategory || f.columnText === parsedCategory);
 
-        if (found != null && found.type == "selection" && this.data != null) {
+        if (found === null) {
+            return [];
+        }
+        const parsedField = found.columField;
+
+        if (found.type === "selection" && this.data !== null) {
             if (!this.cache[parsedField]) {
                 this.cache[parsedField] = _.chain(this.data).map(f => f[parsedField]).uniq().value();
             }
             return this.cache[parsedField];
         }
 
-        if (found != null && found.customValuesFunc) {
+        if (found.customValuesFunc) {
             return found.customValuesFunc(parsedField, parsedOperator);
         }
 
