@@ -117,8 +117,7 @@ class TreeGraph extends AbstractGraph {
         if (d.children) {
             this.collapse(d);
         } else {
-            d.children = new List(d._children).toJS();
-            d._children = null;
+            this.props.onClickChild(d);
 
             // NOTE: Replace the above with lines below to activate paging
             /*
@@ -286,7 +285,7 @@ class TreeGraph extends AbstractGraph {
         this.treeData = this.treemap(this.root);
 
         // collapse all nodes
-        this.root.children.forEach(this.collapse);
+        // this.root.children.forEach(this.collapse);
 
         // NOTE: Uncomment the lines below to activate paging
         // this.initializePageDetails(this.root);
@@ -370,8 +369,7 @@ class TreeGraph extends AbstractGraph {
         nodeUpdate.select('circle.node')
             .attr('r', 10)
             .style("fill", (d) => {
-                const nodeColor = d.parent ? this.colorScale(d.parent.id) : this.colorScale();
-                return d.data.children ? nodeColor : "white";
+                return d.parent ? this.colorScale(d.parent.id) : this.colorScale();
             })
             .attr('cursor', 'pointer');
 
