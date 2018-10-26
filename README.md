@@ -554,6 +554,7 @@ This graph displays nested hierarchical data. It is used to show the relation be
 ![TreeGraph](https://user-images.githubusercontent.com/31058528/47505647-26a26c80-d88c-11e8-8306-1529702b0633.png)
 
 __data__ (Array of object) Nested hierarchical data passed into map to show tree view.
+
 __onClickChild__ (Function) Function that is called when any node is clicked. It is called with one argument, the node which was clicked. Typically it is used to fetch data from server and update the children of the node in tree data.
 
 ```javascript
@@ -562,5 +563,11 @@ const clickChild = (child) => {
   // do something
 }
 ```
+
+```html
+<TreeGraph onClickChild={clickChild} />
+```
+
 __width__ (Integer) Width of treemap area.
+
 __height__ (Integer) Height of treemap area.
