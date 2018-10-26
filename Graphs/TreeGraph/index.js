@@ -22,7 +22,7 @@ const PAGINATION = 2;
 class TreeGraph extends AbstractGraph {
     path = null;
     root = null;
-    colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    colorScale = d3.scaleOrdinal(properties.colors);
     treeData = null;
     treemap = null;
 
