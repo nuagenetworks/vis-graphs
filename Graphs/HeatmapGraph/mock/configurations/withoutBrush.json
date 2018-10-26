@@ -20,5 +20,13 @@
             { "column": "SlaStatus", "label": "Status" }
         ]
  
-   }
+   },
+   "listeners": [
+       {
+           "redirect": "/dashboards/medalsPerCountry",
+           "params": {
+               "app": "value"
+           }
+       }
+   ]
 }

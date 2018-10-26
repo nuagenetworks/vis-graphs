@@ -8,5 +8,13 @@
             { "column": "MEMORY", "label": "MEMORY" },
             { "column": "Value", "label": "Value" }
         ]
-    }
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/medalsPerCountry",
+            "params": {
+                "app": "value"
+            }
+        }
+    ]
 }

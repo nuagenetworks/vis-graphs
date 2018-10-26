@@ -25,6 +25,7 @@
     },
     "listeners": [
         {
+            "redirect": "/dashboards/medalsPerCountry",
             "params": {
                 "app": "value"
             }

@@ -1,5 +1,13 @@
 {
     "data": {
         "targetedColumn":"value"
-    }
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/medalsPerCountry",
+            "params": {
+                "app": "value"
+            }
+        }
+    ]
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
@@ -792,5 +793,42 @@ describe("Table", () => {
             const next = page('table').parent().parent().next().find('button').next().attr('disabled');
             expect(next).toEqual(undefined);
         })
+    });
+
+    describe("Click Event", () => {
+        let table;
+        const mockCallBack = jest.fn();
+        const handleRowSelection = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            table = ReactDOM.render(
+                <Table
+                    width={500}
+                    height={500}
+                    configuration={config.pagination}
+                    data={config.data}
+                    onRowSelection={handleRowSelection}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On Table", (done) => {
+            element.querySelector('td').click();
+            setTimeout(() => {
+                done();
+                expect(handleRowSelection).toHaveBeenCalled();
+                expect(onMarkClick).toHaveBeenCalled();
+            }, 1000);
+        });
     });
 });

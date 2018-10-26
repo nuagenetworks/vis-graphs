@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import { getDataAndConfig } from '../testHelper';
 import SimpleTextGraph from '.';
@@ -61,6 +62,38 @@ describe("SimpleTextGraph", () => {
         it("Value", () => {
             const value = $('div').last().text();
             expect(value).toEqual('1000');
+        });
+        
+    });
+
+    describe("Click Event", () => {
+        let simpleText;
+        const mockCallBack = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            simpleText = ReactDOM.render(
+                <SimpleTextGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withoutTitle}
+                    data={config.data}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On Bar", () => {
+            element.querySelector('div').click();
+            expect(mockCallBack).toHaveBeenCalled();
         });
     });
 });
