@@ -294,7 +294,7 @@ class Table extends AbstractGraph {
                 const search = labelToField(expandExpression(expression), this.getKeyColumns())
                 this.filterData = data;
 
-                if(searchString !== searchText) {
+                if(!searchText || searchString !== searchText) {
                     this.updateTableStatus({search, searchText , selectedRows: {}, currentPage: 1, event: events.SEARCH})
                 }
             } else {
@@ -336,12 +336,12 @@ class Table extends AbstractGraph {
         let headerData = []
         for(let index in columns) {
             if(columns.hasOwnProperty(index)) {
-                const columnRow = columns[index]
+                const columnRow = columns[index];
                 if(this.state.columns.filter( d => d.value === columnRow.label).length) {
                     headerData.push({
                         key: index,
                         label: columnRow.label || columnRow.column,
-                        sortable: true,
+                        sortable: columnRow.sort !== false,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                         columField: index,
                         type: columnRow.selection ? "selection" : "text",

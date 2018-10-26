@@ -326,7 +326,8 @@ __columns__ - (Array) Array of columns display in the table. Example -
         { "column": "type", "label": " ", "colors" : {
             "OTHER": "green",
             "DENY": "red"
-            }
+            },
+            "sort": false // to disable sorting on column
         },
         { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
@@ -501,7 +502,7 @@ __filters__ - List down columns in search bar
             },
             {
                 "columField": "status",
-                "type": "selection" // for `selection`, columnText must be empty and value of status field should be string
+                "type": "selection" // for `selection`, value of status field should be string
             }
 
         ]
