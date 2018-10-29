@@ -17,18 +17,18 @@
                                 "children": []
                             }
                         ]
-                    },
-                    {
-                        "name": "L2_Domain_2",
-                        "children": [
-                            {
-                                "name": "VPort_3",
-                                "children": []
-                            }
-                        ]
                     }
                 ]
             },
+            {
+                "name": "L2_Domain_2",
+                "children": [
+                    {
+                        "name": "VPort_3",
+                        "children": []
+                    }
+                ]
+            },        
             {
                 "name": "L3_Domain_1",
                 "children": [
