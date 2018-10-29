@@ -1,6 +1,7 @@
 
 import React from "react";
 import * as d3 from "d3";
+import _ from 'lodash';
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import { List } from 'immutable';
@@ -48,7 +49,8 @@ class TreeGraph extends AbstractGraph {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props !== nextProps) {
+        if(!_.isEqual(this.props, nextProps)) {
+            this.refresh();
             this.initiate(nextProps);
         }
     }
@@ -88,7 +90,7 @@ class TreeGraph extends AbstractGraph {
         this.setPage(d.parent, d.no);
         // this.update(this.root);
         this.update(d.parent);
-        this.setState({ refresh: !this.state.refresh })
+        this.refresh();
     }
 
     // NOTE: Function used in paging
@@ -102,6 +104,10 @@ class TreeGraph extends AbstractGraph {
         d.currentPage = currentPage;
         d.children = updatedChildren;
         d._children = updatedAltChildren;
+    }
+
+    refresh = () => {
+        this.setState({ refresh: !this.state.refresh });
     }
 
     reset = (d, depth = 0) => {
@@ -133,7 +139,7 @@ class TreeGraph extends AbstractGraph {
         }
         this.update(d);
         // NOTE: Uncomment the lines below to activate paging
-        // this.setState({ refresh: !this.state.refresh })
+        // this.refresh();
     }
 
     collapse = (d) => {
