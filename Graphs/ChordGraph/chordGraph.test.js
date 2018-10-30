@@ -5,8 +5,9 @@ import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
 import ChordGraph from '.';
 
 describe("ChordGraph", () => {
+    let config;
     beforeAll(async () => {
-        global.config = await getDataAndConfig('ChordGraph');
+        config = await getDataAndConfig('ChordGraph');
     });
 
     describe("IntialConfiguration", () => {
