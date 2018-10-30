@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import { GoogleMap,withGoogleMap,withScriptjs } from 'react-google-maps';
 
@@ -27,11 +28,11 @@ GoogleMapsWrapper.defaultProps = {
 }
 
 GoogleMapsWrapper.propTypes = {
-  defaultZoom: React.PropTypes.number.isRequired,
-  googleMapURL: React.PropTypes.string.isRequired,
-  defaultCenter: React.PropTypes.shape({
-    lat: React.PropTypes.number.isRequired,
-    lng: React.PropTypes.number.isRequired
+  defaultZoom: PropTypes.number.isRequired,
+  googleMapURL: PropTypes.string.isRequired,
+  defaultCenter: PropTypes.shape({
+    lat: PropTypes.number.isRequired,
+    lng: PropTypes.number.isRequired
   })
 }
 

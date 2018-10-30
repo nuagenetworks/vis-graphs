@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
@@ -216,6 +217,6 @@ export default class PieGraph extends AbstractGraph {
 }
 
 PieGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  data: React.PropTypes.array
+  configuration: PropTypes.object,
+  data: PropTypes.array
 };

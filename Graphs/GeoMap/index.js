@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react'
 import AbstractGraph from '../AbstractGraph'
 import { Marker, InfoWindow, Polyline } from 'react-google-maps'
@@ -623,7 +624,7 @@ class GeoMap extends AbstractGraph {
 }
 
 GeoMap.propTypes = {
-  data: React.PropTypes.array
+  data: PropTypes.array
 };
 
 export default GeoMap;

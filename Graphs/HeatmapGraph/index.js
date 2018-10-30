@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react"
 import _ from 'lodash'
 import * as d3 from "d3"
@@ -639,8 +640,8 @@ class HeatmapGraph extends XYGraph {
 }
 
 HeatmapGraph.propTypes = {
-    configuration: React.PropTypes.object,
-    data: React.PropTypes.array
+    configuration: PropTypes.object,
+    data: PropTypes.array
 }
 
 export default HeatmapGraph
