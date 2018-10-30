@@ -1,10 +1,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import { getDataAndConfig, getHtml, checkSvg } from '../testHelper';
 import PieGraph from '.';
-
-const cheerio = require('cheerio');
 
 describe("PieGrpah", () => {
     let config;
@@ -162,6 +161,36 @@ describe("PieGrpah", () => {
         it("Legends Label", () => {
             const legend = $('svg').find('g').last().find('text').text();
             expect(legend).toEqual("0 Hendrerit lectus.");
+        });
+    });
+    describe("Click Event", () => {
+        let pieGraph;
+        const mockCallBack = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            pieGraph = ReactDOM.render(
+                <PieGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withoutOtherOption}
+                    data={config.data}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On PieGraph", () => {
+            element.querySelector('path').click();
+            expect(mockCallBack).toHaveBeenCalled();
         });
     });
 });

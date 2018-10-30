@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 
 import { getDataAndConfig } from '../testHelper';
 import VariationTextGraph from '.';
+import ReactDOM from 'react-dom';
 
 const cheerio = require('cheerio')
 
@@ -40,6 +41,37 @@ describe("VariationTextGraph", () => {
         it("Second box value", () => {
             const value = $('span').last().text();
             expect(value).toEqual('1,300');
+        });
+    });
+
+    describe("Click Event", () => {
+        let variationText;
+        const mockCallBack = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            variationText = ReactDOM.render(
+                <VariationTextGraph
+                    width={500}
+                    height={500}
+                    configuration={config.configuration}
+                    data={config.data}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On Bar", () => {
+            element.querySelector('div').click();
+            expect(mockCallBack).toHaveBeenCalled();
         });
     });
 });
