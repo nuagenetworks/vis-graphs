@@ -849,7 +849,7 @@ describe("Table", () => {
             setTimeout(() => {
                 done();
                 expect(handleRowSelection).toHaveBeenCalled();
-                expect(onMarkClick).toHaveBeenCalled();
+                expect(mockCallBack).toHaveBeenCalled();
             }, 1000);
         });
     });
