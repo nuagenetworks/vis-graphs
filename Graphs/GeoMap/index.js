@@ -602,7 +602,7 @@ class GeoMap extends AbstractGraph {
                     <MarkerClusterer
                         ignoreHidden={false}
                         averageCenter
-                        gridSize={60}
+                        gridSize={40}
                         onClusteringEnd={ this.handleClustererEnd}
                         onClick={ this.handleClusterClick }
                     >
