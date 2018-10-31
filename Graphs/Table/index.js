@@ -946,7 +946,9 @@ class Table extends AbstractGraph {
             hidePagination,
             searchBar,
             selectColumnOption,
-            searchText
+            searchText,
+            tableHeaderStyle,
+            tableRowColumnStyle
         } = this.getConfiguredProperties();
 
         const {
@@ -1009,8 +1011,9 @@ class Table extends AbstractGraph {
                                 rowSize={pageSize}
                                 tableStyle={style.table}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
+                                tableHeaderStyle={tableHeaderStyle}
                                 tableRowStyle={style.row}
-                                tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize})}
+                                tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
                                 footerToolbarStyle={style.footerToolbar}
                             />
