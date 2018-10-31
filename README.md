@@ -42,7 +42,11 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "react-tap-event-plugin": "2.0.1",
     "react-tooltip": "^3.2.1",
     "object-path": "^0.11.4",
-    "react-google-maps": "^9.4.5"
+    "react-google-maps": "^9.4.5",
+    "prop-types": "^15.6.2",
+    "react-csv": "1.0.8",
+    "react-copy-to-clipboard": "^4.3.1",
+    "react-modal": "^3.5.1",
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command

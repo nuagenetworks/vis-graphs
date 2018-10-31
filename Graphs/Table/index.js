@@ -444,7 +444,7 @@ class Table extends AbstractGraph {
                         )
                     }
 
-                    if(columnData) {
+                    if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
                     }
                 }
@@ -483,15 +483,7 @@ class Table extends AbstractGraph {
     }
 
     handleStaticSorting(column, order) {
-        this.filterData = this.filterData.sort(
-            (a, b) => {
-                if (order === 'desc')
-                    return b[column] > a[column] ? 1 : -1
-
-                return a[column] > b[column] ? 1 : -1
-            }
-        );
-
+        this.filterData = _.orderBy(this.filterData, [column], [order]);
         /**
          * Resetting the paging due to sorting
          */
