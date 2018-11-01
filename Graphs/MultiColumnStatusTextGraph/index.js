@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import "../style.css";
@@ -77,7 +78,7 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
 }
 
 MultiColumnStatusTextGraph.propTypes = {
-    configuration: React.PropTypes.shape({})
+    configuration: PropTypes.shape({})
 };
 
 export default MultiColumnStatusTextGraph

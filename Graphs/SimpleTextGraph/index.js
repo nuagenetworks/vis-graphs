@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
@@ -213,7 +214,7 @@ class SimpleTextGraph extends AbstractGraph {
 }
 
 SimpleTextGraph.propTypes = {
-    configuration: React.PropTypes.object
+    configuration: PropTypes.object
 };
 
 export default SimpleTextGraph

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react'
 import DataTables from 'material-ui-datatables'
 import CopyToClipboard from 'react-copy-to-clipboard'
@@ -1017,8 +1018,8 @@ class Table extends AbstractGraph {
 }
 
 Table.propTypes = {
-    configuration: React.PropTypes.object,
-    response: React.PropTypes.object
+    configuration: PropTypes.object,
+    response: PropTypes.object
 };
 
 export default Table;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react'
 import * as d3 from 'd3'
 import _ from 'lodash'
@@ -661,8 +662,8 @@ class BarGraph extends XYGraph {
 }
 
 BarGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  data: React.PropTypes.arrayOf(React.PropTypes.object)
+  configuration: PropTypes.object,
+  data: PropTypes.arrayOf(PropTypes.object)
 }
 
 export default BarGraph

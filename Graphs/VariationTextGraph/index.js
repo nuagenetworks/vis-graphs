@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
@@ -205,8 +206,8 @@ export class VariationTextGraph extends AbstractGraph {
 }
 
 VariationTextGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  data: React.PropTypes.array
+  configuration: PropTypes.object,
+  data: PropTypes.array
 };
 
 export default VariationTextGraph;
