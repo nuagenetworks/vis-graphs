@@ -1,4 +1,5 @@
 
+import PropTypes from 'prop-types';
 import React from "react";
 import * as d3 from "d3";
 import _ from 'lodash';
@@ -453,10 +454,10 @@ class TreeGraph extends AbstractGraph {
     }
 }
 TreeGraph.propTypes = {
-    configuration: React.PropTypes.object,
-    response: React.PropTypes.object,
-    parseData: React.PropTypes.func,
-    fetchChildren: React.PropTypes.func,
+    configuration: PropTypes.object,
+    response: PropTypes.object,
+    parseData: PropTypes.func,
+    fetchChildren: PropTypes.func,
 };
 
 export default TreeGraph;
