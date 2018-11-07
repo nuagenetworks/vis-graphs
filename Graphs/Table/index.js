@@ -832,9 +832,9 @@ class Table extends AbstractGraph {
 
     // reset scroll data.
     resetScrollData() {
-
+        const { disableRefresh } = this.getConfiguredProperties();
         return (
-            this.scroll ?
+            this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
                     <IconButton
                         tooltip="Refresh"
