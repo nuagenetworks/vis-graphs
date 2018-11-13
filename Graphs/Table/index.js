@@ -345,6 +345,7 @@ class Table extends AbstractGraph {
                         sortable: columnRow.sort !== false,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                         columField: index,
+                        filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
                         style: {
                             textIndent: '2px'
@@ -586,7 +587,7 @@ class Table extends AbstractGraph {
                 return key
             }
         }
-        return false
+        return column;
     }
 
     getColumnNameByKey(key) {
@@ -693,13 +694,14 @@ class Table extends AbstractGraph {
         if(searchBar === false)
             return;
 
-        const search = searchString !== null ? searchString : searchText;
+        const search = searchString !== null ? searchString : searchText,
+            filteroption = headerData.filter( d => d.filter === true);
 
         return (
             <SearchBar
                 data={this.originalData}
                 searchText={search}
-                options={headerData}
+                options={filteroption}
                 handleSearch={this.handleSearch}
                 columns={this.getColumns()}
                 scroll={this.props.scroll}
