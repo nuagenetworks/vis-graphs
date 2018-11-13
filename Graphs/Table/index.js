@@ -13,7 +13,7 @@ import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
 import ClipboardIcon  from 'react-icons/lib/fa/clipboard';
-import EyeIcon  from 'react-icons/lib/fa/eye';
+import { FaRegEye as EyeIcon } from 'react-icons/fa';
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
