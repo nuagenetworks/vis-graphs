@@ -40,5 +40,22 @@ export default {
     },
     yLabelLimit: 20,
     appendCharLength: 3,
-    brushArea: 20 // // in percentage
+    brushArea: 20, // // in percentage
+    otherColors: [
+        theme.palette.bluePaleColor,
+        theme.palette.orangeLightColor,
+        theme.palette.blueLightColor,
+        theme.palette.pinkLightColor,
+        theme.palette.orangeLighterColor,
+        theme.palette.blackLightColor,
+        theme.palette.greenLightColor,
+        theme.palette.greyLightDarkColor,
+        theme.palette.blueviolet,
+        theme.palette.darkCyan,
+        theme.palette.peach,
+        theme.palette.aquaLightColor,
+        theme.palette.windowBodyColor,
+        theme.palette.orangeBlindColor,
+        theme.palette.mauveColor,
+    ],
 }
