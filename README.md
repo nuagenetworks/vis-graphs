@@ -545,3 +545,29 @@ or
 
 ```
 
+
+## *TreeGraph*
+This graph displays nested hierarchical data. It is used to show the relation between parent node and child nodes using a horizonal tree based layout.
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/treeGraph)
+
+![TreeGraph](https://user-images.githubusercontent.com/31058528/47505647-26a26c80-d88c-11e8-8306-1529702b0633.png)
+
+__data__ (Array of object) Nested hierarchical data passed into map to show tree view.
+
+__onClickChild__ (Function) Function that is called when any node is clicked. It is called with one argument, the node which was clicked. Typically it is used to fetch data from server and update the children of the node in tree data.
+
+```javascript
+const clickChild = (child) => {
+  const { name, children } = child;
+  // do something
+}
+```
+
+```html
+<TreeGraph onClickChild={clickChild} />
+```
+
+__width__ (Integer) Width of treemap area.
+
+__height__ (Integer) Height of treemap area.

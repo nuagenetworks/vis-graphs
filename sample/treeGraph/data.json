@@ -1,0 +1,52 @@
+[
+    {
+        "name": "Enterprise_1",
+        "children": [
+            {
+                "name": "L2_Domain_1",
+                "children": [
+                    {
+                        "name": "VPort_1",
+                        "children": []
+                    },
+                    {
+                        "name": "VPort_2",
+                        "children": [
+                            {
+                                "name": "VM_Interface_1",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "L2_Domain_2",
+                "children": [
+                    {
+                        "name": "VPort_3",
+                        "children": []
+                    }
+                ]
+            },        
+            {
+                "name": "L3_Domain_1",
+                "children": [
+                    {
+                        "name": "Zone_1",
+                        "children": [
+                            {
+                                "name": "Subnet_1",
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Zone_2",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    }
+]
