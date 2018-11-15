@@ -245,8 +245,8 @@ class TreeGraph extends AbstractGraph {
                 .append("g")
                 .attr("class", "page")
                 .attr("transform", (d) => {
-                    const x = (d.type == "next") ? p2.y : p1.y;
-                    const y = (d.type == "prev") ? (p2.x - 30) : (p1.x + 30);
+                    const x = (d.type === "next") ? p2.y : p1.y;
+                    const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 30);
                     return "translate(" + x + "," + y + ")";
                 }).on("click", this.paginate);
 
@@ -260,7 +260,7 @@ class TreeGraph extends AbstractGraph {
                 .append("image")
                 .attr("xlink:href", (d) => {
                     // TODO: Move icons inside vis-graphs repo
-                    if (d.type == "next") {
+                    if (d.type === "next") {
                         return "https://dl.dropboxusercontent.com/s/p7qjclv1ulvoqw3/icon1.png"
                     } else {
                         return "https://dl.dropboxusercontent.com/s/mdzt36poc1z39s3/icon3.png"
@@ -402,8 +402,7 @@ class TreeGraph extends AbstractGraph {
         // update graph
         const svg = this.getGraphContainer();;
 
-        let i = 0,
-            duration = 750;
+        let duration = 750;
 
         // ****************** links section ***************************
 
@@ -430,7 +429,7 @@ class TreeGraph extends AbstractGraph {
             });
 
         // Remove any exiting links
-        const linkExit = link.exit().transition()
+        link.exit().transition()
             .duration(duration)
             .attr('d', (d) => {
                 const o = { x: source.x, y: source.y }
