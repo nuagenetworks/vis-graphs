@@ -343,14 +343,15 @@ __tabifyOptions__ - Converting the provided array indexes to comma separated val
 
 ```javascript
 "tabifyOptions": {
-    "join": [
+    "concatenationFields": [
         {
             "path": "nuage_metadata.src-pgmem-info",
-            "field": "name"
+            "field": "name",
+            "method": "(obj) => `${obj.name} (${obj.category})`"
         },
         {
             "path": "nuage_metadata.dst-pgmem-info",
-            "field": "name"
+            "field": "category"
         }
     ]
 }
