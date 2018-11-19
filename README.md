@@ -339,6 +339,22 @@ __columns__ - (Array) Array of columns display in the table. Example -
         { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
     ]
 ```
+__tabifyOptions__ - Converting the provided array indexes to comma seprated values, instead of generating the multiple rows (avoiding possible duplicates). E.g -
+
+```javascript
+"tabifyOptions": {
+    "join": [
+        {
+            "path": "nuage_metadata.src-pgmem-info",
+            "field": "name"
+        },
+        {
+            "path": "nuage_metadata.dst-pgmem-info",
+            "field": "name"
+        }
+    ]
+}
+```
 
 In above example, if a value of the column show via colors then add colors property in object and mentioned all values as a key and color as a value in order to replace color from value. Note: Add label property with space to declare empty column in the table. E.g -
 
