@@ -36,7 +36,6 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "material-ui-superselectfield": "^1.9.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-filter-box": "^2.0.0",
-    "react-fontawesome": "1.3.1",
     "react-icons": "^2.2.7",
     "react-lightweight-tooltip": "0.0.4",
     "react-tap-event-plugin": "2.0.1",

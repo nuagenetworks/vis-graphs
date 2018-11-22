@@ -12,6 +12,7 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+import ClipboardIcon  from 'react-icons/lib/fa/clipboard';
 import EyeIcon  from 'react-icons/lib/fa/eye';
 
 import { theme } from "../../theme";
@@ -397,8 +398,12 @@ class Table extends AbstractGraph {
 
                         const hoverContent = (
                             <div key={`tooltip_${j}_${key}`}>
-                                {fullText}
-                                <CopyToClipboard text={fullText ? fullText.toString() : ''}><button title="copy" className="btn btn-link btn-xs fa fa-copy pointer text-white"></button></CopyToClipboard>
+                                {fullText} &nbsp;
+                                <CopyToClipboard text={fullText ? fullText.toString() : ''}>
+                                    <button style={{background: '#000', padding: 1}} title="copy">
+                                        <ClipboardIcon size={10} color="#fff" />
+                                    </button>
+                                </CopyToClipboard>
                             </div>
                         )
 
