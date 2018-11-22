@@ -48,8 +48,7 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-            innerWidth,
-            innerHeight,
+            dimension,
             targetedColumn,
             defaultFontSize
         } = this.getConfiguredProperties();
@@ -59,9 +58,9 @@ class SimpleTextGraph extends AbstractGraph {
 
         const text = this.displayText(data, targetedColumn) || 0
 
-        const blockWidth = width * innerWidth
-        const blockHeight = height * innerHeight
-        const textSize = this.state.fontSize * text.toString().length * 0.7
+        const blockWidth = width * dimension
+        const blockHeight = height * dimension
+        const textSize = this.state.fontSize * text.toString().length * 0.4
 
         if (text.toString().length <= 3 && this.state.fontSize !== defaultFontSize) {
             this.setState({
@@ -92,8 +91,8 @@ class SimpleTextGraph extends AbstractGraph {
             return;
 
         return (
-            <div className ={"simpleText"}
-            style={{ fontSize: labelFontSize }}>
+            <div className="simpleText"
+            style={{ fontSize: labelFontSize, marginBottom: 10 }}>
                 {this.currentTitle()}
             </div>
         );
@@ -118,18 +117,19 @@ class SimpleTextGraph extends AbstractGraph {
         return {};
     }
 
-    renderText = ({blockWidth,
-                      blockHeight,
-                      borderRadius,
-                      stroke,
-                      fontColor,
-                      padding,
-                      colors,
-                      cursor,
-                      data,
-                      targetedColumn,
-                      titlePosition
-                  }) => {
+    renderText = ({
+        blockWidth,
+        blockHeight,
+        borderRadius,
+        stroke,
+        fontColor,
+        colors,
+        cursor,
+        data,
+        padding,
+        targetedColumn,
+        titlePosition
+    }) => {
         return (
             <div style={{
                 width: blockWidth,
@@ -142,17 +142,17 @@ class SimpleTextGraph extends AbstractGraph {
                 fontSize: this.state.fontSize,
                 cursor: cursor,
                 margin: 'auto',
-                marginTop: 10
+                display: 'table',
             }}
             >
                 <div style={{
-                    marginLeft: "auto",
-                    marginRight: "auto",
                     width: blockWidth,
-                    padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
                     height: blockHeight,
+                    padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
                     display: "table-cell",
-                    verticalAlign: "middle"
+                    verticalAlign: "middle",
+                    textAlign: "center",
+                    whiteSpace: 'nowrap',
                 }}>
                     {this.displayText(data, targetedColumn)}
                     {this.renderTitleIfNeeded(titlePosition, "bottom")}
@@ -170,33 +170,22 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-            innerHeight,
-            innerWidth,
-            margin,
-            textAlign,
+            dimension,
             titlePosition,
-            labelFontSize
         } = this.getConfiguredProperties();
 
         if (!data || !data.length)
             return this.renderMessage('No data to visualize')
 
         const cursor = onMarkClick ? "pointer" : undefined
-        const blockWidth = width * innerWidth
-        const blockHeight = height * innerHeight
+        const blockWidth = width * dimension
+        const blockHeight = height * dimension
 
         return (
-            <div
-                style={{
-                    margin: [margin.top, margin.right, margin.bottom, margin.left].join(" "),
-                    textAlign: textAlign,
-                    display: "table",
-                    fontSize: labelFontSize
-                }}
+            <div className='center-text'
                 onClick={this.handleMarkerClick}
             >
                 {this.renderTitleIfNeeded(titlePosition, "top")}
-
                 {
                     this.renderText({
                         ...this.getConfiguredProperties(),
