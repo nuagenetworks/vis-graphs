@@ -2,9 +2,7 @@ import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
-
-import AngleDown  from 'react-icons/lib/fa/angle-down';
-import AngleUp  from 'react-icons/lib/fa/angle-up';
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 
 import style from "./styles"
 import {properties} from "./default.config"
@@ -128,7 +126,7 @@ export class VariationTextGraph extends AbstractGraph {
     }
 
     renderIcon(icon) {
-        return icon === 'up' ? <AngleUp size={20} /> : <AngleDown size={20} />;
+        return icon === 'up' ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />;
     }
 
     renderValues() {

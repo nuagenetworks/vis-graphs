@@ -12,8 +12,7 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
-import ClipboardIcon  from 'react-icons/lib/fa/clipboard';
-import { FaRegEye as EyeIcon } from 'react-icons/fa';
+import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -404,7 +403,7 @@ class Table extends AbstractGraph {
                                 {fullText} &nbsp;
                                 <CopyToClipboard text={fullText ? fullText.toString() : ''}>
                                     <button style={{background: '#000', padding: 1}} title="copy">
-                                        <ClipboardIcon size={10} color="#fff" />
+                                        <FaRegClipboard size={10} color="#fff" />
                                     </button>
                                 </CopyToClipboard>
                             </div>
