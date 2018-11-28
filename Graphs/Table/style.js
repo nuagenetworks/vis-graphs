@@ -8,7 +8,7 @@ const tableStyle = {
     },
     body: {
         overflowY: "auto",
-        overflowX: "hidden"
+        overflowX: "auto"
     },
     headerColumn: {
         fontSize: "12px", 

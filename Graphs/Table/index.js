@@ -276,7 +276,10 @@ class Table extends AbstractGraph {
     }
 
     checkFontsize() {
-        if(this.container && this.container.querySelector('table').clientWidth > this.container.clientWidth) {
+        if(this.container &&
+            this.container.querySelector('table').clientWidth > this.container.clientWidth &&
+            this.state.fontSize >= style.defaultFontsize
+        ) {
             this.decrementFontSize();
         }
     }
@@ -968,9 +971,9 @@ class Table extends AbstractGraph {
         tableData = this.removeHighlighter(tableData)
         
         let showFooter = (totalRecords >= pageSize && hidePagination === true) ? false : true,
-            heightMargin = showFooter ? 100 : 80;
+            heightMargin = showFooter ? 95 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
+        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin
         heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
         heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
 

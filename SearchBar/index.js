@@ -110,7 +110,7 @@ export default class SearchBar extends React.Component {
         } = this.props
 
         return (
-            <div style={{display: "flex", margin: "10px"}}>
+            <div style={{display: "flex", margin: "5px"}}>
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
