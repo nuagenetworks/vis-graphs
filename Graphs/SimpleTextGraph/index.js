@@ -48,7 +48,8 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-            dimension,
+            innerWidth,
+            innerHeight,
             targetedColumn,
             defaultFontSize
         } = this.getConfiguredProperties();
@@ -58,8 +59,8 @@ class SimpleTextGraph extends AbstractGraph {
 
         const text = this.displayText(data, targetedColumn) || 0
 
-        const blockWidth = width * dimension
-        const blockHeight = height * dimension
+        const blockWidth = width * innerWidth
+        const blockHeight = height * innerHeight
         const textSize = this.state.fontSize * text.toString().length * 0.4
 
         if (text.toString().length <= 3 && this.state.fontSize !== defaultFontSize) {
@@ -170,7 +171,8 @@ class SimpleTextGraph extends AbstractGraph {
         } = this.props;
 
         const {
-            dimension,
+            innerHeight,
+            innerWidth,
             titlePosition,
         } = this.getConfiguredProperties();
 
@@ -178,8 +180,8 @@ class SimpleTextGraph extends AbstractGraph {
             return this.renderMessage('No data to visualize')
 
         const cursor = onMarkClick ? "pointer" : undefined
-        const blockWidth = width * dimension
-        const blockHeight = height * dimension
+        const blockWidth = width * innerWidth
+        const blockHeight = height * innerHeight
 
         return (
             <div className='center-text'
