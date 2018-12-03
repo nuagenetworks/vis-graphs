@@ -103,11 +103,11 @@ class Table extends AbstractGraph {
         }
     }
 
-    getGraphProperties() {
+    getGraphProperties(props = this.props) {
         const {
             scrollData,
             data
-        } = this.props;
+        } = props;
 
         // Total, per page, current page must be set and only applicable for Table component only.
         return {
@@ -144,7 +144,7 @@ class Table extends AbstractGraph {
             currentPage,
             pageSize,
             size
-        } = this.getGraphProperties();
+        } = this.getGraphProperties(props);
 
         let startIndex = 0;
         let endIndex = size - 1;
