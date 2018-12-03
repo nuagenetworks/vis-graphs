@@ -25,6 +25,7 @@ export const convertElementToElastic = (elem) => {
     const element = elem.element;
     switch (element.operator) {
       case '==':
+      case '=':
         return {
           term: {
             [element.category]: element.value
