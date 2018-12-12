@@ -8,7 +8,8 @@ export const labelToField = (expression, columns) => {
           if(columns.hasOwnProperty(key)) {
             const column = columns[key];
             if(column.label === d.element.category || column.column === d.element.category) {
-              d.element.category = column.column
+              d.element.category = column.column;
+              d.element.nested = column.nested || false;
               break;
             }
           }
@@ -19,6 +20,66 @@ export const labelToField = (expression, columns) => {
   })
 }
 
+const getRandomNumber = () => Math.floor(Math.random() * 900000000);
+
+const isNestedElement = (elem) => {
+  return elem && elem.element && elem.element.nested;
+}
+
+// Get the nested path of the element after removing the field name
+const getNestedBasePath = (element) => {
+  return element.category.substr(0, element.category.lastIndexOf("."));
+}
+
+// Add element to already created nested element in must section
+const addToExistingNestedPath = (nestedObjects, elem) => {
+  const path = getNestedBasePath(elem.element);
+  nestedObjects[path].nested.query.bool.must.push(convertElementToElastic(elem));
+}
+
+// Create the nested template if path does't exists otherwise will return true
+const checkAndCreateNestedTemplate = (nestedObjects, elem) => {
+  const path = getNestedBasePath(elem.element);
+  if (nestedObjects[path]) {
+    return false;
+  }
+
+  // Will push the elments latter (Baic Template is created)
+  const template = getNestedTemplate(elem.element);
+  nestedObjects[path] = template;
+  return template;
+}
+
+const getNestedTemplate = (element) => {
+  const path = element.category.substr(0, element.category.lastIndexOf("."));
+  return {
+    nested: {
+      path,
+      query: {
+        bool: {
+          must: []
+        }
+      },
+      inner_hits: {
+        name: `${path}-${getRandomNumber()}`
+      }
+    }
+  };
+}
+
+// handling OR or Single element
+const convertElementToNestedElastic = (elem) => {
+  const query = getNestedTemplate(elem.element);
+  query.nested.query.bool.must.push(convertElementToElastic(elem))
+  return query;
+}
+
+const getOrBasedElement = (elem) => {
+  if (isNestedElement(elem)) {
+    return convertElementToNestedElastic(elem);
+  }
+  return convertElementToElastic(elem);
+}
 
 export const convertElementToElastic = (elem) => {
   if(elem.element && elem.element.operator) {
@@ -170,29 +231,69 @@ export const convertToPosfix = (expression) => {
 export const evaluateToElastic = (postfix) => {
   const stack = [];
 
-  if(postfix.length === 1) {
+  if (postfix.length === 1) {
+    const elem = postfix[0]
     return {
       'bool': {
         'must': [
-          convertElementToElastic(postfix[0])
+          getOrBasedElement(elem)
         ]
       }
     };
   }
 
+  let nestedObjects = {};
+
   postfix.forEach(elem => {
-    if(elem.element) {
+    if (elem.element) {
       stack.push(elem);
     } else {
-      const elem1 = stack.pop();
-      const elem2 = stack.pop();
 
-      const operator = elem.operator === 'AND' ? 'must' : 'should';
-      stack.push({
-        bool: {
-          [operator]: [convertElementToElastic(elem1), convertElementToElastic(elem2)]
+      const elem1 = stack.pop(),
+        elem2 = stack.pop(),
+        operator = elem.operator.toUpperCase() === 'AND' ? 'must' : 'should',
+        expressions = [];
+
+      if (operator === 'must') {
+        // If AND then then all the nested members must be grouped together.
+        if (isNestedElement(elem1)) {
+          // Creating the nested template
+          const template = checkAndCreateNestedTemplate(nestedObjects, elem1);
+          if(template) {
+            expressions.push(template)
+          }
+
+          // Pushing the element to template.
+          addToExistingNestedPath(nestedObjects, elem1);
+        } else {
+          // Directly create the mapping in case of "Non Nested Element"
+          expressions.push(convertElementToElastic(elem1))
         }
-      })
+
+        if (isNestedElement(elem2)) {
+          const template = checkAndCreateNestedTemplate(nestedObjects, elem2);
+          if(template) {
+            expressions.push(template)
+          }
+
+          addToExistingNestedPath(nestedObjects, elem2);
+        } else {
+          expressions.push(convertElementToElastic(elem2))
+        }
+      } else {
+        // Reset the Nested Objects in case of "OR" and will push the elements again
+        nestedObjects = {};
+        expressions.push(getOrBasedElement(elem1));
+        expressions.push(getOrBasedElement(elem2));
+      }
+
+      if (expressions.length) {
+        stack.push({
+          bool: {
+            [operator]: [...expressions]
+          }
+        })
+      }
     }
   });
 
