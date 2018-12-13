@@ -184,7 +184,7 @@ class SimpleTextGraph extends AbstractGraph {
         const blockHeight = height * innerHeight
 
         return (
-            <div className='center-text' id="simpletext-graph"
+            <div className='center-text simpleTextGraph'
                 onClick={this.handleMarkerClick}
             >
                 {this.renderTitleIfNeeded(titlePosition, "top")}

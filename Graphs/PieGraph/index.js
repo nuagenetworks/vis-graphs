@@ -166,7 +166,7 @@ export default class PieGraph extends AbstractGraph {
             <div className="pie-graph">
                 {this.tooltip}
                 <svg width={ width } height={ height }>
-                    <g id = {'pie-graph'} transform={ `translate(${ width / 2 }, ${ height / 2 })` } >
+                    <g className = {'pieGraph'} transform={ `translate(${ width / 2 }, ${ height / 2 })` } >
                         {
                             slices.map((slice, i) => {
                                 const d = slice.data;

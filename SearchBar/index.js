@@ -113,7 +113,7 @@ export default class SearchBar extends React.Component {
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
-                <div className="filter" id="search">
+                <div className="filter search">
                     <ReactFilterBox
                         ref="filterBox"
                         data={data}
