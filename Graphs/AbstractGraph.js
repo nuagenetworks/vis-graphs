@@ -297,7 +297,7 @@ export default class AbstractGraph extends React.Component {
             let top = height - (margin.bottom + ((data.length - 1) * lineHeight));
 
             return (
-                <g>
+                <g className ={'legend'}>
                     {data.map((d, i) => {
                         const x = left;
                         const y = top + (i * lineHeight);

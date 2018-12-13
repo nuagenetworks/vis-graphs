@@ -185,7 +185,7 @@ class SimpleTextGraph extends AbstractGraph {
         const blockHeight = height * innerHeight
 
         return (
-            <div
+            <div id="simpletext-graph"
                 style={{
                     margin: [margin.top, margin.right, margin.bottom, margin.left].join(" "),
                     textAlign: textAlign,
