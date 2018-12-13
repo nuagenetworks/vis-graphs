@@ -508,10 +508,8 @@ export default class AbstractGraph extends React.Component {
     // to show message at the center of container
     renderMessage(message) {
         return (
-            <div style={{ display: "table", width: this.props.width, height: this.props.height }}>
-                <div className="center-content">
-                    {message}
-                </div>
+            <div className="center-text">
+                {message}
             </div>
         )
     }

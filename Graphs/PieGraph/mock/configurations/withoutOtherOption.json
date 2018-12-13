@@ -16,5 +16,13 @@
             "circleSize": 4,
             "labelOffset": 2
         }
-    }
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/medalsPerCountry",
+            "params": {
+                "app": "value"
+            }
+        }
+    ]
 }

@@ -1,8 +1,9 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 
-import FontAwesome from "react-fontawesome";
 import style from "./styles"
 import {properties} from "./default.config"
 import { format, timeFormat } from "d3";
@@ -19,7 +20,7 @@ export class VariationTextGraph extends AbstractGraph {
         super(props, properties);
         this.settings = {
             colors: null,
-            icon: 'minus',
+            icon: 'down',
             values: null
         }
     }
@@ -48,13 +49,13 @@ export class VariationTextGraph extends AbstractGraph {
         this.settings.colors = drawColors;
 
         if (this.settings.values.variation > 0){
-            this.settings.icon = "caret-up";
             this.settings.colors = positiveColors;
+            this.settings.icon = 'up';
         }
 
         if (this.settings.values.variation < 0){
-            this.settings.icon = "caret-down";
             this.settings.colors = negativeColors;
+            this.settings.icon = 'down';
         }
 
         /**
@@ -124,6 +125,10 @@ export class VariationTextGraph extends AbstractGraph {
         return (target.format) ? this.formattedValue(x, target.format) : this.numberWithCommas(x);
     }
 
+    renderIcon(icon) {
+        return icon === 'up' ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />;
+    }
+
     renderValues() {
         if(!this.settings.values)
             return;
@@ -156,14 +161,12 @@ export class VariationTextGraph extends AbstractGraph {
 
             <div style={{height: "100%"}}>
                 <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
-                    <FontAwesome
-                        name={this.settings.icon}
-                        style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}
-                        >
+                    <div style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}>
                         <div style={Object.assign({}, style.labelText, fullScreenFont)}>
+                            { this.renderIcon(this.settings.icon) } <br/>
                             {`${this.decimals(this.settings.values.variation)}%`}
                         </div>
-                    </FontAwesome>
+                    </div>
                 </span>
                 <span style={Object.assign({}, style.infoBoxText, fullScreenFont)}>
                     {info}
@@ -205,8 +208,8 @@ export class VariationTextGraph extends AbstractGraph {
 }
 
 VariationTextGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  data: React.PropTypes.array
+  configuration: PropTypes.object,
+  data: PropTypes.array
 };
 
 export default VariationTextGraph;

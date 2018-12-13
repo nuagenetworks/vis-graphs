@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 
 import AbstractGraph from "../AbstractGraph";
@@ -199,8 +200,8 @@ export default class ChordGraph extends AbstractGraph {
     }
 }
 ChordGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  data: React.PropTypes.array
+  configuration: PropTypes.object,
+  data: PropTypes.array
 };
 
 
@@ -266,13 +267,13 @@ function ChordDiagram(svg){
       color  = d3.scaleOrdinal(),
       arc    = d3.arc();
 
-  // Compute a color scheme from d3.schemeCategory20 such that
+  // Compute a color scheme from d3.schemePaired such that
   // distinct dark colors come first, then light colors later.
-  var darkColors = d3.schemeCategory20.filter(function(d, i){
-    return i % 2 - 1;
-  });
-  var lightColors = d3.schemeCategory20.filter(function(d, i){
+  var darkColors = d3.schemePaired.filter(function(d, i){
     return i % 2;
+  });
+  var lightColors = d3.schemePaired.filter(function(d, i){
+    return i % 2 + 1;
   });
   var colors = darkColors.concat(lightColors);
 

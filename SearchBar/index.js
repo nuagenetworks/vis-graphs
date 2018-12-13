@@ -7,10 +7,8 @@ import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
-import CheckCircle  from 'react-icons/lib/fa/check-circle';
-import TimeCircle  from 'react-icons/lib/fa/times-circle';
-import SearchIcon  from 'react-icons/lib/fa/search';
-  
+import { FaRegSmile as SmileUp, FaRegFrown as SmileDown } from 'react-icons/fa';
+
 export default class SearchBar extends React.Component {
     constructor(props) {
         super(props)
@@ -45,7 +43,7 @@ export default class SearchBar extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return !_.isEqual(nextProps.data, this.props.data)
-          || !_.isEqual(nextState, this.state)
+            || !_.isEqual(nextState, this.state)
     }
 
     componentDidUpdate () {
@@ -77,22 +75,16 @@ export default class SearchBar extends React.Component {
 
         if (!_.isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
+            clearTimeout(this.setTimeout);
 
-            if (this.props.searchText) {
-                const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                this.props.handleSearch(filteredData, this.state.isOk)
-            } else { 
-                console.error("test")
-                clearTimeout(this.setTimeout)
-                this.setTimeout = setTimeout(() => {
-                    if (scroll) {
-                        this.props.handleSearch(data, this.state.isOk, expressions, this.query)
-                    } else {
-                        const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                        this.props.handleSearch(filteredData, this.state.isOk)
-                    }
-                }, 1500);
-            }
+            this.setTimeout = setTimeout(() => {
+                if (scroll) {
+                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+                } else {
+                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                    this.props.handleSearch(filteredData, this.state.isOk)
+                }
+            }, 1000);
         }
     }
 
@@ -102,8 +94,8 @@ export default class SearchBar extends React.Component {
             marginLeft: 5
         }
 
-        return this.state.isOk ? <CheckCircle size={20} color="green" style={style}/> : 
-        <TimeCircle size={20} style={style} color="#a94442" />
+        return this.state.isOk ? <SmileUp size={20} color="green" style={style}/> :
+        <SmileDown size={20} style={style} color="#a94442" />
     }
 
     render() {
@@ -117,33 +109,25 @@ export default class SearchBar extends React.Component {
         } = this.props
 
         return (
-           
-        <div style={{display: "flex", margin: "10px"}}>
-            <div className="search-label">
-                Search: &nbsp;
+            <div style={{display: "flex", margin: "5px"}}>
+                <div className="search-label">
+                    Search: &nbsp;
+                </div>
+                <div className="filter" id="search">
+                    <ReactFilterBox
+                        ref="filterBox"
+                        data={data}
+                        onChange={this.onChange}
+                        autoCompleteHandler={this.autoCompleteHandler}
+                        query={query}
+                        options={options}
+                        onParseOk={this.onParseOk}
+                    />
+                    <div className="filter-icon">
+                        { this.renderIcon() }
+                    </div>
+                </div>
             </div>
-            <div className="filter" id="search">
-                <ReactFilterBox
-                    ref="filterBox"
-                    data={data}
-                    onChange={this.onChange}
-                    autoCompleteHandler={this.autoCompleteHandler}
-                    query={query}
-                    options={options}
-                    onParseOk={this.onParseOk}
-                />
-
-                <div className="filter-icon">
-                { this.renderIcon() }
-                </div>    
-            </div>
-            
-            <div style={{flex: "none"}}>
-                <button type="submit" className="search-btn pull-left" disabled={!this.state.isOk}>
-                    <SearchIcon size={16} color="#555555" />
-                </button>
-            </div>
-        </div>
         )
     }
 }

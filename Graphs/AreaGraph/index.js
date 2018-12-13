@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react'
 import XYGraph from '../XYGraph'
 import ReactTooltip from 'react-tooltip'
@@ -633,8 +634,8 @@ class AreaGraph extends XYGraph {
 }
 
 AreaGraph.propTypes = {
-    configuration: React.PropTypes.object,
-    response: React.PropTypes.object
+    configuration: PropTypes.object,
+    response: PropTypes.object
 };
 
 export default AreaGraph

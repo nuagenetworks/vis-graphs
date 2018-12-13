@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react'
 import DataTables from 'material-ui-datatables'
 import CopyToClipboard from 'react-copy-to-clipboard'
@@ -11,7 +12,7 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
-import EyeIcon  from 'react-icons/lib/fa/eye';
+import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
@@ -101,11 +102,11 @@ class Table extends AbstractGraph {
         }
     }
 
-    getGraphProperties() {
+    getGraphProperties(props = this.props) {
         const {
             scrollData,
             data
-        } = this.props;
+        } = props;
 
         // Total, per page, current page must be set and only applicable for Table component only.
         return {
@@ -142,7 +143,7 @@ class Table extends AbstractGraph {
             currentPage,
             pageSize,
             size
-        } = this.getGraphProperties();
+        } = this.getGraphProperties(props);
 
         let startIndex = 0;
         let endIndex = size - 1;
@@ -274,7 +275,10 @@ class Table extends AbstractGraph {
     }
 
     checkFontsize() {
-        if(this.container && this.container.querySelector('table').clientWidth > this.container.clientWidth) {
+        if(this.container &&
+            this.container.querySelector('table').clientWidth > this.container.clientWidth &&
+            this.state.fontSize >= style.defaultFontsize
+        ) {
             this.decrementFontSize();
         }
     }
@@ -294,7 +298,7 @@ class Table extends AbstractGraph {
                 const search = labelToField(expandExpression(expression), this.getKeyColumns())
                 this.filterData = data;
 
-                if(searchString !== searchText) {
+                if(!searchText || searchString !== searchText) {
                     this.updateTableStatus({search, searchText , selectedRows: {}, currentPage: 1, event: events.SEARCH})
                 }
             } else {
@@ -336,14 +340,15 @@ class Table extends AbstractGraph {
         let headerData = []
         for(let index in columns) {
             if(columns.hasOwnProperty(index)) {
-                const columnRow = columns[index]
+                const columnRow = columns[index];
                 if(this.state.columns.filter( d => d.value === columnRow.label).length) {
                     headerData.push({
                         key: index,
                         label: columnRow.label || columnRow.column,
-                        sortable: true,
+                        sortable: columnRow.sort !== false,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                         columField: index,
+                        filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
                         style: {
                             textIndent: '2px'
@@ -395,8 +400,12 @@ class Table extends AbstractGraph {
 
                         const hoverContent = (
                             <div key={`tooltip_${j}_${key}`}>
-                                {fullText}
-                                <CopyToClipboard text={fullText ? fullText.toString() : ''}><button title="copy" className="btn btn-link btn-xs fa fa-copy pointer text-white"></button></CopyToClipboard>
+                                {fullText} &nbsp;
+                                <CopyToClipboard text={fullText ? fullText.toString() : ''}>
+                                    <button style={{background: '#000', padding: 1}} title="copy">
+                                        <FaRegClipboard size={10} color="#fff" />
+                                    </button>
+                                </CopyToClipboard>
                             </div>
                         )
 
@@ -444,7 +453,7 @@ class Table extends AbstractGraph {
                         )
                     }
 
-                    if(columnData) {
+                    if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
                     }
                 }
@@ -483,15 +492,7 @@ class Table extends AbstractGraph {
     }
 
     handleStaticSorting(column, order) {
-        this.filterData = this.filterData.sort(
-            (a, b) => {
-                if (order === 'desc')
-                    return b[column] > a[column] ? 1 : -1
-
-                return a[column] > b[column] ? 1 : -1
-            }
-        );
-
+        this.filterData = _.orderBy(this.filterData, [column], [order]);
         /**
          * Resetting the paging due to sorting
          */
@@ -593,7 +594,7 @@ class Table extends AbstractGraph {
                 return key
             }
         }
-        return false
+        return column;
     }
 
     getColumnNameByKey(key) {
@@ -700,13 +701,14 @@ class Table extends AbstractGraph {
         if(searchBar === false)
             return;
 
-        const search = searchString !== null ? searchString : searchText;
+        const search = searchString !== null ? searchString : searchText,
+            filteroption = headerData.filter( d => d.filter === true);
 
         return (
             <SearchBar
                 data={this.originalData}
                 searchText={search}
-                options={headerData}
+                options={filteroption}
                 handleSearch={this.handleSearch}
                 columns={this.getColumns()}
                 scroll={this.props.scroll}
@@ -839,9 +841,9 @@ class Table extends AbstractGraph {
 
     // reset scroll data.
     resetScrollData() {
-
+        const { disableRefresh } = this.getConfiguredProperties();
         return (
-            this.scroll ?
+            this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
                     <IconButton
                         tooltip="Refresh"
@@ -946,7 +948,9 @@ class Table extends AbstractGraph {
             hidePagination,
             searchBar,
             selectColumnOption,
-            searchText
+            searchText,
+            tableHeaderStyle,
+            tableRowColumnStyle
         } = this.getConfiguredProperties();
 
         const {
@@ -966,9 +970,9 @@ class Table extends AbstractGraph {
         tableData = this.removeHighlighter(tableData)
         
         let showFooter = (totalRecords >= pageSize && hidePagination === true) ? false : true,
-            heightMargin = showFooter ? 100 : 80;
+            heightMargin = showFooter ? 95 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.3 : heightMargin
+        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin
         heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
         heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
 
@@ -1009,8 +1013,9 @@ class Table extends AbstractGraph {
                                 rowSize={pageSize}
                                 tableStyle={style.table}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
+                                tableHeaderStyle={tableHeaderStyle}
                                 tableRowStyle={style.row}
-                                tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize})}
+                                tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
                                 footerToolbarStyle={style.footerToolbar}
                             />
@@ -1022,8 +1027,8 @@ class Table extends AbstractGraph {
 }
 
 Table.propTypes = {
-    configuration: React.PropTypes.object,
-    response: React.PropTypes.object
+    configuration: PropTypes.object,
+    response: PropTypes.object
 };
 
 export default Table;

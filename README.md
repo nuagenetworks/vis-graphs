@@ -36,13 +36,16 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "material-ui-superselectfield": "^1.9.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-filter-box": "^2.0.0",
-    "react-fontawesome": "1.3.1",
     "react-icons": "^2.2.7",
     "react-lightweight-tooltip": "0.0.4",
     "react-tap-event-plugin": "2.0.1",
     "react-tooltip": "^3.2.1",
     "object-path": "^0.11.4",
-    "react-google-maps": "^9.4.5"
+    "react-google-maps": "^9.4.5",
+    "prop-types": "^15.6.2",
+    "react-csv": "1.0.8",
+    "react-copy-to-clipboard": "^4.3.1",
+    "react-modal": "^3.5.1",
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
@@ -326,12 +329,33 @@ __columns__ - (Array) Array of columns display in the table. Example -
         { "column": "type", "label": " ", "colors" : {
             "OTHER": "green",
             "DENY": "red"
-            }
+            },
+            "sort": false, // to disable sorting on column
+            "filter": false, // hide column from search bar to filter data
+            "nested": true // to enable searching on nested column of ElasticSearch query. It is applicable
+            // on columns which have nested type template on ElasticSearch
         },
         { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
         { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
     ]
+```
+__tabifyOptions__ - Converting the provided array indexes to comma separated values, instead of generating the multiple rows (avoiding possible duplicates). E.g -
+
+```javascript
+"tabifyOptions": {
+    "concatenationFields": [
+        {
+            "path": "nuage_metadata.src-pgmem-info",
+            "field": "name",
+            "method": "(obj) => `${obj.name} (${obj.category})`"
+        },
+        {
+            "path": "nuage_metadata.dst-pgmem-info",
+            "field": "category"
+        }
+    ]
+}
 ```
 
 In above example, if a value of the column show via colors then add colors property in object and mentioned all values as a key and color as a value in order to replace color from value. Note: Add label property with space to declare empty column in the table. E.g -
@@ -501,7 +525,7 @@ __filters__ - List down columns in search bar
             },
             {
                 "columField": "status",
-                "type": "selection" // for `selection`, columnText must be empty and value of status field should be string
+                "type": "selection" // for `selection`, value of status field should be string
             }
 
         ]
@@ -540,3 +564,29 @@ or
 
 ```
 
+
+## *TreeGraph*
+This graph displays nested hierarchical data. It is used to show the relation between parent node and child nodes using a horizonal tree based layout.
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/treeGraph)
+
+![TreeGraph](https://user-images.githubusercontent.com/31058528/47505647-26a26c80-d88c-11e8-8306-1529702b0633.png)
+
+__data__ (Array of object) Nested hierarchical data passed into map to show tree view.
+
+__onClickChild__ (Function) Function that is called when any node is clicked. It is called with one argument, the node which was clicked. Typically it is used to fetch data from server and update the children of the node in tree data.
+
+```javascript
+const clickChild = (child) => {
+  const { name, children } = child;
+  // do something
+}
+```
+
+```html
+<TreeGraph onClickChild={clickChild} />
+```
+
+__width__ (Integer) Width of treemap area.
+
+__height__ (Integer) Height of treemap area.

@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar } from '../testHelper';
 import BarGraph from '.';
@@ -752,6 +753,37 @@ describe("Bar Graph", () => {
                 $ = getHtml(horizontalBrush, '.legend');
                 const legend = $('.legend').children().length;
                 expect(legend).toEqual(12);
+            });
+        });
+
+        describe("Click Event", () => {
+            let barGraph;
+            const mockCallBack = jest.fn();
+            const element = document.createElement("div");
+            beforeAll((done) => {
+                document.body.appendChild(element);
+                barGraph = ReactDOM.render(
+                    <BarGraph
+                        width={500}
+                        height={500}
+                        configuration={config.verticalNumber}
+                        data={config.data}
+                        onMarkClick={mockCallBack}
+                    />,
+                    element
+                )
+                setTimeout(() => {
+                    done();
+                }, 1000);
+            });
+
+            afterAll(() => {
+                document.body.removeChild(element);
+            });
+
+            it("Click On Bar", () => {
+                element.querySelector('rect').click();
+                expect(mockCallBack).toHaveBeenCalled();
             });
         });
     });

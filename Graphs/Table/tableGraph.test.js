@@ -1,11 +1,11 @@
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-
+import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-injectTapEventPlugin();
-
-import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn } from '../testHelper';
+import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn, checkTime } from '../testHelper';
 import Table from '.';
+
+injectTapEventPlugin();
 
 const cheerio = require('cheerio');
 
@@ -58,8 +58,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -69,8 +70,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -133,8 +135,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -144,8 +147,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -204,9 +208,10 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
                 "",
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -216,9 +221,10 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
                 "",
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -266,8 +272,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -277,8 +284,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -330,8 +338,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(25008863469);
             const firstRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -341,8 +350,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -405,8 +415,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(25008863469);
             const firstRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -416,8 +427,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -480,8 +492,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -491,8 +504,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -555,8 +569,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -566,8 +581,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(35008863469);
             const secondRow = [
-                "Feb 10, 71 10:11:03 AM",
+                date,
                 "Application",
                 "300.54545454545456",
                 "2422791762"
@@ -626,8 +642,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -637,8 +654,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -692,8 +710,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testin...",
                 "200.54545454545456",
                 "2422791762"
@@ -703,8 +722,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Develo...",
                 "300.54545454545456",
                 "2422791762"
@@ -753,8 +773,9 @@ describe("Table", () => {
 
         it("First Row Data", () => {
             const value = checkRowData($);
+            const date = checkTime(15008863469);
             const firstRow = [
-                "Jun 23, 70 10:37:43 PM",
+                date,
                 "Testing",
                 "200.54545454545456",
                 "2422791762"
@@ -764,8 +785,9 @@ describe("Table", () => {
 
         it("Second Row Data", () => {
             const value = checkRowData($, "second");
+            const date = checkTime(25008863469);
             const secondRow = [
-                "Oct 17, 70 4:24:23 PM",
+                date,
                 "Developing",
                 "300.54545454545456",
                 "2422791762"
@@ -792,5 +814,42 @@ describe("Table", () => {
             const next = page('table').parent().parent().next().find('button').next().attr('disabled');
             expect(next).toEqual(undefined);
         })
+    });
+
+    describe("Click Event", () => {
+        let table;
+        const mockCallBack = jest.fn();
+        const handleRowSelection = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            table = ReactDOM.render(
+                <Table
+                    width={500}
+                    height={500}
+                    configuration={config.pagination}
+                    data={config.data}
+                    onRowSelection={handleRowSelection}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On Table", (done) => {
+            element.querySelector('td').click();
+            setTimeout(() => {
+                done();
+                expect(handleRowSelection).toHaveBeenCalled();
+                expect(mockCallBack).toHaveBeenCalled();
+            }, 1000);
+        });
     });
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import ReactDOM from 'react-dom';
 
 import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import HeatmapGraph from '.';
@@ -158,6 +159,37 @@ describe("HeatmapGraph", () => {
             $ = getHtml(withoutBrush, '.legend');
             const legend = $('.legend').children().length;
             expect(legend).toEqual(3);
+        });
+    });
+
+    describe("Click Event", () => {
+        let heatmapGraph;
+        const mockCallBack = jest.fn();
+        const element = document.createElement("div");
+        beforeAll((done) => {
+            document.body.appendChild(element);
+            heatmapGraph = ReactDOM.render(
+                <HeatmapGraph
+                    width={500}
+                    height={500}
+                    configuration={config.withoutBrush}
+                    data={config.data}
+                    onMarkClick={mockCallBack}
+                />,
+                element
+            )
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        afterAll(() => {
+            document.body.removeChild(element);
+        });
+
+        it("Click On Bar", () => {
+            element.querySelector('rect').click();
+            expect(mockCallBack).toHaveBeenCalled();
         });
     });
 });

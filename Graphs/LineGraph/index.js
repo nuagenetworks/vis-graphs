@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from "react";
 import {
     axisBottom,
@@ -466,8 +467,8 @@ class LineGraph extends XYGraph {
     }
 }
 LineGraph.propTypes = {
-  configuration: React.PropTypes.object,
-  response: React.PropTypes.object
+  configuration: PropTypes.object,
+  response: PropTypes.object
 };
 
 export default LineGraph
