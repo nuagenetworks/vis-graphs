@@ -185,7 +185,7 @@ export default class PieGraph extends AbstractGraph {
                                   : "middle"
                                 );
 
-                                return <g key={i} >
+                                return <g className="section" key={i} >
                                     <path
                                       d={ arc(slice) }
                                       fill={ getColor(d) }
