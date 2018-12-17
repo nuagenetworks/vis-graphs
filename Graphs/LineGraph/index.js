@@ -418,7 +418,7 @@ class LineGraph extends XYGraph {
                               />
                           )}
                         </g>
-                        <g>
+                        <g className= {"lineGraph"}>
                           {tooltipOverlay.map((d, i) =>
                               <g
                                   key={ i }
