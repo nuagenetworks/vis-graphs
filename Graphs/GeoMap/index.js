@@ -158,7 +158,7 @@ class GeoMap extends AbstractGraph {
           ))
       }
       return (
-          <div class={'geoGraph'} style={{display: 'table'}}>
+          <div className={'geoGraph'} style={{display: 'table'}}>
               {
                 displayInfo([
                     {label: 'NSG', text: data[nameColumn]},
