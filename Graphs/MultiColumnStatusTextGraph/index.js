@@ -11,11 +11,6 @@ import SimpleTextGraph from "../SimpleTextGraph";
 
 class MultiColumnStatusTextGraph extends SimpleTextGraph {
 
-    renderTitleIfNeeded = (requestedPosition, currentPosition) => {
-        const { disableTitle } = this.getConfiguredProperties();
-        return disableTitle ? "" : super.renderTitleIfNeeded(requestedPosition, currentPosition);
-    }
-
     renderText = ({
                   blockWidth,
                   blockHeight,
@@ -45,7 +40,7 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                             background: colors[index],
                             display: "inline-block",
                             verticalAlign: "middle",
-                            margin: "0 15px 0 0"
+                            margin: "0 25px 0 0"
                         }}
                         >
                             <div style={{
@@ -71,7 +66,6 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
         return (
             <div>
                 {columns}
-                {this.renderTitleIfNeeded(titlePosition, "bottom")}
             </div>
         )
     }
