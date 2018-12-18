@@ -1,0 +1,46 @@
+{
+    "id": "test-port-graph",
+    "graph": "PortGraph",
+    "title": "TEST PORT GRAPH",
+    "description": "Display test port graph data",
+    "author": "ANIL CHAUHAN",
+    "creationDate": "12/11/2018",
+    "query": "test-port-graph",
+    "data": {
+        "columns": [
+            {
+                "column": "name",
+                "label": "Name"
+            },
+            {
+                "column": "status",
+                "label": "Status"
+            }
+        ],
+        "portName": "name",
+        "portColor": {
+            "defaultColor": "gray",
+            "field": "status",
+            "criteria": [
+                {
+                    "value": "UP",
+                    "color": "green"
+                },
+                {
+                    "value": "DOWN",
+                    "color": "red"
+                }
+            ]
+        },
+        "tooltip": [
+            {
+                "column": "name",
+                "label": "Name"
+            },
+            {
+                "column": "status",
+                "label": "Status"
+            }
+        ]
+    }
+}

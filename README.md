@@ -21,6 +21,8 @@ The use of the graphs module is to provide a module to quickly shows your data i
       - [AreaGraph](#areagraph)
       - [GuageGraph](#guagegraph)
       - [Geomap] (#geomap)
+      - [TreeGraph] (#treegraph)
+      - [PortGraph] (#portgraph)
 
 
 ## Requirement-
@@ -590,3 +592,43 @@ const clickChild = (child) => {
 __width__ (Integer) Width of treemap area.
 
 __height__ (Integer) Height of treemap area.
+
+## *PortGraph*
+This graph displays the information of networking ports.
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/portGraph)
+
+![PortGraph](https://user-images.githubusercontent.com/26645756/50140501-edeea480-02ca-11e9-8c66-a7bf349bbbb2.png)
+
+__columns__ (array of object) data to show "key: value" information at top of the ports in graph. __Note:__ this data should come from secondary query source named "data2".
+
+__portName__ (string) field for the port name
+
+__portColor__ (object) define the criteria to show the color of each port icon as per defined condition. E.g -
+
+```javascript
+"portColor": {
+    "defaultColor": "gray",
+    "field": "status",
+    "criteria": [
+        {
+            "value": "UP",
+            "color": "green"
+        },
+        {
+            "value": "DOWN",
+            "color": "red"
+        }
+    ]
+}
+```
+
+__defaultIconColor__ (string) default color of the port icon. Default is gray .
+
+__minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (px).
+
+__maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
+
+__minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
+
+__rowLimit__ (number) show number of ports in each row. Default is 8.

@@ -13,8 +13,8 @@ import Table from "./Table"
 import GeoMap from "./GeoMap"
 import MultiColumnStatusTextGraph from './MultiColumnStatusTextGraph'
 import TreeGraph from './TreeGraph'
+import PortGraph from './PortGraph'
 
-import { theme } from "../theme"
 
 /*
     Stores all graphs.
@@ -35,6 +35,7 @@ let registry = {
     GeoMap,
     MultiColumnStatusTextGraph,
     TreeGraph,
+    PortGraph,
 };
 
 /*
