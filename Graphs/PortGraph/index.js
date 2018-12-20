@@ -95,10 +95,12 @@ class PortGraph extends XYGraph {
     }
 
     // get port name
-    getPortName(row = {}) {
-        const { portName } = this.getConfiguredProperties();
+    getPortAttribute(row = {}, attributeType) {
+        const configuration = this.getConfiguredProperties();
 
-        return objectPath.get(row, portName) || '';
+        const attribute = configuration[attributeType];
+
+        return objectPath.get(row, attribute) || '';
     }
 
     // icon to show port status
@@ -157,10 +159,11 @@ class PortGraph extends XYGraph {
                                                     minWidth: this.state.portAreaWidth,
                                                 }}
                                             >
-                                                {this.getPortName(data)}
+                                                {this.getPortAttribute(data, 'topColumn')}
                                                 <div style={{ borderRight: (i % rowCount) < (rowCount - 1) ? styles.borderRight : '' }}>
                                                     {this.getIcon(data)}
                                                 </div>
+                                                {this.getPortAttribute(data), 'bottomColumn'}
                                             </div>
                                         )
                                     })

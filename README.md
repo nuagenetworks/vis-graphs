@@ -20,9 +20,9 @@ The use of the graphs module is to provide a module to quickly shows your data i
       - [HeatmpaGraph](#heatmapgraph)
       - [AreaGraph](#areagraph)
       - [GuageGraph](#guagegraph)
-      - [Geomap] (#geomap)
-      - [TreeGraph] (#treegraph)
-      - [PortGraph] (#portgraph)
+      - [GeoMap](#geomap)
+      - [TreeGraph](#treegraph)
+      - [PortGraph](#portgraph)
 
 
 ## Requirement-
@@ -48,6 +48,7 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "react-csv": "1.0.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-modal": "^3.5.1",
+    "eval-expression": "^1.0.0"
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
@@ -602,7 +603,9 @@ This graph displays the information of networking ports.
 
 __columns__ (array of object) data to show "key: value" information at top of the ports in graph. __Note:__ this data should come from secondary query source named "data2".
 
-__portName__ (string) field for the port name
+__topColumn__ (string) the name of the column to use for the data on top of port icon
+
+__bottomColumn__ (string) the name of the column to use for the data below port icon
 
 __portColor__ (object) define the criteria to show the color of each port icon as per defined condition. E.g -
 
