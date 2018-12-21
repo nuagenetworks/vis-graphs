@@ -430,6 +430,7 @@ class BarGraph extends XYGraph {
     newBars.append('rect')
       .style('stroke', stroke.color)
       .style('stroke-width', stroke.width)
+      .attr('class',"section")
 
     const allBars = newBars.merge(bars)
     const nestedBars = allBars.selectAll('rect')

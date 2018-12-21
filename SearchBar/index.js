@@ -7,8 +7,7 @@ import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
-import SmileUp  from 'react-icons/lib/fa/smile-o';
-import SmileDown  from 'react-icons/lib/fa/frown-o';
+import { FaRegSmile as SmileUp, FaRegFrown as SmileDown } from 'react-icons/fa';
 
 export default class SearchBar extends React.Component {
     constructor(props) {
@@ -114,7 +113,7 @@ export default class SearchBar extends React.Component {
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
-                <div className="filter">
+                <div className="filter search">
                     <ReactFilterBox
                         ref="filterBox"
                         data={data}

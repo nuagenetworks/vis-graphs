@@ -166,7 +166,7 @@ export default class PieGraph extends AbstractGraph {
             <div className="pie-graph">
                 {this.tooltip}
                 <svg width={ width } height={ height }>
-                    <g transform={ `translate(${ width / 2 }, ${ height / 2 })` } >
+                    <g className = {'pieGraph'} transform={ `translate(${ width / 2 }, ${ height / 2 })` } >
                         {
                             slices.map((slice, i) => {
                                 const d = slice.data;
@@ -185,7 +185,7 @@ export default class PieGraph extends AbstractGraph {
                                   : "middle"
                                 );
 
-                                return <g key={i} >
+                                return <g className="section" key={i} >
                                     <path
                                       d={ arc(slice) }
                                       fill={ getColor(d) }
