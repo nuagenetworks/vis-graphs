@@ -21,6 +21,7 @@ export default class PieGraph extends AbstractGraph {
         const {
             stroke,
             colorColumn,
+            labelColumn,
             colors,
             legendColumn,
             emptyBoxColor
@@ -33,6 +34,8 @@ export default class PieGraph extends AbstractGraph {
                 value = d[legendColumn]
             } else if (d.hasOwnProperty(colorColumn)) {
                 value = d[colorColumn]
+            } else if (d.hasOwnProperty(labelColumn)) {
+                value = d[labelColumn]
             } else if (d.hasOwnProperty("key")) {
                 value = d["key"]
             }
@@ -75,7 +78,8 @@ export default class PieGraph extends AbstractGraph {
           percentagesFormat,
           otherOptions,
           showZero,
-          mappedColors
+          mappedColors,
+          labelCount
         } = this.getConfiguredProperties();
 
 
@@ -202,7 +206,7 @@ export default class PieGraph extends AbstractGraph {
                                       style={{cursor}}
                                       { ...this.tooltipProps(d) }
                                     >
-                                        { labelText(slice.data) }
+                                        { labelCount >= slices.length ? labelText(slice.data) : '' }
                                     </text>
                                 </g>
                             })
