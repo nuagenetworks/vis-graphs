@@ -603,9 +603,9 @@ This graph displays the information of networking ports.
 
 __columns__ (array of object) data to show "key: value" information at top of the ports in graph. __Note:__ this data should come from secondary query source named "data2".
 
-__topColumn__ (string) the name of the column to use for the data on top of port icon
+__topColumn__ (string) the name of the column to use for the data on top of port icon. For example `"topBottom": "portName"`
 
-__bottomColumn__ (string) the name of the column to use for the data below port icon
+__bottomColumn__ (string) the name of the column to use for the data below port icon, example: `"bottomColumn": "type"`
 
 __portColor__ (object) define the criteria to show the color of each port icon as per defined condition. E.g -
 
