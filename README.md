@@ -278,6 +278,12 @@ __pieOuterRadius__ - Outer radius of the slices
 
 __pieLabelRadius__ - Radius for positioning labels
 
+__percentages__ - (boolean) Show area in percentage in each slice of pie chart. Default is false.
+
+__percentagesFormat__ - Format data for percentage.
+
+__hideLabel__ - (boolean) Hide label of each slice of pie graph. Default is false.
+
 __otherOptions__ - optional object
 - **type** Value must be percentage or number, and default is percentage
 - **limit** As per the type we can define the limit in percentage or slices respectively.

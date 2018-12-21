@@ -471,7 +471,6 @@ export default class AbstractGraph extends React.Component {
         if (this.isVertical() && this.isBrush()) {
             this.availableHeight = this.availableHeight * 0.75
             this.availableMinHeight = height - (this.availableHeight + (margin.top * 4) + margin.bottom + chartHeightToPixel + this.getXAxisHeight());
-            this.minMarginTop = this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight()
         }
     }
 
@@ -484,7 +483,12 @@ export default class AbstractGraph extends React.Component {
     }
 
     getMinMarginTop() {
-        return this.minMarginTop;
+        const {
+            chartHeightToPixel,
+            margin
+        } = this.getConfiguredProperties();
+
+        return this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight();
     }
 
     // Check whether to display chart as vertical or horizontal
