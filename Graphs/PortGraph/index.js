@@ -163,7 +163,7 @@ class PortGraph extends XYGraph {
                                                 <div style={{ borderRight: (i % rowCount) < (rowCount - 1) ? styles.borderRight : '' }}>
                                                     {this.getIcon(data)}
                                                 </div>
-                                                {this.getPortAttribute(data), 'bottomColumn'}
+                                                {this.getPortAttribute(data, 'bottomColumn')}
                                             </div>
                                         )
                                     })
