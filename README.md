@@ -282,7 +282,7 @@ __percentages__ - (boolean) Show area in percentage in each slice of pie chart. 
 
 __percentagesFormat__ - Format data for percentage.
 
-__hideLabel__ - (boolean) Hide label of each slice of pie graph. Default is false.
+__labelCount__ - (number) Hide labels of pie graph if slice count is greater than labelCount. Default is 5.
 
 __otherOptions__ - optional object
 - **type** Value must be percentage or number, and default is percentage

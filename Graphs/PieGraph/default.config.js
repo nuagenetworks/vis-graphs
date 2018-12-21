@@ -17,5 +17,6 @@ export const properties = {
     stroke: {
         color: theme.palette.whiteColor,
         width: "3px"
-    }
+    },
+    labelCount: 5
 }

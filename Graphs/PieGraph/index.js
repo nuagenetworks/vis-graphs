@@ -79,7 +79,7 @@ export default class PieGraph extends AbstractGraph {
           otherOptions,
           showZero,
           mappedColors,
-          hideLabel
+          labelCount
         } = this.getConfiguredProperties();
 
 
@@ -206,7 +206,7 @@ export default class PieGraph extends AbstractGraph {
                                       style={{cursor}}
                                       { ...this.tooltipProps(d) }
                                     >
-                                        { hideLabel ? '' : labelText(slice.data) }
+                                        { labelCount >= slices.length ? labelText(slice.data) : '' }
                                     </text>
                                 </g>
                             })
