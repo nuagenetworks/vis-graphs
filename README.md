@@ -613,7 +613,7 @@ __topColumn__ (string) the name of the column to use for the data on top of port
 
 __bottomColumn__ (string) the name of the column to use for the data below port icon, example: `"bottomColumn": "type"`
 
-__portColor__ (object) define the criteria to show the color of each port icon as per defined condition. E.g -
+__portColor__ (object) define the criteria to show the color of each port icon as per defined condition. If `getColor` function is provided getColor is used to determine the color for the port. E.g -
 
 ```javascript
 "portColor": {
@@ -628,7 +628,8 @@ __portColor__ (object) define the criteria to show the color of each port icon a
             "value": "DOWN",
             "color": "red"
         }
-    ]
+    ],
+    "getColor": "({state, type}) => { if (!state) return '#B5B5B5'; switch(state) { case 'DOWN': return '#D9070A'; case 'UP': return type === 'Network' ? '#5A83DE' : '#62AC00'; default: return '#B5B5B5'}}"
 }
 ```
 

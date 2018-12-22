@@ -7,6 +7,7 @@ import XYGraph from '../XYGraph';
 import columnAccessor from '../../utils/columnAccessor';
 import { properties } from './default.config';
 import styles from './styles';
+import evalExpression from 'eval-expression';
 
 
 class PortGraph extends XYGraph {
@@ -72,6 +73,19 @@ class PortGraph extends XYGraph {
             defaultIconColor
         } = this.getConfiguredProperties();
 
+        const { getColor } = portColor || {};
+        // if there is a getColor function then use that function otherwise use criteria
+        if (getColor) {
+            try {
+                const getColorFunction = evalExpression(getColor);
+                if (getColorFunction) {
+                    return getColorFunction(row);
+                }
+            }
+            catch (e) {
+               console.error(`Failed to evaluate getColor function`, e);
+            }
+        }
         if (portColor && typeof portColor === 'object' && portColor.field) {
             let color = portColor.defaultColor || defaultIconColor;
             portColor.criteria.forEach(d => {
@@ -188,7 +202,7 @@ class PortGraph extends XYGraph {
                     return data2.map(d => {
                         return (
                             <div style={styles.labelBox}>
-                                <strong> {column.label || column.column}: </strong>
+                                {column.label ? <strong>{column.label}: </strong> : undefined}
                                 {accessor(d)}
                             </div>
                         );
