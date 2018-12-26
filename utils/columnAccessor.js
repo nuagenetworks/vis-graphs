@@ -8,7 +8,7 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters }) => {
 
     // Generate the accessor for nested values (e.g. "foo.bar").
     const keys = column.split(".");
-    const value = (d) => keys.reduce((d, key) => {
+    const value = (d) => d[column] || keys.reduce((d, key) => {
         return typeof d === 'object' ? d[key] : d
     }, d);
 
