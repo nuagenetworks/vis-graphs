@@ -44,8 +44,8 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                         }}
                         >
                             <div style={{
-                                marginTop: "0.75em",
-                                fontSize: "0.60em",
+                                marginTop: "0.32em",
+                                fontSize: "1em",
                                 color: fontColor,
                             }}>
                                 <span>{this.displayText(data, targetedColumn)}</span>
