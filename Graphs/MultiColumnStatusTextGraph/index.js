@@ -10,62 +10,76 @@ import SimpleTextGraph from "../SimpleTextGraph";
 */
 
 class MultiColumnStatusTextGraph extends SimpleTextGraph {
+    renderTitleIfNeeded() {
+        return "";
+    }
 
-    renderText = ({
-                  blockWidth,
-                  blockHeight,
-                  borderRadius,
-                  stroke,
-                  fontColor,
-                  padding,
-                  colors,
-                  cursor,
-                  data,
-                  titlePosition,
-                  targetedColumns,
-                  texts
-    }) => {
+    getStyleClasses = () => {
+        let { className } = this.getConfiguredProperties();
+        if (!className) {
+            className = "alarms-text";
+        }
+        return `${className} multiColumnStatusTextGraph`;
+    }
+
+    renderRow = ({data, column, text, color, fontColor, inline}) => (
+        <div style={inline ? {padding: '10px'} : {display: "block", marginTop: '5%'}}>
+            <div style={{width: "25%", display: "inline-block"}}>
+                <div style={{
+                    borderRadius: "100%",
+                    height: "1.8em",
+                    width: "1.8em",
+                    textAlign: "center",
+                    background: color,
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    margin: "0 25px 0 0"
+                }}
+                >
+                    <div style={{
+                        marginTop: "0.32em",
+                        fontSize: "1em",
+                        color: fontColor,
+                    }}>
+                        <span>{this.displayText(data, column)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <span style={{
+                display: "inline-block",
+                verticalAlign: "middle",
+                textAlign: "left",
+                width: "75%"}}>
+                {text}
+            </span>
+        </div>
+    )
+
+    renderColumns = ({
+             fontColor,
+             padding,
+             colors,
+             cursor,
+             data,
+             titlePosition,
+             targetedColumns,
+             texts
+     }) => {
+        const { inline } = this.getConfiguredProperties();
+        return targetedColumns.map((targetedColumn, index) => (
+            this.renderRow({data, inline, fontColor, text: texts[index], column: targetedColumn, color: colors[index]})
+        ))
+    }
+
+    renderText = ({targetedColumns, ...rest }) => {
         if (!targetedColumns || !targetedColumns.length) {
             return <div/>;
         }
-        const columns = targetedColumns.map((targetedColumn, index) => {
-            return (
-                <div style={{display: "block", marginTop: '3px'}}>
-                    <div style={{width: "25%", display: "inline-block"}}>
-                        <div style={{
-                            borderRadius: "100%",
-                            height: "1.8em",
-                            width: "1.8em",
-                            textAlign: "center",
-                            background: colors[index],
-                            display: "inline-block",
-                            verticalAlign: "middle",
-                            margin: "0 25px 0 0"
-                        }}
-                        >
-                            <div style={{
-                                marginTop: "0.75em",
-                                fontSize: "0.60em",
-                                color: fontColor,
-                            }}>
-                                <span>{this.displayText(data, targetedColumn)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <span style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        textAlign: "left",
-                        fontSize: ".65em",
-                        width: "75%"
-                    }}>{texts[index]}</span>
-                </div>
-            )
-        })
+        const { inline } = this.getConfiguredProperties();
         return (
-            <div>
-                {columns}
+            <div className={inline ? 'inline-alarms' : ''}>
+                {this.renderColumns({targetedColumns, ...rest})}
             </div>
         )
     }

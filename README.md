@@ -20,7 +20,9 @@ The use of the graphs module is to provide a module to quickly shows your data i
       - [HeatmpaGraph](#heatmapgraph)
       - [AreaGraph](#areagraph)
       - [GuageGraph](#guagegraph)
-      - [Geomap] (#geomap)
+      - [GeoMap](#geomap)
+      - [TreeGraph](#treegraph)
+      - [PortGraph](#portgraph)
 
 
 ## Requirement-
@@ -46,6 +48,7 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "react-csv": "1.0.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-modal": "^3.5.1",
+    "eval-expression": "^1.0.0"
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
@@ -596,3 +599,46 @@ const clickChild = (child) => {
 __width__ (Integer) Width of treemap area.
 
 __height__ (Integer) Height of treemap area.
+
+## *PortGraph*
+This graph displays the information of networking ports.
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/portGraph)
+
+![PortGraph](https://user-images.githubusercontent.com/26645756/50140501-edeea480-02ca-11e9-8c66-a7bf349bbbb2.png)
+
+__columns__ (array of object) data to show "key: value" information at top of the ports in graph. __Note:__ this data should come from secondary query source named "data2".
+
+__topColumn__ (string) the name of the column to use for the data on top of port icon. For example `"topBottom": "portName"`
+
+__bottomColumn__ (string) the name of the column to use for the data below port icon, example: `"bottomColumn": "type"`
+
+__portColor__ (object) define the criteria to show the color of each port icon as per defined condition. If `getColor` function is provided getColor is used to determine the color for the port. E.g -
+
+```javascript
+"portColor": {
+    "defaultColor": "gray",
+    "field": "status",
+    "criteria": [
+        {
+            "value": "UP",
+            "color": "green"
+        },
+        {
+            "value": "DOWN",
+            "color": "red"
+        }
+    ],
+    "getColor": "({state, type}) => { if (!state) return '#B5B5B5'; switch(state) { case 'DOWN': return '#D9070A'; case 'UP': return type === 'Network' ? '#5A83DE' : '#62AC00'; default: return '#B5B5B5'}}"
+}
+```
+
+__defaultIconColor__ (string) default color of the port icon. Default is gray .
+
+__minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (px).
+
+__maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
+
+__minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
+
+__rowLimit__ (number) show number of ports in each row. Default is 8.

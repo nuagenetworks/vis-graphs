@@ -22,3 +22,30 @@ stroke-dasharray: 2,2;
   margin-right: -50%;
   transform: translate(-50%, -50%)
 }
+
+.alarms-text {
+  margin: 0;
+  font-size: 0.9em;
+  position: absolute;
+  top: 35%;
+  left: 35%;
+  margin-right: -15%;
+  transform: translate(-40%, -35%)
+}
+
+.inline-alarms {
+  margin: 0;
+  font-size: 1em;
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.inline-alarms-center-text {
+  margin: 0;
+  font-size: 1em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%)
+}
