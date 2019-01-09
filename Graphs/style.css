@@ -49,3 +49,15 @@ stroke-dasharray: 2,2;
   margin-right: -50%;
   transform: translate(-50%, -50%)
 }
+
+.legendContainer {
+  overflow: auto;
+  box-sizing: border-box;
+  white-space: nowrap;
+  padding: 5px;
+}
+
+.graphContainer {
+  box-sizing: border-box;
+  float: left;
+}

@@ -274,9 +274,6 @@ export default class AbstractGraph extends React.Component {
         if (!legend.show)
             return;
 
-        // Getting unique labels
-        data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i)
-
         const {
             width,
             height
@@ -290,6 +287,13 @@ export default class AbstractGraph extends React.Component {
 
         const isVertical = legend.orientation === 'vertical';
         const lineHeight = legend.circleSize * circleToPixel;
+
+        // Getting unique labels
+        data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+
+        if (legend.separate) {
+            return this.renderSeparateLegend(data, legend, getColor, label, isVertical);
+        }
 
         if (isVertical) {
             // Place the legends in the bottom left corner
@@ -594,4 +598,103 @@ export default class AbstractGraph extends React.Component {
         return null;
     }
 
+    getGraphDimension = () => {
+        const {
+            height,
+            width,
+            data
+        } = this.props;
+
+        const { legend } = this.getConfiguredProperties();
+
+        let dimensions = {
+            graphWidth: width,
+            graphHeight: height,
+            legendHeight: 0,
+            legendWidth: 0
+        }
+
+        if (!legend.show || data.length <= 1 || !legend.separate) {
+            return dimensions;
+        }
+
+        // Compute the available space considering a legend
+        if (legend.orientation === 'vertical') {
+            const value = this.getValueFromPercentage(width, legend.separate);
+            dimensions = {
+                ...dimensions,
+                graphWidth: width - value,
+                legendWidth: value,
+                legendHeight: height,
+            }
+        } else {
+            const value = this.getValueFromPercentage(height, legend.separate);
+            dimensions = {
+                ...dimensions,
+                graphHeight: height - value,
+                legendHeight: value,
+                legendWidth: width,
+            }
+        }
+
+        return dimensions;
+    }
+
+    getValueFromPercentage = (value, percentage) => {
+        return (percentage * value) / 100;
+    }
+
+    renderSeparateLegend(data, legend, getColor, label, isVertical) {
+
+        let legendStyle = {};
+        if (isVertical) {
+            // Place the legends in the bottom left corner
+            legendStyle = { alignSelf: 'flex-end' }
+        } else {
+            // Place legends horizontally
+            legendStyle = {
+                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fit, minmax(${legend.width}px, 1fr))`,
+            }
+        }
+
+        return (
+            <div className='legend' style={legendStyle}>
+                {this.getLegendContent(data, legend, getColor, label)}
+            </div>
+        );
+    }
+
+    getLegendContent(data, legend, getColor, label) {
+        const {
+            fontColor,
+            circleToPixel,
+        } = this.getConfiguredProperties();
+
+        const lineHeight = legend.circleSize * circleToPixel;
+
+        return data.map((d, i) => {
+            return (
+                <div key={i}>
+                    <svg height={lineHeight} width={legend.width}>
+                        <circle
+                            cx={legend.circleSize}
+                            cy={legend.circleSize}
+                            r={legend.circleSize}
+                            fill={getColor(d)}
+                        />
+                        <text
+                            fill={fontColor}
+                            alignmentBaseline="central"
+                            x={legend.circleSize + legend.labelOffset}
+                            y={legend.circleSize}
+                        >
+                            {label(d)}
+                        </text>
+                    </svg>
+                </div>
+            );
+        })
+    }
 }
