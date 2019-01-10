@@ -132,7 +132,7 @@ export default class PieGraph extends AbstractGraph {
         {
             // Extract the longest legend
             // Store the info in legend for convenience
-            legend.width = this.longestLabelLength(data, label) * chartWidthToPixel * 1.2;
+            legend.width = this.longestLabelLength(data, label) * chartWidthToPixel;
 
             if (!legend.separate) {
                 // Compute the available space considering a legend
