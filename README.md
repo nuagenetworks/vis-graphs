@@ -183,6 +183,7 @@ __legend__
 - **orientation** `vertical` or `horizontal` legend. Default is `vertical`
 - **circleSize** size of a legend circle. Default is `4` pixels
 - **labelOffset** space in pixel between the legend circle and its label. Default is `2`.
+- **separate** (numeric) - This will separate the legends from the charts and use the provided value as percentage to define the area for the legends. This will be useful in case of large number of legends and enable the scroll for legends as well (if applicable). If value is 20, then 80% of the area will be used by charts and 20% will be used by legends.
 
 __filterOptions__ - Allows to set filters on the visualization. See dashboard configuration for more information as it is working the same way!
 
