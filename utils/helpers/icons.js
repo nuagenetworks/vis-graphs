@@ -1,3 +1,4 @@
+import React from 'react';
 import objectPath from "object-path"
 
 const icons = {
@@ -8,14 +9,25 @@ const icons = {
   'nsGatewayGreen': 'icon-nsgateway-green-26x26.png'
 };
 
+const svgIcons = {
+  'default': ({color}) => (
+    <polyline
+        fill={color}
+        points="107.618,156.5 1938.331,156.5 1938.331,1175.243 1709.492,1175.243 1709.492,1481.138 1480.653,1481.138 1480.653,1786.489 565.296,1786.489 565.296,1490.638 336.457,1490.638 336.457,1180.304 107.618,1180.304 "
+    />
+  ),
+};
+
+
 const defaultIcon = 'nsGatewayGreen';
 const defaultUrgency = 'GREEN';
 
-export default (iconKey = null, data = []) => {
+export default (iconKey = null, data = [], svg = false) => {
 
   /**
    * get path of the image by key
    *const iconKey = {
+        "default": "nsGatewayGreen"
    *    criteria : [
    *        {
                 "icon": "icon1",
@@ -72,6 +84,11 @@ export default (iconKey = null, data = []) => {
 
     } else {
         icon = iconKey;
+    }
+
+    // if svg = true, then return from above svg object
+    if (svg) {
+      return svgIcons[icon] || svgIcons['default'];
     }
 
     if (!icon) {
