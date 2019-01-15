@@ -697,4 +697,27 @@ export default class AbstractGraph extends React.Component {
             );
         })
     }
+
+    // Get the string by available width (in px) and if required, then will wrap elipsis "..." as well
+    wrapTextByWidth(text, width) {
+        text.each(function () {
+            const text = d3.select(this);
+            const words = text.text();
+            const tspan = text.text(null)
+                .append("tspan")
+                .attr("x", 0)
+                .attr("y", text.attr("y"))
+                .attr("dy", parseFloat(text.attr("dy")) + "em")
+                .text(words);
+
+            const containerWidth = tspan.node().getBBox().width;
+            if (containerWidth > width) {
+                text.style('cursor', 'pointer')
+                    .append('title').text(words);
+
+                const truncateWidth = width / (containerWidth / words.length);
+                tspan.text(words.substr(0, truncateWidth - 1) + '...');
+            }
+        });
+    }
 }

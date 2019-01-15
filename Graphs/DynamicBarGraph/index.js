@@ -296,7 +296,7 @@ class BarGraph extends XYGraph {
       .selectAll('.tick text')
 
     if(this.isVertical()) {
-      xAxis.call(this.wrapD3Text, this.getBarWidth())
+      xAxis.call(this.wrapTextByWidth, this.getBarWidth())
     }
 
     //Add the Y Axis
