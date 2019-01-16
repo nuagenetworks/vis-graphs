@@ -621,7 +621,7 @@ class BarGraph extends XYGraph {
       height
     } = this.props
 
-    if (!data || !data.length)
+    if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined'))
       return this.renderMessage('No data to visualize')
 
     const {
