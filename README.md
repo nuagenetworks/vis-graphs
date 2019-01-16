@@ -638,6 +638,7 @@ __portIcon__ (object) define the criteria to show the icon of each port. E.g -
 ```javascript
 "portIcon": {
     "default": "nsGatewayIcon",
+    "getIcon": "({name}) => { if (name === 'Port 1') return 'default2' }",
     "criteria": [
         {
             "icon": "nsGatewayIcon",
