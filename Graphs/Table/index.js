@@ -965,11 +965,11 @@ class Table extends AbstractGraph {
         const headerData = this.getHeaderData(),
             totalRecords = size || this.filterData.length;
 
-
+            
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
-        
-        let showFooter = (totalRecords >= pageSize && hidePagination === true) ? false : true,
+
+        let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
             heightMargin = showFooter ? 95 : 80;
 
         heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin
