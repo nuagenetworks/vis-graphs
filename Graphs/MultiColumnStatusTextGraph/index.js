@@ -22,8 +22,8 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
         return `${className} multiColumnStatusTextGraph`;
     }
 
-    renderRow = ({data, column, text, color, fontColor, inline}) => (
-        <div style={inline ? {padding: '10px'} : {display: "block", marginTop: '5%'}}>
+    renderRow = ({data, column, text, color, fontColor, inline, key}) => (
+        <div key={key} style={inline ? {padding: '10px'} : {display: "block", marginTop: '5%'}}>
             <div style={{width: "25%", display: "inline-block"}}>
                 <div style={{
                     borderRadius: "100%",
@@ -57,18 +57,18 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
     )
 
     renderColumns = ({
-             fontColor,
-             padding,
-             colors,
-             cursor,
-             data,
-             titlePosition,
-             targetedColumns,
-             texts
-     }) => {
+                         fontColor,
+                         padding,
+                         colors,
+                         cursor,
+                         data,
+                         titlePosition,
+                         targetedColumns,
+                         texts
+                     }) => {
         const { inline } = this.getConfiguredProperties();
         return targetedColumns.map((targetedColumn, index) => (
-            this.renderRow({data, inline, fontColor, text: texts[index], column: targetedColumn, color: colors[index]})
+            this.renderRow({data, inline, fontColor, text: texts[index], column: targetedColumn, color: colors[index], key: index})
         ))
     }
 

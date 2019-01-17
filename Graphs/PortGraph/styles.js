@@ -13,12 +13,21 @@ const styles = {
     labelContainer: {
         width: '100%',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
         gridGap: '5px',
-        margin: '10px 10px 0px 10px'
+        margin: '0px 10px 0px 10px',
+        fontSize: '1em'
+    },
+    labelRow: {
+        width: '100%',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+        gridGap: '5px',
+        margin: '0px 10px 0px 10px',
+        gridColumn: '1 / -1'
     },
     labelBox: {
-        padding: '5px'
+        padding: '2px'
     },
     row: {
         display: 'flex',
