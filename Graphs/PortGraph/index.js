@@ -189,31 +189,36 @@ class PortGraph extends XYGraph {
         );
     }
 
+    getColumns = (columns, data, isLabel) => (
+        columns.map(column => {
+                const accessor = columnAccessor(column);
+                return data.map(d => {
+                    return (
+                        <div style={styles.labelBox}>
+                            {isLabel ? column.label ? <strong>{column.label} </strong> : undefined : accessor(d)}
+                        </div>
+                    );
+                });
+            }
+        )
+    )
+
     // show "key: value" data in top section of the graph
     renderColumns() {
         const { data2 } = this.props;
         const { columns } = this.getConfiguredProperties();
 
         let columnData = null;
+        let columnLabels = null;
         if (columns && columns.length && data2.length) {
-            columnData = (
-                columns.map(column => {
-                    const accessor = columnAccessor(column);
-                    return data2.map(d => {
-                        return (
-                            <div style={styles.labelBox}>
-                                {column.label ? <strong>{column.label}: </strong> : undefined}
-                                {accessor(d)}
-                            </div>
-                        );
-                    });
-                })
-            )
+            columnLabels = this.getColumns(columns, data2, true);
+            columnData = this.getColumns(columns, data2, false);
         }
 
         return (
             <div style={styles.labelContainer}>
-                {columnData}
+                <div style={styles.labelRow}>{columnLabels}</div>
+                <div style={{...styles.labelRow, fontSize: '.8em'}}>{columnData}</div>
             </div>
         )
     }
