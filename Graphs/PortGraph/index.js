@@ -8,6 +8,7 @@ import columnAccessor from '../../utils/columnAccessor';
 import { properties } from './default.config';
 import styles from './styles';
 import evalExpression from 'eval-expression';
+import { getIconPath } from '../../utils/helpers';
 
 
 class PortGraph extends XYGraph {
@@ -109,17 +110,16 @@ class PortGraph extends XYGraph {
     }
 
     // get port name
-    getPortAttribute(row = {}, attributeType) {
-        const configuration = this.getConfiguredProperties();
-
-        const attribute = configuration[attributeType];
-
+    getPortAttribute(row = {}, attribute) {
         return objectPath.get(row, attribute) || '';
     }
 
     // icon to show port status
     getIcon(row) {
+        const { portIcon } = this.getConfiguredProperties();
         const fontSize = this.calculatePortFontSize();
+        const IconSvg = getIconPath(portIcon, row, true);
+
         return (
             <svg
                 style={{ cursor: 'pointer' }}
@@ -130,10 +130,7 @@ class PortGraph extends XYGraph {
                 height={fontSize}
                 viewBox="107.618 156.5 1830.713 1629.989"
             >
-                <polyline
-                    fill={this.getIconColor(row)}
-                    points="107.618,156.5 1938.331,156.5 1938.331,1175.243 1709.492,1175.243 1709.492,1481.138 1480.653,1481.138 1480.653,1786.489 565.296,1786.489 565.296,1490.638 336.457,1490.638 336.457,1180.304 107.618,1180.304 "
-                />
+                <IconSvg color={this.getIconColor(row)}/>
             </svg>
         )
     }
@@ -146,7 +143,10 @@ class PortGraph extends XYGraph {
     }
 
     renderGraph() {
-
+        const {
+            topColumn,
+            bottomColumn,
+        } = this.getConfiguredProperties();
         const nextRow = this.hasMultipleRows();
         const portRowset = this.processPortRowset();
         const { rowCount } = this.state;
@@ -173,11 +173,11 @@ class PortGraph extends XYGraph {
                                                     minWidth: this.state.portAreaWidth,
                                                 }}
                                             >
-                                                {this.getPortAttribute(data, 'topColumn')}
+                                                {this.getPortAttribute(data, topColumn)}
                                                 <div style={{ borderRight: (i % rowCount) < (rowCount - 1) ? styles.borderRight : '' }}>
                                                     {this.getIcon(data)}
                                                 </div>
-                                                {this.getPortAttribute(data, 'bottomColumn')}
+                                                {this.getPortAttribute(data, bottomColumn)}
                                             </div>
                                         )
                                     })

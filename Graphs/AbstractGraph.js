@@ -515,8 +515,12 @@ export default class AbstractGraph extends React.Component {
 
     // to show message at the center of container
     renderMessage(message) {
+        const {
+            configuration
+        } = this.props;
+
         return (
-            <div className="center-text">
+            <div id={`${configuration.id}-message`} className="center-text">
                 {message}
             </div>
         )

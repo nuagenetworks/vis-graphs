@@ -632,6 +632,32 @@ __portColor__ (object) define the criteria to show the color of each port icon a
     ],
     "getColor": "({state, type}) => { if (!state) return '#B5B5B5'; switch(state) { case 'DOWN': return '#D9070A'; case 'UP': return type === 'Network' ? '#5A83DE' : '#62AC00'; default: return '#B5B5B5'}}"
 }
+
+__portIcon__ (object) define the criteria to show the icon of each port. E.g -
+
+```javascript
+"portIcon": {
+    "default": "nsGatewayIcon",
+    "getIcon": "({name}) => { if (name === 'Port 1') return 'default2' }",
+    "criteria": [
+        {
+            "icon": "nsGatewayIcon",
+            "fields": {
+                "status": "DOWN",
+                "type": "ACCESS"
+            }
+        },
+        {
+            "icon": "nsGatewayIcon",
+            "fields": {
+                "status": "UP",
+                "type": "ACCESS"
+            }
+        }
+    ]
+}
+
+Note: icon must be a key exists in svgIcons object in helpers/icons.js
 ```
 
 __defaultIconColor__ (string) default color of the port icon. Default is gray .

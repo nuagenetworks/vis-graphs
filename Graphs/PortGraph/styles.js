@@ -5,10 +5,10 @@ const styles = {
         display: 'flex',
         verticalAlign: 'middle',
         flexFlow: 'row wrap',
+        overflow: 'auto',
     },
     iconContainer: {
         display: 'contents',
-        overflow: 'auto',
     },
     labelContainer: {
         width: '100%',
