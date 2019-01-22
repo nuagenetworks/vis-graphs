@@ -152,9 +152,11 @@ export default class XYGraph extends AbstractGraph {
 
     setTitlePositions() {
       const {
-          chartHeightToPixel,
-          chartWidthToPixel,
-          margin
+            chartHeightToPixel,
+            chartWidthToPixel,
+            margin,
+            xLabelRotate,
+            xLabelRotateHeight,
         } = this.getConfiguredProperties();
 
         this.titlePosition = {
@@ -162,7 +164,7 @@ export default class XYGraph extends AbstractGraph {
               left: this.getLeftMargin() + this.getAvailableWidth() / 2,
               top: (this.isBrush() && this.isVertical())
                 ?  margin.top + margin.bottom + this.getMinMarginTop() + this.getAvailableMinHeight()
-                :  margin.top + this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight()
+                :  margin.top + this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
             },
             y: {
               left: margin.left + chartWidthToPixel + (this.checkIsVerticalLegend() ? this.getLegendConfig().width : 0),

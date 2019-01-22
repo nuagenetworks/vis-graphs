@@ -487,7 +487,9 @@ class AreaGraph extends XYGraph {
     const {
       xTickFontSize,
       yTickFontSize,
-      yLabelLimit
+      yLabelLimit,
+      xLabelRotate,
+      xLabelLimit,
     } = this.getConfiguredProperties();
 
     const svg =  this.getGraph();
@@ -496,7 +498,9 @@ class AreaGraph extends XYGraph {
     svg.select('.xAxis')
       .style('font-size', xTickFontSize)
       .attr('transform', 'translate(0,'+ this.getAvailableHeight() +')')
-      .call(this.getAxis().x);
+      .call(this.getAxis().x)
+      .selectAll('.tick text')
+      .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
   
     //Add the Y Axis
     const yAxis = svg.select('.yAxis')

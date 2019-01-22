@@ -479,7 +479,8 @@ export default class AbstractGraph extends React.Component {
     }
 
     getAvailableHeight() {
-        return this.availableHeight;
+        const { xLabelRotateHeight, xLabelRotate } = this.getConfiguredProperties();
+        return this.availableHeight - (xLabelRotate ? xLabelRotateHeight : 0);
     }
 
     getAvailableMinHeight() {
@@ -698,25 +699,30 @@ export default class AbstractGraph extends React.Component {
         })
     }
 
-    // Get the string by available width (in px) and if required, then will wrap elipsis "..." as well
-    wrapTextByWidth(text, width) {
+    // Get the string and if xLabelLimit is less than string length, then will truncate and rotate string followed by "..." as well
+    wrapTextByWidth(text, { xLabelRotate, xLabelLimit }) {
+
         text.each(function () {
             const text = d3.select(this);
             const words = text.text();
             const tspan = text.text(null)
                 .append("tspan")
-                .attr("x", 0)
+                .attr("x", -2)
                 .attr("y", text.attr("y"))
                 .attr("dy", parseFloat(text.attr("dy")) + "em")
                 .text(words);
 
-            const containerWidth = tspan.node().getBBox().width;
-            if (containerWidth > width) {
+            if (xLabelRotate) {
+                text.attr("transform", "rotate(-50)")
+                    .attr("dy", ".15em")
+                    .style("text-anchor", "end")
+            }
+
+            if (words.length > xLabelLimit) {
                 text.style('cursor', 'pointer')
                     .append('title').text(words);
 
-                const truncateWidth = width / (containerWidth / words.length);
-                tspan.text(words.substr(0, truncateWidth - 1) + '...');
+                tspan.text(words.substr(0, xLabelLimit) + '...');
             }
         });
     }
