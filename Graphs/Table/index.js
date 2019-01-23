@@ -950,7 +950,8 @@ class Table extends AbstractGraph {
             selectColumnOption,
             searchText,
             tableHeaderStyle,
-            tableRowColumnStyle
+            tableRowColumnStyle,
+            tableRowStyle = {}
         } = this.getConfiguredProperties();
 
         const {
@@ -1014,7 +1015,7 @@ class Table extends AbstractGraph {
                                 tableStyle={style.table}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
                                 tableHeaderStyle={tableHeaderStyle}
-                                tableRowStyle={style.row}
+                                tableRowStyle={{...style.row, ...tableRowStyle}}
                                 tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
                                 footerToolbarStyle={style.footerToolbar}
