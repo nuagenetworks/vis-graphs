@@ -479,7 +479,8 @@ export default class AbstractGraph extends React.Component {
     }
 
     getAvailableHeight() {
-        return this.availableHeight;
+        const { xLabelRotateHeight, xLabelRotate } = this.getConfiguredProperties();
+        return this.availableHeight - (xLabelRotate ? xLabelRotateHeight : 0);
     }
 
     getAvailableMinHeight() {
@@ -700,5 +701,33 @@ export default class AbstractGraph extends React.Component {
                 </div>
             );
         })
+    }
+
+    // Get the string and if xLabelLimit is less than string length, then will truncate and rotate string followed by "..." as well
+    wrapTextByWidth(text, { xLabelRotate, xLabelLimit }) {
+
+        text.each(function () {
+            const text = d3.select(this);
+            const words = text.text();
+            const tspan = text.text(null)
+                .append("tspan")
+                .attr("x", -2)
+                .attr("y", text.attr("y"))
+                .attr("dy", parseFloat(text.attr("dy")) + "em")
+                .text(words);
+
+            if (xLabelRotate) {
+                text.attr("transform", "rotate(-50)")
+                    .attr("dy", ".15em")
+                    .style("text-anchor", "end")
+            }
+
+            if (words.length > xLabelLimit) {
+                text.style('cursor', 'pointer')
+                    .append('title').text(words);
+
+                tspan.text(words.substr(0, xLabelLimit) + '...');
+            }
+        });
     }
 }

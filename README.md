@@ -155,7 +155,6 @@ __padding__
 - **right** set right padding in pixels
 - **left** set left padding in pixels
 
-
 ![textgraph 1](https://user-images.githubusercontent.com/26645756/38319372-44c0eb02-384f-11e8-8bdb-a524b9ecdd19.png)
 
 > padding currently supported only for text graph
@@ -173,6 +172,11 @@ __colors__ - (array) List of colors to use to render the graph.
 __yLabelLimit__ - (numeric) Limit the character of y-axis label. Above the defined limit, the substring of the label will be display followed by the "..." and full label will be show on mouseover. 
 
 __appendCharLength__ - (numeric) The length of the appended dots after the label if yLabelLimit defined
+
+__xLabelRotate__ - (boolean) rotate x-axis labels. Default is `true`.
+__xLabelRotateHeight__ - (numeric) if `xLabelRotate` is enable then height occupied by x-axis labels. Default is 35 (in px).
+__xLabelLimit__ - (numeric) number of character need to display. Default is 10. After 10 character `...` is append with tooltip of full character for each label.
+
 
  __stroke__
 - **width** define stroke width

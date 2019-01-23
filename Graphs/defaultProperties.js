@@ -39,6 +39,9 @@ export default {
         labelOffset: 2,             // Space in pixels between the circle and the label
     },
     yLabelLimit: 20,
+    xLabelLimit: 10,
+    xLabelRotate: true,
+    xLabelRotateHeight: 35,
     appendCharLength: 3,
     brushArea: 20, // // in percentage
     otherColors: [
