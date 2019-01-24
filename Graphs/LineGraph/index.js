@@ -70,7 +70,10 @@ class LineGraph extends XYGraph {
           defaultYColor,
           showNull,
           yLabelLimit,
-          appendCharLength
+          appendCharLength,
+          xLabelRotate,
+          xLabelLimit,
+          xLabelRotateHeight,
         } = this.getConfiguredProperties();
 
         let finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
@@ -200,6 +203,10 @@ class LineGraph extends XYGraph {
         let availableWidth    = width - (margin.left + margin.right + yLabelWidth);
         let availableHeight   = height - (margin.top + margin.bottom + chartHeightToPixel + xAxisHeight);
 
+        if (xLabelRotate) {
+            availableHeight -= xLabelRotateHeight;
+        }
+
         if (legend.show)
         {
             legend.width = legendWidth || 1;
@@ -301,7 +308,7 @@ class LineGraph extends XYGraph {
 
         let xTitlePosition = {
             left: leftMargin + availableWidth / 2,
-            top: margin.top + availableHeight + chartHeightToPixel + xAxisHeight
+            top: margin.top + availableHeight + chartHeightToPixel + xAxisHeight + ( xLabelRotate ? xLabelRotateHeight : 0)
         }
         let yTitlePosition = {
             // We use chartWidthToPixel to compensate the rotation of the title
@@ -327,7 +334,7 @@ class LineGraph extends XYGraph {
         const tooltipOverlay = voronoi()
             .x( d => xScale(d[xColumn]))
             .y( d => yScale(d[this.yValue]))
-            .extent([[-leftMargin, -margin.top], [width + margin.right, height + margin.bottom]])
+            .extent([[-leftMargin, -margin.top], [availableWidth + margin.right, availableHeight + margin.bottom]])
             .polygons(filterDatas)
 
         const tooltipOffset = (d) => JSON.stringify({
@@ -390,7 +397,10 @@ class LineGraph extends XYGraph {
                     <g transform={ `translate(${leftMargin},${margin.top})` } >
                         <g
                             key="xAxis"
-                            ref={ (el) => select(el).call(xAxis) }
+                            ref={ (el) => select(el).call(xAxis)
+                                .selectAll('.tick text')
+                                .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
+                            }
                             transform={ `translate(0,${availableHeight})` }
                         />
                         <g
