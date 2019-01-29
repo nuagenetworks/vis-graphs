@@ -271,6 +271,15 @@ __defaultY__ - (string | object) default yAxis value used to draw straight horiz
  }
  ```
 
+__yTicksLabel__ - (object) used to override labels of y axis ticks with some predefined strings. E.g - 
+ ```javascript
+{
+    "-1": "inactive",
+    "0": "starting" ,
+    "1": "active"
+}
+```
+
 >See x-axis and y-axis sections in BarGraph for more information
 
 ## *PieGraph*

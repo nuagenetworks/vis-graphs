@@ -74,6 +74,9 @@ class LineGraph extends XYGraph {
           xLabelRotate,
           xLabelLimit,
           xLabelRotateHeight,
+          yTickFontSize,
+          xTickFontSize,
+          yTicksLabel,
         } = this.getConfiguredProperties();
 
         let finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
@@ -302,6 +305,11 @@ class LineGraph extends XYGraph {
             yAxis.ticks(yTicks);
         }
 
+        if (yTicksLabel && typeof yTicksLabel === 'object') {
+            yAxis.tickValues(Object.keys(yTicksLabel));
+            yAxis.tickFormat( value => yTicksLabel[value] || null);
+        }
+
         const lineGenerator = line()
           .x( d => xScale(d[xColumn]))
           .y( d => yScale(d[this.yValue]))
@@ -399,6 +407,7 @@ class LineGraph extends XYGraph {
                             key="xAxis"
                             ref={ (el) => select(el).call(xAxis)
                                 .selectAll('.tick text')
+                                .style('font-size', xTickFontSize)
                                 .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
                             }
                             transform={ `translate(0,${availableHeight})` }
@@ -408,6 +417,7 @@ class LineGraph extends XYGraph {
                             ref={ (el) => select(el)
                                 .call(yAxis)
                                 .selectAll('.tick text')
+                                .style('font-size', yTickFontSize)
                                 .call(this.wrapD3Text, yLabelLimit)
                              }
                         />
