@@ -36,7 +36,11 @@ export default class AbstractGraph extends React.Component {
         this.setConfiguredProperties(this.props, properties);
 
         // Provide tooltips for subclasses.
-        const { tooltip, defaultY } = this.getConfiguredProperties();
+        this.updateTooltip();
+    }
+
+    updateTooltip() {
+        const { tooltip, defaultY, yTicksLabel, yColumn } = this.getConfiguredProperties();
         if (tooltip) {
 
             this.setTooltipAccessor(tooltip);
@@ -62,12 +66,18 @@ export default class AbstractGraph extends React.Component {
             // by spreading over the return value from this function
             // when invoked with the mark's data element `d` like this:
             // data.map((d) => <rect { ...this.tooltipProps(d) } />
-            this.tooltipProps = (d) => ({
-                "data-tip": true,
-                "data-for": this.tooltipId,
-                "onMouseEnter": () => this.hoveredDatum = d,
-                "onMouseMove": () => this.hoveredDatum = d
-            });
+            this.tooltipProps = (d) => {
+                let value = {...d};
+                if (yTicksLabel && typeof yTicksLabel === 'object') {
+                    value[yColumn[0]] = yTicksLabel[value[yColumn[0]]];
+                }
+                return {
+                    "data-tip": true,
+                    "data-for": this.tooltipId,
+                    "onMouseEnter": () => this.hoveredDatum = value,
+                    "onMouseMove": () => this.hoveredDatum = value
+                };
+            }
 
         } else {
             this.getTooltipContent = () => null
@@ -81,6 +91,7 @@ export default class AbstractGraph extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         this.setConfiguredProperties(nextProps, this.properties);
+        this.updateTooltip();
     }
 
     setTooltipAccessor(tooltip, type = 'default') {
