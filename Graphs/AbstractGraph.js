@@ -436,9 +436,9 @@ export default class AbstractGraph extends React.Component {
 
         if (this.isBrush() && !this.isVertical()) {
             this.availableWidth = this.availableWidth * (100 - brushArea) / 100
-            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right + margin.left)
+            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right);
+            this.availableMinWidth = this.availableMinWidth > 10 ? this.availableMinWidth : 10;
             this.minMarginLeft = this.availableWidth + this.getLeftMargin() + margin.left;
-
         }
     }
 
