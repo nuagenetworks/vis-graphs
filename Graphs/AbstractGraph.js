@@ -316,6 +316,7 @@ export default class AbstractGraph extends React.Component {
                                 />
 
                                 <text
+                                    style={{fontSize: legend.labelFontSize}}
                                     fill={fontColor}
                                     alignmentBaseline="central"
                                     x={legend.circleSize + legend.labelOffset}
@@ -690,9 +691,10 @@ export default class AbstractGraph extends React.Component {
                             fill={getColor(d)}
                         />
                         <text
+                            style={{fontSize: legend.labelFontSize}}
                             fill={fontColor}
                             alignmentBaseline="central"
-                            x={legend.circleSize + legend.labelOffset}
+                            x={legend.circleSize * 2 + legend.labelOffset}
                             y={legend.circleSize}
                         >
                             {label(d)}
