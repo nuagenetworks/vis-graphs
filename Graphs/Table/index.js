@@ -934,11 +934,41 @@ class Table extends AbstractGraph {
         );
     }
 
+    getHeightMargin(showFooter) {
+        const {
+            configuration,
+        } = this.props;
+
+        const {
+            searchBar,
+            selectColumnOption,
+        } = this.getConfiguredProperties();
+
+        let heightMargin = showFooter ? 95 : 80;
+
+        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
+        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
+
+        return configuration.filterOptions ? heightMargin + 50 : heightMargin;
+    }
+
+    getInitialSort() {
+        const {
+            sort
+        } = this.getGraphProperties();
+
+        let initialSort = {};
+        if (sort && sort.column && sort.order) {
+            initialSort = {...sort, column: this.getKeyByColumnName(sort.column)}
+        }
+
+        return initialSort;
+    }
+
     render() {
         const {
             height,
             scroll,
-            configuration,
         } = this.props;
 
         const {
@@ -946,7 +976,6 @@ class Table extends AbstractGraph {
             multiSelectable,
             showCheckboxes,
             hidePagination,
-            searchBar,
             selectColumnOption,
             searchText,
             tableHeaderStyle,
@@ -960,22 +989,16 @@ class Table extends AbstractGraph {
             size
         } = this.getGraphProperties();
 
-        
-
         let tableData  = this.getTableData(this.getColumns());
-        const headerData = this.getHeaderData(),
-            totalRecords = size || this.filterData.length;
 
-            
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
 
-        let showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true,
-            heightMargin = showFooter ? 95 : 80;
-
-        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
-        heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
+        const headerData = this.getHeaderData();
+        const totalRecords = scroll ? size : this.filterData.length;
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
+        const heightMargin = this.getHeightMargin(showFooter);
+        const initialSort = this.getInitialSort();
 
         return (
             <MuiThemeProvider muiTheme={theme}>
@@ -998,6 +1021,7 @@ class Table extends AbstractGraph {
                             <DataTables
                                 columns={headerData}
                                 data={tableData}
+                                initialSort={initialSort}
                                 showHeaderToolbar={false}
                                 showFooterToolbar={showFooter}
                                 selectable={selectable}
