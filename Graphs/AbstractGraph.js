@@ -467,7 +467,7 @@ export default class AbstractGraph extends React.Component {
     }
 
     getAvailableMinWidth() {
-        return this.availableMinWidth > 10 ? this.availableMinWidth : 10;
+        return this.availableMinWidth;
     }
 
     getMinMarginLeft() {
