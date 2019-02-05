@@ -335,6 +335,7 @@ export default class AbstractGraph extends React.Component {
                                 />
 
                                 <text
+                                    style={{fontSize: legend.labelFontSize}}
                                     fill={fontColor}
                                     alignmentBaseline="central"
                                     x={legend.circleSize + legend.labelOffset}
@@ -455,9 +456,9 @@ export default class AbstractGraph extends React.Component {
 
         if (this.isBrush() && !this.isVertical()) {
             this.availableWidth = this.availableWidth * (100 - brushArea) / 100
-            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right)
+            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right);
+            this.availableMinWidth = this.availableMinWidth > 10 ? this.availableMinWidth : 10;
             this.minMarginLeft = this.availableWidth + this.getLeftMargin() + margin.left;
-
         }
     }
 
@@ -709,9 +710,10 @@ export default class AbstractGraph extends React.Component {
                             fill={getColor(d)}
                         />
                         <text
+                            style={{fontSize: legend.labelFontSize}}
                             fill={fontColor}
                             alignmentBaseline="central"
-                            x={legend.circleSize + legend.labelOffset}
+                            x={legend.circleSize * 2 + legend.labelOffset}
                             y={legend.circleSize}
                         >
                             {label(d)}
