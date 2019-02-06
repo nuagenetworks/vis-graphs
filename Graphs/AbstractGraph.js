@@ -1,6 +1,7 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
+import _ from 'lodash';
 
 import "./style.css"
 import defaultProperties from "./defaultProperties";
@@ -34,6 +35,22 @@ export default class AbstractGraph extends React.Component {
 
         // set all configuration into single object
         this.setConfiguredProperties(this.props, properties);
+
+        this.setTooltip();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setConfiguredProperties(nextProps, this.properties);
+        this.reInitializeTooltip(nextProps);
+    }
+
+    reInitializeTooltip(nextProps) {
+        if (!_.isEqual(this.props.configuration.data, nextProps.configuration.data)) {
+            this.setTooltip();
+        }
+    }
+
+    setTooltip() {
 
         // Provide tooltips for subclasses.
         const { tooltip, defaultY } = this.getConfiguredProperties();
@@ -79,10 +96,6 @@ export default class AbstractGraph extends React.Component {
         return Math.floor(new Date().valueOf() * Math.random());
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setConfiguredProperties(nextProps, this.properties);
-    }
-
     setTooltipAccessor(tooltip, type = 'default') {
         if (!tooltip)
             return;
@@ -107,6 +120,12 @@ export default class AbstractGraph extends React.Component {
     }
 
     tooltipContent({ tooltip, accessors }) {
+        let { yTicksLabel } = this.getConfiguredProperties();
+
+        if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+            yTicksLabel = {};
+        }
+
         return (
             <div>
                 {/* Display each tooltip column as "label : value". */}
@@ -120,7 +139,7 @@ export default class AbstractGraph extends React.Component {
                                 {label || column}
                             </strong> : <span>
                                 {/* Apply number and date formatting to the value. */}
-                                {data}
+                                { yTicksLabel[data] || data }
                             </span>
                         </div>
                         ) : null
@@ -213,7 +232,7 @@ export default class AbstractGraph extends React.Component {
             yExtent[1] = 0;
         }
 
-        let diff = Math.floor((yExtent[1] - yExtent[0]) * padding, 0);
+        let diff = Math.floor((yExtent[1] - yExtent[0]) * padding);
 
         yExtent[0] = (yExtent[0] >= 0 && (yExtent[0] - diff) < 0) ? 0 : yExtent[0] - diff;
         yExtent[1] = (yExtent[1] <= 0 && (yExtent[1] + diff) > 0) ? 0 : yExtent[1] + diff;
