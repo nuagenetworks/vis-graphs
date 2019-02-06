@@ -200,7 +200,13 @@ class LineGraph extends XYGraph {
         let xAxisHeight       = xLabel ? chartHeightToPixel : 0;
         let legendWidth       = legend.show ? this.longestLabelLength(filterDatas, legendFn) * chartWidthToPixel : 0;
 
-        let yLabelWidth       = this.longestLabelLength(filterDatas, yLabelFn, yTickFormat);
+        let yLabelWidth = 0;
+        if (yTicksLabel && typeof yTicksLabel === 'object') {
+            yLabelWidth = this.longestLabelLength(Object.values(yTicksLabel));
+        } else {
+            yLabelWidth = this.longestLabelLength(filterDatas, yLabelFn, yTickFormat);
+        }
+
         yLabelWidth = (yLabelWidth > yLabelLimit ?  yLabelLimit + appendCharLength : yLabelWidth)* chartWidthToPixel
         let leftMargin        = margin.left + yLabelWidth;
         let availableWidth    = width - (margin.left + margin.right + yLabelWidth);
@@ -275,8 +281,8 @@ class LineGraph extends XYGraph {
                 defaultYvalue = horizontalLineData[defaultY.column] || null
             }
 
-            startRange = startRange > defaultYvalue ? defaultYvalue - 1 : startRange
-            endRange = endRange < defaultYvalue ? defaultYvalue + 1 : endRange
+            startRange = startRange > defaultYvalue ? Math.floor(defaultYvalue / 10) * 10 : startRange
+            endRange = endRange < defaultYvalue ? Math.ceil(defaultYvalue / 10) * 10 : endRange
             yScale.domain([startRange, endRange]);
 
         }
