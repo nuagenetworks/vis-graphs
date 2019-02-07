@@ -302,6 +302,10 @@ __percentagesFormat__ - Format data for percentage.
 
 __labelCount__ - (number) Hide labels of pie graph if slice count is greater than labelCount. Default is 5.
 
+__labelFontSize__ - (number) font size of the label. Default is 10.
+
+__labelLimit__ - (numeric) number of character need to display. Default is 10. After 10 character `...` is append with tooltip of full character for each label.
+
 __otherOptions__ - optional object
 - **type** Value must be percentage or number, and default is percentage
 - **limit** As per the type we can define the limit in percentage or slices respectively.
