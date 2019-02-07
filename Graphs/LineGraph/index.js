@@ -106,7 +106,7 @@ class LineGraph extends XYGraph {
                     }
 
                     flatData.push(Object.assign({
-                        [this.yValue]: 100,//d[ld['value']],
+                        [this.yValue]: d[ld['value']],
                         [this.yKey]: key
                     }, d));
                 });
@@ -235,7 +235,6 @@ class LineGraph extends XYGraph {
         let range = extent(filterDatas, yLabelFn)
 
         let yExtent = this.updateYExtent(range);
-        console.error("yExtent", yExtent)
         let xScale;
 
         if (dateHistogram) {
@@ -306,7 +305,7 @@ class LineGraph extends XYGraph {
         }
 
         if(yTicks){
-            //yAxis.ticks(yTicks);
+            yAxis.ticks(yTicks);
         }
 
         if (yTicksLabel && typeof yTicksLabel === 'object') {
