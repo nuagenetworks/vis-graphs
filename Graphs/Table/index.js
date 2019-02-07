@@ -476,11 +476,7 @@ class Table extends AbstractGraph {
         let colName = this.getColumnNameByKey(column);
 
         if (sort && sort.column === colName) {
-            if (sort.order === 'desc') {
-                colOrder = '';
-            } else if (sort.order === 'asc') {
-                colOrder = 'desc';
-            }
+            colOrder = sort.order === 'desc' ? 'asc' : 'desc';
         }
 
         this.updateTableStatus({
