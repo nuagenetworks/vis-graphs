@@ -62,5 +62,5 @@ export default {
         theme.palette.mauveColor,
     ],
     zeroStart: true,
-    yRangePadding: false,
+    yRangePadding: true,
 }
