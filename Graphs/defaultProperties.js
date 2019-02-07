@@ -38,6 +38,8 @@ export default {
         circleSize: 4,              // Size in pixel of the circle
         labelOffset: 2,             // Space in pixels between the circle and the label
     },
+    labelFontSize: 10,
+    labelLimit: 10,
     yLabelLimit: 20,
     xLabelLimit: 10,
     xLabelRotate: true,

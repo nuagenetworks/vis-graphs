@@ -84,7 +84,9 @@ export default class PieGraph extends AbstractGraph {
           otherOptions,
           showZero,
           mappedColors,
-          labelCount
+          labelCount,
+          labelLimit,
+          labelFontSize,
         } = this.getConfiguredProperties();
 
 
@@ -159,7 +161,7 @@ export default class PieGraph extends AbstractGraph {
         const pie    = d3.pie().value(value).sort(null);
         const slices = pie(data);
 
-        const labelText = (() => {
+        const getLabelText = (() => {
             if (percentages) {
                 const percentageFormat = d3.format(percentagesFormat || ",.2%");
                 const sum              = d3.sum(data, value);
@@ -194,6 +196,9 @@ export default class PieGraph extends AbstractGraph {
                                 {
                                     slices.map((slice, i) => {
                                         const d = slice.data;
+                                        const labelFullText = labelCount >= slices.length ? getLabelText(d) : '';
+                                        const isTruncate = labelFullText.length > labelLimit;
+                                        const labelText = isTruncate ? `${labelFullText.substr(0, labelLimit)}...` : labelFullText;
 
                                         // Set up clicking and cursor style.
                                         const { onClick, cursor } = (
@@ -223,21 +228,26 @@ export default class PieGraph extends AbstractGraph {
                                             dy=".35em"
                                             fill={ fontColor }
                                             onClick={ onClick }
-                                            style={{cursor}}
+                                            style={{cursor, fontSize: labelFontSize}}
                                             { ...this.tooltipProps(d) }
                                             >
-                                                { labelCount >= slices.length ? labelText(slice.data) : '' }
+                                                <title>{isTruncate ? labelFullText : ''}</title>
+                                                { labelText }
                                             </text>
                                         </g>
                                     })
                                 }
                             </g>
-                            {this.renderLegend(data, legend, getColor, label, legendHeight)}
+                            {this.renderLegend(data, legend, getColor, label)}
                         </svg>
                     </div>
-                    <div className='legendContainer' style={style.legendStyle}>
-                        {this.renderLegend(data, legend, getColor, label)}
-                    </div>
+                    {
+                        legend && legend.separate && (
+                            <div className='legendContainer' style={style.legendStyle}>
+                                {this.renderLegend(data, legend, getColor, label)}
+                            </div>
+                        )
+                    }
                 </div>
             </div>
         );
