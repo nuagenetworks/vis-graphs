@@ -61,4 +61,6 @@ export default {
         theme.palette.orangeBlindColor,
         theme.palette.mauveColor,
     ],
+    zeroStart: true,
+    yRangePadding: false,
 }

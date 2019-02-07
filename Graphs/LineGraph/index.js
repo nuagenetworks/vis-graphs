@@ -64,7 +64,6 @@ class LineGraph extends XYGraph {
           yTickSizeInner,
           yTickSizeOuter,
           brushEnabled,
-          zeroStart,
           circleRadius,
           defaultY,
           defaultYColor,
@@ -107,7 +106,7 @@ class LineGraph extends XYGraph {
                     }
 
                     flatData.push(Object.assign({
-                        [this.yValue]: d[ld['value']],
+                        [this.yValue]: 100,//d[ld['value']],
                         [this.yKey]: key
                     }, d));
                 });
@@ -235,8 +234,8 @@ class LineGraph extends XYGraph {
 
         let range = extent(filterDatas, yLabelFn)
 
-        let yExtent = this.updateYExtent(range, zeroStart);
-
+        let yExtent = this.updateYExtent(range);
+        console.error("yExtent", yExtent)
         let xScale;
 
         if (dateHistogram) {
@@ -280,7 +279,6 @@ class LineGraph extends XYGraph {
                 horizontalLineData = this.props[dataSource] && this.props[dataSource].length ? this.props[dataSource][0] : {}
                 defaultYvalue = horizontalLineData[defaultY.column] || null
             }
-
             startRange = startRange > defaultYvalue ? Math.floor(defaultYvalue / 10) * 10 : startRange
             endRange = endRange < defaultYvalue ? Math.ceil(defaultYvalue / 10) * 10 : endRange
             yScale.domain([startRange, endRange]);
@@ -308,7 +306,7 @@ class LineGraph extends XYGraph {
         }
 
         if(yTicks){
-            yAxis.ticks(yTicks);
+            //yAxis.ticks(yTicks);
         }
 
         if (yTicksLabel && typeof yTicksLabel === 'object') {

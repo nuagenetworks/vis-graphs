@@ -211,6 +211,10 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yTickGrid** (boolean) If set to `true` then the complete grid will be drawn
 - **yTickSizeInner** If size is specified, sets the inner tick size to the specified value and returns the axis.
 - **yTickSizeOuter** If size is specified, sets the outer tick size to the specified value and returns the axis.
+- **zeroStart** (boolean) eg. if the value is from range say 30 to 89 and zeroStart is enabled, then this will change the range to 0 to 89. Default value of zeroStart is "true", and currently applicable for line and area graph.
+- **yRangePadding** (boolean) default value is ```false```, if property is enabled then this will add padding around the min and max range, say min and max  range is 34 to 83, then this will change it to 30 to 90.
+
+
 # Graph specific configuration
 
 ## *BarGraph*
