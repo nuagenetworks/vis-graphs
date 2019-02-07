@@ -70,12 +70,11 @@ export default class XYGraph extends AbstractGraph {
           dateHistogram,
           xColumn,
           yColumn,
-          zeroStart
         } = this.getConfiguredProperties();
 
         const xLabelFn = (d) => d[xColumn];
         const yLabelFn = (d) => parseFloat(d[customYColumn ? customYColumn : yColumn]);
-        const yExtent  = this.updateYExtent(extent(data, yLabelFn), zeroStart);
+        const yExtent  = this.updateYExtent(extent(data, yLabelFn));
 
         this.scale = {};
 

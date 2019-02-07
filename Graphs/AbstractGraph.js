@@ -221,18 +221,25 @@ export default class AbstractGraph extends React.Component {
         return scale;
     }
 
-    updateYExtent(yExtent, zeroStart) {
-        let padding = 0.10;
+    updateYExtent(yExtent) {
+        const { zeroStart, yRangePadding } = this.getConfiguredProperties();
 
+        
         if (zeroStart && yExtent[0] > 0) {
             yExtent[0] = 0;
         }
-
+        
         if (zeroStart && yExtent[1] < 0) {
             yExtent[1] = 0;
         }
 
+        if (!yRangePadding) {
+            return yExtent;
+        }
+        
+        let padding = 0.10;
         let diff = Math.floor((yExtent[1] - yExtent[0]) * padding);
+
 
         yExtent[0] = (yExtent[0] >= 0 && (yExtent[0] - diff) < 0) ? 0 : yExtent[0] - diff;
         yExtent[1] = (yExtent[1] <= 0 && (yExtent[1] + diff) > 0) ? 0 : yExtent[1] + diff;
