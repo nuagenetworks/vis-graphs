@@ -7,14 +7,43 @@ export default ({
     order,
     sequence = null
   }) => {
-  return (a, b) => {
+
+    return (a, b) => {
     let sortOrder = `${sequence ? 'SEQ' : ''}${order || 'ASC'}`
     
     const operations = {
       'ASC': () => +(a[column] > b[column]),
       'DESC': () => +(a[column] < b[column]),
-      'SEQASC': () => (sequence.indexOf(a[column]) - sequence.indexOf(b[column])),
-      'SEQDESC': () => (sequence.indexOf(b[column]) - sequence.indexOf(a[column]))
+      'SEQASC': () => {
+        if(sequence.indexOf(a[column]) >= 0 && sequence.indexOf(b[column]) >= 0) {
+          return sequence.indexOf(a[column]) - sequence.indexOf(b[column]);
+        }
+
+        if(sequence.indexOf(a[column]) >= 0) {
+          return -1;
+        }
+
+        if(sequence.indexOf(b[column]) >= 0) {
+          return 1;
+        }
+
+        return +(a[column] > b[column]);
+      },
+      'SEQDESC': () => {
+        if(sequence.indexOf(a[column]) >= 0 && sequence.indexOf(b[column]) >= 0) {
+          return sequence.indexOf(a[column]) - sequence.indexOf(b[column]);
+        }
+
+        if(sequence.indexOf(a[column]) >= 0) {
+          return -1;
+        }
+
+        if(sequence.indexOf(b[column]) >= 0) {
+          return 1;
+        }
+
+        return +(a[column] < b[column]);
+      }
     }
 
     return a[column] === b[column]
