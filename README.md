@@ -241,7 +241,11 @@ __stackColumn__ - Used to show stacked data in bars. E.g-
 ```
 ![stacked](https://user-images.githubusercontent.com/26645756/36251630-d603b8a0-1267-11e8-8efe-502c1046c7a8.png)
 
-__stackColumn__ (optional) To show stacked Bar Charts
+__stackSequence__ (array) sorting of stacked data manually. Only applicable when `stackColumn` is enable. It is an optional property.  E.g -
+```javascript
+"stackSequence": ['GOOGLE', 'NETFLIX']
+```
+In above example,  'google' & 'netflix' will display at the start of stacked bars and rest data will be sorted `asc` or `desc` order as per defined in sorting.
 
 __brush__ (number) To enble brushing with pre selected bars.Currently support in bar graph and heatmap graph. E.g -
 ```javascript
