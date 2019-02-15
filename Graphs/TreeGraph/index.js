@@ -339,7 +339,9 @@ class TreeGraph extends AbstractGraph {
         const nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr("transform", (d) => {
-                return "translate(" + source.y0 + "," + source.x0 + ")";
+                return d.parent 
+                  ? "translate(" + d.parent.y + "," + d.parent.x + ")" 
+                  : "translate(" + source.y0 + "," + source.x0 + ")";
             })
             .on('click', this.click);
 
@@ -367,7 +369,9 @@ class TreeGraph extends AbstractGraph {
 
         // Transition to the proper position for the node
         nodeUpdate.transition()
-            .duration(duration)
+            .duration((d) => {
+                return d.children ? 0 : duration;
+            })
             .attr("transform", (d) => {
                 return "translate(" + d.y + "," + d.x + ")";
             });
@@ -414,7 +418,7 @@ class TreeGraph extends AbstractGraph {
         const linkEnter = link.enter().insert('path', "g")
             .attr("class", "link")
             .attr('d', (d) => {
-                const o = { x: source.x0, y: source.y0 }
+                const o = { x: d.parent ? d.parent.x : source.x0, y: d.parent ? d.parent.y : source.y0 }
                 return diagonal(o, o)
             });
 
@@ -423,7 +427,9 @@ class TreeGraph extends AbstractGraph {
 
         // Transition back to the parent element position
         linkUpdate.transition()
-            .duration(duration)
+            .duration((d) => {
+                return d.children ? 0 : duration;
+            })
             .attr('d', (d) => {
                 return diagonal(d, d.parent)
             });
