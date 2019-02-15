@@ -422,6 +422,8 @@ class TreeGraph extends AbstractGraph {
                 return diagonal(o, o)
             });
 
+        linkEnter.style("stroke", properties.linkColor)
+
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
 
