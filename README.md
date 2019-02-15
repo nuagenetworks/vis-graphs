@@ -20,7 +20,9 @@ The use of the graphs module is to provide a module to quickly shows your data i
       - [HeatmpaGraph](#heatmapgraph)
       - [AreaGraph](#areagraph)
       - [GuageGraph](#guagegraph)
-      - [Geomap] (#geomap)
+      - [GeoMap](#geomap)
+      - [TreeGraph](#treegraph)
+      - [PortGraph](#portgraph)
 
 
 ## Requirement-
@@ -46,6 +48,7 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "react-csv": "1.0.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-modal": "^3.5.1",
+    "eval-expression": "^1.0.0"
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
@@ -152,7 +155,6 @@ __padding__
 - **right** set right padding in pixels
 - **left** set left padding in pixels
 
-
 ![textgraph 1](https://user-images.githubusercontent.com/26645756/38319372-44c0eb02-384f-11e8-8bdb-a524b9ecdd19.png)
 
 > padding currently supported only for text graph
@@ -171,6 +173,11 @@ __yLabelLimit__ - (numeric) Limit the character of y-axis label. Above the defin
 
 __appendCharLength__ - (numeric) The length of the appended dots after the label if yLabelLimit defined
 
+__xLabelRotate__ - (boolean) rotate x-axis labels. Default is `true`.
+__xLabelRotateHeight__ - (numeric) if `xLabelRotate` is enable then height occupied by x-axis labels. Default is 35 (in px).
+__xLabelLimit__ - (numeric) number of character need to display. Default is 10. After 10 character `...` is append with tooltip of full character for each label.
+
+
  __stroke__
 - **width** define stroke width
 - **color** define stroke color
@@ -180,6 +187,8 @@ __legend__
 - **orientation** `vertical` or `horizontal` legend. Default is `vertical`
 - **circleSize** size of a legend circle. Default is `4` pixels
 - **labelOffset** space in pixel between the legend circle and its label. Default is `2`.
+- **labelFontSize** (numeric) - Font size of the label.
+- **separate** (numeric) - This will separate the legends from the charts and use the provided value as percentage to define the area for the legends. This will be useful in case of large number of legends and enable the scroll for legends as well (if applicable). If value is 20, then 80% of the area will be used by charts and 20% will be used by legends.
 
 __filterOptions__ - Allows to set filters on the visualization. See dashboard configuration for more information as it is working the same way!
 
@@ -202,6 +211,10 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yTickGrid** (boolean) If set to `true` then the complete grid will be drawn
 - **yTickSizeInner** If size is specified, sets the inner tick size to the specified value and returns the axis.
 - **yTickSizeOuter** If size is specified, sets the outer tick size to the specified value and returns the axis.
+- **zeroStart** (boolean) eg. if the value is from range say 30 to 89 and zeroStart is enabled, then this will change the range to 0 to 89. Default value of zeroStart is "true", and currently applicable for line and area graph.
+- **yRangePadding** (boolean) default value is `true`, if property is enabled then this will add padding around the min and max range, say min and max  range is 34 to 83, then this will change it to 30 to 90.
+
+
 # Graph specific configuration
 
 ## *BarGraph*
@@ -228,7 +241,11 @@ __stackColumn__ - Used to show stacked data in bars. E.g-
 ```
 ![stacked](https://user-images.githubusercontent.com/26645756/36251630-d603b8a0-1267-11e8-8efe-502c1046c7a8.png)
 
-__stackColumn__ (optional) To show stacked Bar Charts
+__stackSequence__ (array) sorting of stacked data manually. Only applicable when `stackColumn` is enable. It is an optional property.  E.g -
+```javascript
+"stackSequence": ['GOOGLE', 'NETFLIX']
+```
+In above example,  'google' & 'netflix' will display at the start of stacked bars and rest data will be sorted `asc` or `desc` order as per defined in sorting.
 
 __brush__ (number) To enble brushing with pre selected bars.Currently support in bar graph and heatmap graph. E.g -
 ```javascript
@@ -263,6 +280,15 @@ __defaultY__ - (string | object) default yAxis value used to draw straight horiz
  }
  ```
 
+__yTicksLabel__ - (object) used to override labels of y axis ticks with some predefined strings. E.g - 
+ ```javascript
+{
+    "-1": "inactive",
+    "0": "starting" ,
+    "1": "active"
+}
+```
+
 >See x-axis and y-axis sections in BarGraph for more information
 
 ## *PieGraph*
@@ -283,6 +309,10 @@ __percentages__ - (boolean) Show area in percentage in each slice of pie chart. 
 __percentagesFormat__ - Format data for percentage.
 
 __labelCount__ - (number) Hide labels of pie graph if slice count is greater than labelCount. Default is 5.
+
+__labelFontSize__ - (number) font size of the label. Default is 10.
+
+__labelLimit__ - (numeric) number of character need to display. Default is 10. After 10 character `...` is append with tooltip of full character for each label.
 
 __otherOptions__ - optional object
 - **type** Value must be percentage or number, and default is percentage
@@ -596,3 +626,72 @@ const clickChild = (child) => {
 __width__ (Integer) Width of treemap area.
 
 __height__ (Integer) Height of treemap area.
+
+## *PortGraph*
+This graph displays the information of networking ports.
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/portGraph)
+
+![PortGraph](https://user-images.githubusercontent.com/26645756/50140501-edeea480-02ca-11e9-8c66-a7bf349bbbb2.png)
+
+__columns__ (array of object) data to show "key: value" information at top of the ports in graph. __Note:__ this data should come from secondary query source named "data2".
+
+__topColumn__ (string) the name of the column to use for the data on top of port icon. For example `"topBottom": "portName"`
+
+__bottomColumn__ (string) the name of the column to use for the data below port icon, example: `"bottomColumn": "type"`
+
+__portColor__ (object) define the criteria to show the color of each port icon as per defined condition. If `getColor` function is provided getColor is used to determine the color for the port. E.g -
+
+```javascript
+"portColor": {
+    "defaultColor": "gray",
+    "field": "status",
+    "criteria": [
+        {
+            "value": "UP",
+            "color": "green"
+        },
+        {
+            "value": "DOWN",
+            "color": "red"
+        }
+    ],
+    "getColor": "({state, type}) => { if (!state) return '#B5B5B5'; switch(state) { case 'DOWN': return '#D9070A'; case 'UP': return type === 'Network' ? '#5A83DE' : '#62AC00'; default: return '#B5B5B5'}}"
+}
+
+__portIcon__ (object) define the criteria to show the icon of each port. E.g -
+
+```javascript
+"portIcon": {
+    "default": "nsGatewayIcon",
+    "getIcon": "({name}) => { if (name === 'Port 1') return 'default2' }",
+    "criteria": [
+        {
+            "icon": "nsGatewayIcon",
+            "fields": {
+                "status": "DOWN",
+                "type": "ACCESS"
+            }
+        },
+        {
+            "icon": "nsGatewayIcon",
+            "fields": {
+                "status": "UP",
+                "type": "ACCESS"
+            }
+        }
+    ]
+}
+
+Note: icon must be a key exists in svgIcons object in helpers/icons.js
+```
+
+__defaultIconColor__ (string) default color of the port icon. Default is gray .
+
+__minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (px).
+
+__maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
+
+__minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
+
+__rowLimit__ (number) show number of ports in each row. Default is 8.

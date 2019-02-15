@@ -162,6 +162,8 @@ class SimpleTextGraph extends AbstractGraph {
         );
     }
 
+    getStyleClasses = () => ('center-text simpleTextGraph')
+
     render() {
         const {
             height,
@@ -184,7 +186,7 @@ class SimpleTextGraph extends AbstractGraph {
         const blockHeight = height * innerHeight
 
         return (
-            <div className='center-text simpleTextGraph'
+            <div className={this.getStyleClasses()}
                 onClick={this.handleMarkerClick}
             >
                 {this.renderTitleIfNeeded(titlePosition, "top")}

@@ -7,7 +7,7 @@ export default ({
   metric,
   stack,
   otherOptions,
-  vertical
+  stackSequence = null
     }) => {
 
   return nestStack({
@@ -16,7 +16,8 @@ export default ({
         data: nest({
           data,
           key: dimension,
-          sortColumn: stack
+          sortColumn: stack,
+          sequence: stackSequence
         }),
         stackColumn: metric
       }),

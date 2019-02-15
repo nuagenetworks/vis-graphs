@@ -87,10 +87,12 @@ class GeoMap extends AbstractGraph {
       longitudeColumn
     } = this.getConfiguredProperties()
     const bounds = new window.google.maps.LatLngBounds()
+    let shouldFitToBounds = false;
 
     this.state.data.forEach(marker => {
       if (marker[latitudeColumn] && marker[longitudeColumn]) {
         bounds.extend(new window.google.maps.LatLng(marker[latitudeColumn], marker[longitudeColumn]));
+        shouldFitToBounds = true;
       }
     });
 
@@ -98,7 +100,7 @@ class GeoMap extends AbstractGraph {
 
     if (newCenter && !_.isEqual(this.center, newCenter)) {
 
-      if (!this.center) {
+      if (!this.center && shouldFitToBounds) {
         this.map.fitBounds(bounds);
       }
 

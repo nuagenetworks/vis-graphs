@@ -64,13 +64,18 @@ class LineGraph extends XYGraph {
           yTickSizeInner,
           yTickSizeOuter,
           brushEnabled,
-          zeroStart,
           circleRadius,
           defaultY,
           defaultYColor,
           showNull,
           yLabelLimit,
-          appendCharLength
+          appendCharLength,
+          xLabelRotate,
+          xLabelLimit,
+          xLabelRotateHeight,
+          yTickFontSize,
+          xTickFontSize,
+          yTicksLabel,
         } = this.getConfiguredProperties();
 
         let finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
@@ -194,11 +199,21 @@ class LineGraph extends XYGraph {
         let xAxisHeight       = xLabel ? chartHeightToPixel : 0;
         let legendWidth       = legend.show ? this.longestLabelLength(filterDatas, legendFn) * chartWidthToPixel : 0;
 
-        let yLabelWidth       = this.longestLabelLength(filterDatas, yLabelFn, yTickFormat);
+        let yLabelWidth = 0;
+        if (yTicksLabel && typeof yTicksLabel === 'object') {
+            yLabelWidth = this.longestLabelLength(Object.values(yTicksLabel));
+        } else {
+            yLabelWidth = this.longestLabelLength(filterDatas, yLabelFn, yTickFormat);
+        }
+
         yLabelWidth = (yLabelWidth > yLabelLimit ?  yLabelLimit + appendCharLength : yLabelWidth)* chartWidthToPixel
         let leftMargin        = margin.left + yLabelWidth;
         let availableWidth    = width - (margin.left + margin.right + yLabelWidth);
         let availableHeight   = height - (margin.top + margin.bottom + chartHeightToPixel + xAxisHeight);
+
+        if (xLabelRotate) {
+            availableHeight -= xLabelRotateHeight;
+        }
 
         if (legend.show)
         {
@@ -219,8 +234,7 @@ class LineGraph extends XYGraph {
 
         let range = extent(filterDatas, yLabelFn)
 
-        let yExtent = this.updateYExtent(range, zeroStart);
-
+        let yExtent = this.updateYExtent(range);
         let xScale;
 
         if (dateHistogram) {
@@ -264,9 +278,8 @@ class LineGraph extends XYGraph {
                 horizontalLineData = this.props[dataSource] && this.props[dataSource].length ? this.props[dataSource][0] : {}
                 defaultYvalue = horizontalLineData[defaultY.column] || null
             }
-
-            startRange = startRange > defaultYvalue ? defaultYvalue - 1 : startRange
-            endRange = endRange < defaultYvalue ? defaultYvalue + 1 : endRange
+            startRange = startRange > defaultYvalue ? Math.floor(defaultYvalue / 10) * 10 : startRange
+            endRange = endRange < defaultYvalue ? Math.ceil(defaultYvalue / 10) * 10 : endRange
             yScale.domain([startRange, endRange]);
 
         }
@@ -295,13 +308,18 @@ class LineGraph extends XYGraph {
             yAxis.ticks(yTicks);
         }
 
+        if (yTicksLabel && typeof yTicksLabel === 'object') {
+            yAxis.tickValues(Object.keys(yTicksLabel));
+            yAxis.tickFormat( value => yTicksLabel[value] || null);
+        }
+
         const lineGenerator = line()
           .x( d => xScale(d[xColumn]))
           .y( d => yScale(d[this.yValue]))
 
         let xTitlePosition = {
             left: leftMargin + availableWidth / 2,
-            top: margin.top + availableHeight + chartHeightToPixel + xAxisHeight
+            top: margin.top + availableHeight + chartHeightToPixel + xAxisHeight + ( xLabelRotate ? xLabelRotateHeight : 0)
         }
         let yTitlePosition = {
             // We use chartWidthToPixel to compensate the rotation of the title
@@ -327,7 +345,7 @@ class LineGraph extends XYGraph {
         const tooltipOverlay = voronoi()
             .x( d => xScale(d[xColumn]))
             .y( d => yScale(d[this.yValue]))
-            .extent([[-leftMargin, -margin.top], [width + margin.right, height + margin.bottom]])
+            .extent([[-leftMargin, -margin.top], [availableWidth + margin.right, availableHeight + margin.bottom]])
             .polygons(filterDatas)
 
         const tooltipOffset = (d) => JSON.stringify({
@@ -390,7 +408,11 @@ class LineGraph extends XYGraph {
                     <g transform={ `translate(${leftMargin},${margin.top})` } >
                         <g
                             key="xAxis"
-                            ref={ (el) => select(el).call(xAxis) }
+                            ref={ (el) => select(el).call(xAxis)
+                                .selectAll('.tick text')
+                                .style('font-size', xTickFontSize)
+                                .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
+                            }
                             transform={ `translate(0,${availableHeight})` }
                         />
                         <g
@@ -398,6 +420,7 @@ class LineGraph extends XYGraph {
                             ref={ (el) => select(el)
                                 .call(yAxis)
                                 .selectAll('.tick text')
+                                .style('font-size', yTickFontSize)
                                 .call(this.wrapD3Text, yLabelLimit)
                              }
                         />

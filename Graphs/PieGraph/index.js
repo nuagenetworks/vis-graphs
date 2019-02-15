@@ -49,17 +49,22 @@ export default class PieGraph extends AbstractGraph {
     }
 
     render() {
-
         const {
             data: originalData,
-            width,
             height,
+            width,
             onMarkClick
         } = this.props;
 
+        const {
+            graphHeight,
+            graphWidth,
+            legendHeight,
+            legendWidth
+        } = this.getGraphDimension();
 
         if (!originalData || !originalData.length)
-           return this.renderMessage("No data to visualize");
+            return this.renderMessage("No data to visualize");
 
         const {
           chartWidthToPixel,
@@ -79,7 +84,9 @@ export default class PieGraph extends AbstractGraph {
           otherOptions,
           showZero,
           mappedColors,
-          labelCount
+          labelCount,
+          labelLimit,
+          labelFontSize,
         } = this.getConfiguredProperties();
 
 
@@ -111,8 +118,8 @@ export default class PieGraph extends AbstractGraph {
         if (!data || !data.length)
             return this.renderMessage("No data to visualize")
 
-        let availableWidth     = width - (margin.left + margin.right);
-        let availableHeight    = height - (margin.top + margin.bottom);
+        let availableWidth     = graphWidth - (margin.left + margin.right);
+        let availableHeight    = graphHeight - (margin.top + margin.bottom);
 
         const isVerticalLegend = legend.orientation === 'vertical';
         const value            = (d) => d[sliceColumn];
@@ -129,11 +136,13 @@ export default class PieGraph extends AbstractGraph {
             // Store the info in legend for convenience
             legend.width = this.longestLabelLength(data, label) * chartWidthToPixel;
 
-            // Compute the available space considering a legend
-            if (isVerticalLegend)
-                availableWidth -= legend.width;
-            else
-                availableHeight -= (data.length - 1) * legend.circleSize * circleToPixel;
+            if (!legend.separate) {
+                // Compute the available space considering a legend
+                if (isVerticalLegend)
+                    availableWidth -= legend.width;
+                else
+                    availableHeight -= (data.length - 1) * legend.circleSize * circleToPixel;
+            }
         }
 
         const maxRadius   = Math.min(availableWidth, availableHeight) / 2;
@@ -152,7 +161,7 @@ export default class PieGraph extends AbstractGraph {
         const pie    = d3.pie().value(value).sort(null);
         const slices = pie(data);
 
-        const labelText = (() => {
+        const getLabelText = (() => {
             if (percentages) {
                 const percentageFormat = d3.format(percentagesFormat || ",.2%");
                 const sum              = d3.sum(data, value);
@@ -161,60 +170,85 @@ export default class PieGraph extends AbstractGraph {
             return label;
         })();
 
-        let strokeStyle = {
-            strokeWidth: stroke.width,
-            stroke: stroke.color
-        }
+        const style = {
+            strokeStyle: {
+                strokeWidth: stroke.width,
+                stroke: stroke.color
+            },
+            graphStyle: {
+                width: graphWidth,
+                height: graphHeight
+            },
+            legendStyle: {
+                width: legendWidth,
+                height: legendHeight,
+                display: isVerticalLegend ? 'grid' : 'inline-block'
+            }
+        };
 
         return (
             <div className="pie-graph">
                 {this.tooltip}
-                <svg width={ width } height={ height }>
-                    <g className = {'pieGraph'} transform={ `translate(${ width / 2 }, ${ height / 2 })` } >
-                        {
-                            slices.map((slice, i) => {
-                                const d = slice.data;
+                <div style={{ height, width}}>
+                    <div className='graphContainer' style={ style.graphStyle }>
+                        <svg width={ graphWidth } height={ graphHeight }>
+                            <g className = {'pieGraph'} transform={ `translate(${ graphWidth / 2 }, ${ graphHeight / 2 })` } >
+                                {
+                                    slices.map((slice, i) => {
+                                        const d = slice.data;
+                                        const labelFullText = labelCount >= slices.length ? getLabelText(d) : '';
+                                        const isTruncate = labelFullText.length > labelLimit;
+                                        const labelText = isTruncate ? `${labelFullText.substr(0, labelLimit)}...` : labelFullText;
 
-                                // Set up clicking and cursor style.
-                                const { onClick, cursor } = (
-                                    onMarkClick && (!otherOptions || d[settings.dimension] !== otherOptions.label) ? {
-                                        onClick: () => onMarkClick(d),
-                                        cursor: "pointer"
-                                    } : { }
-                                );
+                                        // Set up clicking and cursor style.
+                                        const { onClick, cursor } = (
+                                            onMarkClick && (!otherOptions || d[settings.dimension] !== otherOptions.label) ? {
+                                                onClick: () => onMarkClick(d),
+                                                cursor: "pointer"
+                                            } : { }
+                                        );
 
-                                const textAnchor = (
-                                  (pieLabelRadius > pieOuterRadius)
-                                  ? ((slice.startAngle + slice.endAngle) / 2 < Math.PI ? "start" : "end")
-                                  : "middle"
-                                );
+                                        const textAnchor = (
+                                        (pieLabelRadius > pieOuterRadius)
+                                        ? ((slice.startAngle + slice.endAngle) / 2 < Math.PI ? "start" : "end")
+                                        : "middle"
+                                        );
 
-                                return <g className="section" key={i} >
-                                    <path
-                                      d={ arc(slice) }
-                                      fill={ getColor(d) }
-                                      onClick={ onClick }
-                                      style={ Object.assign({cursor}, strokeStyle) }
-                                      { ...this.tooltipProps(d) }
-                                    />
-                                    <text
-                                      transform={`translate(${labelArc.centroid(slice)})`}
-                                      textAnchor={ textAnchor }
-                                      dy=".35em"
-                                      fill={ fontColor }
-                                      onClick={ onClick }
-                                      style={{cursor}}
-                                      { ...this.tooltipProps(d) }
-                                    >
-                                        { labelCount >= slices.length ? labelText(slice.data) : '' }
-                                    </text>
-                                </g>
-                            })
-                        }
-                    </g>
-
-                    {this.renderLegend(data, legend, getColor, label)}
-                </svg>
+                                        return <g className="section" key={i} >
+                                            <path
+                                            d={ arc(slice) }
+                                            fill={ getColor(d) }
+                                            onClick={ onClick }
+                                            style={ Object.assign({cursor}, style.strokeStyle) }
+                                            { ...this.tooltipProps(d) }
+                                            />
+                                            <text
+                                            transform={`translate(${labelArc.centroid(slice)})`}
+                                            textAnchor={ textAnchor }
+                                            dy=".35em"
+                                            fill={ fontColor }
+                                            onClick={ onClick }
+                                            style={{cursor, fontSize: labelFontSize}}
+                                            { ...this.tooltipProps(d) }
+                                            >
+                                                <title>{isTruncate ? labelFullText : ''}</title>
+                                                { labelText }
+                                            </text>
+                                        </g>
+                                    })
+                                }
+                            </g>
+                            {this.renderLegend(data, legend, getColor, label)}
+                        </svg>
+                    </div>
+                    {
+                        legend && legend.separate && (
+                            <div className='legendContainer' style={style.legendStyle}>
+                                {this.renderLegend(data, legend, getColor, label)}
+                            </div>
+                        )
+                    }
+                </div>
             </div>
         );
     }

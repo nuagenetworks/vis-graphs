@@ -102,15 +102,16 @@ class HeatmapGraph extends XYGraph {
       sortColumn: yColumn
     })
 
-    this.filterData = []
+    this.filterData = [];
+
+    this.nestedYData.forEach((item, i) => {
+      if (!item.key || typeof item.key === 'object' || item.key === 'null' || item.key === 'undefined') {
+        this.nestedYData.splice(i, 1);
+      }
+    });
 
     // Check x column data, if not found set to null
     this.nestedYData.forEach((item, i) => {
-
-      if (!item.key || typeof item.key === 'object' || item.key === 'null' || item.key === 'undefined') {
-        this.nestedYData.splice(i, 1)
-        return
-      }
 
       const d = Object.assign({}, item)
 
@@ -341,7 +342,9 @@ class HeatmapGraph extends XYGraph {
     const {
       xTickFontSize,
       yTickFontSize,
-      yLabelLimit
+      yLabelLimit,
+      xLabelRotate,
+      xLabelLimit,
     } = this.getConfiguredProperties()
 
     const svg = this.getGraph()
@@ -357,6 +360,8 @@ class HeatmapGraph extends XYGraph {
       .style('font-size', xTickFontSize)
       .attr('transform', 'translate(0,' + this.getAvailableHeight() + ')')
       .call(this.getAxis().x)
+      .selectAll('.tick text')
+      .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
 
     //Add the Y Axis
     const yAxis = svg.select('.yAxis')

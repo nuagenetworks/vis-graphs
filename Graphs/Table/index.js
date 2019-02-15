@@ -476,11 +476,7 @@ class Table extends AbstractGraph {
         let colName = this.getColumnNameByKey(column);
 
         if (sort && sort.column === colName) {
-            if (sort.order === 'desc') {
-                colOrder = '';
-            } else if (sort.order === 'asc') {
-                colOrder = 'desc';
-            }
+            colOrder = sort.order === 'desc' ? 'asc' : 'desc';
         }
 
         this.updateTableStatus({
@@ -934,11 +930,41 @@ class Table extends AbstractGraph {
         );
     }
 
+    getHeightMargin(showFooter) {
+        const {
+            configuration,
+        } = this.props;
+
+        const {
+            searchBar,
+            selectColumnOption,
+        } = this.getConfiguredProperties();
+
+        let heightMargin = showFooter ? 95 : 80;
+
+        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
+        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
+
+        return configuration.filterOptions ? heightMargin + 50 : heightMargin;
+    }
+
+    getInitialSort() {
+        const {
+            sort
+        } = this.getGraphProperties();
+
+        let initialSort = {};
+        if (sort && sort.column && sort.order) {
+            initialSort = {...sort, column: this.getKeyByColumnName(sort.column)}
+        }
+
+        return initialSort;
+    }
+
     render() {
         const {
             height,
             scroll,
-            configuration,
         } = this.props;
 
         const {
@@ -946,11 +972,11 @@ class Table extends AbstractGraph {
             multiSelectable,
             showCheckboxes,
             hidePagination,
-            searchBar,
             selectColumnOption,
             searchText,
             tableHeaderStyle,
-            tableRowColumnStyle
+            tableRowColumnStyle,
+            tableRowStyle = {}
         } = this.getConfiguredProperties();
 
         const {
@@ -959,22 +985,16 @@ class Table extends AbstractGraph {
             size
         } = this.getGraphProperties();
 
-        
-
         let tableData  = this.getTableData(this.getColumns());
-        const headerData = this.getHeaderData(),
-            totalRecords = size || this.filterData.length;
-
 
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
-        
-        let showFooter = (totalRecords >= pageSize && hidePagination === true) ? false : true,
-            heightMargin = showFooter ? 95 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin
-        heightMargin = configuration.filterOptions ? heightMargin + 50 : heightMargin
+        const headerData = this.getHeaderData();
+        const totalRecords = scroll ? size : this.filterData.length;
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
+        const heightMargin = this.getHeightMargin(showFooter);
+        const initialSort = this.getInitialSort();
 
         return (
             <MuiThemeProvider muiTheme={theme}>
@@ -997,6 +1017,7 @@ class Table extends AbstractGraph {
                             <DataTables
                                 columns={headerData}
                                 data={tableData}
+                                initialSort={initialSort}
                                 showHeaderToolbar={false}
                                 showFooterToolbar={showFooter}
                                 selectable={selectable}
@@ -1014,7 +1035,7 @@ class Table extends AbstractGraph {
                                 tableStyle={style.table}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
                                 tableHeaderStyle={tableHeaderStyle}
-                                tableRowStyle={style.row}
+                                tableRowStyle={{...style.row, ...tableRowStyle}}
                                 tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
                                 footerToolbarStyle={style.footerToolbar}

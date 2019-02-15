@@ -118,7 +118,8 @@ class BarGraph extends XYGraph {
       xColumn,
       yColumn,
       stackColumn,
-      otherOptions
+      otherOptions,
+      stackSequence
     } = this.getConfiguredProperties()
  
     if (this.isVertical()) {
@@ -137,7 +138,7 @@ class BarGraph extends XYGraph {
       metric: this.metric,
       stack: this.stack,
       otherOptions,
-      vertical: this.isVertical()
+      stackSequence,
     })
 
     // check condition to apply brush on chart
@@ -271,7 +272,10 @@ class BarGraph extends XYGraph {
   updateElements() {
     const {
       dateHistogram,
-      yLabelLimit
+      yLabelLimit,
+      xLabelLimit,
+      xLabelRotate,
+      xTickFontSize
     } = this.getConfiguredProperties()
 
     const svg =  this.getGraph()
@@ -294,10 +298,9 @@ class BarGraph extends XYGraph {
       .attr('transform', 'translate(0,'+ this.getAvailableHeight() +')')
       .call(this.getAxis().x)
       .selectAll('.tick text')
+      .style('font-size', xTickFontSize)
 
-    if(this.isVertical()) {
-      xAxis.call(this.wrapD3Text, this.getBarWidth())
-    }
+      xAxis.call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit })
 
     //Add the Y Axis
     const yAxis = svg.select('.yAxis')
@@ -518,7 +521,9 @@ class BarGraph extends XYGraph {
     const {
       margin,
       padding,
-      brush
+      brush,
+      xLabelRotate,
+      xLabelLimit,
     } = this.getConfiguredProperties()
 
     const svg   = this.getMinGraph(),
@@ -583,7 +588,9 @@ class BarGraph extends XYGraph {
         if(this.isVertical()) {
           mainZoom.domain([start, end]);
           scale.x.range([mainZoom(originalRange[0]), mainZoom(originalRange[1])]);
-          this.getGraph().select(".xAxis").call(this.getAxis().x);
+          this.getGraph().select(".xAxis").call(this.getAxis().x)
+          .selectAll('.tick text')
+          .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
         } else {
           mainZoom.domain([end, start]);
           scale.y.range([mainZoom(originalRange[0]), mainZoom(originalRange[1])]);
@@ -621,7 +628,7 @@ class BarGraph extends XYGraph {
       height
     } = this.props
 
-    if (!data || !data.length)
+    if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined'))
       return this.renderMessage('No data to visualize')
 
     const {

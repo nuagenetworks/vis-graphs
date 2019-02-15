@@ -1,6 +1,7 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
+import _ from 'lodash';
 
 import "./style.css"
 import defaultProperties from "./defaultProperties";
@@ -34,6 +35,22 @@ export default class AbstractGraph extends React.Component {
 
         // set all configuration into single object
         this.setConfiguredProperties(this.props, properties);
+
+        this.setTooltip();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setConfiguredProperties(nextProps, this.properties);
+        this.reInitializeTooltip(nextProps);
+    }
+
+    reInitializeTooltip(nextProps) {
+        if (!_.isEqual(this.props.configuration.data, nextProps.configuration.data)) {
+            this.setTooltip();
+        }
+    }
+
+    setTooltip() {
 
         // Provide tooltips for subclasses.
         const { tooltip, defaultY } = this.getConfiguredProperties();
@@ -79,10 +96,6 @@ export default class AbstractGraph extends React.Component {
         return Math.floor(new Date().valueOf() * Math.random());
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setConfiguredProperties(nextProps, this.properties);
-    }
-
     setTooltipAccessor(tooltip, type = 'default') {
         if (!tooltip)
             return;
@@ -107,6 +120,12 @@ export default class AbstractGraph extends React.Component {
     }
 
     tooltipContent({ tooltip, accessors }) {
+        let { yTicksLabel } = this.getConfiguredProperties();
+
+        if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+            yTicksLabel = {};
+        }
+
         return (
             <div>
                 {/* Display each tooltip column as "label : value". */}
@@ -120,7 +139,7 @@ export default class AbstractGraph extends React.Component {
                                 {label || column}
                             </strong> : <span>
                                 {/* Apply number and date formatting to the value. */}
-                                {data}
+                                { yTicksLabel[data] || data }
                             </span>
                         </div>
                         ) : null
@@ -202,18 +221,25 @@ export default class AbstractGraph extends React.Component {
         return scale;
     }
 
-    updateYExtent(yExtent, zeroStart) {
-        let padding = 0.10;
+    updateYExtent(yExtent) {
+        const { zeroStart, yRangePadding } = this.getConfiguredProperties();
 
+        
         if (zeroStart && yExtent[0] > 0) {
             yExtent[0] = 0;
         }
-
+        
         if (zeroStart && yExtent[1] < 0) {
             yExtent[1] = 0;
         }
 
-        let diff = Math.floor((yExtent[1] - yExtent[0]) * padding, 0);
+        if (!yRangePadding) {
+            return yExtent;
+        }
+        
+        let padding = 0.10;
+        let diff = Math.floor((yExtent[1] - yExtent[0]) * padding);
+
 
         yExtent[0] = (yExtent[0] >= 0 && (yExtent[0] - diff) < 0) ? 0 : yExtent[0] - diff;
         yExtent[1] = (yExtent[1] <= 0 && (yExtent[1] + diff) > 0) ? 0 : yExtent[1] + diff;
@@ -274,9 +300,6 @@ export default class AbstractGraph extends React.Component {
         if (!legend.show)
             return;
 
-        // Getting unique labels
-        data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i)
-
         const {
             width,
             height
@@ -290,6 +313,13 @@ export default class AbstractGraph extends React.Component {
 
         const isVertical = legend.orientation === 'vertical';
         const lineHeight = legend.circleSize * circleToPixel;
+
+        // Getting unique labels
+        data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+
+        if (legend.separate) {
+            return this.renderSeparateLegend(data, legend, getColor, label, isVertical);
+        }
 
         if (isVertical) {
             // Place the legends in the bottom left corner
@@ -312,6 +342,7 @@ export default class AbstractGraph extends React.Component {
                                 />
 
                                 <text
+                                    style={{fontSize: legend.labelFontSize}}
                                     fill={fontColor}
                                     alignmentBaseline="central"
                                     x={legend.circleSize + legend.labelOffset}
@@ -432,9 +463,9 @@ export default class AbstractGraph extends React.Component {
 
         if (this.isBrush() && !this.isVertical()) {
             this.availableWidth = this.availableWidth * (100 - brushArea) / 100
-            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right + margin.left)
+            this.availableMinWidth = width - (this.availableWidth + this.getLeftMargin() + margin.left + margin.right);
+            this.availableMinWidth = this.availableMinWidth > 10 ? this.availableMinWidth : 10;
             this.minMarginLeft = this.availableWidth + this.getLeftMargin() + margin.left;
-
         }
     }
 
@@ -475,7 +506,8 @@ export default class AbstractGraph extends React.Component {
     }
 
     getAvailableHeight() {
-        return this.availableHeight;
+        const { xLabelRotateHeight, xLabelRotate } = this.getConfiguredProperties();
+        return this.availableHeight - (xLabelRotate ? xLabelRotateHeight : 0);
     }
 
     getAvailableMinHeight() {
@@ -511,8 +543,12 @@ export default class AbstractGraph extends React.Component {
 
     // to show message at the center of container
     renderMessage(message) {
+        const {
+            configuration
+        } = this.props;
+
         return (
-            <div className="center-text">
+            <div id={`${configuration.id}-message`} className="center-text">
                 {message}
             </div>
         )
@@ -594,4 +630,132 @@ export default class AbstractGraph extends React.Component {
         return null;
     }
 
+    getGraphDimension = () => {
+        const {
+            height,
+            width,
+            data
+        } = this.props;
+
+        const { legend } = this.getConfiguredProperties();
+
+        let dimensions = {
+            graphWidth: width,
+            graphHeight: height,
+            legendHeight: 0,
+            legendWidth: 0
+        }
+
+        if (!legend.show || data.length <= 1 || !legend.separate) {
+            return dimensions;
+        }
+
+        // Compute the available space considering a legend
+        if (legend.orientation === 'vertical') {
+            const value = this.getValueFromPercentage(width, legend.separate);
+            dimensions = {
+                ...dimensions,
+                graphWidth: width - value,
+                legendWidth: value,
+                legendHeight: height,
+            }
+        } else {
+            const value = this.getValueFromPercentage(height, legend.separate);
+            dimensions = {
+                ...dimensions,
+                graphHeight: height - value,
+                legendHeight: value,
+                legendWidth: width,
+            }
+        }
+
+        return dimensions;
+    }
+
+    getValueFromPercentage = (value, percentage) => {
+        return (percentage * value) / 100;
+    }
+
+    renderSeparateLegend(data, legend, getColor, label, isVertical) {
+
+        let legendStyle = {};
+        if (isVertical) {
+            // Place the legends in the bottom left corner
+            legendStyle = { alignSelf: 'flex-end' }
+        } else {
+            // Place legends horizontally
+            legendStyle = {
+                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fit, minmax(${legend.width}px, 1fr))`,
+            }
+        }
+
+        return (
+            <div className='legend' style={legendStyle}>
+                {this.getLegendContent(data, legend, getColor, label)}
+            </div>
+        );
+    }
+
+    getLegendContent(data, legend, getColor, label) {
+        const {
+            fontColor,
+            circleToPixel,
+        } = this.getConfiguredProperties();
+
+        const lineHeight = legend.circleSize * circleToPixel;
+
+        return data.map((d, i) => {
+            return (
+                <div key={i}>
+                    <svg height={lineHeight} width={legend.width}>
+                        <circle
+                            cx={legend.circleSize}
+                            cy={legend.circleSize}
+                            r={legend.circleSize}
+                            fill={getColor(d)}
+                        />
+                        <text
+                            style={{fontSize: legend.labelFontSize}}
+                            fill={fontColor}
+                            alignmentBaseline="central"
+                            x={legend.circleSize * 2 + legend.labelOffset}
+                            y={legend.circleSize}
+                        >
+                            {label(d)}
+                        </text>
+                    </svg>
+                </div>
+            );
+        })
+    }
+
+    // Get the string and if xLabelLimit is less than string length, then will truncate and rotate string followed by "..." as well
+    wrapTextByWidth(text, { xLabelRotate, xLabelLimit }) {
+
+        text.each(function () {
+            const text = d3.select(this);
+            const words = text.text();
+            const tspan = text.text(null)
+                .append("tspan")
+                .attr("x", -2)
+                .attr("y", text.attr("y"))
+                .attr("dy", parseFloat(text.attr("dy")) + "em")
+                .text(words);
+
+            if (xLabelRotate) {
+                text.attr("transform", "rotate(-50)")
+                    .attr("dy", ".15em")
+                    .style("text-anchor", "end")
+            }
+
+            if (words.length > xLabelLimit) {
+                text.style('cursor', 'pointer')
+                    .append('title').text(words);
+
+                tspan.text(words.substr(0, xLabelLimit) + '...');
+            }
+        });
+    }
 }

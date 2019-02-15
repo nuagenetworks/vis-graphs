@@ -38,7 +38,12 @@ export default {
         circleSize: 4,              // Size in pixel of the circle
         labelOffset: 2,             // Space in pixels between the circle and the label
     },
+    labelFontSize: 10,
+    labelLimit: 10,
     yLabelLimit: 20,
+    xLabelLimit: 10,
+    xLabelRotate: true,
+    xLabelRotateHeight: 35,
     appendCharLength: 3,
     brushArea: 20, // // in percentage
     otherColors: [
@@ -58,4 +63,6 @@ export default {
         theme.palette.orangeBlindColor,
         theme.palette.mauveColor,
     ],
+    zeroStart: true,
+    yRangePadding: true,
 }
