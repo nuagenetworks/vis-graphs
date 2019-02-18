@@ -279,7 +279,7 @@ class TreeGraph extends AbstractGraph {
             height,
             width
         } = props;
-
+        
         if (!data || !data.length)
             return;
 
@@ -325,9 +325,12 @@ class TreeGraph extends AbstractGraph {
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
+        
+        const {
+            transition: {duration}
+        } = this.getConfiguredProperties();
 
-        let i = 0,
-            duration = 750;
+        let i = 0;
 
         // ****************** Nodes section ***************************
 
@@ -404,9 +407,12 @@ class TreeGraph extends AbstractGraph {
 
     updateLinks = (source, links) => {
         // update graph
-        const svg = this.getGraphContainer();;
+        const svg = this.getGraphContainer();
 
-        let duration = 750;
+        const {
+            transition: {duration},
+            stroke
+        } = this.getConfiguredProperties();
 
         // ****************** links section ***************************
 
@@ -420,13 +426,14 @@ class TreeGraph extends AbstractGraph {
             .attr('d', (d) => {
                 const o = { x: d.parent ? d.parent.x : source.x0, y: d.parent ? d.parent.y : source.y0 }
                 return diagonal(o, o)
-            });
-
-        linkEnter.style("stroke", properties.linkColor)
+            })
+            .attr("stroke-width", stroke.width)
+            .attr("stroke", stroke.color);
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
 
+        // linkUpdate.style("stroke", stroke.color)
         // Transition back to the parent element position
         linkUpdate.transition()
             .duration((d) => {
@@ -434,7 +441,7 @@ class TreeGraph extends AbstractGraph {
             })
             .attr('d', (d) => {
                 return diagonal(d, d.parent)
-            });
+            })
 
         // Remove any exiting links
         link.exit().transition()
