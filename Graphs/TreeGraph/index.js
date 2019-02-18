@@ -279,7 +279,7 @@ class TreeGraph extends AbstractGraph {
             height,
             width
         } = props;
-
+        
         if (!data || !data.length)
             return;
 
@@ -325,9 +325,12 @@ class TreeGraph extends AbstractGraph {
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
+        
+        const {
+            transition: {duration}
+        } = this.getConfiguredProperties();
 
-        let i = 0,
-            duration = 750;
+        let i = 0;
 
         // ****************** Nodes section ***************************
 
@@ -339,7 +342,9 @@ class TreeGraph extends AbstractGraph {
         const nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr("transform", (d) => {
-                return "translate(" + source.y0 + "," + source.x0 + ")";
+                return d.parent 
+                  ? "translate(" + d.parent.y + "," + d.parent.x + ")" 
+                  : "translate(" + source.y0 + "," + source.x0 + ")";
             })
             .on('click', this.click);
 
@@ -367,7 +372,9 @@ class TreeGraph extends AbstractGraph {
 
         // Transition to the proper position for the node
         nodeUpdate.transition()
-            .duration(duration)
+            .duration((d) => {
+                return d.children ? 0 : duration;
+            })
             .attr("transform", (d) => {
                 return "translate(" + d.y + "," + d.x + ")";
             });
@@ -400,9 +407,12 @@ class TreeGraph extends AbstractGraph {
 
     updateLinks = (source, links) => {
         // update graph
-        const svg = this.getGraphContainer();;
+        const svg = this.getGraphContainer();
 
-        let duration = 750;
+        const {
+            transition: {duration},
+            stroke
+        } = this.getConfiguredProperties();
 
         // ****************** links section ***************************
 
@@ -414,19 +424,24 @@ class TreeGraph extends AbstractGraph {
         const linkEnter = link.enter().insert('path', "g")
             .attr("class", "link")
             .attr('d', (d) => {
-                const o = { x: source.x0, y: source.y0 }
+                const o = { x: d.parent ? d.parent.x : source.x0, y: d.parent ? d.parent.y : source.y0 }
                 return diagonal(o, o)
-            });
+            })
+            .attr("stroke-width", stroke.width)
+            .attr("stroke", stroke.color);
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
 
+        // linkUpdate.style("stroke", stroke.color)
         // Transition back to the parent element position
         linkUpdate.transition()
-            .duration(duration)
+            .duration((d) => {
+                return d.children ? 0 : duration;
+            })
             .attr('d', (d) => {
                 return diagonal(d, d.parent)
-            });
+            })
 
         // Remove any exiting links
         link.exit().transition()

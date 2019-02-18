@@ -2,11 +2,8 @@ import { theme } from "../../theme"
 
 export const properties = {
     stroke: {
-        color: "red",
+        color: "#6b94ec",
         width: "2px"
-    },
-    legend: {
-        show: false
     },
     colors: [
         theme.palette.greenColor,
@@ -26,7 +23,7 @@ export const properties = {
         theme.palette.redLightColor,
         theme.palette.orangeLightColor,
     ],
-    zeroStart: true,
-    circleRadius: 5,
-    defaultYColor: theme.palette.greenColor
+    "transition": {
+        "duration": 750
+    }
 }
