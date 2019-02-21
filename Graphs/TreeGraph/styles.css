@@ -13,7 +13,42 @@
 }
 
 .link {
-    fill: none;
+    /* fill: none; */
     /* stroke: #ccc;
     stroke-width: 2px; */
+}
+
+.node-rect {
+}
+
+.node-rect-closed {
+	stroke-width: 2px;
+	stroke: rgb(0,0,0);
+}
+
+.link {
+	fill: none;
+	stroke: lightsteelblue;
+	stroke-width: 2px;
+}
+
+.linkselected {
+	fill: none;
+	stroke: tomato;
+	stroke-width: 2px;
+}
+
+.arrow {
+	fill: lightsteelblue;
+	stroke-width: 1px;
+}
+
+.arrowselected {
+	fill: tomato;
+	stroke-width: 2px;
+}
+
+.link text {
+	font: 7px sans-serif;
+	fill: #CC0000;
 }

@@ -7,7 +7,7 @@ import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import { List } from 'immutable';
 import './styles.css'
-
+import { parseSrc } from '@/lib/ui-components/utils.js'
 const diagonal = (s, d) => {
     // Creates a curved (diagonal) path from parent to the child nodes
     const path = `M ${s.y} ${s.x}
@@ -325,7 +325,7 @@ class TreeGraph extends AbstractGraph {
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
-        
+        const rectNode = { width : 120, height : 45, textMargin : 5 }
         const {
             transition: {duration}
         } = this.getConfiguredProperties();
@@ -348,28 +348,63 @@ class TreeGraph extends AbstractGraph {
             })
             .on('click', this.click);
 
-        // Add Circle for the nodes
-        nodeEnter.append('circle')
-            .attr('class', 'node')
-            .attr('r', 1e-6)
-            .style("fill", (d) => {
-                return d._children ? "lightsteelblue" : "#fff";
-            });
+            nodeEnter.append('g').append('rect')
+            .attr('rx', 3)
+            .attr('ry', 3)
+            .attr('width', rectNode.width)
+            .attr('height', rectNode.height)
+            .attr('class', 'node-rect')
+            .attr('fill', function (d) { return d.children ? "white" : "lightsteelblue"; })
 
-        // Add labels for the nodes
-        nodeEnter.append('text')
-            .attr("dy", ".35em")
-            .attr("x", (d) => {
-                return d.children || d._children ? -13 : 13;
-            })
-            .attr("text-anchor", (d) => {
-                return d.children || d._children ? "end" : "start";
-            })
-            .text((d) => { return d.data.name; });
+            nodeEnter.append('foreignObject')
+                .attr('x', rectNode.textMargin)
+                .attr('y', rectNode.textMargin)
+                .attr('width', function () {
+                    return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
+                        (rectNode.width - rectNode.textMargin * 2)
+                })
+                .attr('height', function () {
+                    return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
+                        (rectNode.height - rectNode.textMargin * 2)
+                })
+                .append('xhtml').html(function (d) {
+                    const desc = (d.data.description) ? d.data.description : 'No description given';
+                    return '<div style="width: ' +
+                        (rectNode.width - rectNode.textMargin * 2) + 'px; height: ' +
+                        (rectNode.height - rectNode.textMargin * 2) + 'px;" class="node-text wordwrap">' +
+                        '<div style="width:22%%;float:left"><img style="width: 20px;" src="'+parseSrc(d.data.avatarData)+'" /></div>' +
+                        '<div style="width:78%;float:right;font-size: 8px;">' + d.data.name + '</div>' +
+                        '<div style="width:22%%;float:left;font-size: 8px;"></div>' +
+                        '<div style="width:75%;float:left;font-size: 8px;margin-left:4%">'+ desc  +'</div>' +
+                        '</div>';
+                })
+
+        // // Add Circle for the nodes
+        // nodeEnter.append('circle')
+        //     .attr('class', 'node')
+        //     .attr('r', 1e-6)
+        //     .style("fill", (d) => {
+        //         return d._children ? "lightsteelblue" : "#fff";
+        //     });
+
+        // // Add labels for the nodes
+        // nodeEnter.append('text')
+        //     .attr("dy", ".35em")
+        //     .attr("x", (d) => {
+        //         return d.children || d._children ? -13 : 13;
+        //     })
+        //     .attr("text-anchor", (d) => {
+        //         return d.children || d._children ? "end" : "start";
+        //     })
+        //     .text((d) => { return d.data.name; });
 
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
 
+        nodeUpdate.select('rect')
+        .attr('class', function(d) { return d.children ? 'node-rect-closed' : 'node-rect'; })
+        .attr('cursor', 'pointer');
+        
         // Transition to the proper position for the node
         nodeUpdate.transition()
             .duration((d) => {
@@ -379,15 +414,6 @@ class TreeGraph extends AbstractGraph {
                 return "translate(" + d.y + "," + d.x + ")";
             });
 
-        // Update the node attributes and style
-        nodeUpdate.select('circle.node')
-            .attr('r', 10)
-            .style("fill", (d) => {
-                return d.parent ? this.colorScale(d.parent.id) : this.colorScale();
-            })
-            .attr('cursor', 'pointer');
-
-
         // Remove any exiting nodes
         const nodeExit = node.exit().transition()
             .duration(duration)
@@ -396,13 +422,9 @@ class TreeGraph extends AbstractGraph {
             })
             .remove();
 
-        // On exit reduce the node circles size to 0
-        nodeExit.select('circle')
-            .attr('r', 1e-6);
+        nodeUpdate.select('rect')
+            .attr('fill', function(d) { return d.children ? "white" : "lightsteelblue" })
 
-        // On exit reduce the opacity of text labels
-        nodeExit.select('text')
-            .style('fill-opacity', 1e-6);
     }
 
     updateLinks = (source, links) => {
@@ -420,6 +442,13 @@ class TreeGraph extends AbstractGraph {
         const link = svg.selectAll('path.link')
             .data(links, (d) => { return d.id; });
 
+
+        d3.selection.prototype.moveToFront = function () {
+            return this.each(function () {
+                this.parentNode.appendChild(this);
+            });
+        };
+
         // Enter any new links at the parent's previous position.
         const linkEnter = link.enter().insert('path', "g")
             .attr("class", "link")
@@ -428,7 +457,7 @@ class TreeGraph extends AbstractGraph {
                 return diagonal(o, o)
             })
             .attr("stroke-width", stroke.width)
-            .attr("stroke", stroke.color);
+            
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
@@ -438,6 +467,9 @@ class TreeGraph extends AbstractGraph {
         linkUpdate.transition()
             .duration((d) => {
                 return d.children ? 0 : duration;
+            })
+            .style("stroke", (d) => {
+                return d.children ? 'red' : 'blue';
             })
             .attr('d', (d) => {
                 return diagonal(d, d.parent)
