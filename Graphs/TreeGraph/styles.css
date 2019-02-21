@@ -19,11 +19,12 @@
 }
 
 .node-rect {
+    
 }
 
 .node-rect-closed {
-	stroke-width: 2px;
-	stroke: rgb(0,0,0);
+	stroke-width: 1px;
+	stroke: #ccc
 }
 
 .link {
@@ -52,3 +53,5 @@
 	font: 7px sans-serif;
 	fill: #CC0000;
 }
+
+.doubled { fill: black !important; }
