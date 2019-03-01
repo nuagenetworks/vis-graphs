@@ -25,5 +25,7 @@ export const properties = {
     ],
     "transition": {
         "duration": 750
-    }
+    },
+    rectNode: { width : 120, height : 45, textMargin : 5 },
+    margin: {top: -80, right: 90, bottom: 30, left: 90},
 }
