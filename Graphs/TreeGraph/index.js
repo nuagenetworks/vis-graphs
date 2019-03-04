@@ -36,6 +36,7 @@ class TreeGraph extends AbstractGraph {
         if (!data)
             return
 
+        this.setSVGTransform(this.props)
         this.elementGenerator();
     }
 
@@ -105,6 +106,19 @@ class TreeGraph extends AbstractGraph {
         this.root.y0 = 0;
 
         this.update(this.root)
+    }
+
+    setSVGTransform = (props) => {
+
+        if(!props.transformAttr) {
+            const {
+                transformAttr
+            } = this.getConfiguredProperties();
+            const dx = transformAttr['translate'][0];
+            const dy = transformAttr['translate'][1];
+            this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy})`)
+        }
+
     }
 
     initiate = (props) => {
@@ -295,7 +309,16 @@ class TreeGraph extends AbstractGraph {
         this.addArrowAtEndOfAllLink(svg);
 
         // UPDATE
-        linkEnter.merge(link);
+        const linkUpdate = linkEnter.merge(link);
+
+
+        linkUpdate.transition()
+            .duration((d) => {
+                return d.children ? 0 : duration;
+            })
+            .attr('d', (d) => {
+                return this.diagonal(d)
+            })
 
         // Remove any exiting links
         link.exit().transition()
@@ -350,15 +373,31 @@ class TreeGraph extends AbstractGraph {
 
     }
 
+    parseTransformation = (a) => {
+        const b={};
+        for (const i in a = a.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g))
+        {
+            const c = a[i].match(/[\w.-]+/g);
+            b[c.shift()] = c;
+        }
+        return b;
+    }
+
     zoomed = () => {
         this.getGraphContainer().attr("transform", event.transform);
+        const tr = this.getGraphContainer().attr("transform");
+        const transformAttr = this.parseTransformation(tr)
+        const dx = transformAttr['translate'][0];
+        const dy = transformAttr['translate'][1];
+        const zm = transformAttr['scale'][0];
+        this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
     }
 
     getLeftMargin = () => 30;
     
     render() {
-        const { width, height } = this.props;
-        const { margin } = this.getConfiguredProperties();
+        const { width, height, transformAttr } = this.props;
+
         return (
             <div className="line-graph">
                 <svg
@@ -373,7 +412,7 @@ class TreeGraph extends AbstractGraph {
                     )}
                 }
                 >
-                    <g className='tree-graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
+                    <g className='tree-graph-container' transform={transformAttr}>
 
                     </g>
                 </svg>
