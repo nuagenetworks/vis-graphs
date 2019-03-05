@@ -18,14 +18,15 @@ const style = {
         width: "60%",
         textAlign: "center",
         fontWeight: "bold",
-        alignItems: "center"
+        alignItems: "center",
+        fontSize: "1.2em"
     },
 
     labelText: {
         textAlign: "center",
         fontWeight: "bold",
         marginTop: "2px",
-        fontSize: "0.6em"
+        fontSize: "0.5em"
     },
 
     iconFont: {
