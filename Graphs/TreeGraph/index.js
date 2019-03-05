@@ -6,6 +6,7 @@ import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
 import { parseSrc } from '@/lib/ui-components/utils.js'
+import { netmaskToCIDR } from '@/utils'
 import {
     select,
     zoom,
@@ -203,6 +204,8 @@ class TreeGraph extends AbstractGraph {
             .attr('ry', 3)
             .attr('width', rectNode.width)
             .attr('height', rectNode.height)
+            .attr("stroke", rectNode.stroke.color)
+            .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
 
         nodeEnter.append('foreignObject')
@@ -217,17 +220,7 @@ class TreeGraph extends AbstractGraph {
                     (rectNode.height - rectNode.textMargin * 2)
             })
             .append('xhtml').html((d) => {
-                let img = this.fetchImage(d.data.apiData, d.data.contextName);
-                const desc = (d.data.description) ? d.data.description : 'No description given';
-                const rectColorText = d.children ? "#F9F8FF" : "#020202"
-                return '<div style="width: ' +
-                    (rectNode.width - rectNode.textMargin * 2) + 'px; height: ' +
-                    (rectNode.height - rectNode.textMargin * 2) + 'px;" class="node-text wordwrap">' +
-                    '<div style="width:22%%;float:left"><img style="width: 20px;" src="' + parseSrc(img) + '" /></div>' +
-                    '<div style="width:78%;float:right;font-size: 8px;color:' + rectColorText + '">' + d.data.name + '</div>' +
-                    '<div style="width:22%%;float:left;font-size: 8px;"></div>' +
-                    '<div style="width:75%;float:left;font-size: 8px;margin-left:4%;color:' + rectColorText + '">' + desc + '</div>' +
-                    '</div>';
+                return this.renderRectNode(d);
             })
 
         // UPDATE
@@ -258,11 +251,36 @@ class TreeGraph extends AbstractGraph {
 
         nodeUpdate.select("rect")
             .style("fill", (d) => {
-                return d.clicked ? "#58A2FF" : (d.children ? "#58A2FF" : "#D9D9D9");
+                return d.clicked ? rectNode.selectedBackground : (d.children ? rectNode.selectedBackground : rectNode.defaultBackground);
             });
 
     }
-    
+
+    renderRectNode = (d) => {
+        const {
+            rectNode
+        } = this.getConfiguredProperties();
+
+        let img = this.fetchImage(d.data.apiData, d.data.contextName);
+        const rectColorText = d.children ? rectNode.selectedTextColor : rectNode.defaultTextColor
+        const colmAttr = rectNode['attributesToShow'][d.data.contextName];
+        const displayName = (d.data.name) ? d.data.name : 'No Name given';
+        const displayDesc = (d.data.description) ? d.data.description : 'No description given';
+
+        const CIDR = (colmAttr.address && d.data.apiData._netmask) ? netmaskToCIDR(d.data.apiData._netmask) : ''
+
+        const showNameAttr = (colmAttr.name) ? `<div style="width:78%;float:right;font-size: 8px;color:${rectColorText}">${displayName}</div>` :  '';
+        const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 7px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` :  '';
+        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 7px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` :  '';
+        return `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
+                    <div style="width:22%;float:left"><img style="width: 20px;" src="${parseSrc(img)}" /></div>
+                    ${showNameAttr}
+                    <div style="width:22%;float:left;font-size: 8px;"></div>
+                    ${showDesAttr}
+                    ${showAddressAttr}
+                </div>`
+    }
+
     fetchImage =(apiData, contextName) => {
         let icon,
             iconType;
@@ -288,7 +306,7 @@ class TreeGraph extends AbstractGraph {
             transition: {
                 duration
             },
-            stroke
+            linksSettings
         } = this.getConfiguredProperties();
 
         // ****************** links section ***************************
@@ -303,7 +321,7 @@ class TreeGraph extends AbstractGraph {
             .attr('d', (d) => {
                 return this.diagonal(d)
             })
-            .attr("stroke-width", stroke.width)
+            .attr("stroke-width", linksSettings.stroke.width)
             .attr("marker-start", "url(#start-arrow)");
 
         this.addArrowAtEndOfAllLink(svg);

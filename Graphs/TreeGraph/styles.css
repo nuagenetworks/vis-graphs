@@ -12,19 +12,13 @@
     font: 12px sans-serif;
 }
 
-.link {
-    /* fill: none; */
-    /* stroke: #ccc;
-    stroke-width: 2px; */
-}
-
 .node-rect {
-    
+	
 }
 
 .node-rect-closed {
 	stroke-width: 1px;
-	stroke: #ccc
+	stroke: #7977FF
 }
 
 .link {
