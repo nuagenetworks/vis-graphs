@@ -5,8 +5,9 @@ import {
 export const properties = {
     linksSettings: {
         stroke: {
-            color: "#6b94ec",
-            width: "2px"
+            "defaultColor": "lightsteelblue",
+            "selectedColor": "tomato",
+            "width": "1px"
         }
     },
     colors: [
@@ -36,7 +37,8 @@ export const properties = {
         selectedTextColor: "#F9F8FF",
         defaultTextColor: "#020202",
         stroke: {
-            color: "#666",
+            selectedColor: "#666",
+            defaultColor: "rgba(60, 57, 57, 0.37)",
             width: "1px"
         },
         width: 120,

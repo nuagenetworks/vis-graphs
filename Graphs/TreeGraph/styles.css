@@ -33,19 +33,17 @@
 	stroke-width: 2px;
 }
 
-.arrow {
+.normalArrow {
 	fill: lightsteelblue;
 	stroke-width: 1px;
 }
 
-.arrowselected {
+.coloredArrow {
 	fill: tomato;
-	stroke-width: 2px;
+	stroke-width: 1px;
 }
 
 .link text {
 	font: 7px sans-serif;
 	fill: #CC0000;
 }
-
-.doubled { fill: black !important; }

@@ -204,7 +204,9 @@ class TreeGraph extends AbstractGraph {
             .attr('ry', 3)
             .attr('width', rectNode.width)
             .attr('height', rectNode.height)
-            .attr("stroke", rectNode.stroke.color)
+            .attr("stroke", (d) => {
+                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
+            })
             .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
 
@@ -227,9 +229,6 @@ class TreeGraph extends AbstractGraph {
         const nodeUpdate = nodeEnter.merge(node);
 
         nodeUpdate.select('rect')
-            .attr('class', (d) => {
-                return d.children ? 'node-rect-closed' : 'node-rect';
-            })
             .attr('cursor', 'pointer');
 
         // Transition to the proper position for the node
@@ -251,7 +250,7 @@ class TreeGraph extends AbstractGraph {
 
         nodeUpdate.select("rect")
             .style("fill", (d) => {
-                return d.clicked ? rectNode.selectedBackground : (d.children ? rectNode.selectedBackground : rectNode.defaultBackground);
+                return d.clicked ? rectNode.selectedBackground : (d.children || d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
             });
 
     }
@@ -262,7 +261,7 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         let img = this.fetchImage(d.data.apiData, d.data.contextName);
-        const rectColorText = d.children ? rectNode.selectedTextColor : rectNode.defaultTextColor
+        const rectColorText = d.children || d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
         const colmAttr = rectNode['attributesToShow'][d.data.contextName];
         const displayName = (d.data.name) ? d.data.name : 'No Name given';
         const displayDesc = (d.data.description) ? d.data.description : 'No description given';
@@ -322,13 +321,19 @@ class TreeGraph extends AbstractGraph {
                 return this.diagonal(d)
             })
             .attr("stroke-width", linksSettings.stroke.width)
-            .attr("marker-start", "url(#start-arrow)");
+            .attr("marker-start", (d) => {
+                return d.children || d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
+            });
 
-        this.addArrowAtEndOfAllLink(svg);
+        this.normalArrow(svg);
+        this.coloredArrow(svg);
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
 
+        linkUpdate.style("stroke", (d) => {
+            return d.children || d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
+        })
 
         linkUpdate.transition()
             .duration((d) => {
@@ -347,16 +352,30 @@ class TreeGraph extends AbstractGraph {
             .remove();
     }
 
-    addArrowAtEndOfAllLink(svg) {
+    normalArrow(svg) {
         svg.append("svg:defs").append('marker')
-		.attr('id', 'start-arrow')
+		.attr('id', 'normal-arrow')
 		.attr('viewBox', '0 -5 10 10')
 		.attr('refX', 0)
 		.attr('refY', 0)
 		.attr('markerWidth', 6)
 		.attr('markerHeight', 6)
 		.attr('orient', 'auto')
-		.attr('class', 'arrow')
+		.attr('class', 'normalArrow')
+		.append('path')
+		.attr('d', 'M10,-5L0,0L10,5');
+    }
+
+    coloredArrow(svg) {
+        svg.append("svg:defs").append('marker')
+		.attr('id', 'colored-arrow')
+		.attr('viewBox', '0 -5 10 10')
+		.attr('refX', 0)
+		.attr('refY', 0)
+		.attr('markerWidth', 6)
+		.attr('markerHeight', 6)
+		.attr('orient', 'auto')
+		.attr('class', 'coloredArrow')
 		.append('path')
 		.attr('d', 'M10,-5L0,0L10,5');
     }
