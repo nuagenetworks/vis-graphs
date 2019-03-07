@@ -168,6 +168,14 @@ class TreeGraph extends AbstractGraph {
         });
     }
 
+    removePreviousChart(){
+        this.getGraphContainer().selectAll('g.node').remove();
+    } 
+
+    componentWillUpdate() {
+        this.removePreviousChart();
+    }
+
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
@@ -325,8 +333,8 @@ class TreeGraph extends AbstractGraph {
                 return d.children || d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
             });
 
-        this.normalArrow(svg);
-        this.coloredArrow(svg);
+        this.normalArrow(svg, linksSettings);
+        this.coloredArrow(svg, linksSettings);
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
@@ -352,7 +360,7 @@ class TreeGraph extends AbstractGraph {
             .remove();
     }
 
-    normalArrow(svg) {
+    normalArrow(svg, linksSettings) {
         svg.append("svg:defs").append('marker')
 		.attr('id', 'normal-arrow')
 		.attr('viewBox', '0 -5 10 10')
@@ -361,12 +369,12 @@ class TreeGraph extends AbstractGraph {
 		.attr('markerWidth', 6)
 		.attr('markerHeight', 6)
 		.attr('orient', 'auto')
-		.attr('class', 'normalArrow')
+		.attr('fill', linksSettings.stroke.defaultColor)
 		.append('path')
 		.attr('d', 'M10,-5L0,0L10,5');
     }
 
-    coloredArrow(svg) {
+    coloredArrow(svg, linksSettings) {
         svg.append("svg:defs").append('marker')
 		.attr('id', 'colored-arrow')
 		.attr('viewBox', '0 -5 10 10')
@@ -375,7 +383,7 @@ class TreeGraph extends AbstractGraph {
 		.attr('markerWidth', 6)
 		.attr('markerHeight', 6)
 		.attr('orient', 'auto')
-		.attr('class', 'coloredArrow')
+		.attr('fill', linksSettings.stroke.selectedColor)
 		.append('path')
 		.attr('d', 'M10,-5L0,0L10,5');
     }
@@ -433,8 +441,7 @@ class TreeGraph extends AbstractGraph {
     getLeftMargin = () => 30;
     
     render() {
-        const { width, height, transformAttr } = this.props;
-
+        const { width, height, transformAttr, data } = this.props;
         return (
             <div className="line-graph">
                 <svg
