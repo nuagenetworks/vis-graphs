@@ -198,7 +198,7 @@ export class VariationTextGraph extends AbstractGraph {
                     style={{
                         textAlign: textAlign,
                         cursor: cursor,
-                        fontSize: "1em",
+                        fontSize: "1.2em",
                         height: "100%"
                     }}
                     onClick={onMarkClick}
