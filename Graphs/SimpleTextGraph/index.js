@@ -93,7 +93,7 @@ class SimpleTextGraph extends AbstractGraph {
 
         return (
             <div className="simpleText"
-            style={{ fontSize: labelFontSize, marginBottom: 10 }}>
+            style={{ fontSize: labelFontSize, marginBottom: 10, textAlign: 'center' }}>
                 {this.currentTitle()}
             </div>
         );
