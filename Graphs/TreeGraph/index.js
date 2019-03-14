@@ -273,7 +273,8 @@ class TreeGraph extends AbstractGraph {
 
         let img = this.fetchImage(d.data.apiData, d.data.contextName);
         const rectColorText = d.children || d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        const colmAttr = rectNode['attributesToShow'][d.data.contextName];
+        const colmAttr = rectNode['attributesToShow'][d.data.contextName] ? rectNode['attributesToShow'][d.data.contextName] : rectNode['attributesToShow']['default'];
+        
         const displayName = (d.data.name) ? d.data.name.length > 10 ? `${d.data.name.substring(0,10)}...` : d.data.name : 'No Name given';
         const displayDesc = (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0,25)}...` : d.data.description : commonEN.general.noDescription;
 
