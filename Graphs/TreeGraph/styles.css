@@ -2,6 +2,8 @@
     cursor: pointer;
 }
 
+svg { width:100% }
+
 .node circle {
     fill: #fff;
     stroke: #5a83de;
