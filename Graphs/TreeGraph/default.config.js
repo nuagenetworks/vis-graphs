@@ -70,6 +70,14 @@ export const properties = {
                 'name': true,
                 'description': true
             },
+            vminterface: {
+                'name': true,
+                'description': true
+            },
+            default: {
+                'name': true,
+                'description': true
+            }
         }
     },
     margin: {
@@ -79,7 +87,7 @@ export const properties = {
         left: 90
     },
     transformAttr: {
-        translate: [30, -150],
+        translate: [30, -80],
         scale: []
     }
 }
