@@ -453,14 +453,13 @@ class TreeGraph extends AbstractGraph {
     }
     
     render() {
-        let { width, height, transformAttr } = this.props;
+        let { height, transformAttr } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
         return (
             <div className="line-graph">
                 <svg
-                    width={width}
                     height={height}
                     ref={ (node) => {
                         this.node = node;
