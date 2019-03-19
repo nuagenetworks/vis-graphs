@@ -17,11 +17,8 @@ class BarGraph extends XYGraph {
   customExtent = []
 
   constructor(props) {
-    super(props, properties)
-  }
-
-  componentWillMount() {
-    this.initiate(this.props)
+    super(props, properties);
+    this.initiate(this.props);
   }
 
   componentDidMount() {
@@ -36,16 +33,15 @@ class BarGraph extends XYGraph {
     this.updateElements()
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return !_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
   } 
 
-  componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))) 
-      this.initiate(nextProps)
-  }
+  componentDidUpdate(prevProps) {
+    if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+      this.initiate(this.props);
+    }
 
-  componentDidUpdate() {
     const {
       data
     } = this.props;

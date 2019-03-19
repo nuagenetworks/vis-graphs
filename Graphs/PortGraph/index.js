@@ -21,14 +21,11 @@ class PortGraph extends XYGraph {
             portAreaWidth: 100,
             rowCount: 0,
         }
-    }
-
-    componentWillMount() {
         this.initiate(this.props);
     }
-
-    componentWillReceiveProps(nextProps) {
-        this.initiate(nextProps);
+    
+    componentDidUpdate() {
+        this.initiate(this.props);
     }
 
     initiate(props) {

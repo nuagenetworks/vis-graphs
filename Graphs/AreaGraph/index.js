@@ -19,9 +19,6 @@ class AreaGraph extends XYGraph {
 
   constructor(props) {
     super(props, properties);
-  }
-
-  componentWillMount() {
     this.initiate(this.props);
   }
 
@@ -43,7 +40,11 @@ class AreaGraph extends XYGraph {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (prevProps !== this.props) {
+      this.initiate(this.props);
+    }
+
     const {
       data
     } = this.props;

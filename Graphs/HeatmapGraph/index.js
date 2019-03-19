@@ -14,12 +14,10 @@ const FILTER_KEY = ['data', 'height', 'width', 'context']
 class HeatmapGraph extends XYGraph {
 
   constructor(props) {
-    super(props, properties)
+    super(props, properties);
+    this.initiate(this.props);
   }
 
-  componentWillMount() {
-    this.initiate(this.props)
-  }
 
   componentDidMount() {
     const {
@@ -37,12 +35,11 @@ class HeatmapGraph extends XYGraph {
     return !_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY)))
-      this.initiate(nextProps)
-  }
-
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+      this.initiate(this.props);
+    }
+ 
     const {
       data
     } = this.props;

@@ -23,10 +23,7 @@ export class VariationTextGraph extends AbstractGraph {
             icon: 'down',
             values: null
         }
-    }
-
-    componentWillMount() {
-        this.initialize()
+        this.initialize();
     }
 
     initialize() {
@@ -106,7 +103,7 @@ export class VariationTextGraph extends AbstractGraph {
     }
 
     numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     formattedValue(x, format) {
@@ -141,20 +138,9 @@ export class VariationTextGraph extends AbstractGraph {
             context
         } = this.props;
 
-        let info = null;
-
-
-        if (!absolute) {
-            info =
-                <span style={{ color: this.settings.colors.content, margin:"auto" }}>
-                    { this.getFormattedValue(this.settings.values.lastValue) }
-                 </span>
-        } else {
-          info =
-            <span style={{ color : this.settings.colors.content, margin:"auto"}}>
-                {this.getFormattedValue(this.settings.values.lastValue)} / {this.getFormattedValue(this.settings.values.previousValue)}
-            </span>
-        }
+        const lastValue = this.getFormattedValue(this.settings.values.lastValue);
+        const previousValue = this.getFormattedValue(this.settings.values.previousValue);
+        const info = !absolute ? lastValue : (lastValue/previousValue);
 
         let fullScreenFont = context && context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
         return (
@@ -169,7 +155,9 @@ export class VariationTextGraph extends AbstractGraph {
                     </div>
                 </span>
                 <span style={Object.assign({}, style.infoBoxText, fullScreenFont)}>
-                    {info}
+                    <span style={{ color: this.settings.colors.content, margin:"auto" }}>
+                        { info || info === 0 ? info : 'NaN'}
+                    </span>
                 </span>
             </div>
         )

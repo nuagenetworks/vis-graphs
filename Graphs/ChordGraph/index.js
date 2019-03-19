@@ -19,20 +19,14 @@ export default class ChordGraph extends AbstractGraph {
         this.filterData = []
     }
 
-    componentWillMount() {
-      this.parseData(this.props.data)
-    }
-
     componentDidMount() {
-      this.initiate()
-    }
-
-    componentWillReceiveProps(nextProps) {
-      this.parseData(nextProps.data)
+      this.parseData(this.props.data);
+      this.initiate();
     }
 
     componentDidUpdate() {
-      this.initiate()
+      this.parseData(this.props.data);
+      this.initiate();
     }
 
     initiate() {

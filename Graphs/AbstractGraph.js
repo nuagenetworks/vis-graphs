@@ -39,9 +39,9 @@ export default class AbstractGraph extends React.Component {
         this.setTooltip();
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setConfiguredProperties(nextProps, this.properties);
-        this.reInitializeTooltip(nextProps);
+    componentDidUpdate() {
+        this.setConfiguredProperties(this.props, this.properties);
+        this.reInitializeTooltip(this.props);
     }
 
     reInitializeTooltip(nextProps) {

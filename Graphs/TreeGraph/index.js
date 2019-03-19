@@ -34,29 +34,22 @@ class TreeGraph extends AbstractGraph {
         super(props, properties);
     }
 
-    componentWillMount() {
-        this.initiate(this.props)
-    }
-
     componentDidMount() {
+        this.initiate(this.props);
         const {
             data
         } = this.props;
 
         if (!data || !data.length)
-            return
+            return;
 
         this.elementGenerator();
     }
 
-    componentWillReceiveProps(nextProps) {
-        if(!_.isEqual(this.props, nextProps)) {
-            this.refresh();
-            this.initiate(nextProps);
+    componentDidUpdate(prevProps) {
+        if(!_.isEqual(prevProps, this.props)) {
+            this.initiate(this.props);
         }
-    }
-
-    componentDidUpdate() {
         const {
             data
         } = this.props;
