@@ -169,9 +169,12 @@ class Table extends AbstractGraph {
             return;
 
         let columnNameList = []
-        this.keyColumns    = {}
         this.filterData    = []
         this.unformattedData = {}
+
+        if(!context.refreshInterval || context.refreshInterval === -1 ) {
+            this.keyColumns = {}
+        }
 
         // generate random key for each column and assign that key to the values in data
         columns.forEach( d => {

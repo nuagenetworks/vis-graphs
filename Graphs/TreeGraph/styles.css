@@ -2,6 +2,8 @@
     cursor: pointer;
 }
 
+svg { width:100% }
+
 .node circle {
     fill: #fff;
     stroke: #5a83de;
@@ -12,8 +14,38 @@
     font: 12px sans-serif;
 }
 
+.node-rect {
+	
+}
+
+.node-rect-closed {
+	stroke-width: 1px;
+	stroke: #7977FF
+}
+
 .link {
-    fill: none;
-    stroke: #ccc;
-    stroke-width: 2px;
+	fill: none;
+	stroke: lightsteelblue;
+	stroke-width: 2px;
+}
+
+.linkselected {
+	fill: none;
+	stroke: tomato;
+	stroke-width: 2px;
+}
+
+.normalArrow {
+	fill: lightsteelblue;
+	stroke-width: 1px;
+}
+
+.coloredArrow {
+	fill: tomato;
+	stroke-width: 1px;
+}
+
+.link text {
+	font: 7px sans-serif;
+	fill: #CC0000;
 }

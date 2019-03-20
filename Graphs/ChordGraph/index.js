@@ -312,6 +312,7 @@ function ChordDiagram(svg){
       color.domain(matrix.names.slice().sort());
 
       // Render the ribbons of the Chord Diagram (the connecting fibers inside the circle).
+      ribbonsG.selectAll('path').remove();
       var ribbons = ribbonsG
         .selectAll("path")
           .data(chords);

@@ -93,12 +93,15 @@ export class VariationTextGraph extends AbstractGraph {
                 previousInfo = d;
         })
 
-        const variation = lastInfo[target.field] - previousInfo[target.field];
+        const lastValue = lastInfo[target.field];
+        const previousValue = previousInfo[target.field];
+
+        const variation = lastValue - previousValue;
 
         return {
-            lastValue: lastInfo[target.field],
-            previousValue: previousInfo[target.field],
-            variation: variation !== 0 ? variation * 100 / previousInfo[target.field] : 0
+            lastValue,
+            previousValue,
+            variation: variation !== 0 ? variation * 100/ previousValue : 0
         }
     }
 
