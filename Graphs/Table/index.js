@@ -171,15 +171,18 @@ class Table extends AbstractGraph {
         let columnNameList = []
         this.filterData    = []
         this.unformattedData = {}
-
-        if(!context.refreshInterval || context.refreshInterval === -1 ) {
-            this.keyColumns = {}
-        }
+        this.keyColumns = {}
 
         // generate random key for each column and assign that key to the values in data
+        const types = {};
         columns.forEach( d => {
-            columnNameList.push(d.column)
-            this.keyColumns[ d.selection ? d.label : `${d.column}_${Math.floor(100000 + Math.random() * 900000)}`] = d
+            if(!types[d.column]) {
+                types[d.column] = 1;
+            }
+
+            columnNameList.push(d.column);
+            this.keyColumns[ d.selection ? d.label : `${d.column}_${types[d.column]}`] = d;
+            types[d.column]++;
         });
 
         props.data.forEach( (d, i) => {
