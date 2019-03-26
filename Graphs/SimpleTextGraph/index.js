@@ -43,6 +43,7 @@ class SimpleTextGraph extends AbstractGraph {
                 width: nextProps.width
             };
         }
+        return null;
     }
 
     checkFontsize() {
