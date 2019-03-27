@@ -129,7 +129,7 @@ export default class AbstractGraph extends React.Component {
         }
 
         return (
-            <div>
+            <React.Fragment>
                 {/* Display each tooltip column as "label : value". */}
                 {tooltip.map(({ column, label }, i) => {
                     let data = accessors[i](this.hoveredDatum)
@@ -146,7 +146,7 @@ export default class AbstractGraph extends React.Component {
                         </div>
                         ) : null
                 })}
-            </div>
+            </React.Fragment>
         )
     }
 

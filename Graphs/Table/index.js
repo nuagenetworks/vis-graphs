@@ -954,7 +954,7 @@ class Table extends AbstractGraph {
 
         return (
             this.state.showConfirmationPopup &&
-            <div>
+            <React.Fragment>
                 <Dialog
                     title="Unable to fetch"
                     actions={actions}
@@ -964,7 +964,7 @@ class Table extends AbstractGraph {
                 >
                     Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
                 </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 

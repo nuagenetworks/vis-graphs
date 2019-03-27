@@ -580,7 +580,7 @@ class GeoMap extends AbstractGraph {
     }
 
     return (
-      <div>
+      <React.Fragment>
         {this.renderSearchBarIfNeeded()}
         {
             googleMapsAPIKey ?
@@ -621,7 +621,7 @@ class GeoMap extends AbstractGraph {
                 </div>
         }
 
-      </div>
+      </React.Fragment>
     )
   }
 }

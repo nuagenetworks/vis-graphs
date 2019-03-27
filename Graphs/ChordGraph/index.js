@@ -57,7 +57,7 @@ export default class ChordGraph extends AbstractGraph {
                 } = this.hoveredDatum;
 
                 return (
-                    <div>
+                    <React.Fragment>
                         <div>
                             <strong>{`${destination} to ${source}:`}</strong>
                             <span> {accessor({ value: sourceValue})}</span>
@@ -68,7 +68,7 @@ export default class ChordGraph extends AbstractGraph {
                             <span> {accessor({ value: destinationValue})}</span>
                             { label ? <span> {label}</span>:null }
                         </div>
-                    </div>
+                    </React.Fragment>
                 );
             } else {
                 return <div>Hover over a chord to see flow details.</div>;
