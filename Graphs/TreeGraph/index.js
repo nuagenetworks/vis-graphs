@@ -15,7 +15,7 @@ import {
     hierarchy
   } from "d3";
 
-
+const PAGINATION = 2;
 class TreeGraph extends AbstractGraph {
 
     constructor(props) {
@@ -100,14 +100,15 @@ class TreeGraph extends AbstractGraph {
         // declares a tree layout and assigns the size
         this.treemap = tree().size([this.getAvailableHeight(), this.getAvailableWidth()]);
         this.treeData = data[0];
+        
         // Assigns parent, children, height, depth
         this.root = hierarchy(this.treeData, (d) => { return d.children; });
-        
         //form x and y axis
         
         this.root.x0 = this.getAvailableHeight() / 2;
         this.root.y0 = 0;
 
+        this.reset(this.root)
         this.update(this.root)
     }
 
@@ -148,8 +149,9 @@ class TreeGraph extends AbstractGraph {
 
     update = (source) => {
         // Assigns the x and y position for the nodes
+        
         this.treeData = this.treemap(this.root);
-
+        
         // Compute the new tree layout.
         const nodes = this.treeData.descendants(),
             links = this.treeData.descendants().slice(1);
@@ -165,6 +167,112 @@ class TreeGraph extends AbstractGraph {
             d.x0 = d.x;
             d.y0 = d.y;
         });
+
+        const svg = this.getGraphContainer();
+
+        const parents = nodes.filter(function (d) {
+            return (d.kids && d.kids.length > PAGINATION) ? true : false;
+        });
+
+        svg.selectAll(".page").remove();
+        
+        parents.forEach((p) => {
+
+            const p1 = p.children[p.children.length - 1];
+            const p2 = p.children[0];
+
+            const pagingData = [];
+            if (p.page > 1) {
+                pagingData.push({
+                type: "prev",
+                parent: p,
+                no: (p.page - 1)
+                });
+            }
+            
+            console.log('===PREV PAGING DATA==', pagingData)
+            
+            if (p.page < Math.ceil(p.kids.length / PAGINATION)) {
+                pagingData.push({
+                type: "next",
+                parent: p,
+                no: (p.page + 1)
+                });
+            }
+            
+            console.log('===NEXT PAGING DATA==', pagingData)
+
+            const pageControl = svg.selectAll(".page")
+                .data(pagingData, function(d) {
+                return (d.parent.id + d.type);
+                }).enter()
+                .append("g")
+                .attr("class", "page")
+                .attr("transform", function(d) {
+                const x = (d.type === "next") ? p2.y : p1.y;
+                const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 30);
+                return "translate(" + x + "," + y + ")";
+                }).on("click", this.paginate);
+    
+            pageControl
+                .append("circle")
+                .attr("r", 15)
+                .style("fill", function(d) {
+                return d.parent? "blue": "red";
+            })
+
+            pageControl
+                .append("image")
+                .attr("xlink:href", function(d) {
+                if (d.type === "next") {
+                    return "https://dl.dropboxusercontent.com/s/p7qjclv1ulvoqw3/icon1.png"
+                } else {
+                    return "https://dl.dropboxusercontent.com/s/mdzt36poc1z39s3/icon3.png"
+                }
+                })
+                .attr("x", -12.5)
+                .attr("y", -12.5)
+                .attr("width", 25)
+                .attr("height", 25);
+        });
+    }
+
+    reset = (d) => {
+        if (d && d.children) {
+            d.page = 1;
+            d.kids = [];
+            d.children.forEach( (d1, i) => {
+                d1.pageNo = Math.ceil((i + 1) / PAGINATION);
+                if (d.page === d1.pageNo) {
+                    d.kids.push(d1)
+                }
+                this.reset(d1);
+            })
+            this.swap(d, "children", d, "kids");
+        }
+    }
+
+    swap = (sourceObj, sourceKey, targetObj, targetKey) => {
+        var temp = sourceObj[sourceKey];
+        sourceObj[sourceKey] = targetObj[targetKey];
+        targetObj[targetKey] = temp;
+    }
+
+    paginate = (d) => {
+        d.parent.page = d.no;
+        this.setPage(d.parent);
+        this.update(this.root);
+    }
+
+    setPage = (d) => {
+        if (d && d.kids) {
+            d.children = [];
+            d.kids.forEach( (d1, i) => {
+                if (d.page === d1.pageNo) {
+                    d.children.push(d1);
+                }
+            })
+        }
     }
 
     removePreviousChart(){
