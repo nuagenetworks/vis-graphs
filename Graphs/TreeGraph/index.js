@@ -24,10 +24,10 @@ class TreeGraph extends AbstractGraph {
         this.treeData = null;
         this.treemap = null;
         this.transformAttr = null;
+        this.initiate(props);
     }
 
     componentDidMount() {
-        this.initiate(this.props);
         const {
             data
         } = this.props;
