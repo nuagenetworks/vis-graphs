@@ -15,7 +15,6 @@ import {
     hierarchy
   } from "d3";
 
-const PAGINATION = 2;
 class TreeGraph extends AbstractGraph {
 
     constructor(props) {
@@ -150,10 +149,26 @@ class TreeGraph extends AbstractGraph {
     }
 
     update = (source) => {
+
+        const {
+            siteIcons: {
+                preBtn,
+                nextBtn
+            }
+        } = this.props;
+
+        const {
+            pagination: {
+                paginationIconColor,
+                numberOfNodesToShow
+            }
+        } = this.getConfiguredProperties();
+
+
         // Assigns the x and y position for the nodes
-        
+
         this.treeData = this.treemap(this.root);
-        
+
         // Compute the new tree layout.
         const nodes = this.treeData.descendants(),
             links = this.treeData.descendants().slice(1);
@@ -173,62 +188,60 @@ class TreeGraph extends AbstractGraph {
         const svg = this.getGraphContainer();
 
         const parents = nodes.filter(function (d) {
-            return (d.data.kids && d.data.kids.length > PAGINATION) ? true : false;
+            return (d.data.kids && d.data.kids.length > numberOfNodesToShow) ? true : false;
         });
 
         svg.selectAll(".page").remove();
 
         parents.forEach((p) => {
-            if(p.children) {
+            if (p.children) {
                 const p1 = p.children[p.children.length - 1];
                 const p2 = p.children[0];
-                
+
                 const pr = p.data;
                 const pagingData = [];
 
                 if (pr.page > 1) {
                     pagingData.push({
-                    type: "prev",
-                    parent: p,
-                    no: (pr.page - 1)
+                        type: "prev",
+                        parent: p,
+                        no: (pr.page - 1)
                     });
                 }
 
-                if (pr.page < Math.ceil(pr.kids.length / PAGINATION)) {
+                if (pr.page < Math.ceil(pr.kids.length / numberOfNodesToShow)) {
                     pagingData.push({
-                    type: "next",
-                    parent: p,
-                    no: (pr.page + 1)
+                        type: "next",
+                        parent: p,
+                        no: (pr.page + 1)
                     });
                 }
 
                 const pageControl = svg.selectAll(".page")
-                    .data(pagingData, function(d) {
-                    return (d.parent.id + d.type);
+                    .data(pagingData, function (d) {
+                        return (d.parent.id + d.type);
                     }).enter()
                     .append("g")
                     .attr("class", "page")
-                    .attr("transform", function(d) {
-                    const x = (d.type === "next") ? p2.y : p1.y;
-                    const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 30);
-                    return "translate(" + x + "," + y + ")";
+                    .attr("transform", function (d) {
+                        const x = (d.type === "next") ? p2.y : p1.y;
+                        const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
+                        return "translate(" + x + "," + y + ")";
                     }).on("click", this.paginate);
-        
+
                 pageControl
                     .append("circle")
                     .attr("r", 15)
-                    .style("fill", function(d) {
-                    return d.parent? "blue": "red";
-                })
+                    .style("fill", paginationIconColor)
 
                 pageControl
                     .append("image")
-                    .attr("xlink:href", function(d) {
-                    if (d.type === "next") {
-                        return "https://dl.dropboxusercontent.com/s/p7qjclv1ulvoqw3/icon1.png"
-                    } else {
-                        return "https://dl.dropboxusercontent.com/s/mdzt36poc1z39s3/icon3.png"
-                    }
+                    .attr("xlink:href", function (d) {
+                        if (d.type === "next") {
+                            return nextBtn
+                        } else {
+                            return preBtn
+                        }
                     })
                     .attr("x", -12.5)
                     .attr("y", -12.5)
@@ -242,7 +255,6 @@ class TreeGraph extends AbstractGraph {
     paginate = (d) => {
         d.parent.data.page = d.no;
         this.setPage(d.parent);
-        // this.update(this.root);
     }
 
     setPage = (d) => {
@@ -347,6 +359,7 @@ class TreeGraph extends AbstractGraph {
 
         nodeUpdate.select("rect")
             .style("fill", (d) => {
+                console.log(d);
                 return d.clicked ? rectNode.selectedBackground : (d.children || d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
             });
 
