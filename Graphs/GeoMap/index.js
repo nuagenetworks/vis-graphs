@@ -43,13 +43,14 @@ class GeoMap extends AbstractGraph {
     this.onZoomChanged        = this.onZoomChanged.bind(this)
   }
 
-  componentWillMount() {
-    this.initiate(this.props)
+  componentDidMount() {
+    this.initiate(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!_.isEqual(this.props.data, nextProps.data))
-      this.initiate(nextProps)
+  componentDidUpdate(prevProps) {
+    if (!_.isEqual(prevProps.data, this.props.data)) {
+      this.initiate(this.props);
+    }
   }
 
   componentWillUnmount() {
@@ -579,7 +580,7 @@ class GeoMap extends AbstractGraph {
     }
 
     return (
-      <div>
+      <React.Fragment>
         {this.renderSearchBarIfNeeded()}
         {
             googleMapsAPIKey ?
@@ -620,7 +621,7 @@ class GeoMap extends AbstractGraph {
                 </div>
         }
 
-      </div>
+      </React.Fragment>
     )
   }
 }

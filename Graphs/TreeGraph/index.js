@@ -24,10 +24,7 @@ class TreeGraph extends AbstractGraph {
         this.treeData = null;
         this.treemap = null;
         this.transformAttr = null;
-    }
-
-    componentWillMount() {
-        this.initiate(this.props)
+        this.initiate(props);
     }
 
     componentDidMount() {
@@ -35,20 +32,18 @@ class TreeGraph extends AbstractGraph {
             data
         } = this.props;
 
-        if (!data)
+        if (!data || !data.length)
             return
 
         this.setSVGTransform(this.props)
         this.elementGenerator();
     }
 
-    componentWillReceiveProps(nextProps) {
-        if(!_.isEqual(this.props, nextProps)) {
-            this.initiate(nextProps);
+    componentDidUpdate(prevProps) {
+        if(!_.isEqual(prevProps, this.props)) {
+            this.initiate(this.props);
         }
-    }
 
-    componentDidUpdate() {
         const {
             data
         } = this.props;

@@ -65,14 +65,19 @@ class Table extends AbstractGraph {
             showInfoBox: false,
             showConfirmationPopup: false
         }
+        this.initiate(props);
     }
 
-    componentWillMount() {
-        this.initiate(this.props);
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(!prevState.columns.length) {
+            return Table.updateColumn(nextProps);
+        } 
+        return null;
     }
 
     componentDidMount() {
-        this.checkFontsize()
+        this.initiate(this.props);
+        this.checkFontsize();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -81,20 +86,16 @@ class Table extends AbstractGraph {
             || !_.isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
     }
 
-    componentWillReceiveProps(nextProps) {
+    componentDidUpdate(prevProps) {
+        if(prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
+            this.setState({ fontSize: style.defaultFontsize});
+        }
+
+        if((!_.isEqual(prevProps.data, this.props.data) || !_.isEqual(prevProps.scrollData, this.props.scrollData))
+            && (prevProps.context && prevProps.context[this.columns] === this.props.context[this.columns])) {
+            this.initiate(this.props);
+        }
         
-        // reset font size on resize
-        if(this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
-            this.setState({ fontSize: style.defaultFontsize})
-        }
-
-        if((!_.isEqual(this.props.data, nextProps.data) || !_.isEqual(this.props.scrollData, nextProps.scrollData))
-            && (this.props.context && this.props.context[this.columns] === nextProps.context[this.columns])) {
-            this.initiate(nextProps);
-        }
-    }
-
-    componentDidUpdate() {
         this.checkFontsize();
         const { contextMenu } = this.state;
         if (contextMenu) {
@@ -117,6 +118,37 @@ class Table extends AbstractGraph {
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
         }
+    }
+
+    static updateColumn(props) {
+        const column = `${props.configuration.id}-columns`;
+        
+        const {
+            context,
+            selectedColumns
+        } = props;
+
+        let columnsContext = false
+
+        if(selectedColumns) {
+            columnsContext = selectedColumns
+        } else {
+            columnsContext = context && context.hasOwnProperty(column) ? context[column] : false
+        }
+
+        const columns = props.configuration.data.columns.filter( d => {
+            Object.assign(d, {value: d.label})
+
+            //Only selected Columns
+            if(columnsContext) {
+                return columnsContext.indexOf(d.label) > -1 || false
+            } else {
+                //Configured Columns
+                return d.display !== false
+            }
+        });
+
+        return { columns }
     }
 
     // update scroll data on pagination, searching and sorting.
@@ -922,7 +954,7 @@ class Table extends AbstractGraph {
 
         return (
             this.state.showConfirmationPopup &&
-            <div>
+            <React.Fragment>
                 <Dialog
                     title="Unable to fetch"
                     actions={actions}
@@ -932,7 +964,7 @@ class Table extends AbstractGraph {
                 >
                     Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
                 </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 

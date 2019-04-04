@@ -39,9 +39,11 @@ export default class AbstractGraph extends React.Component {
         this.setTooltip();
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setConfiguredProperties(nextProps, this.properties);
-        this.reInitializeTooltip(nextProps);
+    componentDidUpdate(prevProps) {
+        if (!_.isEqual(prevProps.configuration.data, this.props.configuration.data)) {
+            this.setConfiguredProperties(this.props, this.properties);
+            this.reInitializeTooltip(this.props);
+        }
     }
 
     reInitializeTooltip(nextProps) {
@@ -127,7 +129,7 @@ export default class AbstractGraph extends React.Component {
         }
 
         return (
-            <div>
+            <React.Fragment>
                 {/* Display each tooltip column as "label : value". */}
                 {tooltip.map(({ column, label }, i) => {
                     let data = accessors[i](this.hoveredDatum)
@@ -144,7 +146,7 @@ export default class AbstractGraph extends React.Component {
                         </div>
                         ) : null
                 })}
-            </div>
+            </React.Fragment>
         )
     }
 

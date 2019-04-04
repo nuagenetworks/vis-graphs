@@ -1,9 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react'
+import _ from 'lodash';
+
 import XYGraph from '../XYGraph'
 import ReactTooltip from 'react-tooltip'
 
-import { nest, nestStack, merge, sorter } from "../../utils/helpers"
+import { nest, nestStack, merge, sorter, pick } from "../../utils/helpers"
 
 import {
     line,
@@ -12,6 +14,8 @@ import {
 
 import { properties } from './default.config';
 
+const PROPS_FILTER_KEY = ['data', 'context', 'height', 'width'];
+
 class AreaGraph extends XYGraph {
 
   yKey   = 'yKey'
@@ -19,9 +23,6 @@ class AreaGraph extends XYGraph {
 
   constructor(props) {
     super(props, properties);
-  }
-
-  componentWillMount() {
     this.initiate(this.props);
   }
 
@@ -37,13 +38,11 @@ class AreaGraph extends XYGraph {
     this.updateElements();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if(this.props !== nextProps) {
-        this.initiate(nextProps);
+  componentDidUpdate(prevProps) {
+    if (!_.isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
+      this.initiate(this.props);
     }
-  }
 
-  componentDidUpdate() {
     const {
       data
     } = this.props;

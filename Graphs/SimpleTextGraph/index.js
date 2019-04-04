@@ -22,22 +22,28 @@ class SimpleTextGraph extends AbstractGraph {
 
         this.state = {
             fontSize: INITIAL_FONT_SIZE,
+            height: props.height,
+            width: props.width
         }
     }
 
     componentDidMount() {
-        this.checkFontsize()
+        this.checkFontsize();
     }
 
     componentDidUpdate() {
-        this.checkFontsize()
+        this.checkFontsize();
     }
 
-    componentWillReceiveProps(nextProps) {
-        // reset font size on resize
-        if (this.props.height !== nextProps.height || this.props.width !== nextProps.width) {
-            this.setState({ fontSize: INITIAL_FONT_SIZE })
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (prevState.height !== nextProps.height || prevState.width !== nextProps.width) {
+            return { 
+                fontSize: INITIAL_FONT_SIZE,
+                height: nextProps.height,
+                width: nextProps.width
+            };
         }
+        return null;
     }
 
     checkFontsize() {
