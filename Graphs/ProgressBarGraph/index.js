@@ -28,7 +28,7 @@ export default class ProgressBarGraph extends AbstractGraph {
             usedData,
             display,
             maxDataFormat,
-            defaultPercentage,
+            defaultRange,
         } = this.getConfiguredProperties();
 
         if (display === PERCENTAGE) {
@@ -39,7 +39,7 @@ export default class ProgressBarGraph extends AbstractGraph {
         barData[usedData] = d3.format(maxDataFormat)(barData[usedData]);
         barData[maxData] = barData[maxData] ? d3.format(maxDataFormat)(barData[maxData]) : undefined;
 
-        return barData[maxData] ? `${barData[usedData]} / ${barData[maxData]}` : `${barData[usedData]} / ${defaultPercentage}`;
+        return barData[maxData] ? `${barData[usedData]} / ${barData[maxData]}` : `${barData[usedData]} / ${defaultRange}`;
     }
 
     getPercentage = (barData, width) => {
@@ -53,16 +53,11 @@ export default class ProgressBarGraph extends AbstractGraph {
 
     getColor = (barData, width) => {
         const {
-            defaultColor,
-            color,
+            barColor,
             colorRange,
         } = this.getConfiguredProperties();
 
         let setColor = false;
-
-        if (typeof color === "string" && !colorRange) {
-            return color;
-        }
 
         if (colorRange) {
             const percentage = this.getPercentage(barData, width);
@@ -77,16 +72,7 @@ export default class ProgressBarGraph extends AbstractGraph {
             return colorData['color'];
         }
 
-        return defaultColor;
-    }
-
-    getBackgroundColor = () => {
-        const {
-            defaultBackgroundColor,
-            backgroundColor
-        } = this.getConfiguredProperties();
-
-        return backgroundColor ? backgroundColor : defaultBackgroundColor;
+        return barColor;
     }
 
     render() {
@@ -102,6 +88,7 @@ export default class ProgressBarGraph extends AbstractGraph {
             display,
             chartWidthToPixel,
             minSectionHeight,
+            backgroundColor,
         } = this.getConfiguredProperties();
 
         if (!data.length) {
@@ -158,7 +145,7 @@ export default class ProgressBarGraph extends AbstractGraph {
                                                 <rect
                                                     width={barWidth}
                                                     height={barHeight}
-                                                    fill={this.getBackgroundColor()}
+                                                    fill={backgroundColor}
                                                 />
                                                 <rect
                                                     width={this.getWidth(d, barWidth)}
@@ -195,3 +182,4 @@ ProgressBarGraph.defaultProps = {
     data: [],
     configuration: {}
 };
+

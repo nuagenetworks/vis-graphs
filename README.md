@@ -695,3 +695,45 @@ __maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (
 __minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
 
 __rowLimit__ (number) show number of ports in each row. Default is 8.
+
+## *ProgressBarGraph*
+This graph is used to display process data out of the total data
+
+>[See sample data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/progressBarGraph)
+
+![progress-bar-graph](https://user-images.githubusercontent.com/26645756/55630879-632baa00-57d4-11e9-9bc6-4fc803ad72a7.png)
+
+__maxData__ (string) this column is used to display total value of each bar. 
+
+__usedData__ (string) this column is used to display used value of each bar.
+
+__label__ (string) this column used to display the bar name.
+
+__barColor__ (string) color of the bar drawn by used data.
+
+__backgroundColor__ (string) color of the bar drawn by max data.
+
+__percentage__ (boolean) whether to show bar value in percentage or not. Deafult is `false`
+
+__defaultRange__ (numeric) If max data is not present then this value is used to calculate the percentage. default is `100`. 
+
+
+
+__colorRange__ (array) define the criteria to show the color of each bar on the basis of defined used value range. E.g -
+
+```javascript
+"colorRange": [
+            {
+                "upto": 10,
+                "color": "red"
+            },
+            {
+                "upto": 70,
+                "color": "blue"
+            },
+            {
+                "upto": 100,
+                "color": "green"
+            }
+        ]
+```

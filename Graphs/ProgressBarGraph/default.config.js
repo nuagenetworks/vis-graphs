@@ -1,8 +1,8 @@
 import { theme } from '../../theme';
 
 export const properties = {
-    defaultColor: theme.palette.blueColor,
-    defaultBackgroundColor: theme.palette.greyLightColor,
+    barColor: theme.palette.blueColor,
+    backgroundColor: theme.palette.greyLightColor,
     minSectionHeight: 30,
-    defaultPercentage: 100,
+    defaultRange: 100,
 }
