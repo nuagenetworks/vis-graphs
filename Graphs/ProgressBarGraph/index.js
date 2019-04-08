@@ -99,14 +99,19 @@ export default class ProgressBarGraph extends AbstractGraph {
         let barWidth = availableWidth;
         if (display === PERCENTAGE) {
             const labelWidth = this.longestLabelLength(data, (d) => this.getData(d)) * chartWidthToPixel;
-            barWidth = availableWidth - labelWidth;
+            barWidth = availableWidth - labelWidth * 1.30;
         }
 
         let sectionHeight = height / (data.length + 1);
         const barHeight = (display === PERCENTAGE) ? (sectionHeight * 0.60) : sectionHeight * 0.50;
 
+        let textWidth;
         if (sectionHeight < minSectionHeight) {
-            sectionHeight = minSectionHeight;
+            sectionHeight = minSectionHeight;     
+            if(display !== PERCENTAGE) {
+                textWidth = this.longestLabelLength(data);
+                barWidth = availableWidth - textWidth;
+            }      
         }
 
         return (
@@ -127,7 +132,7 @@ export default class ProgressBarGraph extends AbstractGraph {
                                 key={i}
                                 style={{
                                     height: sectionHeight,
-                                    width: availableWidth,
+                                    width: availableWidth,        
                                     ...style.section
                                 }}
                             >
@@ -158,8 +163,9 @@ export default class ProgressBarGraph extends AbstractGraph {
                                     <div style={{
                                         ...style.lowerText,
                                         alignSelf: (display === PERCENTAGE) ? 'center' : 'flex-end',
+                                        marginRight: (sectionHeight === minSectionHeight) ? textWidth * 1.25 : margin.right,
                                     }}>
-                                        &nbsp;{this.getData(d)}
+                                        {this.getData(d)}
                                     </div>
                                 </div>
                             </div>

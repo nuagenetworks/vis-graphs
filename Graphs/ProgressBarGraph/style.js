@@ -1,11 +1,9 @@
 export default {
     container: {
-        display: 'flex',
-        flexDirection: 'nowrap',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        alignContent: 'center',
         overflowY: 'auto',
+        overflowX: 'hidden',
+        padding: '10px',
+        position: 'relative',
     },
     section: {
         flex: 1,
