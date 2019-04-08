@@ -261,7 +261,20 @@ Display one or multiple lines
 
 ![multiline-chart](https://cloud.githubusercontent.com/assets/1447243/21205460/4672e4a6-c211-11e6-88a5-269bc32d2140.png)
 
-__linesColumn__ - attribute name in your results to display line value
+__linesColumn__ (array || string)- attribute name in your results to display line value.
+```javascript
+    "linesColumn": "L7Classification" // for single line
+    or 
+    "linesColumn": ["CPU", "MEMORY",  "DISK"] // for multiple line
+```
+ or we may manually specify the color of each lines. For e.g -
+ ```javascript
+        "linesColumn": [ //for multiple line with given colors
+            {"key": "CPU", "color":"red"},
+            {"key": "MEMORY", "color":"green"},
+            {"key": "DISK", "color":"blue"}
+    ],
+```
 
 __showNull__ - (Boolean) If false, Show truncated line if yValue is null . Default is true
 
