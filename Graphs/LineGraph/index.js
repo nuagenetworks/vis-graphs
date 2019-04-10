@@ -82,10 +82,26 @@ class LineGraph extends XYGraph {
 
         let updatedLinesLabel = [];
 
-        let linesColumn = configLinesColumn || [yColumn]
+        let linesColumn = configLinesColumn || [yColumn];
+
+        const colorList = {};
+        const getColorList = (linesColumn) => {
+            const keyList = [];
+            linesColumn.forEach(lineList => {
+                if (typeof lineList === 'object') {
+                    colorList[lineList['key']] = lineList['color'];
+                    keyList.push(lineList['key']);
+                }
+            });
+
+            if (keyList.length === 0) {
+                return linesColumn;
+            }
+            return keyList;
+        }
 
         if(linesColumn) {
-            updatedLinesLabel = typeof linesColumn === 'object' ? linesColumn : [linesColumn];
+            updatedLinesLabel = typeof linesColumn === 'object' ? getColorList(linesColumn) : [linesColumn];
         }
 
         let legendsData = updatedLinesLabel.map((d, i) => {
@@ -193,8 +209,13 @@ class LineGraph extends XYGraph {
         const legendFn         = (d) => d[this.yKey];
         const label            = (d) => d[this.yKey];
 
-        const scale            = this.scaleColor(filterDatas, this.yKey);
-        const getColor         = (d) => scale ? scale(d[this.yKey] || d["key"]) : stroke.color || colors[0];
+        const scale = this.scaleColor(filterDatas, this.yKey);
+        const getColor = (d) => {
+            if (colorList && colorList[d[this.yKey]]) {
+                return colorList[d[this.yKey]];
+            }
+            return scale ? scale(d[this.yKey] || d["key"]) : stroke.color || colors[0]
+        };
 
         let xAxisHeight       = xLabel ? chartHeightToPixel : 0;
         let legendWidth       = legend.show ? this.longestLabelLength(filterDatas, legendFn) * chartWidthToPixel : 0;

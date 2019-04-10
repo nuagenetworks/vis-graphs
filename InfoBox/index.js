@@ -33,7 +33,7 @@ export default class InfoBox extends React.Component {
         onRequestClose={onInfoBoxClose}
         style={style.modal}
       >
-        <div>
+        <React.Fragment>
           <div style={style.container}>
             {children}
           </div>
@@ -45,7 +45,7 @@ export default class InfoBox extends React.Component {
               onClick={onInfoBoxClose}
             />
           </div>
-        </div>
+        </React.Fragment>
       </Modal>
     );
   }

@@ -19,20 +19,14 @@ export default class ChordGraph extends AbstractGraph {
         this.filterData = []
     }
 
-    componentWillMount() {
-      this.parseData(this.props.data)
-    }
-
     componentDidMount() {
-      this.initiate()
-    }
-
-    componentWillReceiveProps(nextProps) {
-      this.parseData(nextProps.data)
+      this.parseData(this.props.data);
+      this.initiate();
     }
 
     componentDidUpdate() {
-      this.initiate()
+      this.parseData(this.props.data);
+      this.initiate();
     }
 
     initiate() {
@@ -63,7 +57,7 @@ export default class ChordGraph extends AbstractGraph {
                 } = this.hoveredDatum;
 
                 return (
-                    <div>
+                    <React.Fragment>
                         <div>
                             <strong>{`${destination} to ${source}:`}</strong>
                             <span> {accessor({ value: sourceValue})}</span>
@@ -74,7 +68,7 @@ export default class ChordGraph extends AbstractGraph {
                             <span> {accessor({ value: destinationValue})}</span>
                             { label ? <span> {label}</span>:null }
                         </div>
-                    </div>
+                    </React.Fragment>
                 );
             } else {
                 return <div>Hover over a chord to see flow details.</div>;

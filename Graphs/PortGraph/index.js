@@ -8,9 +8,9 @@ import columnAccessor from '../../utils/columnAccessor';
 import { properties } from './default.config';
 import styles from './styles';
 import evalExpression from 'eval-expression';
-import { getIconPath } from '../../utils/helpers';
+import { getIconPath, pick } from '../../utils/helpers';
 
-
+const PROPS_FILTER_KEY = ['data', 'context', 'data2', 'height', 'width'];
 class PortGraph extends XYGraph {
 
     constructor(props) {
@@ -21,14 +21,13 @@ class PortGraph extends XYGraph {
             portAreaWidth: 100,
             rowCount: 0,
         }
-    }
-
-    componentWillMount() {
         this.initiate(this.props);
     }
-
-    componentWillReceiveProps(nextProps) {
-        this.initiate(nextProps);
+    
+    componentDidUpdate(prevProps) {
+        if (!_.isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
+            this.initiate(this.props);
+        }
     }
 
     initiate(props) {
