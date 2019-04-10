@@ -15,6 +15,8 @@ import {
     hierarchy
   } from "d3";
 
+  import * as d3 from "d3";
+
 class TreeGraph extends AbstractGraph {
 
     constructor(props) {
@@ -23,6 +25,8 @@ class TreeGraph extends AbstractGraph {
         this.treeData = null;
         this.treemap = null;
         this.transformAttr = null;
+        this.rectWidth = 0
+        this.rectHeight = 0
         this.initiate(props);
     }
 
@@ -185,7 +189,7 @@ class TreeGraph extends AbstractGraph {
         const parents = nodes.filter(function (d) {
             return (d.data.kids && d.data.kids.length > numberOfNodesToShow) ? true : false;
         });
-
+        
         svg.selectAll(".page").remove();
 
         parents.forEach((p) => {
@@ -272,6 +276,23 @@ class TreeGraph extends AbstractGraph {
         this.removePreviousChart();
     }
 
+    count_leaves = (node) => {
+        let count=0;
+        for (var i = 0; i < node.length; i++) {
+            if(node[i].children) {
+                for (var j = 0; j < node[i].children.length; j++) {
+                    if (node[i].children[j].children) {
+                        this.count_leaves(node[i].children[j]);
+                    }
+                    else {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
+    }
+
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
@@ -280,12 +301,33 @@ class TreeGraph extends AbstractGraph {
             transition: {
                 duration
             },
-            rectNode
+            rectNode,
+            checkToShowCircleNodes
         } = this.getConfiguredProperties();
 
-        let i = 0;
+        const {
+            commonEN
+        } = this.props;
 
-        // ****************** Nodes section ***************************
+        let i = 0,
+            showOnlyImg = false;
+
+        this.rectWidth = rectNode.width;
+        this.rectHeight = rectNode.height;
+
+        if(this.count_leaves(nodes)) {
+            const countLeaves = this.count_leaves(nodes);
+            if(countLeaves > checkToShowCircleNodes) {
+                this.rectWidth = rectNode.smallerWidth;
+                this.rectHeight = rectNode.smallerHeight;
+                showOnlyImg = true;
+            }
+        }
+        d3.select(".tooltip").remove();
+        // Define the div for the tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
 
         // Update the nodes...
         const node = svg.selectAll('g.node')
@@ -293,42 +335,76 @@ class TreeGraph extends AbstractGraph {
                 return d.id || (d.id = ++i);
             });
 
-        // Enter any new modes at the parent's previous position.
-        const nodeEnter = node.enter().append('g')
-            .attr('class', 'node')
-            .attr("transform", (d) => {
-                return d.parent ?
-                    "translate(" + d.parent.y + "," + d.parent.x + ")" :
-                    "translate(" + source.y0 + "," + source.x0 + ")";
-            })
-            .on('click', this.click);
+        // Enter any new nodes at the parent's previous position.
+        const nodeEnter = node.enter().append("g")
+        .attr("class", "node")
+        .attr("transform", (d) => {
+            return d.parent ?
+                "translate(" + d.parent.y + "," + d.parent.x + ")" :
+                "translate(" + source.y0 + "," + source.x0 + ")";
+        })
+        .on("click", this.click);
+
+        // ****************** Nodes section ***************************
 
         nodeEnter.append('g').append('rect')
             .attr('rx', 3)
             .attr('ry', 3)
-            .attr('width', rectNode.width)
-            .attr('height', rectNode.height)
+            .attr('width', this.rectWidth)
+            .attr('height', this.rectHeight)
             .attr("stroke", (d) => {
                 return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
             })
             .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
 
-        nodeEnter.append('foreignObject')
-            .attr('x', rectNode.textMargin)
-            .attr('y', rectNode.textMargin)
-            .attr('width', () => {
-                return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
-                    (rectNode.width - rectNode.textMargin * 2)
-            })
-            .attr('height', () => {
-                return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
-                    (rectNode.height - rectNode.textMargin * 2)
-            })
-            .append('xhtml').html((d) => {
-                return this.renderRectNode(d);
-            })
+        if (showOnlyImg) {
+            nodeEnter
+                .append("image")
+                .attr("xlink:href", (d) => {
+                    let img = this.fetchImage(d.data.apiData, d.data.contextName);
+                    return img
+                })
+                .attr("width", 25)
+                .attr("height", 25)
+                .on("mouseover", function (d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 1)
+                        .style("z-index", 1);
+                    tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${ (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0,100)}...` : d.data.description : commonEN.general.noDescription }</div>`)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function (d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
 
+            nodeEnter.append("text")
+                .attr("x", 28)
+                .attr("dy", "18px")
+                .text(function (d) {
+                    return d.data.name;
+                })
+                .style("fill-opacity", 1);
+        } else {
+            nodeEnter.append('foreignObject')
+                .attr('x', rectNode.textMargin)
+                .attr('y', rectNode.textMargin)
+                .attr('width', () => {
+                    return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
+                        (rectNode.width - rectNode.textMargin * 2)
+                })
+                .attr('height', () => {
+                    return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
+                        (rectNode.height - rectNode.textMargin * 2)
+                })
+                .append('xhtml').html((d) => {
+                    return this.renderRectNode(d);
+                })
+        }
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
 
@@ -354,10 +430,8 @@ class TreeGraph extends AbstractGraph {
 
         nodeUpdate.select("rect")
             .style("fill", (d) => {
-                console.log(d);
                 return d.clicked ? rectNode.selectedBackground : (d.children || d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
             });
-
     }
 
     renderRectNode = (d) => {
@@ -501,17 +575,14 @@ class TreeGraph extends AbstractGraph {
     }
 
     diagonal = (d) => {
-        const {
-            rectNode
-        } = this.getConfiguredProperties();
 
         // Creates a curved (diagonal) path from parent to the child nodes
         var p0 = {
-                x: d.x + rectNode.height / 2,
+                x: d.x + this.rectHeight / 2,
                 y: (d.y)
             },
             p3 = {
-                x: d.parent.x + rectNode.height / 2,
+                x: d.parent.x + this.rectHeight / 2 ,
                 y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
             },
             m = (p0.y + p3.y) / 2,
