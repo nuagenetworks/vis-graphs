@@ -302,7 +302,7 @@ class TreeGraph extends AbstractGraph {
                 duration
             },
             rectNode,
-            checkToShowCircleNodes
+            maximumNodesToShowOnPage
         } = this.getConfiguredProperties();
 
         const {
@@ -317,7 +317,7 @@ class TreeGraph extends AbstractGraph {
 
         if(this.count_leaves(nodes)) {
             const countLeaves = this.count_leaves(nodes);
-            if(countLeaves > checkToShowCircleNodes) {
+            if(countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
                 this.rectHeight = rectNode.smallerHeight;
                 showOnlyImg = true;
