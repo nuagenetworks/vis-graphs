@@ -99,16 +99,11 @@ class TreeGraph extends AbstractGraph {
         this.treemap = tree().size([this.getAvailableHeight(), this.getAvailableWidth()]);
         this.treeData = data[0];
         
-        
-
         // Assigns parent, children, height, depth
         this.root = hierarchy(this.treeData, (d) => { return d.children; });
-
         //form x and y axis
-        
         this.root.x0 = this.getAvailableHeight() / 2;
         this.root.y0 = 0;
-
         this.update(this.root)
     }
 
@@ -264,7 +259,7 @@ class TreeGraph extends AbstractGraph {
                     d.data.children.push(d1);
                 }
             })
-            this.props.onSetPage(d)
+            this.props.onSetPaginatedData(d)
         }
     }
 
@@ -414,7 +409,7 @@ class TreeGraph extends AbstractGraph {
         // Transition to the proper position for the node
         nodeUpdate.transition()
             .duration((d) => {
-                return d.children ? 0 : duration;
+                return d.data.loaded ? 0 : duration;
             })
             .attr("transform", (d) => {
                 return "translate(" + d.y + "," + d.x + ")";
@@ -531,7 +526,7 @@ class TreeGraph extends AbstractGraph {
 
         linkUpdate.transition()
             .duration((d) => {
-                return d.children ? 0 : duration;
+                return d.data.loaded ? 0 : duration;
             })
             .attr('d', (d) => {
                 return this.diagonal(d)
