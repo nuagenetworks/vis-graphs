@@ -365,9 +365,14 @@ class BarGraph extends XYGraph {
   renderLegendIfNeeded() {
     const {
       data
-    } = this.props
+    } = this.props;
 
-    this.renderNewLegend(data, this.getLegendConfig(), this.getColor(), this.getStackLabelFn())
+    const {
+      stackColumn
+    } = this.getConfiguredProperties();
+
+    const filterData = (stackColumn && _.uniqBy(data, stackColumn)) || data;
+    this.renderNewLegend(filterData, this.getLegendConfig(), this.getColor(), this.getStackLabelFn())
   }
 
   getBarDimensions(scale) {
