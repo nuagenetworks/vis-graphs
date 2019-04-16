@@ -15,7 +15,7 @@ import {
     hierarchy
   } from "d3";
 
-  import * as d3 from "d3";
+import * as d3 from "d3";
 
 class TreeGraph extends AbstractGraph {
 
@@ -155,7 +155,8 @@ class TreeGraph extends AbstractGraph {
             pagination: {
                 paginationIconColor,
                 numberOfNodesToShow
-            }
+            },
+            linksSettings
         } = this.getConfiguredProperties();
 
 
@@ -180,6 +181,54 @@ class TreeGraph extends AbstractGraph {
         });
 
         const svg = this.getGraphContainer();
+
+        const selectedNodes = nodes.filter(function (d) {
+            return (d.data.clicked) ? true : false;
+        });
+        
+        const genealogySVG = d3.select(".genealogy");
+
+        let yAxis1 =  5;
+        let yAxis2 =  20;
+        
+        selectedNodes.forEach((node, i) => {
+            const height = 10*i*4;
+            
+            const axisDifference = i > 0 ? 40 : 0;
+
+            var line = genealogySVG.append("g");
+
+            yAxis1 += parseInt(axisDifference)
+            yAxis2 += parseInt(axisDifference)
+
+            if(selectedNodes.length != ++i) {
+                line.append("svg:defs").append("svg:marker")
+                .attr("id", "triangle")
+                .attr("refX", 6)
+                .attr("refY", 6)
+                .attr("markerWidth", 30)
+                .attr("markerHeight", 30)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 12 6 0 12 3 6")
+                .style("fill", "rgb(14, 21, 236)");
+
+                line.append("line")          // attach a line
+                .style("stroke", "rgb(14, 21, 236)")  // colour the line
+                .attr("x1", 5)     // x position of the first end of the line
+                .attr("y1", yAxis1)      // y position of the first end of the line
+                .attr("x2", 5)     // x position of the second end of the line
+                .attr("y2", yAxis2)
+                .attr("marker-end", "url(#triangle)");
+            }
+            line.append("text")
+            .attr("dy", height)
+            .style('fill', 'black')
+            .style('font-weight', 'bold')
+            .text(node.data.name.length > 25 ? `${node.data.name.substring(0,25)}...` : node.data.name)
+
+        })
+        
 
         const parents = nodes.filter(function (d) {
             return (d.data.kids && d.data.kids.length > numberOfNodesToShow) ? true : false;
@@ -425,7 +474,7 @@ class TreeGraph extends AbstractGraph {
 
         nodeUpdate.select("rect")
             .style("fill", (d) => {
-                return d.clicked ? rectNode.selectedBackground : (d.children || d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
+                return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
     }
 
@@ -439,7 +488,7 @@ class TreeGraph extends AbstractGraph {
         } = this.props;
 
         let img = this.fetchImage(d.data.apiData, d.data.contextName);
-        const rectColorText = d.children || d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
+        const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
         const colmAttr = rectNode['attributesToShow'][d.data.contextName] ? rectNode['attributesToShow'][d.data.contextName] : rectNode['attributesToShow']['default'];
         
         const displayName = (d.data.name) ? d.data.name.length > 10 ? `${d.data.name.substring(0,10)}...` : d.data.name : 'No Name given';
@@ -511,7 +560,7 @@ class TreeGraph extends AbstractGraph {
             })
             .attr("stroke-width", linksSettings.stroke.width)
             .attr("marker-start", (d) => {
-                return d.children || d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
+                return d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
             });
 
         this.normalArrow(svg, linksSettings);
@@ -521,7 +570,7 @@ class TreeGraph extends AbstractGraph {
         const linkUpdate = linkEnter.merge(link);
 
         linkUpdate.style("stroke", (d) => {
-            return d.children || d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
+            return d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
         })
 
         linkUpdate.transition()
@@ -636,6 +685,9 @@ class TreeGraph extends AbstractGraph {
                 >
                     <g className='tree-graph-container' transform={transformAttr}>
 
+                    </g>
+                    <g class="genealogy" transform="translate(820,30) scale(1)">
+                        
                     </g>
                 </svg>
             </div>
