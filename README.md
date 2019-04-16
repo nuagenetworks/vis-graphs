@@ -117,6 +117,7 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
   - **column*** - attribute name to use to display the value
   - **label** - tooltip label. If not specified, column will be used.
   - **format** - [d3 format](https://github.com/d3/d3-format) style to display the column value
+  - **duration** - used to dispaly duration in date time format. You may set the format as per your choice.
 
 ```javascript
 {
@@ -125,7 +126,8 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
         // ...
         "tooltip": [
             { "column": "L7Classification", "label": "L7 Signature" },
-            { "column": "Sum of MB", "format": ",.2s"}
+            { "column": "Sum of MB", "format": ",.2s"},
+            { "column": "duration", "label": "Value", "duration": "h [hrs], m [min], s [sec]"}
         ]
     }
     // ...
