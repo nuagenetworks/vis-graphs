@@ -5,8 +5,6 @@ import _ from 'lodash';
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
-import { parseSrc } from '@/lib/ui-components/utils.js'
-import { netmaskToCIDR } from '@/utils'
 import {
     select,
     zoom,
@@ -263,7 +261,9 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN
+            commonEN,
+            parseSrc,
+            netmaskToCIDR
         } = this.props;
 
         let img = this.fetchImage(d.data.apiData, d.data.contextName);
