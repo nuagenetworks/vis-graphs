@@ -25,9 +25,10 @@ class BarGraph extends XYGraph {
     const {
       data
     } = this.props;
-
-    if (!data || !data.length)
+  
+    if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined')) {
       return
+    }
 
     this.elementGenerator()
     this.updateElements()
@@ -46,9 +47,10 @@ class BarGraph extends XYGraph {
       data
     } = this.props;
 
-    if (!data || !data.length)
+    if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined')) {
       return
-
+    }
+      
     this.updateElements()
   }
 
