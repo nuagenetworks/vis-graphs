@@ -14,11 +14,16 @@ import {
     merge,
     event
 } from "d3";
+import moment from 'moment';
+import momentDuration from 'moment-duration-format';
 
 import XYGraph from "../XYGraph";
 import { nest } from "../../utils/helpers"
 import {properties} from "./default.config";
 
+momentDuration(moment);
+
+const duration = "duration";
 class LineGraph extends XYGraph {
 
     yKey   = 'columnType'
@@ -59,6 +64,7 @@ class LineGraph extends XYGraph {
           xTickSizeOuter,
           yColumn,
           yTickFormat,
+          yTickFormatType,
           yTickGrid,
           yTicks,
           yTickSizeInner,
@@ -224,7 +230,7 @@ class LineGraph extends XYGraph {
         if (yTicksLabel && typeof yTicksLabel === 'object') {
             yLabelWidth = this.longestLabelLength(Object.values(yTicksLabel));
         } else {
-            yLabelWidth = this.longestLabelLength(filterDatas, yLabelFn, yTickFormat);
+            yLabelWidth = this.longestLabelLength(filterDatas, yLabelFn, (yTickFormatType !== duration) ? yTickFormat : null);
         }
 
         yLabelWidth = (yLabelWidth > yLabelLimit ?  yLabelLimit + appendCharLength : yLabelWidth)* chartWidthToPixel
@@ -321,8 +327,9 @@ class LineGraph extends XYGraph {
           .tickSizeInner(yTickGrid ? -availableWidth : yTickSizeInner)
           .tickSizeOuter(yTickSizeOuter);
 
-        if(yTickFormat){
-            yAxis.tickFormat(format(yTickFormat));
+        if (yTickFormat) {
+            const yAxisTickFormat = (yTickFormatType === duration) ? (d) => moment.duration(d).format(yTickFormat, { trim: false }) : format(yTickFormat);
+            yAxis.tickFormat(yAxisTickFormat);
         }
 
         if(yTicks){

@@ -210,6 +210,16 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yLabel** y-axis title
 - **yTicks** number of ticks to use on y-axis
 - **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
+- **yTickFormatType** If y axis data is in duration(miliseconds) then set `yTickFormatType: 'duration'` and define format in `yTickFormat` property to make it readable. E.g -
+```javascript
+    "data": {
+    ...
+    "yTickFormat": "mm:ss",
+    "yTickFormatType": "duration",
+    ...
+    }
+```
+
 - **yTickGrid** (boolean) If set to `true` then the complete grid will be drawn
 - **yTickSizeInner** If size is specified, sets the inner tick size to the specified value and returns the axis.
 - **yTickSizeOuter** If size is specified, sets the outer tick size to the specified value and returns the axis.
