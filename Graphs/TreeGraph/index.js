@@ -5,7 +5,6 @@ import _ from 'lodash';
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
-import { parseSrc } from '@/lib/ui-components/utils.js'
 import { netmaskToCIDR } from '@/utils'
 import {
     select,
@@ -154,9 +153,8 @@ class TreeGraph extends AbstractGraph {
         const {
             pagination: {
                 paginationIconColor,
-                numberOfNodesToShow
-            },
-            linksSettings
+                max
+            }
         } = this.getConfiguredProperties();
 
 
@@ -182,56 +180,10 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
-        const selectedNodes = nodes.filter(function (d) {
-            return (d.data.clicked) ? true : false;
-        });
-        
-        const genealogySVG = d3.select(".genealogy");
-
-        let yAxis1 =  5;
-        let yAxis2 =  20;
-        
-        selectedNodes.forEach((node, i) => {
-            const height = 10*i*4;
-            
-            const axisDifference = i > 0 ? 40 : 0;
-
-            var line = genealogySVG.append("g");
-
-            yAxis1 += parseInt(axisDifference)
-            yAxis2 += parseInt(axisDifference)
-
-            if(selectedNodes.length != ++i) {
-                line.append("svg:defs").append("svg:marker")
-                .attr("id", "triangle")
-                .attr("refX", 6)
-                .attr("refY", 6)
-                .attr("markerWidth", 30)
-                .attr("markerHeight", 30)
-                .attr("orient", "auto")
-                .append("path")
-                .attr("d", "M 0 0 12 6 0 12 3 6")
-                .style("fill", "rgb(14, 21, 236)");
-
-                line.append("line")          // attach a line
-                .style("stroke", "rgb(14, 21, 236)")  // colour the line
-                .attr("x1", 5)     // x position of the first end of the line
-                .attr("y1", yAxis1)      // y position of the first end of the line
-                .attr("x2", 5)     // x position of the second end of the line
-                .attr("y2", yAxis2)
-                .attr("marker-end", "url(#triangle)");
-            }
-            line.append("text")
-            .attr("dy", height)
-            .style('fill', 'black')
-            .style('font-weight', 'bold')
-            .text(node.data.name.length > 25 ? `${node.data.name.substring(0,25)}...` : node.data.name)
-
-        })
-        
+        this.renderSelectedNodesInfo(nodes)
 
         const parents = nodes.filter(function (d) {
-            return (d.data.kids && d.data.kids.length > numberOfNodesToShow) ? true : false;
+            return (d.data.kids && d.data.kids.length > max) ? true : false;
         });
         
         svg.selectAll(".page").remove();
@@ -252,7 +204,7 @@ class TreeGraph extends AbstractGraph {
                     });
                 }
 
-                if (pr.page < Math.ceil(pr.kids.length / numberOfNodesToShow)) {
+                if (pr.page < Math.ceil(pr.kids.length / max)) {
                     pagingData.push({
                         type: "next",
                         parent: p,
@@ -293,6 +245,97 @@ class TreeGraph extends AbstractGraph {
 
             }
         });
+    }
+
+    renderSelectedNodesInfo = (nodes) => {
+
+        const {
+            selectedNodesInfo
+        } = this.getConfiguredProperties();
+
+        const svg = this.getGraphContainer();
+        const selectedNodes = nodes.filter(function (d) {
+            return (d.data.clicked) ? true : false;
+        });
+        if(selectedNodes.length > 1)
+        {
+            const line = svg.selectAll(".genealogy")
+                .data(selectedNodes, d => d.data);
+
+            const newLine = line.enter()
+                .append("g")
+                .attr("class", "genealogy");
+
+            let yAxis1 =  5;
+            let yAxis2 =  20;
+
+            newLine.append("svg:defs").append("svg:marker")
+            .attr("id", "triangle")
+            .attr("refX", 6)
+            .attr("refY", 6)
+            .attr("markerWidth", 30)
+            .attr("markerHeight", 30)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 12 6 0 12 3 6")
+            .style("fill", selectedNodesInfo.stroke);
+
+            newLine.append("line")          // attach a line
+            .style("stroke", selectedNodesInfo.stroke)  // colour the line
+            .style("opacity", (d, i) => {
+                if(selectedNodes.length == ++i || !d.children) {
+                    return 0;
+                }
+            })  // colour the line
+            .attr("x1", 5)     // x position of the first end of the line
+            .attr("y1", (d, i)=>{
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis1 += parseInt(axisDifference)
+                return yAxis1;
+            })                  // y position of the first end of the line
+            .attr("x2", 5)     // x position of the second end of the line
+            .attr("y2", (d, i) => {
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis2 += parseInt(axisDifference)
+                return yAxis2;
+            })
+            .attr("marker-end", "url(#triangle)");
+
+            newLine.append("text")
+            .attr("dy", (d, i) => {
+                const height = 10*i*4;
+                return height;
+            })
+            .text((d) => d.data.name)
+            .style('fill', selectedNodesInfo.fontColor)
+            .style('font-weight', 'bold')
+
+            const allLines = newLine.merge(line);
+
+            let xTra = 0;
+            let yTra = 0;
+
+            svg.selectAll('.genealogy')
+            .data(selectedNodes)
+            .each(function (d) {
+                if(d.children) {
+                    const firstChild = d.children[0];
+                    if(!firstChild.data.loaded) {
+                        xTra = firstChild.x + 40
+                        yTra = firstChild.y + 200
+                    }
+                } else if(d.data.clicked) {
+                    xTra = d.x + 40
+                    yTra = d.y + 200
+                }
+            })
+
+            d3.selectAll('.genealogy').attr("transform", "translate(" + yTra + ","+ xTra +")");
+
+            line.exit().remove();
+        } else {
+            svg.selectAll(".genealogy").remove();
+        }
     }
 
     paginate = (d) => {
@@ -497,7 +540,7 @@ class TreeGraph extends AbstractGraph {
         const CIDR = (colmAttr.address && d.data.apiData._netmask) ? netmaskToCIDR(d.data.apiData._netmask) : ''
 
 
-        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${parseSrc(img)}" /></div>` : ''
+        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : ''
         const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` :  '';
         const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` :  '';
         const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` :  '';
@@ -547,6 +590,7 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         // ****************** links section ***************************
+
         // Update the links...
         const link = svg.selectAll('path.link').data(links, (d) => {
             return d.id;
@@ -559,9 +603,6 @@ class TreeGraph extends AbstractGraph {
                 return this.diagonal(d)
             })
             .attr("stroke-width", linksSettings.stroke.width)
-            .attr("marker-start", (d) => {
-                return d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
-            });
 
         this.normalArrow(svg, linksSettings);
         this.coloredArrow(svg, linksSettings);
@@ -580,6 +621,9 @@ class TreeGraph extends AbstractGraph {
             .attr('d', (d) => {
                 return this.diagonal(d)
             })
+            .attr("marker-start", (d) => {
+                return d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
+            });
 
         // Remove any exiting links
         link.exit().transition()
@@ -685,9 +729,6 @@ class TreeGraph extends AbstractGraph {
                 >
                     <g className='tree-graph-container' transform={transformAttr}>
 
-                    </g>
-                    <g class="genealogy" transform="translate(820,30) scale(1)">
-                        
                     </g>
                 </svg>
             </div>
