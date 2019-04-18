@@ -1,0 +1,27 @@
+[
+    {
+        "label": "Gold",
+        "maxData": 300000,
+        "usedData": 168663
+    },
+    {
+        "label": "Silver",
+        "maxData": 26000,
+        "usedData": 18803
+    },
+    {
+        "label": "Platium",
+        "maxData": 3000,
+        "usedData": 1896
+    },
+    {
+        "label": "Bronze",
+        "maxData": 20000,
+        "usedData": 15000
+    },
+    {
+        "label": "Dimond",
+        "maxData": 2200000,
+        "usedData": 1896000
+    }
+]

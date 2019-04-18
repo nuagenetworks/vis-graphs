@@ -14,6 +14,7 @@ import GeoMap from "./GeoMap"
 import MultiColumnStatusTextGraph from './MultiColumnStatusTextGraph'
 import TreeGraph from './TreeGraph'
 import PortGraph from './PortGraph'
+import ProgressBarGraph from './ProgressBarGraph'
 
 
 /*
@@ -36,6 +37,7 @@ let registry = {
     MultiColumnStatusTextGraph,
     TreeGraph,
     PortGraph,
+    ProgressBarGraph,
 };
 
 /*
