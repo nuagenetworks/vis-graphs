@@ -283,7 +283,7 @@ class TreeGraph extends AbstractGraph {
             newLine.append("line")          // attach a line
             .style("stroke", selectedNodesInfo.stroke)  // colour the line
             .style("opacity", (d, i) => {
-                if(selectedNodes.length == ++i || !d.children) {
+                if(selectedNodes.length === ++i || !d.children) {
                     return 0;
                 }
             })  // colour the line
@@ -310,7 +310,7 @@ class TreeGraph extends AbstractGraph {
             .style('fill', selectedNodesInfo.fontColor)
             .style('font-weight', 'bold')
 
-            const allLines = newLine.merge(line);
+            newLine.merge(line);
 
             let xTra = 0;
             let yTra = 0;
