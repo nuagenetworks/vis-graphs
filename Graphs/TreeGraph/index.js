@@ -5,7 +5,6 @@ import _ from 'lodash';
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
-import { netmaskToCIDR } from '@/utils'
 import {
     select,
     zoom,
@@ -159,7 +158,6 @@ class TreeGraph extends AbstractGraph {
 
 
         // Assigns the x and y position for the nodes
-
         this.treeData = this.treemap(this.root);
 
         // Compute the new tree layout.
@@ -527,7 +525,8 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN
+            commonEN,
+            netmaskToCIDR
         } = this.props;
 
         let img = this.fetchImage(d.data.apiData, d.data.contextName);
@@ -590,7 +589,6 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         // ****************** links section ***************************
-
         // Update the links...
         const link = svg.selectAll('path.link').data(links, (d) => {
             return d.id;
