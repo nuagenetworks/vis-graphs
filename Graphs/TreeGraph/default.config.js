@@ -6,7 +6,7 @@ export const properties = {
     linksSettings: {
         stroke: {
             "defaultColor": "lightsteelblue",
-            "selectedColor": "tomato",
+            "selectedColor": "#0e15ec",
             "width": "1px"
         }
     },
@@ -89,5 +89,15 @@ export const properties = {
     transformAttr: {
         translate: [30, -80],
         scale: []
+    },
+    pagination: {
+        "paginationIconColor": "#58A2FF",
+        "max": 5
+    },
+    "maximumNodesToShowOnPage": 15,
+    "selectedNodesInfo": {
+        "fontColor" :"black",
+        "stroke": "#0e15ec",
+        "width": "1px"
     }
 }
