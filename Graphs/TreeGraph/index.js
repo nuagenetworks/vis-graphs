@@ -178,8 +178,10 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
+        // ======================selected nodes notification to show==============================
         this.renderSelectedNodesInfo(nodes)
-
+        
+        // ======================pagination starts here==============================
         const parents = nodes.filter(function (d) {
             return (d.data.kids && d.data.kids.length > max) ? true : false;
         });
