@@ -127,7 +127,7 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
         "tooltip": [
             { "column": "L7Classification", "label": "L7 Signature" },
             { "column": "Sum of MB", "format": ",.2s"},
-            { "column": "duration", "label": "Value", "duration": "h [hrs], m [min], s [sec]"}
+            { "column": "timestamp", "label": "Value", "duration": "h [hrs], m [min], s [sec]"}
         ]
     }
     // ...
