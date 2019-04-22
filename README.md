@@ -117,6 +117,7 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
   - **column*** - attribute name to use to display the value
   - **label** - tooltip label. If not specified, column will be used.
   - **format** - [d3 format](https://github.com/d3/d3-format) style to display the column value
+  - **duration** - used to dispaly duration in date time format. You may set the format as per your choice.
 
 ```javascript
 {
@@ -125,7 +126,8 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
         // ...
         "tooltip": [
             { "column": "L7Classification", "label": "L7 Signature" },
-            { "column": "Sum of MB", "format": ",.2s"}
+            { "column": "Sum of MB", "format": ",.2s"},
+            { "column": "timestamp", "label": "Value", "duration": "h [hrs], m [min], s [sec]"}
         ]
     }
     // ...
@@ -208,6 +210,18 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yLabel** y-axis title
 - **yTicks** number of ticks to use on y-axis
 - **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
+- **yTickFormatType** If y axis data is in duration(miliseconds) then set `yTickFormatType: 'duration'` and define format in `yTickFormat` property to make it readable. Here is the link for the duration format - https://www.npmjs.com/package/moment-duration-format.
+
+E.g -
+```javascript
+    "data": {
+    ...
+    "yTickFormat": "mm:ss",
+    "yTickFormatType": "duration",
+    ...
+    }
+```
+
 - **yTickGrid** (boolean) If set to `true` then the complete grid will be drawn
 - **yTickSizeInner** If size is specified, sets the inner tick size to the specified value and returns the axis.
 - **yTickSizeOuter** If size is specified, sets the outer tick size to the specified value and returns the axis.
