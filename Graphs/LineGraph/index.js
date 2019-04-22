@@ -117,6 +117,12 @@ class LineGraph extends XYGraph {
             }
         })
 
+        const {
+            graphHeight,
+            graphWidth,
+            legendHeight
+        } = this.getGraphDimension();
+
         let flatData = []
         data.forEach((d) => {
             if(!dateHistogram || d[xColumn] <= Date.now()) {
@@ -235,8 +241,8 @@ class LineGraph extends XYGraph {
 
         yLabelWidth = (yLabelWidth > yLabelLimit ?  yLabelLimit + appendCharLength : yLabelWidth)* chartWidthToPixel
         let leftMargin        = margin.left + yLabelWidth;
-        let availableWidth    = width - (margin.left + margin.right + yLabelWidth);
-        let availableHeight   = height - (margin.top + margin.bottom + chartHeightToPixel + xAxisHeight);
+        let availableWidth    = graphWidth - (margin.left + margin.right + yLabelWidth);
+        let availableHeight   = graphHeight - (margin.top + margin.bottom + chartHeightToPixel + xAxisHeight);
 
         if (xLabelRotate) {
             availableHeight -= xLabelRotateHeight;
@@ -415,6 +421,21 @@ class LineGraph extends XYGraph {
             )
         }
 
+        const style = {
+            strokeStyle: {
+                strokeWidth: stroke.width,
+                stroke: stroke.color
+            },
+            graphStyle: {
+                width: graphWidth,
+                height: graphHeight
+            },
+            legendStyle: {
+                width: legendWidth,
+                height: legendHeight,
+                display: isVerticalLegend ? 'grid' : 'inline-block'
+            }
+        };
 
         let defaultLine =
             range[0] < 0 && range[1] > 0 ?
@@ -431,7 +452,9 @@ class LineGraph extends XYGraph {
         return (
             <div className="line-graph">
                 <div>{this.tooltip}</div>
-                <svg width={width} height={height}>
+                <div style={{ height, width}}>
+                    <div className='graphContainer' style={ style.graphStyle }>
+                        <svg width={ graphWidth } height={ graphHeight }>
                     {this.axisTitles(xTitlePosition, yTitlePosition)}
                     <g transform={ `translate(${leftMargin},${margin.top})` } >
                         <g
@@ -452,8 +475,7 @@ class LineGraph extends XYGraph {
                                 .call(this.wrapD3Text, yLabelLimit)
                              }
                         />
-
-
+                        
                         <g>
                           {linesData.map((d, i) =>
                               (d.values.length === 1) ?
@@ -513,6 +535,15 @@ class LineGraph extends XYGraph {
                     </g>
                     {this.renderLegend(filterDatas, legend, getColor, label)}
                 </svg>
+            </div>
+            {
+                        legend && legend.separate && (
+                            <div className='legendContainer' style={style.legendStyle}>
+                                {this.renderLegend(data, legend, getColor, label)}
+                            </div>
+                        )
+                    }
+                </div>
             </div>
         );
     }

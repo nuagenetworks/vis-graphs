@@ -166,7 +166,7 @@ export default class XYGraph extends AbstractGraph {
                 :  margin.top + this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
             },
             y: {
-              left: margin.left + chartWidthToPixel + (this.checkIsVerticalLegend() ? this.getLegendConfig().width : 0),
+              left: margin.left + chartWidthToPixel + (this.checkIsVerticalLegend() && !this.checkIsSeprateLegend() ? this.getLegendConfig().width : 0),
               top: margin.top + this.getAvailableHeight() / 2
             }
         }

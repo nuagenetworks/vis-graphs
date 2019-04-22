@@ -168,13 +168,12 @@ class BarGraph extends XYGraph {
     } = this.getConfiguredProperties()
     
 
-    const legendWidth = this.longestLabelLength(data, this.getStackLabelFn()) * chartWidthToPixel    
+    const legendWidth = this.longestLabelLength(data, this.getStackLabelFn()) * chartWidthToPixel * 1.3;    
 
-    let legend = Object.assign({}, originalLegend)
-    
-    if (legend.show) {
-      legend.width = legendWidth
+    let legend = Object.assign({}, originalLegend);
+    legend.width = legendWidth;
 
+    if (legend.show && !this.checkIsSeprateLegend()) {
       // Compute the available space considering a legend
       if (this.checkIsVerticalLegend()) {
         this.leftMargin += legend.width
@@ -185,9 +184,8 @@ class BarGraph extends XYGraph {
         const nbLines = parseInt(data.length / nbElementsPerLine, 10)
         this.availableHeight -= nbLines * legend.circleSize * circleToPixel + chartHeightToPixel
       }
-
-      this.legendConfig = legend
     }
+    this.legendConfig = legend;
   }
 
   getLegendConfig() {
@@ -340,7 +338,7 @@ class BarGraph extends XYGraph {
     } = this.getConfiguredProperties()
 
     const scale = this.scaleColor(data, this.getStack())
-    this.color =  (d) => scale ? scale(d[colorColumn || this.getStack()]) : colors[0]
+    this.color =  (d) => scale ? scale(d[colorColumn || this.getStack()]) : colors[0];
   }
 
   getColor() {
@@ -631,6 +629,13 @@ class BarGraph extends XYGraph {
       height
     } = this.props
 
+    const {
+      graphHeight,
+      graphWidth,
+      legendHeight,
+      legendWidth
+    } = this.getGraphDimension();
+
     if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined'))
       return this.renderMessage('No data to visualize')
 
@@ -638,35 +643,52 @@ class BarGraph extends XYGraph {
       margin
     } = this.getConfiguredProperties()
 
+    {this.setColor()}
+
     return (
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
-        <svg width={width} height={height}>
-          <g ref={node => this.node = node}>
-            <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+        <div style={{ height, width, display: this.checkIsVerticalLegend() ? 'flex' : ''}}>
+          <div style={{width: graphWidth, height: graphHeight}}>
+            <svg width={graphWidth} height={graphHeight}>
+              <g ref={node => this.node = node}>
+                <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='graph-bars'></g>
+                </g>
+                <g className='mini-graph-container'>
+                  <g className='min-horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='min-graph-bars'></g>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='brush'></g>
+                </g>
+                <g className='axis-title'>
+                  <text className='x-axis-label' textAnchor="middle"></text>
+                  <text className='y-axis-label' textAnchor="middle"></text>
+                </g>
+                <g className='legend'></g>
               </g>
-              <g className='graph-bars'></g>
-            </g>
-            <g className='mini-graph-container'>
-              <g className='min-horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
-              </g>
-              <g className='min-graph-bars'></g>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='brush'></g>
-            </g>
-            <g className='axis-title'>
-              <text className='x-axis-label' textAnchor="middle"></text>
-              <text className='y-axis-label' textAnchor="middle"></text>
-            </g>
-            <g className='legend'></g>
-          </g>
-        </svg>
+            </svg>
+          </div>
+          {
+              this.legendConfig && this.legendConfig.separate && (
+                  <div className='legendContainer' style={{
+                    width: legendWidth,
+                    height: legendHeight,
+                    display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block'
+                }}>
+                      {this.renderLegend(data, this.legendConfig, this.getColor(), this.getStackLabelFn())}
+                  </div>
+              )
+          }
+        </div>
       </div>
     )
   }

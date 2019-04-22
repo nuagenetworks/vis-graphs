@@ -302,6 +302,9 @@ export default class AbstractGraph extends React.Component {
         if (!legend.show)
             return;
 
+        if (!label)
+            label = (d) => d; 
+
         const {
             width,
             height
@@ -424,10 +427,15 @@ export default class AbstractGraph extends React.Component {
     }
 
     setDimensions(props, data = null, column = null) {
+        const {
+            graphHeight,
+            graphWidth
+        } = this.getGraphDimension();
+        
         this.setYlabelWidth(data ? data : props.data, column);
         this.setLeftMargin();
-        this.setAvailableWidth(props);
-        this.setAvailableHeight(props);
+        this.setAvailableWidth(graphWidth);
+        this.setAvailableHeight(graphHeight);
     }
 
     // check condition to apply brush on chart
@@ -455,7 +463,7 @@ export default class AbstractGraph extends React.Component {
         return this.leftMargin;
     }
 
-    setAvailableWidth({ width }) {
+    setAvailableWidth(width) {
         const {
             margin,
             brushArea
@@ -493,7 +501,7 @@ export default class AbstractGraph extends React.Component {
         return xLabel ? chartHeightToPixel : 0;
     }
 
-    setAvailableHeight({ height }) {
+    setAvailableHeight(height) {
         const {
             chartHeightToPixel,
             margin
@@ -543,6 +551,15 @@ export default class AbstractGraph extends React.Component {
         return legend.orientation === 'vertical';
     }
 
+    checkIsSeprateLegend() {
+        const {
+            legend
+        } = this.getConfiguredProperties();
+
+        return legend.separate || false;
+    }
+
+
     // to show message at the center of container
     renderMessage(message) {
         const {
@@ -558,7 +575,7 @@ export default class AbstractGraph extends React.Component {
 
     renderNewLegend(data, legendConfig, getColor, label) {
 
-        if (!legendConfig || !legendConfig.show)
+        if (!legendConfig || !legendConfig.show || legendConfig.separate)
             return;
 
         if (!label)

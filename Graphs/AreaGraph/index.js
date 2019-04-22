@@ -300,13 +300,12 @@ class AreaGraph extends XYGraph {
         legend,
     } = this.getConfiguredProperties();
 
-    
-    if (legend.show)
-    {
-        const legendFn   = (d) => (d.value) ? d.value : d.key;
-        let legendWidth  = legend.show && this.getYColumns().length >= 1 ? this.longestLabelLength(this.getYColumns(), legendFn) * chartWidthToPixel : 0;
-  
-        legend.width = legendWidth;
+    const legendFn   = (d) => (d.value) ? d.value : d.key;
+    let legendWidth  = legend.show && this.getYColumns().length >= 1 ? this.longestLabelLength(this.getYColumns(), legendFn) * chartWidthToPixel : 0;
+
+    legend.width = legendWidth;
+
+    if (legend.show && !this.checkIsSeprateLegend()) {
 
         // Compute the available space considering a legend
         if (this.checkIsVerticalLegend())
@@ -350,7 +349,7 @@ class AreaGraph extends XYGraph {
 
     boundaryCircle.enter().append('circle')
         .attr('class', 'boundaryCircle')
-        .style('fill', d => this.getColor({'key': d.key}))
+        .style('fill', this.getColor())
         .attr('r', circleRadius)
       .merge(boundaryCircle)
         .attr('cx', d => this.getScale().x(d.xColumn))
@@ -381,7 +380,7 @@ class AreaGraph extends XYGraph {
 
     tooltipCircle.enter().append('circle')
         .attr('class', 'tooltipCircle')
-        .style('fill', stacked === false ? d => this.getColor(d) : 'rgb(255,0,0)')
+        .style('fill', stacked === false ? this.getColor() : 'rgb(255,0,0)')
         .attr('r', circleRadius)
       .merge(tooltipCircle)
         .attr('cx', 0)
@@ -434,7 +433,7 @@ class AreaGraph extends XYGraph {
     const allLines = newLines.merge(lines); 
 
     allLines.select('.line')
-        .style('stroke', d => this.getColor({'key': d.key}))
+        .style('stroke', this.getColor())
         .attr('d', d => {
 
           let data = (d.values)
@@ -464,7 +463,7 @@ class AreaGraph extends XYGraph {
     const allAreas = newAreas.merge(areas); 
 
     allAreas.select('.area')
-        .style('fill', d => this.getColor({'key': d.key}))
+        .style('fill', this.getColor())
         .attr('d', d => areaGenerator(d.values));
 
     // add transition effect
@@ -492,6 +491,8 @@ class AreaGraph extends XYGraph {
     } = this.getConfiguredProperties();
 
     const svg =  this.getGraph();
+
+    this.setColor();
 
     //Add the X Axis
     svg.select('.xAxis')
@@ -528,16 +529,22 @@ class AreaGraph extends XYGraph {
     }
   }
 
-  renderLegendIfNeeded() {
+  setColor() {
     const {
       stroke,
       colors
     } = this.getConfiguredProperties();
 
     const scale    = this.scaleColor(this.getYColumns(), 'key');
-    this.getColor  = (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
-    
-    this.renderNewLegend(this.getSequence(), this.getLegendConfig(), this.getColor);
+    this.color  = (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
+  }
+
+  getColor() {
+    return this.color;
+  } 
+  
+  renderLegendIfNeeded() {
+    this.renderNewLegend(this.getSequence(), this.getLegendConfig(), this.getColor());
   }
 
   // Create tooltip data
@@ -601,6 +608,13 @@ class AreaGraph extends XYGraph {
         height
     } = this.props;
 
+    const {
+      graphHeight,
+      graphWidth,
+      legendHeight,
+      legendWidth
+    } = this.getGraphDimension();
+
     if (!data || !data.length)
         return this.renderMessage('No data to visualize')
 
@@ -608,30 +622,45 @@ class AreaGraph extends XYGraph {
         margin
     } = this.getConfiguredProperties();
 
+    {this.setColor()}
+
     return (
         <div className='stacked-area-graph'>
-            
             { this.tooltip }
-
-            <svg width={width} height={height}>
-              <g ref={node => this.node = node}>
-                <g className='graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
-                    <g className='area-chart'></g>
-                    <g className='tooltip-line' transform={ `translate(0,0)` } style={{opacity : 0}}>
-                      <line className='hover-line' style={{stroke:'rgb(255,0,0)'}}></line>
-                    </g>
-                    <g className='tooltip-section'></g>
-                    <g className='xAxis'></g>
-                    <g className='yAxis'></g>
-                </g>
-                <g className='axis-title'>
-                  <text className='x-axis-label' textAnchor="middle"></text>
-                  <text className='y-axis-label' textAnchor="middle"></text>
-                </g>
-                <g className='legend'></g>
-              </g>  
-            </svg>
+            <div style={{ height, width, display: this.checkIsVerticalLegend() ? 'flex' : ''}}>
+              <div style={{width: graphWidth, height: graphHeight}}>
+                <svg width={graphWidth} height={graphHeight}>
+                <g ref={node => this.node = node}>
+                  <g className='graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
+                      <g className='area-chart'></g>
+                      <g className='tooltip-line' transform={ `translate(0,0)` } style={{opacity : 0}}>
+                        <line className='hover-line' style={{stroke:'rgb(255,0,0)'}}></line>
+                      </g>
+                      <g className='tooltip-section'></g>
+                      <g className='xAxis'></g>
+                      <g className='yAxis'></g>
+                  </g>
+                  <g className='axis-title'>
+                    <text className='x-axis-label' textAnchor="middle"></text>
+                    <text className='y-axis-label' textAnchor="middle"></text>
+                  </g>
+                  <g className='legend'></g>
+                </g>  
+              </svg>
+            </div>
+        {
+              this.legendConfig && this.legendConfig.separate && (
+                  <div className='legendContainer' style={{
+                    width: legendWidth,
+                    height: legendHeight,
+                    display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block'
+                }}>
+                      {this.renderLegend(this.getSequence(), this.legendConfig, this.getColor())}
+                  </div>
+              )
+          }
         </div>
+      </div>
     );
   }
 }
