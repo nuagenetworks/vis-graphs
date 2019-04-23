@@ -777,4 +777,24 @@ export default class AbstractGraph extends React.Component {
             }
         });
     }
+
+    getSeparateLegend(data, legend, getColor, label, isVertical) {
+        const {
+            legendWidth,
+            legendHeight
+        } = this.getGraphDimension();
+
+        const legendStyle = {
+            width: legendWidth,
+            height: legendHeight,
+            display: isVertical ? 'grid' : 'inline-block'
+        };
+
+        return (
+            <div className='legendContainer' style={legendStyle}>
+                {this.renderLegend(data, legend, getColor, label)}
+            </div>
+        );
+    }
+
 }

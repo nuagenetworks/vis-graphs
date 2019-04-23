@@ -119,8 +119,7 @@ class LineGraph extends XYGraph {
 
         const {
             graphHeight,
-            graphWidth,
-            legendHeight
+            graphWidth
         } = this.getGraphDimension();
 
         let flatData = []
@@ -429,11 +428,6 @@ class LineGraph extends XYGraph {
             graphStyle: {
                 width: graphWidth,
                 height: graphHeight
-            },
-            legendStyle: {
-                width: legendWidth,
-                height: legendHeight,
-                display: isVerticalLegend ? 'grid' : 'inline-block'
             }
         };
 
@@ -537,12 +531,9 @@ class LineGraph extends XYGraph {
                 </svg>
             </div>
             {
-                        legend && legend.separate && (
-                            <div className='legendContainer' style={style.legendStyle}>
-                                {this.renderLegend(data, legend, getColor, label)}
-                            </div>
-                        )
-                    }
+                legend && legend.separate && 
+                this.getSeparateLegend(filterDatas, legend, getColor, label, isVerticalLegend)
+            }
                 </div>
             </div>
         );

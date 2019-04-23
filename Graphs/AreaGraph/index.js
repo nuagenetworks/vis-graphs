@@ -611,8 +611,6 @@ class AreaGraph extends XYGraph {
     const {
       graphHeight,
       graphWidth,
-      legendHeight,
-      legendWidth
     } = this.getGraphDimension();
 
     if (!data || !data.length)
@@ -648,17 +646,10 @@ class AreaGraph extends XYGraph {
                 </g>  
               </svg>
             </div>
-        {
-              this.legendConfig && this.legendConfig.separate && (
-                  <div className='legendContainer' style={{
-                    width: legendWidth,
-                    height: legendHeight,
-                    display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block'
-                }}>
-                      {this.renderLegend(this.getSequence(), this.legendConfig, this.getColor())}
-                  </div>
-              )
-          }
+            {
+              this.legendConfig && this.legendConfig.separate &&
+              this.getSeparateLegend(this.getSequence(), this.legendConfig, this.getColor(), (d) => d, this.checkIsVerticalLegend())
+            }
         </div>
       </div>
     );

@@ -59,8 +59,6 @@ export default class PieGraph extends AbstractGraph {
         const {
             graphHeight,
             graphWidth,
-            legendHeight,
-            legendWidth
         } = this.getGraphDimension();
 
         if (!originalData || !originalData.length)
@@ -178,11 +176,6 @@ export default class PieGraph extends AbstractGraph {
             graphStyle: {
                 width: graphWidth,
                 height: graphHeight
-            },
-            legendStyle: {
-                width: legendWidth,
-                height: legendHeight,
-                display: isVerticalLegend ? 'grid' : 'inline-block'
             }
         };
 
@@ -242,11 +235,8 @@ export default class PieGraph extends AbstractGraph {
                         </svg>
                     </div>
                     {
-                        legend && legend.separate && (
-                            <div className='legendContainer' style={style.legendStyle}>
-                                {this.renderLegend(data, legend, getColor, label)}
-                            </div>
-                        )
+                        legend && legend.separate && 
+                        this.getSeparateLegend(data, legend, getColor, label, isVerticalLegend)
                     }
                 </div>
             </div>

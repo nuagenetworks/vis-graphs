@@ -632,8 +632,6 @@ class BarGraph extends XYGraph {
     const {
       graphHeight,
       graphWidth,
-      legendHeight,
-      legendWidth
     } = this.getGraphDimension();
 
     if (!data || !data.length || (this.nestedData.length === 1 && this.nestedData[0].key === 'undefined'))
@@ -678,15 +676,8 @@ class BarGraph extends XYGraph {
             </svg>
           </div>
           {
-              this.legendConfig && this.legendConfig.separate && (
-                  <div className='legendContainer' style={{
-                    width: legendWidth,
-                    height: legendHeight,
-                    display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block'
-                }}>
-                      {this.renderLegend(data, this.legendConfig, this.getColor(), this.getStackLabelFn())}
-                  </div>
-              )
+            this.legendConfig && this.legendConfig.separate && 
+            this.getSeparateLegend(data, this.legendConfig, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())
           }
         </div>
       </div>
