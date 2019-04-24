@@ -190,7 +190,7 @@ __legend__
 - **circleSize** size of a legend circle. Default is `4` pixels
 - **labelOffset** space in pixel between the legend circle and its label. Default is `2`.
 - **labelFontSize** (numeric) - Font size of the label.
-- **separate** (numeric) - This will separate the legends from the charts and use the provided value as percentage to define the area for the legends. This will be useful in case of large number of legends and enable the scroll for legends as well (if applicable). If value is 20, then 80% of the area will be used by charts and 20% will be used by legends.
+- **separate** (numeric) - This will separate the legends from the charts and use the provided value as percentage to define the area for the legends. This will be useful in case of large number of legends and enable the scroll for legends as well (if applicable). If value is 20, then 80% of the area will be used by charts and 20% will be used by legends. If the value set to `false` then the scroll will be removed.
 
 __filterOptions__ - Allows to set filters on the visualization. See dashboard configuration for more information as it is working the same way!
 

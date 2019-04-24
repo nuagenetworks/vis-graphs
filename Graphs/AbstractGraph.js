@@ -184,6 +184,10 @@ export default class AbstractGraph extends React.Component {
     };
 
     setConfiguredProperties(props, properties) {
+        if(props.configuration.data.legend){
+            props.configuration.data.legend = _.merge(defaultProperties.legend,props.configuration.data.legend)
+        }
+
         this.configuredProperties = Object.assign({}, defaultProperties, properties, props.configuration.data, { multiMenu: props.configuration.multiMenu, menu: props.configuration.menu });
     }
 
