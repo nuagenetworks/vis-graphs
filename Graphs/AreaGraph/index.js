@@ -305,7 +305,7 @@ class AreaGraph extends XYGraph {
 
     legend.width = legendWidth;
 
-    if (legend.show && !this.checkIsSeprateLegend()) {
+    if (legend.show && !this.isLegendSeparate()) {
 
         // Compute the available space considering a legend
         if (this.checkIsVerticalLegend())

@@ -555,7 +555,7 @@ export default class AbstractGraph extends React.Component {
         return legend.orientation === 'vertical';
     }
 
-    checkIsSeprateLegend() {
+    isLegendSeparate() {
         const {
             legend
         } = this.getConfiguredProperties();
@@ -578,8 +578,11 @@ export default class AbstractGraph extends React.Component {
     }
 
     renderNewLegend(data, legendConfig, getColor, label) {
+        if (legendConfig.separate) {
+            return;
+        }
 
-        if (!legendConfig || !legendConfig.show || legendConfig.separate)
+        if (!legendConfig || !legendConfig.show)
             return;
 
         if (!label)
