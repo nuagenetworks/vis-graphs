@@ -647,6 +647,10 @@ class BarGraph extends XYGraph {
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
         <div style={{ height, width, display: this.checkIsVerticalLegend() ? 'flex' : ''}}>
+          {
+            this.legendConfig && this.legendConfig.separate && 
+            this.getSeparateLegend(data, this.legendConfig, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())
+          }
           <div style={{width: graphWidth, height: graphHeight}}>
             <svg width={graphWidth} height={graphHeight}>
               <g ref={node => this.node = node}>
@@ -675,10 +679,7 @@ class BarGraph extends XYGraph {
               </g>
             </svg>
           </div>
-          {
-            this.legendConfig && this.legendConfig.separate && 
-            this.getSeparateLegend(data, this.legendConfig, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())
-          }
+         
         </div>
       </div>
     )

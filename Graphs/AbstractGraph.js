@@ -552,7 +552,7 @@ export default class AbstractGraph extends React.Component {
             legend
         } = this.getConfiguredProperties();
 
-        return legend.orientation === 'vertical';
+        return legend.show && legend.orientation === 'vertical';
     }
 
     isLegendSeparate() {

@@ -214,7 +214,7 @@ class LineGraph extends XYGraph {
 
         let filterDatas = merge(linesData.map(function(d) { return d.values; }))
 
-        const isVerticalLegend = legend.orientation === 'vertical';
+        const isVerticalLegend = legend.show && legend.orientation === 'vertical';
         const xLabelFn         = (d) => parseFloat(d[xColumn])
         const yLabelFn         = (d) => parseFloat(d[this.yValue]);
         const legendFn         = (d) => d[this.yKey];
@@ -247,9 +247,10 @@ class LineGraph extends XYGraph {
             availableHeight -= xLabelRotateHeight;
         }
 
-        if (legend.show)
+        legend.width = legendWidth || 1;
+
+        if (legend.show && !this.isLegendSeparate() )
         {
-            legend.width = legendWidth || 1;
 
             // Compute the available space considering a legend
             if (isVerticalLegend)
@@ -356,7 +357,7 @@ class LineGraph extends XYGraph {
         }
         let yTitlePosition = {
             // We use chartWidthToPixel to compensate the rotation of the title
-            left: margin.left + chartWidthToPixel + (isVerticalLegend ? legend.width : 0),
+            left: margin.left + chartWidthToPixel + (isVerticalLegend && !this.isLegendSeparate() ? legend.width : 0),
             top: margin.top + availableHeight / 2
         }
 
@@ -446,94 +447,94 @@ class LineGraph extends XYGraph {
         return (
             <div className="line-graph">
                 <div>{this.tooltip}</div>
-                <div style={{ height, width}}>
+                <div style={{ height, width, display: isVerticalLegend ? 'flex' : ''}}>
+                    {
+                        legend && legend.separate && 
+                        this.getSeparateLegend(filterDatas, legend, getColor, label, isVerticalLegend)
+                    }
                     <div className='graphContainer' style={ style.graphStyle }>
                         <svg width={ graphWidth } height={ graphHeight }>
-                    {this.axisTitles(xTitlePosition, yTitlePosition)}
-                    <g transform={ `translate(${leftMargin},${margin.top})` } >
-                        <g
-                            key="xAxis"
-                            ref={ (el) => select(el).call(xAxis)
-                                .selectAll('.tick text')
-                                .style('font-size', xTickFontSize)
-                                .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
-                            }
-                            transform={ `translate(0,${availableHeight})` }
-                        />
-                        <g
-                            key="yAxis"
-                            ref={ (el) => select(el)
-                                .call(yAxis)
-                                .selectAll('.tick text')
-                                .style('font-size', yTickFontSize)
-                                .call(this.wrapD3Text, yLabelLimit)
-                             }
-                        />
-                        
-                        <g>
-                          {linesData.map((d, i) =>
-                              (d.values.length === 1) ?
-                                  <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
-                              :
-                              <path
-                                  key={ d.key }
-                                  fill="none"
-                                  stroke={ getColor(d.values[0] || d) }
-                                  strokeWidth={ stroke.width }
-                                  d={ lineGenerator(d.values) }
+                            {this.axisTitles(xTitlePosition, yTitlePosition)}
+                            <g transform={ `translate(${leftMargin},${margin.top})` } >
+                                <g
+                                    key="xAxis"
+                                    ref={ (el) => select(el).call(xAxis)
+                                        .selectAll('.tick text')
+                                        .style('font-size', xTickFontSize)
+                                        .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
+                                    }
+                                    transform={ `translate(0,${availableHeight})` }
+                                />
+                                <g
+                                    key="yAxis"
+                                    ref={ (el) => select(el)
+                                        .call(yAxis)
+                                        .selectAll('.tick text')
+                                        .style('font-size', yTickFontSize)
+                                        .call(this.wrapD3Text, yLabelLimit)
+                                    }
+                                />
+                                
+                                <g>
+                                {linesData.map((d, i) =>
+                                    (d.values.length === 1) ?
+                                        <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
+                                    :
+                                    <path
+                                        key={ d.key }
+                                        fill="none"
+                                        stroke={ getColor(d.values[0] || d) }
+                                        strokeWidth={ stroke.width }
+                                        d={ lineGenerator(d.values) }
 
-                              />
-                          )}
-                        </g>
-                        <g className= {"lineGraph"}>
-                          {tooltipOverlay.map((d, i) =>
-                              <g
-                                  key={ i }
-                                  { ...this.tooltipProps(d.data) }
-                                  offset={tooltipOffset(d.data)}
-                              >
+                                    />
+                                )}
+                                </g>
+                                <g className= {"lineGraph"}>
+                                {tooltipOverlay.map((d, i) =>
+                                    <g
+                                        key={ i }
+                                        { ...this.tooltipProps(d.data) }
+                                        offset={tooltipOffset(d.data)}
+                                    >
 
-                                  /*
-                                    This rectangle is a hack
-                                    to position tooltips correctly.
-                                    Due to this rectangle, the boundingClientRect
-                                    used by ReactTooltip for positioning the tooltips
-                                    has an upper left corner at (0, 0).
-                                  */
-                                  <rect
-                                      x={-leftMargin}
-                                      y={-margin.top}
-                                      width="1"
-                                      height="1"
-                                      fill="none"
-                                  />
+                                        /*
+                                            This rectangle is a hack
+                                            to position tooltips correctly.
+                                            Due to this rectangle, the boundingClientRect
+                                            used by ReactTooltip for positioning the tooltips
+                                            has an upper left corner at (0, 0).
+                                        */
+                                        <rect
+                                            x={-leftMargin}
+                                            y={-margin.top}
+                                            width="1"
+                                            height="1"
+                                            fill="none"
+                                        />
 
-                                  <path
-                                      key={ i }
-                                      fill="none"
-                                      d={ d == null ? null : "M" + d.join("L") + "Z" }
-                                      style={{"pointerEvents": "all", "opacity": 0.5}}
-                                  />
-                              </g>
-                          )}
-                        </g>
-                        { defaultLine }
-                        { horizontalLine }
-                        {
-                            brushEnabled &&
-                            <g
-                                key="brush"
-                                ref={ (el) => select(el).call(this.brush) }
-                            />
-                        }
-                    </g>
-                    {this.renderLegend(filterDatas, legend, getColor, label)}
-                </svg>
-            </div>
-            {
-                legend && legend.separate && 
-                this.getSeparateLegend(filterDatas, legend, getColor, label, isVerticalLegend)
-            }
+                                        <path
+                                            key={ i }
+                                            fill="none"
+                                            d={ d == null ? null : "M" + d.join("L") + "Z" }
+                                            style={{"pointerEvents": "all", "opacity": 0.5}}
+                                        />
+                                    </g>
+                                )}
+                                </g>
+                                { defaultLine }
+                                { horizontalLine }
+                                {
+                                    brushEnabled &&
+                                    <g
+                                        key="brush"
+                                        ref={ (el) => select(el).call(this.brush) }
+                                    />
+                                }
+                            </g>
+                            {this.renderLegend(filterDatas, legend, getColor, label)}
+                        </svg>
+                    </div>
                 </div>
             </div>
         );

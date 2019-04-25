@@ -626,6 +626,10 @@ class AreaGraph extends XYGraph {
         <div className='stacked-area-graph'>
             { this.tooltip }
             <div style={{ height, width, display: this.checkIsVerticalLegend() ? 'flex' : ''}}>
+              {
+                this.legendConfig && this.legendConfig.separate &&
+                this.getSeparateLegend(this.getSequence(), this.legendConfig, this.getColor(), (d) => d, this.checkIsVerticalLegend())
+              }
               <div style={{width: graphWidth, height: graphHeight}}>
                 <svg width={graphWidth} height={graphHeight}>
                 <g ref={node => this.node = node}>
@@ -646,10 +650,6 @@ class AreaGraph extends XYGraph {
                 </g>  
               </svg>
             </div>
-            {
-              this.legendConfig && this.legendConfig.separate &&
-              this.getSeparateLegend(this.getSequence(), this.legendConfig, this.getColor(), (d) => d, this.checkIsVerticalLegend())
-            }
         </div>
       </div>
     );

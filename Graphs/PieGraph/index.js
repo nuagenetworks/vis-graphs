@@ -119,7 +119,7 @@ export default class PieGraph extends AbstractGraph {
         let availableWidth     = graphWidth - (margin.left + margin.right);
         let availableHeight    = graphHeight - (margin.top + margin.bottom);
 
-        const isVerticalLegend = legend.orientation === 'vertical';
+        const isVerticalLegend = legend.show && legend.orientation === 'vertical';
         const value            = (d) => d[sliceColumn];
         const label            = (d) => d[labelColumn];
         const scale            = mappedColors ?
@@ -182,7 +182,11 @@ export default class PieGraph extends AbstractGraph {
         return (
             <div className="pie-graph">
                 {this.tooltip}
-                <div style={{ height, width}}>
+                <div style={{ height, width, display: isVerticalLegend ? 'flex' : ''}}>
+                    {
+                        legend && legend.separate && 
+                        this.getSeparateLegend(data, legend, getColor, label, isVerticalLegend)
+                    }
                     <div className='graphContainer' style={ style.graphStyle }>
                         <svg width={ graphWidth } height={ graphHeight }>
                             <g className = {'pieGraph'} transform={ `translate(${ graphWidth / 2 }, ${ graphHeight / 2 })` } >
@@ -234,10 +238,7 @@ export default class PieGraph extends AbstractGraph {
                             {this.renderLegend(data, legend, getColor, label)}
                         </svg>
                     </div>
-                    {
-                        legend && legend.separate && 
-                        this.getSeparateLegend(data, legend, getColor, label, isVerticalLegend)
-                    }
+                    
                 </div>
             </div>
         );
