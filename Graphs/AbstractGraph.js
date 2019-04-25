@@ -734,7 +734,7 @@ export default class AbstractGraph extends React.Component {
 
         return data.map((d, i) => {
             return (
-                <div key={i}>
+                <div key={i} style={{height:lineHeight, width:legend.width * 1.25}} >
                     <svg height={lineHeight} width={legend.width}>
                         <circle
                             cx={legend.circleSize}
