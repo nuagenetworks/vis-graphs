@@ -72,8 +72,7 @@ class AreaGraph extends XYGraph {
     }
 
     this.parseData(props);
-    this.setDimensions(props, this.getRefinedData(), this.yValue);
-    this.updateLegend();
+    this.setDimensions(props, this.getRefinedData(), this.yValue, (d) => d);
     this.configureAxis({
       data: this.getRefinedData(),
       customYColumn: 'y1'
@@ -291,38 +290,6 @@ class AreaGraph extends XYGraph {
         )
   }
 
-  updateLegend() {
-
-    const {
-        chartHeightToPixel,
-        chartWidthToPixel,
-        circleToPixel,
-        legend,
-    } = this.getConfiguredProperties();
-
-    
-    if (legend.show)
-    {
-        const legendFn   = (d) => (d.value) ? d.value : d.key;
-        let legendWidth  = legend.show && this.getYColumns().length >= 1 ? this.longestLabelLength(this.getYColumns(), legendFn) * chartWidthToPixel : 0;
-  
-        legend.width = legendWidth;
-
-        // Compute the available space considering a legend
-        if (this.checkIsVerticalLegend())
-        {          
-            this.leftMargin      +=  legend.width;
-            this.availableWidth  -=  legend.width;
-        } else {
-            const nbElementsPerLine  = parseInt(this.getAvailableWidth() / legend.width, 10);
-            const nbLines            = parseInt(this.getYColumns().length / nbElementsPerLine, 10);
-            this.availableHeight    -= nbLines * legend.circleSize * circleToPixel + chartHeightToPixel;
-        }
-    }
-    this.legendConfig = legend;
-  }
-  
-
   // generate methods which helps to create charts
   elementGenerator() {
 
@@ -350,7 +317,7 @@ class AreaGraph extends XYGraph {
 
     boundaryCircle.enter().append('circle')
         .attr('class', 'boundaryCircle')
-        .style('fill', d => this.getColor({'key': d.key}))
+        .style('fill',this.getColor())
         .attr('r', circleRadius)
       .merge(boundaryCircle)
         .attr('cx', d => this.getScale().x(d.xColumn))
@@ -381,7 +348,7 @@ class AreaGraph extends XYGraph {
 
     tooltipCircle.enter().append('circle')
         .attr('class', 'tooltipCircle')
-        .style('fill', stacked === false ? d => this.getColor(d) : 'rgb(255,0,0)')
+        .style('fill', stacked === false ?  this.getColor() : 'rgb(255,0,0)')
         .attr('r', circleRadius)
       .merge(tooltipCircle)
         .attr('cx', 0)
@@ -434,7 +401,7 @@ class AreaGraph extends XYGraph {
     const allLines = newLines.merge(lines); 
 
     allLines.select('.line')
-        .style('stroke', d => this.getColor({'key': d.key}))
+        .style('stroke', this.getColor())
         .attr('d', d => {
 
           let data = (d.values)
@@ -464,7 +431,7 @@ class AreaGraph extends XYGraph {
     const allAreas = newAreas.merge(areas); 
 
     allAreas.select('.area')
-        .style('fill', d => this.getColor({'key': d.key}))
+        .style('fill',this.getColor())
         .attr('d', d => areaGenerator(d.values));
 
     // add transition effect
@@ -509,8 +476,7 @@ class AreaGraph extends XYGraph {
     yAxis.selectAll('.tick text')
       .call(this.wrapD3Text, yLabelLimit)
 
-    this.setAxisTitles();
-    this.renderLegendIfNeeded();  
+    this.setAxisTitles(); 
 
     if(data.length === 1) {
       this.boundaryCircle();
@@ -528,16 +494,18 @@ class AreaGraph extends XYGraph {
     }
   }
 
-  renderLegendIfNeeded() {
+  setColor() {
     const {
       stroke,
       colors
-    } = this.getConfiguredProperties();
+    } = this.getConfiguredProperties()
 
-    const scale    = this.scaleColor(this.getYColumns(), 'key');
-    this.getColor  = (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
-    
-    this.renderNewLegend(this.getSequence(), this.getLegendConfig(), this.getColor);
+    const scale =  this.scaleColor(this.getYColumns(), 'key');
+    this.color =  (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
+  }
+
+  getColor() {
+    return this.color
   }
 
   // Create tooltip data
@@ -605,14 +573,41 @@ class AreaGraph extends XYGraph {
         return this.renderMessage('No data to visualize')
 
     const {
-        margin
+        margin,
+        legend
     } = this.getConfiguredProperties();
 
-    return (
-        <div className='stacked-area-graph'>
-            
-            { this.tooltip }
+    {this.setColor()}
 
+    const {
+      graphHeight,
+      graphWidth,
+      legendHeight,
+      legendWidth
+    } = this.getGraphDimension((d) => d);
+
+    const style = {
+      graphStyle: {
+          width: graphWidth,
+          height: graphHeight,
+          order:this.checkIsVerticalLegend() ? 2 : 1,
+      },
+      legendStyle: {
+          width: legendWidth,
+          height: legendHeight,
+          display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
+          order: this.checkIsVerticalLegend() ? 1 : 2,
+      }
+    };
+    
+    return (
+      <div className='stacked-area-graph'>
+          { this.tooltip }
+        <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
+          <div className='legendContainer' style={style.legendStyle}>
+            {this.renderLegend(this.getSequence(), legend, this.getColor(), (d) => d, this.checkIsVerticalLegend())}
+          </div>
+          <div className='graphContainer' style={ style.graphStyle }>
             <svg width={width} height={height}>
               <g ref={node => this.node = node}>
                 <g className='graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
@@ -628,10 +623,11 @@ class AreaGraph extends XYGraph {
                   <text className='x-axis-label' textAnchor="middle"></text>
                   <text className='y-axis-label' textAnchor="middle"></text>
                 </g>
-                <g className='legend'></g>
               </g>  
             </svg>
+          </div>
         </div>
+      </div>
     );
   }
 }
@@ -641,4 +637,4 @@ AreaGraph.propTypes = {
     response: PropTypes.object
 };
 
-export default AreaGraph
+export default AreaGraph;

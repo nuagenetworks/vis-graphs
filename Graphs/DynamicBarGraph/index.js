@@ -100,8 +100,7 @@ class BarGraph extends XYGraph {
         return
 
     this.parseData(props)
-    this.setDimensions(props, this.getNestedData(), this.isVertical() ? 'total' : 'key')
-    this.updateLegend(props)
+    this.setDimensions(props, this.getNestedData(), this.isVertical() ? 'total' : 'key', this.getStackLabelFn())
     this.configureAxis({
       data: this.getNestedData()
     })
@@ -153,45 +152,6 @@ class BarGraph extends XYGraph {
 
   getStack() {
     return this.stack
-  }
-
-  updateLegend(props) {
-    const {
-      data
-    } = props
-
-    const {
-      chartHeightToPixel,
-      chartWidthToPixel,
-      circleToPixel,
-      legend: originalLegend
-    } = this.getConfiguredProperties()
-    
-
-    const legendWidth = this.longestLabelLength(data, this.getStackLabelFn()) * chartWidthToPixel    
-
-    let legend = Object.assign({}, originalLegend)
-    
-    if (legend.show) {
-      legend.width = legendWidth
-
-      // Compute the available space considering a legend
-      if (this.checkIsVerticalLegend()) {
-        this.leftMargin += legend.width
-        this.availableWidth -= legend.width
-      }
-      else {
-        const nbElementsPerLine = parseInt(this.availableWidth / legend.width, 10)
-        const nbLines = parseInt(data.length / nbElementsPerLine, 10)
-        this.availableHeight -= nbLines * legend.circleSize * circleToPixel + chartHeightToPixel
-      }
-
-      this.legendConfig = legend
-    }
-  }
-
-  getLegendConfig() {
-    return this.legendConfig
   }
 
   // calculate range and make starting point from zero
@@ -313,7 +273,6 @@ class BarGraph extends XYGraph {
     } 
 
     this.setAxisTitles()
-    this.renderLegendIfNeeded()
 
     if(this.isBrush()) {
       this.configureMinGraph()
@@ -362,19 +321,6 @@ class BarGraph extends XYGraph {
 
   getBarWidth() {
     return this.barWidth
-  }
- 
-  renderLegendIfNeeded() {
-    const {
-      data
-    } = this.props;
-
-    const {
-      stackColumn
-    } = this.getConfiguredProperties();
-
-    const filterData = (stackColumn && _.uniqBy(data, stackColumn)) || data;
-    this.renderNewLegend(filterData, this.getLegendConfig(), this.getColor(), this.getStackLabelFn())
   }
 
   getBarDimensions(scale) {
@@ -635,39 +581,69 @@ class BarGraph extends XYGraph {
       return this.renderMessage('No data to visualize')
 
     const {
-      margin
-    } = this.getConfiguredProperties()
+      margin,
+      legend,
+    } = this.getConfiguredProperties();
+
+    {this.setColor()}
+
+    const {
+      graphHeight,
+      graphWidth,
+      legendHeight,
+      legendWidth,
+    } = this.getGraphDimension(this.getStackLabelFn());
+
+    const style = {
+      graphStyle: {
+          width: graphWidth,
+          height: graphHeight,
+          order:this.checkIsVerticalLegend() ? 2 : 1,
+      },
+      legendStyle: {
+          width: legendWidth,
+          height: legendHeight,
+          display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
+          order: this.checkIsVerticalLegend() ? 1 : 2,
+      }
+  };
 
     return (
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
-        <svg width={width} height={height}>
-          <g ref={node => this.node = node}>
-            <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+        <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
+          <div className='legendContainer' style={style.legendStyle}>
+            {this.renderLegend(data, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
+          </div>
+          <div className='graphContainer' style={ style.graphStyle }>
+            <svg width={graphWidth} height={graphHeight}>
+              <g ref={node => this.node = node}>
+                <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='graph-bars'></g>
+                </g>
+                <g className='mini-graph-container'>
+                  <g className='min-horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='min-graph-bars'></g>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='brush'></g>
+                </g>
+                <g className='axis-title'>
+                  <text className='x-axis-label' textAnchor="middle"></text>
+                  <text className='y-axis-label' textAnchor="middle"></text>
+                </g>
               </g>
-              <g className='graph-bars'></g>
-            </g>
-            <g className='mini-graph-container'>
-              <g className='min-horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
-              </g>
-              <g className='min-graph-bars'></g>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='brush'></g>
-            </g>
-            <g className='axis-title'>
-              <text className='x-axis-label' textAnchor="middle"></text>
-              <text className='y-axis-label' textAnchor="middle"></text>
-            </g>
-            <g className='legend'></g>
-          </g>
-        </svg>
-      </div>
+            </svg>
+          </div>  
+        </div>
+      </div>  
     )
   }
 }

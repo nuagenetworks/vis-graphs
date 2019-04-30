@@ -61,7 +61,7 @@ export default class PieGraph extends AbstractGraph {
             graphWidth,
             legendHeight,
             legendWidth
-        } = this.getGraphDimension();
+        } = this.getGraphDimension(label);
 
         if (!originalData || !originalData.length)
             return this.renderMessage("No data to visualize");
@@ -177,19 +177,24 @@ export default class PieGraph extends AbstractGraph {
             },
             graphStyle: {
                 width: graphWidth,
-                height: graphHeight
+                height: graphHeight,
+                order:this.checkIsVerticalLegend() ? 2 : 1,
             },
             legendStyle: {
                 width: legendWidth,
                 height: legendHeight,
-                display: isVerticalLegend ? 'grid' : 'inline-block'
+                display: isVerticalLegend ? 'grid' : 'inline-block',
+                order:this.checkIsVerticalLegend() ? 1 : 2,
             }
         };
 
         return (
             <div className="pie-graph">
                 {this.tooltip}
-                <div style={{ height, width}}>
+                <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
+                    <div className='legendContainer' style={style.legendStyle}>
+                        {this.renderLegend(data, legend, getColor, label,this.checkIsVerticalLegend())}
+                    </div>
                     <div className='graphContainer' style={ style.graphStyle }>
                         <svg width={ graphWidth } height={ graphHeight }>
                             <g className = {'pieGraph'} transform={ `translate(${ graphWidth / 2 }, ${ graphHeight / 2 })` } >
@@ -238,16 +243,9 @@ export default class PieGraph extends AbstractGraph {
                                     })
                                 }
                             </g>
-                            {this.renderLegend(data, legend, getColor, label)}
+                           
                         </svg>
                     </div>
-                    {
-                        legend && legend.separate && (
-                            <div className='legendContainer' style={style.legendStyle}>
-                                {this.renderLegend(data, legend, getColor, label)}
-                            </div>
-                        )
-                    }
                 </div>
             </div>
         );
