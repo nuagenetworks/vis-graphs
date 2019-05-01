@@ -582,33 +582,21 @@ class AreaGraph extends XYGraph {
     const {
       graphHeight,
       graphWidth,
-      legendHeight,
-      legendWidth
     } = this.getGraphDimension((d) => d);
 
-    const style = {
-      graphStyle: {
+    const graphStyle = {
           width: graphWidth,
           height: graphHeight,
           order:this.checkIsVerticalLegend() ? 2 : 1,
-      },
-      legendStyle: {
-          width: legendWidth,
-          height: legendHeight,
-          display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
-          order: this.checkIsVerticalLegend() ? 1 : 2,
-      }
     };
     
     return (
       <div className='stacked-area-graph'>
           { this.tooltip }
         <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-          <div className='legendContainer' style={style.legendStyle}>
-            {this.renderLegend(this.getSequence(), legend, this.getColor(), (d) => d, this.checkIsVerticalLegend())}
-          </div>
-          <div className='graphContainer' style={ style.graphStyle }>
-            <svg width={width} height={height}>
+          {this.renderLegend(this.getSequence(), legend, this.getColor(), (d) => d, this.checkIsVerticalLegend())}
+          <div className='graphContainer' style={ graphStyle }>
+            <svg width={graphWidth} height={graphHeight}>
               <g ref={node => this.node = node}>
                 <g className='graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
                     <g className='area-chart'></g>

@@ -59,8 +59,6 @@ export default class PieGraph extends AbstractGraph {
         const {
             graphHeight,
             graphWidth,
-            legendHeight,
-            legendWidth
         } = this.getGraphDimension(label);
 
         if (!originalData || !originalData.length)
@@ -120,8 +118,6 @@ export default class PieGraph extends AbstractGraph {
 
         let availableWidth     = graphWidth - (margin.left + margin.right);
         let availableHeight    = graphHeight - (margin.top + margin.bottom);
-
-        const isVerticalLegend = legend.orientation === 'vertical';
         const value            = (d) => d[sliceColumn];
         const label            = (d) => d[labelColumn];
         const scale            = mappedColors ?
@@ -129,21 +125,6 @@ export default class PieGraph extends AbstractGraph {
 
         const getColor         = mappedColors ?
             this.getColor(scale) : (d) => scale ? scale(d[colorColumn || labelColumn]) : null;
-
-        if (legend.show && data.length > 1)
-        {
-            // Extract the longest legend
-            // Store the info in legend for convenience
-            legend.width = this.longestLabelLength(data, label) * chartWidthToPixel;
-
-            if (!legend.separate) {
-                // Compute the available space considering a legend
-                if (isVerticalLegend)
-                    availableWidth -= legend.width;
-                else
-                    availableHeight -= (data.length - 1) * legend.circleSize * circleToPixel;
-            }
-        }
 
         const maxRadius   = Math.min(availableWidth, availableHeight) / 2;
         const innerRadius = pieInnerRadius * maxRadius;
@@ -179,12 +160,6 @@ export default class PieGraph extends AbstractGraph {
                 width: graphWidth,
                 height: graphHeight,
                 order:this.checkIsVerticalLegend() ? 2 : 1,
-            },
-            legendStyle: {
-                width: legendWidth,
-                height: legendHeight,
-                display: isVerticalLegend ? 'grid' : 'inline-block',
-                order:this.checkIsVerticalLegend() ? 1 : 2,
             }
         };
 
@@ -192,9 +167,7 @@ export default class PieGraph extends AbstractGraph {
             <div className="pie-graph">
                 {this.tooltip}
                 <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-                    <div className='legendContainer' style={style.legendStyle}>
-                        {this.renderLegend(data, legend, getColor, label,this.checkIsVerticalLegend())}
-                    </div>
+                    {this.renderLegend(data, legend, getColor, label,this.checkIsVerticalLegend())}
                     <div className='graphContainer' style={ style.graphStyle }>
                         <svg width={ graphWidth } height={ graphHeight }>
                             <g className = {'pieGraph'} transform={ `translate(${ graphWidth / 2 }, ${ graphHeight / 2 })` } >

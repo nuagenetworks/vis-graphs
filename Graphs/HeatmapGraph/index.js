@@ -575,22 +575,13 @@ class HeatmapGraph extends XYGraph {
     const {
       graphHeight,
       graphWidth,
-      legendHeight,
-      legendWidth
     } = this.getGraphDimension(this.getLegendFn());
 
-    const style = {
-      graphStyle: {
-          width: graphWidth,
-          height: graphHeight,
-          order:this.checkIsVerticalLegend() ? 2 : 1,
-      },
-      legendStyle: {
-          width: legendWidth,
-          height: legendHeight,
-          display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
-          order:this.checkIsVerticalLegend() ? 1 : 2,
-      }
+   
+    const graphStyle = {
+        width: graphWidth,
+        height: graphHeight,
+        order:this.checkIsVerticalLegend() ? 2 : 1,
     };
 
     if (!data || !data.length || !this.getFilterData().length)
@@ -600,11 +591,9 @@ class HeatmapGraph extends XYGraph {
       <div className='heatmap-graph'>
         <div>{this.tooltip}</div>
         <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-          <div className='legendContainer' style={style.legendStyle}>
-            {this.renderLegend(this.getCellColumnData(), legend, this.getColor(), (d) => d["key"], this.checkIsVerticalLegend())}
-          </div>
-          <div className='graphContainer' style={ style.graphStyle }>
-            <svg width={width} height={height}>
+          {this.renderLegend(this.getCellColumnData(), legend, this.getColor(), (d) => d["key"], this.checkIsVerticalLegend())}
+          <div className='graphContainer' style={ graphStyle }>
+            <svg width={graphWidth} height={graphHeight}>
               <g ref={node => this.node = node}>
                 <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
                   <g className='heatmap'></g>

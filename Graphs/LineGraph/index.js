@@ -207,10 +207,8 @@ class LineGraph extends XYGraph {
 
         let filterDatas = merge(linesData.map(function(d) { return d.values; }))
 
-        const isVerticalLegend = legend.orientation === 'vertical';
         const xLabelFn         = (d) => parseFloat(d[xColumn])
         const yLabelFn         = (d) => parseFloat(d[this.yValue]);
-        const legendFn         = (d) => d[this.yKey];
         const label            = (d) => d[this.yKey];
 
         const scale = this.scaleColor(filterDatas, this.yKey);
@@ -224,8 +222,6 @@ class LineGraph extends XYGraph {
         const {
             graphHeight,
             graphWidth,
-            legendHeight,
-            legendWidth
         } = this.getGraphDimension(label, filterDatas);
 
         let xAxisHeight       = xLabel ? chartHeightToPixel : 0;
@@ -415,29 +411,19 @@ class LineGraph extends XYGraph {
                 />
                 : '';
 
-        const style = {
-            graphStyle: {
-                width: graphWidth,
-                height: graphHeight,
-                order:this.checkIsVerticalLegend() ? 2 : 1,
-            },
-            legendStyle: {
-                width: legendWidth,
-                height: legendHeight,
-                display: isVerticalLegend ? 'grid' : 'inline-block',
-                order:this.checkIsVerticalLegend() ? 1 : 2,
-            }
+        const graphStyle = {
+            width: graphWidth,
+            height: graphHeight,
+            order:this.checkIsVerticalLegend() ? 2 : 1,
         };        
 
         return (
             <div className="line-graph">
                 <div>{this.tooltip}</div>
                 <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-                    <div className='legendContainer' style={style.legendStyle}>
-                        {this.renderSeparateLegend(filterDatas, legend, getColor, label, this.checkIsVerticalLegend())}
-                    </div>
-                    <div className='graphContainer' style={ style.graphStyle }>
-                        <svg width={width} height={height}>
+                    {this.renderLegend(filterDatas, legend, getColor, label, this.checkIsVerticalLegend())}
+                    <div className='graphContainer' style={ graphStyle }>
+                        <svg width={graphWidth} height={graphHeight}>
                             {this.axisTitles(xTitlePosition, yTitlePosition)}
                             <g transform={ `translate(${leftMargin},${margin.top})` } >
                                 <g

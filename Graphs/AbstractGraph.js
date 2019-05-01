@@ -526,8 +526,17 @@ export default class AbstractGraph extends React.Component {
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
         
         const {
-            labelWidth
+            labelWidth,
+            legendWidth,
+            legendHeight,
         } = this.getGraphDimension(label, data);
+
+        const legendContainerStyle = {
+            width: legendWidth,
+            height: legendHeight,
+            display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
+            order:this.checkIsVerticalLegend() ? 1 : 2,
+        }
 
         let legendStyle = {};
         if (isVertical) {
@@ -543,8 +552,10 @@ export default class AbstractGraph extends React.Component {
         }
 
         return (
-            <div className='legend' style={legendStyle}>
-                {this.getLegendContent(data, legend, getColor, label)}
+            <div className='legendContainer' style={legendContainerStyle}>
+                <div className='legend' style={legendStyle}>
+                    {this.getLegendContent(data, legend, getColor, label)}
+                </div>
             </div>
         );
     }

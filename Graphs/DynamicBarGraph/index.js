@@ -590,32 +590,20 @@ class BarGraph extends XYGraph {
     const {
       graphHeight,
       graphWidth,
-      legendHeight,
-      legendWidth,
     } = this.getGraphDimension(this.getStackLabelFn());
 
-    const style = {
-      graphStyle: {
-          width: graphWidth,
-          height: graphHeight,
-          order:this.checkIsVerticalLegend() ? 2 : 1,
-      },
-      legendStyle: {
-          width: legendWidth,
-          height: legendHeight,
-          display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
-          order: this.checkIsVerticalLegend() ? 1 : 2,
-      }
-  };
+    const graphStyle = {
+      width: graphWidth,
+      height: graphHeight,
+      order:this.checkIsVerticalLegend() ? 2 : 1,
+    };
 
     return (
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
         <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-          <div className='legendContainer' style={style.legendStyle}>
-            {this.renderLegend(data, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
-          </div>
-          <div className='graphContainer' style={ style.graphStyle }>
+          {this.renderLegend(data, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
+          <div className='graphContainer' style={ graphStyle }>
             <svg width={graphWidth} height={graphHeight}>
               <g ref={node => this.node = node}>
                 <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
