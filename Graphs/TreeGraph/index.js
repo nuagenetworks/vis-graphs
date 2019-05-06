@@ -115,8 +115,8 @@ class TreeGraph extends AbstractGraph {
     }
 
     initiate = (props) => {
-        this.setAvailableWidth(props.width);
-        this.setAvailableHeight(props.height);
+        this.setAvailableWidth(props);
+        this.setAvailableHeight(props);
         this.setSVGTransform();
     }
 
