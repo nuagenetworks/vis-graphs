@@ -522,6 +522,9 @@ export default class AbstractGraph extends React.Component {
     }
 
     renderLegend(data, legend, getColor, label, isVertical) {
+        if (!legend.show)	
+            return;
+
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
         
