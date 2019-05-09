@@ -332,8 +332,8 @@ export default class AbstractGraph extends React.Component {
         
         this.setYlabelWidth(data ? data : props.data, column);
         this.setLeftMargin();
-        this.setAvailableWidth(graphWidth);
-        this.setAvailableHeight(graphHeight);
+        this.setAvailableWidth({width: graphWidth});
+        this.setAvailableHeight({height: graphHeight});
     }
 
     // check condition to apply brush on chart
@@ -361,7 +361,7 @@ export default class AbstractGraph extends React.Component {
         return this.leftMargin;
     }
 
-    setAvailableWidth(width) {
+    setAvailableWidth({ width }) {
         const {
             margin,
             brushArea
@@ -399,7 +399,7 @@ export default class AbstractGraph extends React.Component {
         return xLabel ? chartHeightToPixel : 0;
     }
 
-    setAvailableHeight(height) {
+    setAvailableHeight({ height }) {
         const {
             chartHeightToPixel,
             margin
