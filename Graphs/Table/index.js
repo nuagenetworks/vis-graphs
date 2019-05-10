@@ -788,6 +788,8 @@ class Table extends AbstractGraph {
             onColumnSelection({[this.columns]: columnsData});
         }
 
+        delete context['query'];
+         
         this.setState({ columns });
         goTo && goTo(window.location.pathname, Object.assign({}, context, {[this.columns]: JSON.stringify(columnsData)}))
 
