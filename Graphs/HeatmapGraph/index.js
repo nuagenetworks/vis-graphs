@@ -64,8 +64,7 @@ class HeatmapGraph extends XYGraph {
       return
 
     this.parseData(props)
-    this.setDimensions(props, this.getFilterData(), yColumn)
-    this.updateLegend(props)
+    this.setDimensions(props, this.getFilterData(), yColumn, (d) => d["key"], this.getCellColumnData())
     this.configureAxis({
       data: this.getFilterData()
     })
@@ -160,41 +159,6 @@ class HeatmapGraph extends XYGraph {
 
   getCellColumnData() {
     return this.cellColumnsData || []
-  }
-
-  updateLegend(props) {
-    const {
-      data
-    } = props
-
-    const {
-      chartHeightToPixel,
-      chartWidthToPixel,
-      circleToPixel,
-      legend: originalLegend
-    } = this.getConfiguredProperties()
-    
-
-    const legendWidth = this.longestLabelLength(this.getFilterData(), this.getLegendFn()) * chartWidthToPixel    
-
-    const legend = Object.assign({}, originalLegend)
-    
-    if (legend.show) {
-      legend.width = legendWidth
-
-      // Compute the available space considering a legend
-      if (this.checkIsVerticalLegend()) {
-        this.leftMargin += legend.width
-        this.availableWidth -= legend.width
-      }
-      else {
-        const nbElementsPerLine = parseInt(this.availableWidth / legend.width, 10)
-        const nbLines = parseInt(data.length / nbElementsPerLine, 10)
-        this.availableHeight -= nbLines * legend.circleSize * circleToPixel + chartHeightToPixel
-      }
-
-      this.legendConfig = legend
-    }
   }
 
   getLegendConfig() {
@@ -370,7 +334,6 @@ class HeatmapGraph extends XYGraph {
         .call(this.wrapD3Text, yLabelLimit)
 
     this.setAxisTitles()
-    this.renderLegendIfNeeded()
     // check to enable/disable brushing
     if(this.isBrush()) {
       this.configureMinGraph()
@@ -413,10 +376,6 @@ class HeatmapGraph extends XYGraph {
       return colorScale ? colorScale(value) : stroke.color || colors[0]
     }
 
-  }
-
-  renderLegendIfNeeded() {   
-    this.renderNewLegend(this.getCellColumnData(), this.getLegendConfig(), this.getColor(), (d) => d["key"])
   }
 
   // highlight selected cell
@@ -609,8 +568,21 @@ class HeatmapGraph extends XYGraph {
     } = this.props
 
     const {
-      margin
-    } = this.getConfiguredProperties()  
+      margin,
+      legend
+    } = this.getConfiguredProperties();
+    
+    const {
+      graphHeight,
+      graphWidth,
+    } = this.getGraphDimension(this.getLegendFn());
+
+   
+    const graphStyle = {
+        width: graphWidth,
+        height: graphHeight,
+        order:this.checkIsVerticalLegend() ? 2 : 1,
+    };
 
     if (!data || !data.length || !this.getFilterData().length)
       return this.renderMessage('No data to visualize')
@@ -618,25 +590,30 @@ class HeatmapGraph extends XYGraph {
     return (
       <div className='heatmap-graph'>
         <div>{this.tooltip}</div>
-        <svg width={width} height={height}>
-          <g ref={node => this.node = node}>
-            <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
-              <g className='heatmap'></g>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-            </g>
-            <g className='mini-graph-container'>
-              <g className='min-heatmap'></g>
-              <g className='brush'></g>
-            </g>
-            <g className='axis-title'>
-              <text className='x-axis-label' textAnchor="middle"></text>
-              <text className='y-axis-label' textAnchor="middle"></text>
-            </g>
-            <g className='legend'></g>
-          </g>
-        </svg>
-      </div>
+        <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
+          {this.renderLegend(this.getCellColumnData(), legend, this.getColor(), (d) => d["key"], this.checkIsVerticalLegend())}
+          <div className='graphContainer' style={ graphStyle }>
+            <svg width={graphWidth} height={graphHeight}>
+              <g ref={node => this.node = node}>
+                <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
+                  <g className='heatmap'></g>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                </g>
+                <g className='mini-graph-container'>
+                  <g className='min-heatmap'></g>
+                  <g className='brush'></g>
+                </g>
+                <g className='axis-title'>
+                  <text className='x-axis-label' textAnchor="middle"></text>
+                  <text className='y-axis-label' textAnchor="middle"></text>
+                </g>
+                <g className='legend'></g>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>    
     )
   }
 }
