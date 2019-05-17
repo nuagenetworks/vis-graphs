@@ -90,15 +90,15 @@ class TreeGraph extends AbstractGraph {
     // generate methods which helps to create charts
     elementGenerator = () => {
         const {
-            data
+            data,
+            graphType
         } = this.props;
-
         // declares a tree layout and assigns the size
         this.treemap = tree().size([this.getAvailableHeight(), this.getAvailableWidth()]);
         this.treeData = data[0];
         
         // Assigns parent, children, height, depth
-        this.root = hierarchy(this.treeData, (d) => { return d.children; });
+        this.root = hierarchy(this.treeData, (d) => { return graphType ? d.kids : d.children; });
         //form x and y axis
         this.root.x0 = this.getAvailableHeight() / 2;
         this.root.y0 = 0;
@@ -146,7 +146,8 @@ class TreeGraph extends AbstractGraph {
             siteIcons: {
                 preBtn,
                 nextBtn
-            }
+            },
+            graphType
         } = this.props;
 
         const {
@@ -178,73 +179,75 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
-        // ======================selected nodes notification to show==============================
-        this.renderSelectedNodesInfo(nodes)
-        
-        // ======================pagination starts here==============================
-        const parents = nodes.filter(function (d) {
-            return (d.data.kids && d.data.kids.length > max) ? true : false;
-        });
-        
-        svg.selectAll(".page").remove();
+        if(!graphType) {
+            // ======================selected nodes notification to show==============================
+            this.renderSelectedNodesInfo(nodes)
+            
+            // ======================pagination starts here==============================
+            const parents = nodes.filter(function (d) {
+                return (d.data.kids && d.data.kids.length > max) ? true : false;
+            });
+            
+            svg.selectAll(".page").remove();
 
-        parents.forEach((p) => {
-            if (p.children) {
-                const p1 = p.children[p.children.length - 1];
-                const p2 = p.children[0];
+            parents.forEach((p) => {
+                if (p.children) {
+                    const p1 = p.children[p.children.length - 1];
+                    const p2 = p.children[0];
 
-                const pr = p.data;
-                const pagingData = [];
+                    const pr = p.data;
+                    const pagingData = [];
 
-                if (pr.page > 1) {
-                    pagingData.push({
-                        type: "prev",
-                        parent: p,
-                        no: (pr.page - 1)
-                    });
+                    if (pr.page > 1) {
+                        pagingData.push({
+                            type: "prev",
+                            parent: p,
+                            no: (pr.page - 1)
+                        });
+                    }
+
+                    if (pr.page < Math.ceil(pr.kids.length / max)) {
+                        pagingData.push({
+                            type: "next",
+                            parent: p,
+                            no: (pr.page + 1)
+                        });
+                    }
+
+                    const pageControl = svg.selectAll(".page")
+                        .data(pagingData, function (d) {
+                            return (d.parent.id + d.type);
+                        }).enter()
+                        .append("g")
+                        .attr("class", "page")
+                        .attr("transform", function (d) {
+                            const x = (d.type === "next") ? p2.y : p1.y;
+                            const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
+                            return "translate(" + x + "," + y + ")";
+                        }).on("click", this.paginate);
+
+                    pageControl
+                        .append("circle")
+                        .attr("r", 15)
+                        .style("fill", paginationIconColor)
+
+                    pageControl
+                        .append("image")
+                        .attr("xlink:href", function (d) {
+                            if (d.type === "next") {
+                                return nextBtn
+                            } else {
+                                return preBtn
+                            }
+                        })
+                        .attr("x", -12.5)
+                        .attr("y", -12.5)
+                        .attr("width", 25)
+                        .attr("height", 25);
+
                 }
-
-                if (pr.page < Math.ceil(pr.kids.length / max)) {
-                    pagingData.push({
-                        type: "next",
-                        parent: p,
-                        no: (pr.page + 1)
-                    });
-                }
-
-                const pageControl = svg.selectAll(".page")
-                    .data(pagingData, function (d) {
-                        return (d.parent.id + d.type);
-                    }).enter()
-                    .append("g")
-                    .attr("class", "page")
-                    .attr("transform", function (d) {
-                        const x = (d.type === "next") ? p2.y : p1.y;
-                        const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
-                        return "translate(" + x + "," + y + ")";
-                    }).on("click", this.paginate);
-
-                pageControl
-                    .append("circle")
-                    .attr("r", 15)
-                    .style("fill", paginationIconColor)
-
-                pageControl
-                    .append("image")
-                    .attr("xlink:href", function (d) {
-                        if (d.type === "next") {
-                            return nextBtn
-                        } else {
-                            return preBtn
-                        }
-                    })
-                    .attr("x", -12.5)
-                    .attr("y", -12.5)
-                    .attr("width", 25)
-                    .attr("height", 25);
-
-            }
-        });
+            });
+        }
     }
 
     renderSelectedNodesInfo = (nodes) => {
@@ -393,7 +396,8 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN
+            commonEN,
+            graphType
         } = this.props;
 
         let i = 0,
@@ -402,7 +406,7 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = rectNode.width;
         this.rectHeight = rectNode.height;
 
-        if(this.count_leaves(nodes)) {
+        if(this.count_leaves(nodes) && !graphType) {
             const countLeaves = this.count_leaves(nodes);
             if(countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
@@ -723,7 +727,6 @@ class TreeGraph extends AbstractGraph {
                         select(node)
                         .call(zoom()
                         .scaleExtent([1 / 2, 8])
-                        .on("zoom", this.zoomed)
                     )}
                 }
                 >
