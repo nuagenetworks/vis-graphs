@@ -2,6 +2,8 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import _ from 'lodash';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'; 
+
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
@@ -529,6 +531,23 @@ class TreeGraph extends AbstractGraph {
         const isTemplatePos = contextName.search("template")
         return (isTemplatePos !== -1) ? contextName.substr(0, isTemplatePos) :  contextName
     }
+    
+    getListStyle = (isDraggingOver, style)=> ({
+        background: isDraggingOver ? 'lightblue' : 'lightgrey',
+        padding: 2,
+        width: 250,
+        ...style
+    });
+
+    onDragEnd = result => {
+        const { source, destination } = result;
+        console.error("result",result)
+        // dropped outside the list
+        if (!destination) {
+            return;
+        }
+        
+    };
 
     renderRectNode = (d) => {
         const {
@@ -562,7 +581,7 @@ class TreeGraph extends AbstractGraph {
                     <div style="width:22%;float:left;font-size: 8px;"></div>
                     ${showDesAttr}
                     ${showAddressAttr}
-                </div>`
+                </div>`       
     }
 
     fetchImage =(apiData, contextName) => {
@@ -718,29 +737,96 @@ class TreeGraph extends AbstractGraph {
         const zm = transformAttr['scale'][0];
         this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
     }
-    
+
+    getItemStyle = (isDragging, draggableStyle, style) => ({
+       
+        // some basic styles to make the items look a bit nicer
+        userSelect: 'none',
+        padding: 8 * 2,
+        margin: `0 0 8px 0`,
+
+        // change background colour if dragging
+        background: isDragging ? 'lightgreen' : 'grey',
+
+        // styles we need to apply on draggables
+        ...draggableStyle,
+        ...style,
+    });
+
+    renderAllContext = () => {
+        const {treeLayoutStyle, allContexts} = this.props
+        return (
+            allContexts.map((val, index)=>{
+                return (
+                    <Droppable droppableId="droppable2">
+                        {(provided, snapshot) => 
+                        (
+                            <div style={this.getListStyle(snapshot.isDraggingOver, treeLayoutStyle.libraryBox)}
+                                    ref={provided.innerRef} key={val.name}>
+                                <Draggable
+                                    key={`item-${index}`}
+                                    index={index}
+                                    draggableId={`item-${index}`}
+                                >
+                                    {(provided, snapshot) => ( 
+                                        <div style={this.getItemStyle(
+                                            snapshot.isDragging,
+                                            provided.draggableProps.style,
+                                            treeLayoutStyle.libraryImgbox
+                                            )}
+                                        key={val.name}
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}><img style={{width: '25px'}} src={val.icons} /></div>
+                                    )}   
+                                </Draggable>
+                                <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div> 
+                            </div>
+                        )}
+                    </Droppable>
+                )
+            })
+        )
+    }
+
     render() {
-        let { height, transformAttr } = this.props;
+        let { height, transformAttr, treeLayoutStyle } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
         return (
-            <div className="line-graph">
-                <svg
-                    height={height}
-                    ref={ (node) => {
-                        this.node = node;
-                        select(node)
-                        .call(zoom()
-                        .scaleExtent([1 / 2, 8])
-                    )}
-                }
-                >
-                    <g className='tree-graph-container' transform={transformAttr}>
+            <DragDropContext onDragEnd={this.onDragEnd}>
+                <div style={treeLayoutStyle.graphContainer}>
+                    <div style={treeLayoutStyle.graphView}>
+                        <div className="line-graph">
+                            <svg
+                                height={height}
+                                ref={ (node) => {
+                                    this.node = node;
+                                    select(node)
+                                    .call(zoom()
+                                    .scaleExtent([1 / 2, 8])
+                                )}
+                            }
+                            >
+                                <g className='tree-graph-container' transform={transformAttr}>
 
-                    </g>
-                </svg>
-            </div>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                    <div style={treeLayoutStyle.contextView}>
+                        <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}></div>
+                        <div style={{height:'50%'}}>
+                            <div style={treeLayoutStyle.libraryTitle}>Libray</div>
+                            <div style= {{overflow: 'auto', height: '100%'}}>
+                                {this.renderAllContext()}
+                            </div>
+                                
+                        </div>
+                    </div>
+                </div> 
+            </DragDropContext>
         );
     }
 }
