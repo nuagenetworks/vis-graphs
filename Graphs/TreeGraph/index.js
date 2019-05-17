@@ -525,6 +525,11 @@ class TreeGraph extends AbstractGraph {
             });
     }
 
+    changeContextBasedOnSelection = (contextName) => {
+        const isTemplatePos = contextName.search("template")
+        return (isTemplatePos !== -1) ? contextName.substr(0, isTemplatePos) :  contextName
+    }
+
     renderRectNode = (d) => {
         const {
             rectNode
@@ -535,9 +540,11 @@ class TreeGraph extends AbstractGraph {
             netmaskToCIDR
         } = this.props;
 
-        let img = this.fetchImage(d.data.apiData, d.data.contextName);
+        const contextName = this.changeContextBasedOnSelection(d.data.contextName)
+
+        let img = this.fetchImage(d.data.apiData, contextName);
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        const colmAttr = rectNode['attributesToShow'][d.data.contextName] ? rectNode['attributesToShow'][d.data.contextName] : rectNode['attributesToShow']['default'];
+        const colmAttr = rectNode['attributesToShow'][contextName] ? rectNode['attributesToShow'][contextName] : rectNode['attributesToShow']['default'];
         
         const displayName = (d.data.name) ? d.data.name.length > 10 ? `${d.data.name.substring(0,10)}...` : d.data.name : 'No Name given';
         const displayDesc = (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0,25)}...` : d.data.description : commonEN.general.noDescription;
@@ -559,7 +566,6 @@ class TreeGraph extends AbstractGraph {
     }
 
     fetchImage =(apiData, contextName) => {
-
         const {
             siteIcons
         } = this.props;
