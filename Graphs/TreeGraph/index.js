@@ -2,7 +2,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import _ from 'lodash';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'; 
 
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
@@ -16,6 +15,14 @@ import {
   } from "d3";
 
 import * as d3 from "d3";
+
+const allowDrop = (event) => {
+    console.log('allowDrop',event)
+}
+
+const drop = (event) => {
+    console.log('drop',event)
+}
 
 class TreeGraph extends AbstractGraph {
 
@@ -494,7 +501,7 @@ class TreeGraph extends AbstractGraph {
                     return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
                         (rectNode.height - rectNode.textMargin * 2)
                 })
-                .append('xhtml').html((d) => {
+                .html((d) => {
                     return this.renderRectNode(d);
                 })
         }
@@ -525,6 +532,11 @@ class TreeGraph extends AbstractGraph {
             .style("fill", (d) => {
                 return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
+
+    }
+
+    dragended = (res) => {
+        console.log(res)
     }
 
     changeContextBasedOnSelection = (contextName) => {
@@ -575,7 +587,7 @@ class TreeGraph extends AbstractGraph {
         const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` :  '';
         const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` :  '';
         const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` :  '';
-        return `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
+        return `<div id="droppableId" onDrop="this.dragended(event)" style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
                     ${showImg}
                     ${showNameAttr}
                     <div style="width:22%;float:left;font-size: 8px;"></div>
@@ -753,81 +765,92 @@ class TreeGraph extends AbstractGraph {
         ...style,
     });
 
+    dragStart = (event) => {
+        console.log(event)
+    }
+
     renderAllContext = () => {
         const {treeLayoutStyle, allContexts} = this.props
         return (
-            allContexts.map((val, index)=>{
+            allContexts.map((val)=>{
                 return (
-                    <Droppable droppableId="droppable2">
-                        {(provided, snapshot) => 
-                        (
-                            <div style={this.getListStyle(snapshot.isDraggingOver, treeLayoutStyle.libraryBox)}
-                                    ref={provided.innerRef} key={val.name}>
-                                <Draggable
-                                    key={`item-${index}`}
-                                    index={index}
-                                    draggableId={`item-${index}`}
-                                >
-                                    {(provided, snapshot) => ( 
-                                        <div style={this.getItemStyle(
-                                            snapshot.isDragging,
-                                            provided.draggableProps.style,
-                                            treeLayoutStyle.libraryImgbox
-                                            )}
-                                        key={val.name}
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}><img style={{width: '25px'}} src={val.icons} /></div>
-                                    )}   
-                                </Draggable>
-                                <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div> 
-                            </div>
-                        )}
-                    </Droppable>
+                    <div style={treeLayoutStyle.libraryBox} draggable="true" onDragStart={(event) => this.dragStart(event)}>
+                        <div style={ treeLayoutStyle.libraryImgbox}><img style={{width: '25px'}} src={val.icons} /></div>
+                        <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div> 
+                    </div>
                 )
             })
         )
     }
 
-    render() {
+    renderTopologyGraph = () => {
+        let { height, transformAttr } = this.props;
+        if(!transformAttr) {
+            transformAttr = this.transformAttr;
+        }
+        return (
+            <div className="line-graph">
+                <svg
+                    height={height}
+                    ref={ (node) => {
+                        this.node = node;
+                        select(node)
+                        .call(zoom()
+                        .scaleExtent([1 / 2, 8])
+                    )}
+                }
+                className="svgWidth"
+                >
+                    <g className='tree-graph-container' transform={transformAttr}>
+
+                    </g>
+                </svg>
+            </div>
+        )
+    }
+
+    renderNetworkGraph = () => {
         let { height, transformAttr, treeLayoutStyle } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
         return (
-            <DragDropContext onDragEnd={this.onDragEnd}>
-                <div style={treeLayoutStyle.graphContainer}>
-                    <div style={treeLayoutStyle.graphView}>
-                        <div className="line-graph">
-                            <svg
-                                height={height}
-                                ref={ (node) => {
-                                    this.node = node;
-                                    select(node)
-                                    .call(zoom()
-                                    .scaleExtent([1 / 2, 8])
-                                )}
-                            }
-                            >
-                                <g className='tree-graph-container' transform={transformAttr}>
+            <div style={treeLayoutStyle.graphContainer}>
+                <div style={treeLayoutStyle.graphView}>
+                    <div className="line-graph">
+                        <svg
+                            height={height}
+                            ref={ (node) => {
+                                this.node = node;
+                                select(node)
+                                .call(zoom()
+                                .scaleExtent([1 / 2, 8])
+                            )}
+                        }
+                        className="svgWidth"
+                        >
+                            <g className='tree-graph-container' transform={transformAttr}>
 
-                                </g>
-                            </svg>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+                <div style={treeLayoutStyle.contextView}>
+                    <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}></div>
+                    <div style={{height:'50%'}}>
+                        <div style={treeLayoutStyle.libraryTitle}>Libray</div>
+                        <div className="contextContainer" style= {{overflow: 'auto', height: '100%'}} >
+                            {this.renderAllContext()}
                         </div>
                     </div>
-                    <div style={treeLayoutStyle.contextView}>
-                        <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}></div>
-                        <div style={{height:'50%'}}>
-                            <div style={treeLayoutStyle.libraryTitle}>Libray</div>
-                            <div style= {{overflow: 'auto', height: '100%'}}>
-                                {this.renderAllContext()}
-                            </div>
-                                
-                        </div>
-                    </div>
-                </div> 
-            </DragDropContext>
-        );
+                </div>
+            </div>
+        )
+    }
+
+    render() {
+        let { graphType } = this.props;
+        return (graphType ? this.renderNetworkGraph() : this.renderTopologyGraph())
     }
 }
 TreeGraph.propTypes = {

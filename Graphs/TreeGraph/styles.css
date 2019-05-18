@@ -2,7 +2,10 @@
     cursor: pointer;
 }
 
-svg { width:100% }
+.svgWidth {
+	width:100%
+}
+/* svg { width:100% } */
 
 .node circle {
     fill: #fff;
