@@ -15,14 +15,7 @@ import {
   } from "d3";
 
 import * as d3 from "d3";
-
-const allowDrop = (event) => {
-    console.log('allowDrop',event)
-}
-
-const drop = (event) => {
-    console.log('drop',event)
-}
+import ListContent from '@/Layout/ListContent.js'
 
 class TreeGraph extends AbstractGraph {
 
@@ -392,6 +385,11 @@ class TreeGraph extends AbstractGraph {
         }
     }
 
+    changleLocation = (d) => {
+        const { onSelect } = this.props
+        onSelect({ module:d.data.context.moduleName, item: d.data });
+    }
+
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
@@ -443,7 +441,9 @@ class TreeGraph extends AbstractGraph {
                 "translate(" + d.parent.y + "," + d.parent.x + ")" :
                 "translate(" + source.y0 + "," + source.x0 + ")";
         })
-        .on("click", this.click);
+        .on("click", (d) => {
+            !graphType ? this.click(d) : this.changleLocation(d);
+        });
 
         // ****************** Nodes section ***************************
 
@@ -771,10 +771,11 @@ class TreeGraph extends AbstractGraph {
 
     renderAllContext = () => {
         const {treeLayoutStyle, allContexts} = this.props
+
         return (
-            allContexts.map((val)=>{
+            allContexts.map((val, index)=>{
                 return (
-                    <div style={treeLayoutStyle.libraryBox} draggable="true" onDragStart={(event) => this.dragStart(event)}>
+                    <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event)}>
                         <div style={ treeLayoutStyle.libraryImgbox}><img style={{width: '25px'}} src={val.icons} /></div>
                         <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div> 
                     </div>
@@ -810,10 +811,11 @@ class TreeGraph extends AbstractGraph {
     }
 
     renderNetworkGraph = () => {
-        let { height, transformAttr, treeLayoutStyle } = this.props;
+        let { height, transformAttr, treeLayoutStyle, module, viewContent } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
+        
         return (
             <div style={treeLayoutStyle.graphContainer}>
                 <div style={treeLayoutStyle.graphView}>
@@ -835,8 +837,10 @@ class TreeGraph extends AbstractGraph {
                         </svg>
                     </div>
                 </div>
-                <div style={treeLayoutStyle.contextView}>
-                    <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}></div>
+                <div style={treeLayoutStyle.contextView} id="sideView">
+                    <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}>
+                        {viewContent}
+                    </div>
                     <div style={{height:'50%'}}>
                         <div style={treeLayoutStyle.libraryTitle}>Libray</div>
                         <div className="contextContainer" style= {{overflow: 'auto', height: '100%'}} >
