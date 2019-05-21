@@ -834,7 +834,7 @@ class TreeGraph extends AbstractGraph {
                     </div>
                     <div style={{height:'50%'}}>
                         <div style={treeLayoutStyle.libraryTitle}>Libray</div>
-                        <div className="contextContainer" style= {{overflow: 'auto', height: '100%'}} >
+                        <div className="contextContainer" style= {{overflow: 'auto', height: '70%'}} >
                             {this.renderAllContext()}
                         </div>
                     </div>
