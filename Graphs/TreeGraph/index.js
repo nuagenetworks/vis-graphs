@@ -748,7 +748,7 @@ class TreeGraph extends AbstractGraph {
             allContexts.map((val, index) => {
                 return (
                     <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event, val.depth)}>
-                        <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} src={val.icons} /></div>
+                        <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} alt={val.name} src={val.icons} /></div>
                         <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div>
                     </div>
                 )
@@ -784,7 +784,7 @@ class TreeGraph extends AbstractGraph {
     }
 
     renderNetworkGraph = () => {
-        let { height, transformAttr, treeLayoutStyle, module, viewContent } = this.props;
+        let { height, transformAttr, treeLayoutStyle, viewContent } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
