@@ -16,6 +16,10 @@ import {
 
 import * as d3 from "d3";
 
+const EDITOR = 'new';
+const DESIGN = 'design';
+const TEMPLATE = 'template';
+
 class TreeGraph extends AbstractGraph {
 
     constructor(props) {
@@ -27,6 +31,7 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = 0
         this.rectHeight = 0
         this.depth = 0;
+        this.module = null;
         this.initiate(props);
     }
 
@@ -536,14 +541,25 @@ class TreeGraph extends AbstractGraph {
     }
 
     dragLeave = (event) => {
+        const { changePath, getModulePath} = this.props;
         if((this.depth - 1) === event.depth) {
-            this.props.changePath('/enterprises/enterprise/23f79cdc-9cca-433e-8e18-39caf58d6c3a/networks/domains/domaintemplate/da67c34d-db23-47a1-a75f-d9c9aa920e20/design/zones/new');
+            let path;
+            const elementContext = event.data.context.moduleName;
+            const id = event.data.ID;
+            const contextName = event.data.contextName;
+            path = this.changeContextBasedOnSelection(getModulePath, elementContext);
+            if(event.parent === null) {
+                path = `${path}${elementContext}/${contextName}/${id}/${DESIGN}/${this.module}/${EDITOR}`;
+            } else {
+                path = `${path}${elementContext}/${contextName}/${id}/${this.module}/${EDITOR}`;
+            }
+            changePath(path);
         }
     }
 
-    changeContextBasedOnSelection = (contextName) => {
-        const isTemplatePos = contextName.search("template")
-        return (isTemplatePos !== -1) ? contextName.substr(0, isTemplatePos) : contextName
+    changeContextBasedOnSelection = (contextName, removalContext) => {
+        const isRemovalContextPos = contextName.search(removalContext)
+        return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
     }
 
     renderRectNode = (d) => {
@@ -556,7 +572,7 @@ class TreeGraph extends AbstractGraph {
             netmaskToCIDR
         } = this.props;
 
-        const contextName = this.changeContextBasedOnSelection(d.data.contextName)
+        const contextName = this.changeContextBasedOnSelection(d.data.contextName, TEMPLATE)
 
         let img = this.fetchImage(d.data.apiData, contextName);
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
@@ -734,8 +750,9 @@ class TreeGraph extends AbstractGraph {
         this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
     }
 
-    dragStart = (event, depth) => {
+    dragStart = (event, depth, moduleName) => {
         this.depth = depth;
+        this.module = moduleName;
         const svg = this.getGraphContainer();
         svg.selectAll('rect').style('fill', (d) => {
             return d.depth === depth - 1 ? '#96e896' : '#f59999';
@@ -747,7 +764,7 @@ class TreeGraph extends AbstractGraph {
         return (
             allContexts.map((val, index) => {
                 return (
-                    <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event, val.depth)}>
+                    <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event, val.depth, val.moduleName)}>
                         <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} src={val.icons} /></div>
                         <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div>
                     </div>
