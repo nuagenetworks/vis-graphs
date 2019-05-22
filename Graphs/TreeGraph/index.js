@@ -19,6 +19,9 @@ import * as d3 from "d3";
 const EDITOR = 'new';
 const DESIGN = 'design';
 const TEMPLATE = 'template';
+const TYPE = 'vportType';
+const HOST = 'HOST';
+const PREDICATE = 'type == HOST';
 
 class TreeGraph extends AbstractGraph {
 
@@ -449,7 +452,7 @@ class TreeGraph extends AbstractGraph {
         .on("click", (d) => {
             !graphType ? this.click(d) : this.changleLocation(d);
         })
-	.on("dragleave", (event) => this.dragLeave(event));
+	    .on("dragleave", (event) => this.dragLeave(event));
 
         // ****************** Nodes section ***************************
 
@@ -544,17 +547,23 @@ class TreeGraph extends AbstractGraph {
     dragLeave = (event) => {
         const { changePath, getModulePath} = this.props;
         if((this.depth - 1) === event.depth) {
-            let path;
+            let path, query={};
             const elementContext = event.data.context.moduleName;
             const id = event.data.ID;
             const contextName = event.data.contextName;
             path = this.changeContextBasedOnSelection(getModulePath, elementContext);
+
             if(event.parent === null) {
                 path = `${path}${elementContext}/${contextName}/${id}/${DESIGN}/${this.module}/${EDITOR}`;
             } else {
                 path = `${path}${elementContext}/${contextName}/${id}/${this.module}/${EDITOR}`;
             }
-            changePath(path);
+            
+            if(event.data.category.predicate && event.data.category.predicate === PREDICATE) {
+                query[TYPE] = HOST;
+            } 
+            
+            changePath(path, query);
         }
     }
 
@@ -589,7 +598,7 @@ class TreeGraph extends AbstractGraph {
         const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` : '';
         const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` : '';
         const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` : '';
-        return `<div id="droppableId" onDrop="this.dragended(event)" style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
+        return `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
                     ${showImg}
                     ${showNameAttr}
                     <div style="width:22%;float:left;font-size: 8px;"></div>
