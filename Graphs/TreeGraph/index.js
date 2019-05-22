@@ -575,7 +575,7 @@ class TreeGraph extends AbstractGraph {
 
         const contextName = this.changeContextBasedOnSelection(d.data.contextName, TEMPLATE)
 
-        let img = this.fetchImage(d.data.apiData, contextName);
+        let img = this.fetchImage(d.data.apiData, contextName, d.data );
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
         const colmAttr = rectNode['attributesToShow'][contextName] ? rectNode['attributesToShow'][contextName] : rectNode['attributesToShow']['default'];
 
@@ -598,7 +598,10 @@ class TreeGraph extends AbstractGraph {
                 </div>`
     }
 
-    fetchImage = (apiData, contextName) => {
+    fetchImage = (apiData, contextName, fullData) => {
+        if(fullData.category.icons) {
+            return fullData.category.icons
+        }
         const {
             siteIcons
         } = this.props;
@@ -608,6 +611,7 @@ class TreeGraph extends AbstractGraph {
 
         let icon,
             iconType;
+
         if (contextName === 'zone') {
             iconType = (apiData.publicZone) ? 'publiczone' : 'privatezone'
         }
