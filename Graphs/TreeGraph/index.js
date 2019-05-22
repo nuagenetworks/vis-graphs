@@ -390,6 +390,7 @@ class TreeGraph extends AbstractGraph {
     }
 
     changleLocation = (d) => {
+        d.data.clicked = true;
         const { onSelect } = this.props
         onSelect({ module:d.data.context.moduleName, item: d.data });
     }
@@ -782,13 +783,13 @@ class TreeGraph extends AbstractGraph {
             <div className="line-graph">
                 <svg
                     height={height}
-                    ref={(node) => {
+                    ref={ (node) => {
                         this.node = node;
                         select(node)
-                            .call(zoom()
-                                .scaleExtent([1 / 2, 8])
-                            )
-                    }
+                        .call(zoom()
+                        .scaleExtent([1 / 2, 8])
+                        .on("zoom", this.zoomed)
+                    )}
                     }
                     className="svgWidth"
                 >
@@ -812,13 +813,13 @@ class TreeGraph extends AbstractGraph {
                     <div className="line-graph">
                         <svg
                             height={height}
-                            ref={(node) => {
+                            ref={ (node) => {
                                 this.node = node;
                                 select(node)
-                                    .call(zoom()
-                                        .scaleExtent([1 / 2, 8])
-                                    )
-                            }
+                                .call(zoom()
+                                .scaleExtent([1 / 2, 8])
+                                .on("zoom", this.zoomed)
+                            )}
                             }
                             className="svgWidth"
                         >
