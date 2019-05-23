@@ -2,6 +2,7 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import _ from 'lodash';
+import objectPath from 'object-path';
 
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
@@ -545,21 +546,26 @@ class TreeGraph extends AbstractGraph {
     }
 
     dragLeave = (event) => {
-        const { changePath, getModulePath} = this.props;
-        if((this.depth - 1) === event.depth) {
-            let path, query={};
-            const elementContext = event.data.context.moduleName;
-            const id = event.data.ID;
-            const contextName = event.data.contextName;
-            path = this.changeContextBasedOnSelection(getModulePath, elementContext);
+        const { 
+            changePath,
+            currentPath,
+        } = this.props;
 
+        if ((this.depth - 1) === event.depth) {
+            const query = {};
+            const elementContext = objectPath.get(event, 'data.context.moduleName');
+            const id = objectPath.get(event, 'data.ID');
+            const contextName = objectPath.get(event, 'data.contextName');
+
+            let path = this.changeContextBasedOnSelection(currentPath, elementContext);
             if(event.parent === null) {
                 path = `${path}${elementContext}/${contextName}/${id}/${DESIGN}/${this.module}/${EDITOR}`;
             } else {
                 path = `${path}${elementContext}/${contextName}/${id}/${this.module}/${EDITOR}`;
             }
             
-            if(event.data.category.predicate && event.data.category.predicate === PREDICATE) {
+            const predicate = objectPath.get(event, 'data.category.predicate');
+            if(predicate && predicate === PREDICATE) {
                 query[TYPE] = HOST;
             } 
             
@@ -574,37 +580,38 @@ class TreeGraph extends AbstractGraph {
 
     renderRectNode = (d) => {
         const {
-            rectNode
+            rectNode,
         } = this.getConfiguredProperties();
 
         const {
             commonEN,
-            netmaskToCIDR
+            netmaskToCIDR,
         } = this.props;
 
-        const contextName = this.changeContextBasedOnSelection(d.data.contextName, TEMPLATE)
+        const data = d.data || {};
+        const contextName = this.changeContextBasedOnSelection(data.contextName, TEMPLATE);
 
-        let img = this.fetchImage(d.data.apiData, contextName, d.data );
-        const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        const colmAttr = rectNode['attributesToShow'][contextName] ? rectNode['attributesToShow'][contextName] : rectNode['attributesToShow']['default'];
+        let img = this.fetchImage(data.apiData, contextName, data );
 
-        const displayName = (d.data.name) ? d.data.name.length > 10 ? `${d.data.name.substring(0, 10)}...` : d.data.name : 'No Name given';
-        const displayDesc = (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0, 25)}...` : d.data.description : commonEN.general.noDescription;
-
-        const CIDR = (colmAttr.address && d.data.apiData._netmask) ? netmaskToCIDR(d.data.apiData._netmask) : ''
-
-
-        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : ''
+        const rectColorText = data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
+        const colmAttr = rectNode['attributesToShow'][contextName] || rectNode['attributesToShow']['default'];
+        const displayName = data.name ? (data.name.length > 10 ? `${data.name.substring(0, 10)}...` : data.name) : 'No Name given';
+        const displayDesc = data.description ? (data.description.length > 25 ? `${data.description.substring(0, 25)}...` : data.description) : commonEN.general.noDescription;
+        const CIDR = (colmAttr.address && data.apiData._netmask) ? netmaskToCIDR(data.apiData._netmask) : '';
+        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : '';
         const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` : '';
         const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` : '';
-        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` : '';
-        return `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
+        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${data.apiData._address}/${CIDR}</div>` : '';
+        
+        return (
+                `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
                     ${showImg}
                     ${showNameAttr}
                     <div style="width:22%;float:left;font-size: 8px;"></div>
                     ${showDesAttr}
                     ${showAddressAttr}
                 </div>`
+            );
     }
 
     fetchImage = (apiData, contextName, fullData) => {
@@ -819,32 +826,12 @@ class TreeGraph extends AbstractGraph {
     }
 
     renderNetworkGraph = () => {
-        let { height, transformAttr, treeLayoutStyle, viewContent } = this.props;
-        if(!transformAttr) {
-            transformAttr = this.transformAttr;
-        }
+        let { treeLayoutStyle, viewContent } = this.props;
         
         return (
             <div style={treeLayoutStyle.graphContainer}>
                 <div style={treeLayoutStyle.graphView}>
-                    <div className="line-graph">
-                        <svg
-                            height={height}
-                            ref={ (node) => {
-                                this.node = node;
-                                select(node)
-                                .call(zoom()
-                                .scaleExtent([1 / 2, 8])
-                                .on("zoom", this.zoomed)
-                            )}
-                            }
-                            className="svgWidth"
-                        >
-                            <g className='tree-graph-container' transform={transformAttr}>
-
-                            </g>
-                        </svg>
-                    </div>
+                    {this.renderTopologyGraph()}
                 </div>
                 <div style={treeLayoutStyle.contextView} id="sideView">
                     <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}>
@@ -863,7 +850,7 @@ class TreeGraph extends AbstractGraph {
 
     render() {
         let { graphType } = this.props;
-        return (graphType ? this.renderNetworkGraph() : this.renderTopologyGraph())
+        return (graphType ? this.renderNetworkGraph() : this.renderTopologyGraph());
     }
 }
 TreeGraph.propTypes = {
