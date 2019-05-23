@@ -608,7 +608,7 @@ class TreeGraph extends AbstractGraph {
     }
 
     fetchImage = (apiData, contextName, fullData) => {
-        if(fullData.category.icons) {
+        if(fullData.category) {
             return fullData.category.icons
         }
         const {
@@ -777,10 +777,14 @@ class TreeGraph extends AbstractGraph {
         const { treeLayoutStyle, allContexts } = this.props;
         return (
             allContexts.map((val, index) => {
+                const contextName = val.name
+                const isRemovalContextPos = contextName.search(TEMPLATE)
+                let displayName = (isRemovalContextPos !== -1) ? `${contextName.substr(0, isRemovalContextPos)} Template`  : contextName
+
                 return (
                     <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event, val.depth, val.moduleName)}>
-                        <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} alt={val.name} src={val.icons} /></div>
-                        <div style={treeLayoutStyle.libraryTextbox}>{val.name}</div>
+                        <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} alt={val.moduleName} src={val.icons} /></div>
+                        <div style={treeLayoutStyle.libraryTextbox}>{displayName === displayName.toUpperCase() ? displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase() : displayName.charAt(0).toUpperCase() + displayName.slice(1)}</div>
                     </div>
                 )
             })
