@@ -57,7 +57,18 @@ const customTheme = {
     blueviolet: "#8A2BE3",
     lightBrown: "#deb887",
     darkCyan: "#008B8F",
-    peach: "#FFDABA"
+    peach: "#FFDABA",
+    limePie: "#bcbd22",
+    matisse: "#1f78b4",
+    spicyMix: "#8c564b",
+    sweetPink: "#fb9a99",
+    punchRed: "#d62728",
+    paarl: "#b15928",
+    flushOrange: "#ff7f00",
+    java: "#17becf",
+    lavenderGray: "#cab2d6",
+    wisteriaViolet: "#9467bd",
+    regentBlue: "#a6cee3",
 }
 
 export const lightTheme = getMuiTheme(lightMuiTheme, {
@@ -146,12 +157,22 @@ export const lightTheme = getMuiTheme(lightMuiTheme, {
         yellowDarkerColor: customTheme.yellowDarkerColor,
         yellowLightColor: customTheme.yellowLightColor,
         yellowLighterColor: customTheme.yellowLighterColor,
-
         aquaLightColor: customTheme.aquaLightColor,
         blueviolet: customTheme.blueviolet,
         lightBrown: customTheme.lightBrown,
         darkCyan: customTheme.darkCyan,
-        peach: customTheme.peach
+        peachColor: customTheme.peach,
+        limePieColor: customTheme.limePie,
+        matisseColor: customTheme.matisse,
+        spicyMixColor: customTheme.spicyMix,
+        sweetPinkColor: customTheme.sweetPink,
+        punchRedColor: customTheme.punchRed,
+        paarlColor: customTheme.paarl,
+        flushOrangeColor: customTheme.flushOrange,
+        javaColor: customTheme.java,
+        lavenderGrayColor: customTheme.lavenderGray,
+        wisteriaVioletColor: customTheme.wisteriaViolet,
+        regentBlueColor: customTheme.regentBlue,
     },
     drawer: {
         color: customTheme.whiteColor,
