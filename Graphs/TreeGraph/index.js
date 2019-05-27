@@ -472,7 +472,7 @@ class TreeGraph extends AbstractGraph {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = this.fetchImage(d.data.apiData, d.data.contextName);
+                    let img = this.fetchImage(d.data.data, d.data.contextName);
                     return img
                 })
                 .attr("width", 25)
@@ -591,17 +591,17 @@ class TreeGraph extends AbstractGraph {
         const data = d.data || {};
         const contextName = this.changeContextBasedOnSelection(data.contextName, TEMPLATE);
 
-        let img = this.fetchImage(data.apiData, contextName, data );
+        let img = this.fetchImage(data.data, contextName, data );
 
         const rectColorText = data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
         const colmAttr = rectNode['attributesToShow'][contextName] || rectNode['attributesToShow']['default'];
         const displayName = data.name ? (data.name.length > 10 ? `${data.name.substring(0, 10)}...` : data.name) : 'No Name given';
         const displayDesc = data.description ? (data.description.length > 25 ? `${data.description.substring(0, 25)}...` : data.description) : commonEN.general.noDescription;
-        const CIDR = (colmAttr.address && data.apiData._netmask) ? netmaskToCIDR(data.apiData._netmask) : '';
+        const CIDR = (colmAttr.address && data.data._netmask) ? netmaskToCIDR(data.data._netmask) : '';
         const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : '';
         const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` : '';
         const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` : '';
-        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${data.apiData._address}/${CIDR}</div>` : '';
+        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${data.data._address}/${CIDR}</div>` : '';
         
         return (
                 `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
@@ -614,7 +614,7 @@ class TreeGraph extends AbstractGraph {
             );
     }
 
-    fetchImage = (apiData, contextName, fullData) => {
+    fetchImage = (data, contextName, fullData) => {
         if(fullData.category) {
             return fullData.category.icons
         }
@@ -629,11 +629,11 @@ class TreeGraph extends AbstractGraph {
             iconType;
 
         if (contextName === 'zone') {
-            iconType = (apiData.publicZone) ? 'publiczone' : 'privatezone'
+            iconType = (data.publicZone) ? 'publiczone' : 'privatezone'
         }
 
-        if (apiData._avatarData) {
-            icon = apiData._avatarData;
+        if (data._avatarData) {
+            icon = data._avatarData;
         } else if (siteIcons[contextName]) {
             icon = siteIcons[contextName];
         } else if (iconType && siteIcons[iconType]) {
