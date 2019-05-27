@@ -497,10 +497,11 @@ class AreaGraph extends XYGraph {
   setColor() {
     const {
       stroke,
-      colors
+      colors,
+      mappedColors,
     } = this.getConfiguredProperties()
 
-    const scale =  this.scaleColor(this.getYColumns(), 'key');
+    const scale =  mappedColors ? this.getMappedScaleColor(this.getYColumns(), 'key') : this.scaleColor(this.getYColumns(), 'key');
     this.color =  (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
   }
 
