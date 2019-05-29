@@ -83,8 +83,8 @@ export class VariationTextGraph extends AbstractGraph {
         if (!data || !target)
             return;
 
-        let lastInfo,
-            previousInfo;
+        let lastInfo = {},
+            previousInfo = {};
 
         data.forEach((d) => {
             if (d[target.column] === target.value)
