@@ -14,7 +14,8 @@ const FILTER_KEY = ['data', 'height', 'width', 'context']
 
 class BarGraph extends XYGraph {
 
-  customExtent = []
+  customExtent = [];
+  nestedData = [];
 
   constructor(props) {
     super(props, properties);
@@ -233,10 +234,13 @@ class BarGraph extends XYGraph {
       yLabelLimit,
       xLabelLimit,
       xLabelRotate,
-      xTickFontSize
+      xTickFontSize,
+      margin
     } = this.getConfiguredProperties()
 
-    const svg =  this.getGraph()
+    const svg =  this.getGraph();
+    svg.attr('transform', `translate(${this.getLeftMargin()},${margin.top})`)
+
 
     // set nested bar colors
     this.setColor()
