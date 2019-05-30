@@ -252,13 +252,14 @@ export default class AbstractGraph extends React.Component {
     scaleColor(data, defaultColumn) {
         const {
             colors,
+            otherColors,
             colorColumn,
         } = this.getConfiguredProperties();
 
         if (!colorColumn && !defaultColumn)
             return;
 
-        const scale = d3.scaleOrdinal(colors);
+        const scale = d3.scaleOrdinal([...colors, ...otherColors]);
         scale.domain(data.map((d) => d[colorColumn || defaultColumn]));
 
         return scale;
