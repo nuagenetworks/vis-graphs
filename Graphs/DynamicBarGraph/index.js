@@ -299,7 +299,7 @@ class BarGraph extends XYGraph {
 
     const {
       colorColumn,
-      colors,
+      colors
     } = this.getConfiguredProperties()
 
     const scale = this.scaleColor(data, this.getStack())
