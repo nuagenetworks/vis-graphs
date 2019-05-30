@@ -251,6 +251,10 @@ export default class AbstractGraph extends React.Component {
 
     scaleColor(data, defaultColumn) {
         const {
+            setGraphColor,
+        } = this.props;
+
+        const {
             colors,
             otherColors,
             colorColumn,
@@ -260,8 +264,9 @@ export default class AbstractGraph extends React.Component {
             return;
 
         const scale = d3.scaleOrdinal([...colors, ...otherColors]);
-        scale.domain(data.map((d) => d[colorColumn || defaultColumn]));
+        const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys().sort();
 
+        scale.domain((setGraphColor && setGraphColor(domainData)) || domainData);
         return scale;
     }
 

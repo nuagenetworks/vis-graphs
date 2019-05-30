@@ -300,10 +300,9 @@ class BarGraph extends XYGraph {
     const {
       colorColumn,
       colors,
-      mappedColors,
     } = this.getConfiguredProperties()
 
-    const scale = mappedColors ? this.getMappedScaleColor(data, this.getStack()) : this.scaleColor(data, this.getStack())
+    const scale = this.scaleColor(data, this.getStack())
     this.color =  (d) => scale ? scale(d[colorColumn || this.getStack()]) : colors[0]
   }
 
