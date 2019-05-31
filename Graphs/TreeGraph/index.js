@@ -14,6 +14,7 @@ import {
   } from "d3";
 
 import * as d3 from "d3";
+import {isFunction} from "../../utils/helpers";
 
 class TreeGraph extends AbstractGraph {
 
@@ -527,56 +528,24 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN,
-            netmaskToCIDR
+            renderNode
         } = this.props;
 
-        let img = this.fetchImage(d.data.apiData, d.data.contextName);
+        if (!isFunction(renderNode)) return '<div/>';
+
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        const colmAttr = rectNode['attributesToShow'][d.data.contextName] ? rectNode['attributesToShow'][d.data.contextName] : rectNode['attributesToShow']['default'];
-        
-        const displayName = (d.data.name) ? d.data.name.length > 10 ? `${d.data.name.substring(0,10)}...` : d.data.name : 'No Name given';
-        const displayDesc = (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0,25)}...` : d.data.description : commonEN.general.noDescription;
-
-        const CIDR = (colmAttr.address && d.data.apiData._netmask) ? netmaskToCIDR(d.data.apiData._netmask) : ''
-
-
-        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : ''
-        const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` :  '';
-        const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` :  '';
-        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${d.data.apiData._address}/${CIDR}</div>` :  '';
-        return `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
-                    ${showImg}
-                    ${showNameAttr}
-                    <div style="width:22%;float:left;font-size: 8px;"></div>
-                    ${showDesAttr}
-                    ${showAddressAttr}
-                </div>`
+        return renderNode({data: d.data, textColor: rectColorText, ...rectNode});
     }
 
     fetchImage =(apiData, contextName) => {
-
         const {
-            siteIcons
+            fetchImage
         } = this.props;
-        
-        if(!siteIcons)
+
+        if(!isFunction(fetchImage))
             return false;
 
-        let icon,
-            iconType;
-        if (contextName === 'zone') {
-            iconType = (apiData.publicZone) ? 'publiczone' : 'privatezone'
-        }
-
-        if (apiData._avatarData) {
-            icon = apiData._avatarData;
-        } else if (siteIcons[contextName]) {
-            icon = siteIcons[contextName];
-        } else if (iconType && siteIcons[iconType]) {
-            icon = siteIcons[iconType];
-        }
-        return icon;
+        return fetchImage({apiData, contextName});
     }
 
     updateLinks = (source, links) => {

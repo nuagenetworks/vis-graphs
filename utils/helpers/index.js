@@ -14,3 +14,5 @@ export * from "./nest/index"
 export * from "./reducers/index"
 export * from "./ESSearchConverter"
 
+export const isFunction = fnC => fnC && typeof fnC === 'function';
+
