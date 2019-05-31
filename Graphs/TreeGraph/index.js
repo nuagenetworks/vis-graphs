@@ -2,8 +2,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import _ from 'lodash';
-import objectPath from 'object-path';
-
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
@@ -16,13 +14,6 @@ import {
 } from "d3";
 
 import * as d3 from "d3";
-
-const EDITOR = 'new';
-const DESIGN = 'design';
-const TEMPLATE = 'template';
-const TYPE = 'vportType';
-const HOST = 'HOST';
-const PREDICATE = 'type == HOST';
 
 class TreeGraph extends AbstractGraph {
 
@@ -49,6 +40,13 @@ class TreeGraph extends AbstractGraph {
 
         this.setSVGTransform(this.props)
         this.elementGenerator();
+        this.setDraggingRef(this.props)
+    }
+
+    setDraggingRef = (props) => {
+        if(props.onDragStartRef) {
+            props.onDragStartRef(this.dragStart)
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -380,23 +378,12 @@ class TreeGraph extends AbstractGraph {
         let count = 0;
         for (var i = 0; i < node.length; i++) {
             if (node[i].children) {
-                for (var j = 0; j < node[i].children.length; j++) {
-                    if (node[i].children[j].children) {
-                        this.count_leaves(node[i].children[j]);
-                    }
-                    else {
-                        count++;
-                    }
+                if(node[i].children.length > count) {
+                    count = node[i].children.length
                 }
-                return count;
             }
         }
-    }
-
-    changleLocation = (d) => {
-        d.data.clicked = true;
-        const { onSelect } = this.props
-        onSelect({ module:d.data.context.moduleName, item: d.data });
+        return count;
     }
 
     updateNodes = (source, nodes) => {
@@ -451,28 +438,17 @@ class TreeGraph extends AbstractGraph {
                 "translate(" + source.y0 + "," + source.x0 + ")";
         })
         .on("click", (d) => {
-            !graphType ? this.click(d) : this.changleLocation(d);
+            !graphType ? this.click(d) : this.props.OnChangleContext(d);
         })
-	    .on("dragleave", (event) => this.dragLeave(event));
+	    .on("dragleave", (event) => this.props.OnSubmitFormOnDragLeave(event));
 
         // ****************** Nodes section ***************************
-
-        nodeEnter.append('g').append('rect')
-            .attr('rx', 3)
-            .attr('ry', 3)
-            .attr('width', this.rectWidth)
-            .attr('height', this.rectHeight)
-            .attr("stroke", (d) => {
-                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
-            })
-            .attr("stroke-width", rectNode.stroke.width)
-            .attr('class', 'node-rect')
 
         if (showOnlyImg) {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = this.fetchImage(d.data.data, d.data.contextName);
+                    let img = d.data.category.icons;
                     return img
                 })
                 .attr("width", 25)
@@ -480,8 +456,7 @@ class TreeGraph extends AbstractGraph {
                 .on("mouseover", function (d) {
                     tooltip.transition()
                         .duration(200)
-                        .style("opacity", 1)
-                        .style("z-index", 1);
+                        .style("opacity", 5)
                     tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${(d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0, 100)}...` : d.data.description : commonEN.general.noDescription}</div>`)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 28) + "px");
@@ -500,6 +475,17 @@ class TreeGraph extends AbstractGraph {
                 })
                 .style("fill-opacity", 1);
         } else {
+            nodeEnter.append('g').append('rect')
+            .attr('rx', 3)
+            .attr('ry', 3)
+            .attr('width', this.rectWidth)
+            .attr('height', this.rectHeight)
+            .attr("stroke", (d) => {
+                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
+            })
+            .attr("stroke-width", rectNode.stroke.width)
+            .attr('class', 'node-rect')
+
             nodeEnter.append('foreignObject')
                 .attr('x', rectNode.textMargin)
                 .attr('y', rectNode.textMargin)
@@ -542,37 +528,8 @@ class TreeGraph extends AbstractGraph {
             .style("fill", (d) => {
                 return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
-
     }
-
-    dragLeave = (event) => {
-        const { 
-            changePath,
-            currentPath,
-        } = this.props;
-
-        if ((this.depth - 1) === event.depth) {
-            const query = {};
-            const elementContext = objectPath.get(event, 'data.context.moduleName');
-            const id = objectPath.get(event, 'data.ID');
-            const contextName = objectPath.get(event, 'data.contextName');
-
-            let path = this.changeContextBasedOnSelection(currentPath, elementContext);
-            if(event.parent === null) {
-                path = `${path}${elementContext}/${contextName}/${id}/${DESIGN}/${this.module}/${EDITOR}`;
-            } else {
-                path = `${path}${elementContext}/${contextName}/${id}/${this.module}/${EDITOR}`;
-            }
-            
-            const predicate = objectPath.get(event, 'data.category.predicate');
-            if(predicate && predicate === PREDICATE) {
-                query[TYPE] = HOST;
-            } 
-            
-            changePath(path, query);
-        }
-    }
-
+    
     changeContextBasedOnSelection = (contextName, removalContext) => {
         const isRemovalContextPos = contextName.search(removalContext)
         return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
@@ -589,9 +546,9 @@ class TreeGraph extends AbstractGraph {
         } = this.props;
 
         const data = d.data || {};
-        const contextName = this.changeContextBasedOnSelection(data.contextName, TEMPLATE);
+        const contextName = this.changeContextBasedOnSelection(data.contextName, 'template');
 
-        let img = this.fetchImage(data.data, contextName, data );
+        let img = data.category.icons;
 
         const rectColorText = data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
         const colmAttr = rectNode['attributesToShow'][contextName] || rectNode['attributesToShow']['default'];
@@ -612,34 +569,6 @@ class TreeGraph extends AbstractGraph {
                     ${showAddressAttr}
                 </div>`
             );
-    }
-
-    fetchImage = (data, contextName, fullData) => {
-        if(fullData.category) {
-            return fullData.category.icons
-        }
-        const {
-            siteIcons
-        } = this.props;
-
-        if (!siteIcons)
-            return false;
-
-        let icon,
-            iconType;
-
-        if (contextName === 'zone') {
-            iconType = (data.publicZone) ? 'publiczone' : 'privatezone'
-        }
-
-        if (data._avatarData) {
-            icon = data._avatarData;
-        } else if (siteIcons[contextName]) {
-            icon = siteIcons[contextName];
-        } else if (iconType && siteIcons[iconType]) {
-            icon = siteIcons[iconType];
-        }
-        return icon;
     }
 
     updateLinks = (source, links) => {
@@ -772,30 +701,8 @@ class TreeGraph extends AbstractGraph {
     }
 
     dragStart = (event, depth, moduleName) => {
-        this.depth = depth;
-        this.module = moduleName;
         const svg = this.getGraphContainer();
-        svg.selectAll('rect').style('fill', (d) => {
-            return d.depth === depth - 1 ? '#96e896' : '#f59999';
-        });
-    }
-
-    renderAllContext = () => {
-        const { treeLayoutStyle, allContexts } = this.props;
-        return (
-            allContexts.map((val, index) => {
-                const contextName = val.name
-                const isRemovalContextPos = contextName.search(TEMPLATE)
-                let displayName = (isRemovalContextPos !== -1) ? `${contextName.substr(0, isRemovalContextPos)} Template`  : contextName
-
-                return (
-                    <div style={treeLayoutStyle.libraryBox} key={index} draggable="true" onDragStart={(event) => this.dragStart(event, val.depth, val.moduleName)}>
-                        <div style={treeLayoutStyle.libraryImgbox}><img style={{ width: '25px' }} alt={val.moduleName} src={val.icons} /></div>
-                        <div style={treeLayoutStyle.libraryTextbox}>{displayName === displayName.toUpperCase() ? displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase() : displayName.charAt(0).toUpperCase() + displayName.slice(1)}</div>
-                    </div>
-                )
-            })
-        )
+        this.props.OnSetDragging(depth, moduleName, svg)
     }
 
     renderTopologyGraph = () => {
@@ -825,32 +732,9 @@ class TreeGraph extends AbstractGraph {
         )
     }
 
-    renderNetworkGraph = () => {
-        let { treeLayoutStyle, viewContent } = this.props;
-        
-        return (
-            <div style={treeLayoutStyle.graphContainer}>
-                <div style={treeLayoutStyle.graphView}>
-                    {this.renderTopologyGraph()}
-                </div>
-                <div style={treeLayoutStyle.contextView} id="sideView">
-                    <div style={{height:'60%', borderBottom:'1px solid rgb(242, 242, 242)'}}>
-                        {viewContent}
-                    </div>
-                    <div style={{height:'50%'}}>
-                        <div style={treeLayoutStyle.libraryTitle}>Libray</div>
-                        <div className="contextContainer" style= {{overflow: 'auto', height: '70%'}} >
-                            {this.renderAllContext()}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
 
     render() {
-        let { graphType } = this.props;
-        return (graphType ? this.renderNetworkGraph() : this.renderTopologyGraph());
+        return this.renderTopologyGraph();
     }
 }
 TreeGraph.propTypes = {

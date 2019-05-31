@@ -63,5 +63,6 @@ div.tooltip {
     border-radius: 8px;
 	pointer-events: none;
 	max-width: 200px;
-    height: auto;
+	height: auto;
+	z-index: 1;
 }
