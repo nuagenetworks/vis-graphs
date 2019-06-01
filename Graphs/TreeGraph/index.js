@@ -11,9 +11,10 @@ import {
     event,
     tree,
     hierarchy
-} from "d3";
+  } from "d3";
 
 import * as d3 from "d3";
+import {isFunction} from "../../utils/helpers";
 
 class TreeGraph extends AbstractGraph {
 
@@ -50,7 +51,7 @@ class TreeGraph extends AbstractGraph {
     }
 
     componentDidUpdate(prevProps) {
-        if (!_.isEqual(prevProps, this.props)) {
+        if(!_.isEqual(prevProps, this.props)) {
             this.initiate(this.props);
         }
 
@@ -60,7 +61,7 @@ class TreeGraph extends AbstractGraph {
 
         if (!data)
             return
-
+        
         this.setSVGTransform(this.props)
         this.elementGenerator();
     }
@@ -87,7 +88,7 @@ class TreeGraph extends AbstractGraph {
         }
         this.update(d);
     }
-
+    
     collapse = (d) => {
         if (d.children) {
             d._children = d.children
@@ -102,10 +103,11 @@ class TreeGraph extends AbstractGraph {
             data,
             graphType
         } = this.props;
+
         // declares a tree layout and assigns the size
         this.treemap = tree().size([this.getAvailableHeight(), this.getAvailableWidth()]);
         this.treeData = data[0];
-
+        
         // Assigns parent, children, height, depth
         this.root = hierarchy(this.treeData, (d) => { return graphType ? d.kids : d.children; });
         //form x and y axis
@@ -115,12 +117,12 @@ class TreeGraph extends AbstractGraph {
     }
 
     setSVGTransform = () => {
-        const {
-            transformAttr
-        } = this.getConfiguredProperties();
-        const dx = transformAttr['translate'][0];
-        const dy = transformAttr['translate'][1];
-        this.transformAttr = `translate(${dx},${dy})`;
+            const {
+                transformAttr
+            } = this.getConfiguredProperties();
+            const dx = transformAttr['translate'][0];
+            const dy = transformAttr['translate'][1];
+            this.transformAttr = `translate(${dx},${dy})`;
     }
 
     initiate = (props) => {
@@ -269,7 +271,8 @@ class TreeGraph extends AbstractGraph {
         const selectedNodes = nodes.filter(function (d) {
             return (d.data.clicked) ? true : false;
         });
-        if (selectedNodes.length > 1) {
+        if(selectedNodes.length > 1)
+        {
             const line = svg.selectAll(".genealogy")
                 .data(selectedNodes, d => d.data);
 
@@ -277,49 +280,49 @@ class TreeGraph extends AbstractGraph {
                 .append("g")
                 .attr("class", "genealogy");
 
-            let yAxis1 = 5;
-            let yAxis2 = 20;
+            let yAxis1 =  5;
+            let yAxis2 =  20;
 
             newLine.append("svg:defs").append("svg:marker")
-                .attr("id", "triangle")
-                .attr("refX", 6)
-                .attr("refY", 6)
-                .attr("markerWidth", 30)
-                .attr("markerHeight", 30)
-                .attr("orient", "auto")
-                .append("path")
-                .attr("d", "M 0 0 12 6 0 12 3 6")
-                .style("fill", selectedNodesInfo.stroke);
+            .attr("id", "triangle")
+            .attr("refX", 6)
+            .attr("refY", 6)
+            .attr("markerWidth", 30)
+            .attr("markerHeight", 30)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 12 6 0 12 3 6")
+            .style("fill", selectedNodesInfo.stroke);
 
             newLine.append("line")          // attach a line
-                .style("stroke", selectedNodesInfo.stroke)  // colour the line
-                .style("opacity", (d, i) => {
-                    if (selectedNodes.length === ++i || !d.children) {
-                        return 0;
-                    }
-                })  // colour the line
-                .attr("x1", 5)     // x position of the first end of the line
-                .attr("y1", (d, i) => {
-                    const axisDifference = i > 0 ? 40 : 0;
-                    yAxis1 += parseInt(axisDifference)
-                    return yAxis1;
-                })                  // y position of the first end of the line
-                .attr("x2", 5)     // x position of the second end of the line
-                .attr("y2", (d, i) => {
-                    const axisDifference = i > 0 ? 40 : 0;
-                    yAxis2 += parseInt(axisDifference)
-                    return yAxis2;
-                })
-                .attr("marker-end", "url(#triangle)");
+            .style("stroke", selectedNodesInfo.stroke)  // colour the line
+            .style("opacity", (d, i) => {
+                if(selectedNodes.length === ++i || !d.children) {
+                    return 0;
+                }
+            })  // colour the line
+            .attr("x1", 5)     // x position of the first end of the line
+            .attr("y1", (d, i)=>{
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis1 += parseInt(axisDifference)
+                return yAxis1;
+            })                  // y position of the first end of the line
+            .attr("x2", 5)     // x position of the second end of the line
+            .attr("y2", (d, i) => {
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis2 += parseInt(axisDifference)
+                return yAxis2;
+            })
+            .attr("marker-end", "url(#triangle)");
 
             newLine.append("text")
-                .attr("dy", (d, i) => {
-                    const height = 10 * i * 4;
-                    return height;
-                })
-                .text((d) => d.data.name)
-                .style('fill', selectedNodesInfo.fontColor)
-                .style('font-weight', 'bold')
+            .attr("dy", (d, i) => {
+                const height = 10*i*4;
+                return height;
+            })
+            .text((d) => d.data.name)
+            .style('fill', selectedNodesInfo.fontColor)
+            .style('font-weight', 'bold')
 
             newLine.merge(line);
 
@@ -327,21 +330,21 @@ class TreeGraph extends AbstractGraph {
             let yTra = 0;
 
             svg.selectAll('.genealogy')
-                .data(selectedNodes)
-                .each(function (d) {
-                    if (d.children) {
-                        const firstChild = d.children[0];
-                        if (!firstChild.data.loaded) {
-                            xTra = firstChild.x + 40
-                            yTra = firstChild.y + 200
-                        }
-                    } else if (d.data.clicked) {
-                        xTra = d.x + 40
-                        yTra = d.y + 200
+            .data(selectedNodes)
+            .each(function (d) {
+                if(d.children) {
+                    const firstChild = d.children[0];
+                    if(!firstChild.data.loaded) {
+                        xTra = firstChild.x + 40
+                        yTra = firstChild.y + 200
                     }
-                })
+                } else if(d.data.clicked) {
+                    xTra = d.x + 40
+                    yTra = d.y + 200
+                }
+            })
 
-            d3.selectAll('.genealogy').attr("transform", "translate(" + yTra + "," + xTra + ")");
+            d3.selectAll('.genealogy').attr("transform", "translate(" + yTra + ","+ xTra +")");
 
             line.exit().remove();
         } else {
@@ -357,7 +360,7 @@ class TreeGraph extends AbstractGraph {
     setPage = (d) => {
         if (d && d.data.kids) {
             d.data.children = [];
-            d.data.kids.forEach((d1, i) => {
+            d.data.kids.forEach( (d1, i) => {
                 if (d.data.page === d1.pageNo) {
                     d.data.children.push(d1);
                 }
@@ -366,9 +369,9 @@ class TreeGraph extends AbstractGraph {
         }
     }
 
-    removePreviousChart() {
+    removePreviousChart(){
         this.getGraphContainer().selectAll('g.node').remove();
-    }
+    } 
 
     componentWillUpdate() {
         this.removePreviousChart();
@@ -448,7 +451,7 @@ class TreeGraph extends AbstractGraph {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = d.data.category.icons;
+                    let img = this.fetchImage(d.data.data, d.data.contextName);
                     return img
                 })
                 .attr("width", 25)
@@ -537,38 +540,28 @@ class TreeGraph extends AbstractGraph {
 
     renderRectNode = (d) => {
         const {
-            rectNode,
+            rectNode
         } = this.getConfiguredProperties();
 
         const {
-            commonEN,
-            netmaskToCIDR,
+            renderNode
         } = this.props;
 
-        const data = d.data || {};
-        const contextName = this.changeContextBasedOnSelection(data.contextName, 'template');
+        if (!isFunction(renderNode)) return '<div/>';
 
-        let img = data.category.icons;
+        const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
+        return renderNode({data: d.data, textColor: rectColorText, ...rectNode});
+    }
 
-        const rectColorText = data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        const colmAttr = rectNode['attributesToShow'][contextName] || rectNode['attributesToShow']['default'];
-        const displayName = data.name ? (data.name.length > 10 ? `${data.name.substring(0, 10)}...` : data.name) : 'No Name given';
-        const displayDesc = data.description ? (data.description.length > 25 ? `${data.description.substring(0, 25)}...` : data.description) : commonEN.general.noDescription;
-        const CIDR = (colmAttr.address && data.data._netmask) ? netmaskToCIDR(data.data._netmask) : '';
-        const showImg = img ? `<div style="width:22%;float:left"><img style="width: 20px;" src="${img}" /></div>` : '';
-        const showNameAttr = (colmAttr.name) ? `<div style="width:${showImg ? '78%' : '100%'};float:right;font-size: 10px;color:${rectColorText}">${displayName}</div>` : '';
-        const showDesAttr = (colmAttr.description) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${displayDesc}</div>` : '';
-        const showAddressAttr = (colmAttr.address) ? `<div style="width:78%;float:left;font-size: 8px;margin-top: 4px;color:${rectColorText}">${data.data._address}/${CIDR}</div>` : '';
-        
-        return (
-                `<div style="width: ${(rectNode.width - rectNode.textMargin * 2)}px; height: ${(rectNode.height - rectNode.textMargin * 2)}px;" class="node-text wordwrap">
-                    ${showImg}
-                    ${showNameAttr}
-                    <div style="width:22%;float:left;font-size: 8px;"></div>
-                    ${showDesAttr}
-                    ${showAddressAttr}
-                </div>`
-            );
+    fetchImage =(apiData, contextName) => {
+        const {
+            fetchImage
+        } = this.props;
+
+        if(!isFunction(fetchImage))
+            return false;
+
+        return fetchImage({apiData, contextName});
     }
 
     updateLinks = (source, links) => {
@@ -628,41 +621,41 @@ class TreeGraph extends AbstractGraph {
 
     normalArrow(svg, linksSettings) {
         svg.append("svg:defs").append('marker')
-            .attr('id', 'normal-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .attr('fill', linksSettings.stroke.defaultColor)
-            .append('path')
-            .attr('d', 'M10,-5L0,0L10,5');
+		.attr('id', 'normal-arrow')
+		.attr('viewBox', '0 -5 10 10')
+		.attr('refX', 0)
+		.attr('refY', 0)
+		.attr('markerWidth', 6)
+		.attr('markerHeight', 6)
+		.attr('orient', 'auto')
+		.attr('fill', linksSettings.stroke.defaultColor)
+		.append('path')
+		.attr('d', 'M10,-5L0,0L10,5');
     }
 
     coloredArrow(svg, linksSettings) {
         svg.append("svg:defs").append('marker')
-            .attr('id', 'colored-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .attr('fill', linksSettings.stroke.selectedColor)
-            .append('path')
-            .attr('d', 'M10,-5L0,0L10,5');
+		.attr('id', 'colored-arrow')
+		.attr('viewBox', '0 -5 10 10')
+		.attr('refX', 0)
+		.attr('refY', 0)
+		.attr('markerWidth', 6)
+		.attr('markerHeight', 6)
+		.attr('orient', 'auto')
+		.attr('fill', linksSettings.stroke.selectedColor)
+		.append('path')
+		.attr('d', 'M10,-5L0,0L10,5');
     }
 
     diagonal = (d) => {
 
         // Creates a curved (diagonal) path from parent to the child nodes
         var p0 = {
-            x: d.x + this.rectHeight / 2,
-            y: (d.y)
-        },
+                x: d.x + this.rectHeight / 2,
+                y: (d.y)
+            },
             p3 = {
-                x: d.parent.x + this.rectHeight / 2,
+                x: d.parent.x + this.rectHeight / 2 ,
                 y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
             },
             m = (p0.y + p3.y) / 2,
@@ -670,10 +663,10 @@ class TreeGraph extends AbstractGraph {
                 x: p0.x,
                 y: m
             }, {
-                    x: p3.x,
-                    y: m
-                }, p3];
-        p = p.map((d) => {
+                x: p3.x,
+                y: m
+            }, p3];
+        p = p.map( (d) => {
             return [d.y, d.x];
         });
 
@@ -682,8 +675,9 @@ class TreeGraph extends AbstractGraph {
     }
 
     parseTransformation = (a) => {
-        const b = {};
-        for (const i in a = a.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g)) {
+        const b={};
+        for (const i in a = a.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g))
+        {
             const c = a[i].match(/[\w.-]+/g);
             b[c.shift()] = c;
         }
@@ -707,7 +701,7 @@ class TreeGraph extends AbstractGraph {
 
     renderTopologyGraph = () => {
         let { height, transformAttr } = this.props;
-        if (!transformAttr) {
+        if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
         return (
