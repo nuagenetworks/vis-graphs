@@ -532,11 +532,6 @@ class TreeGraph extends AbstractGraph {
                 return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
     }
-    
-    changeContextBasedOnSelection = (contextName, removalContext) => {
-        const isRemovalContextPos = contextName.search(removalContext)
-        return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
-    }
 
     renderRectNode = (d) => {
         const {
