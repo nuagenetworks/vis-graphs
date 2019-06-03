@@ -11,7 +11,6 @@ export const properties = {
     enableSelectAll: true,
 
     rowHeight: 40,
-    colors: [theme.palette.greyLighterColor, theme.palette.whiteColor],
     fontColor: theme.palette.blackLightColor,
     highlightColor: theme.palette.greenLighterColor,
     border: {
