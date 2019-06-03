@@ -1,4 +1,8 @@
 
+import {
+    theme
+} from "../../theme"
+
 export const properties = {
     linksSettings: {
         stroke: {
@@ -7,6 +11,24 @@ export const properties = {
             "width": "1px"
         }
     },
+    colors: [
+        theme.palette.greenColor,
+        theme.palette.mauveColor,
+        theme.palette.yellowDarkColor,
+        theme.palette.blueLightColor,
+        theme.palette.pinkLightColor,
+        theme.palette.redBlindColor,
+        theme.palette.peach,
+        theme.palette.darkCyan,
+        theme.palette.lightBrown,
+        theme.palette.orangeLighterColor,
+        theme.palette.blueviolet,
+        theme.palette.aquaLightColor,
+        theme.palette.yellowLightColor,
+        theme.palette.greenDarkerColor,
+        theme.palette.redLightColor,
+        theme.palette.orangeLightColor,
+    ],
     "transition": {
         "duration": 750
     },
