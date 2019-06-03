@@ -101,7 +101,7 @@ class TreeGraph extends AbstractGraph {
     elementGenerator = () => {
         const {
             data,
-            graphType
+            graphRenderView
         } = this.props;
 
         // declares a tree layout and assigns the size
@@ -109,7 +109,7 @@ class TreeGraph extends AbstractGraph {
         this.treeData = data[0];
         
         // Assigns parent, children, height, depth
-        this.root = hierarchy(this.treeData, (d) => { return graphType ? d.kids : d.children; });
+        this.root = hierarchy(this.treeData, (d) => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
         this.root.x0 = this.getAvailableHeight() / 2;
         this.root.y0 = 0;
@@ -158,7 +158,7 @@ class TreeGraph extends AbstractGraph {
                 preBtn,
                 nextBtn
             },
-            graphType
+            graphRenderView
         } = this.props;
 
         const {
@@ -190,7 +190,7 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
-        if (!graphType) {
+        if (!graphRenderView) {
             // ======================selected nodes notification to show==============================
             this.renderSelectedNodesInfo(nodes)
 
@@ -403,7 +403,7 @@ class TreeGraph extends AbstractGraph {
 
         const {
             commonEN,
-            graphType
+            graphRenderView
         } = this.props;
 
         let i = 0,
@@ -412,7 +412,7 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = rectNode.width;
         this.rectHeight = rectNode.height;
 
-        if (this.count_leaves(nodes) && !graphType) {
+        if (this.count_leaves(nodes) && !graphRenderView) {
             const countLeaves = this.count_leaves(nodes);
             if (countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
@@ -441,7 +441,7 @@ class TreeGraph extends AbstractGraph {
                 "translate(" + source.y0 + "," + source.x0 + ")";
         })
         .on("click", (d) => {
-            !graphType ? this.click(d) : this.props.OnChangleContext(d);
+            !graphRenderView ? this.click(d) : this.props.OnChangleContext(d);
         })
 	    .on("dragleave", (event) => this.props.OnSubmitFormOnDragLeave(event));
 
