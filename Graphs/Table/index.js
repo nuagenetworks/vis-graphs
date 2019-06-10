@@ -1079,7 +1079,6 @@ class Table extends AbstractGraph {
                                 tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
                                 footerToolbarStyle={style.footerToolbar}
-                                fixedHeader={true}
                             />
                         }
                 </div>
