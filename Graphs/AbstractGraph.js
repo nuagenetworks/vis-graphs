@@ -2,6 +2,7 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
 import _ from 'lodash';
+import objectPath from 'object-path';
 
 import "./style.css"
 import defaultProperties from "./defaultProperties";
@@ -184,7 +185,13 @@ export default class AbstractGraph extends React.Component {
     };
 
     setConfiguredProperties(props, properties) {
-        this.configuredProperties = Object.assign({}, defaultProperties, properties, props.configuration.data, { multiMenu: props.configuration.multiMenu, menu: props.configuration.menu });
+        this.configuredProperties = Object.assign(
+            {},
+            { isCustomColor: objectPath.has(props.configuration.data, 'colors') || false },
+            defaultProperties,
+            properties,
+            props.configuration.data,
+            { multiMenu: props.configuration.multiMenu, menu: props.configuration.menu });
     }
 
     getConfiguredProperties() {
@@ -203,8 +210,8 @@ export default class AbstractGraph extends React.Component {
         if (!colorColumn && !defaultColumn)
             return;
 
-        let domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys().sort();
-        let colors = Object.assign({}, mapColors, heatmapColor ? heatmapColor : {}, mappedColors ? mappedColors : {});
+        const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys().sort();
+        const colors = Object.assign({}, mapColors, heatmapColor || {}, mappedColors || {});
 
         let propColors = [];
         let index = 0;
@@ -251,16 +258,31 @@ export default class AbstractGraph extends React.Component {
 
     scaleColor(data, defaultColumn) {
         const {
+            setGraphColor,
+        } = this.props;
+
+        const {
             colors,
             otherColors,
             colorColumn,
+            isCustomColor,
         } = this.getConfiguredProperties();
 
         if (!colorColumn && !defaultColumn)
             return;
 
-        const scale = d3.scaleOrdinal([...colors, ...otherColors]);
-        scale.domain(data.map((d) => d[colorColumn || defaultColumn]));
+        let scale;
+        const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys();
+        const colorList = [...colors, ...otherColors];
+
+        if (setGraphColor && !isCustomColor) {
+            const graphColors = setGraphColor(domainData, colorList);
+            scale = d3.scaleOrdinal(graphColors);
+        } else {
+            scale = d3.scaleOrdinal(colorList);
+        }
+
+        scale.domain(domainData);
 
         return scale;
     }

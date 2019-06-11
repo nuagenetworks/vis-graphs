@@ -515,7 +515,7 @@ function ChordDiagram(svg){
       j = indices[destination(d)];
 
       if(chordWeightColumn){
-        matrix[j][i] = weight(d);
+          matrix[j][i] += weight(d);
       } else {
 
         // Handle the case where no weight column was specified

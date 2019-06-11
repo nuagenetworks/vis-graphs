@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
+import _ from 'lodash';
 
 import AbstractGraph from "../AbstractGraph";
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
@@ -7,7 +8,10 @@ import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 import style from "./styles"
 import {properties} from "./default.config"
 import { format, timeFormat } from "d3";
+import { pick } from '../../utils/helpers';
+
 const d3 = { format, timeFormat };
+const FILTER_KEY = ['data', 'height', 'width', 'context'];
 
 /*
     This graph will present the variation between 2 values:
@@ -24,6 +28,12 @@ export class VariationTextGraph extends AbstractGraph {
             values: null
         }
         this.initialize();
+    }
+
+    componentDidUpdate (prevProps) {
+        if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+            this.initialize();
+        }
     }
 
     initialize() {
