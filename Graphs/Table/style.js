@@ -3,8 +3,7 @@
 const tableStyle = {
     defaultFontsize: 10,
     table: {
-        width: "inherit",
-        minWidth: "100%"
+        width: "100%"
     },
     body: {
         overflowY: "auto",
@@ -45,6 +44,10 @@ const tableStyle = {
         labelStyle: {
             fontWeight: 700
         }
+    },
+    
+    tableFixedHeader: {
+        borderRight: "40px solid transparent"
     }
   }
   
