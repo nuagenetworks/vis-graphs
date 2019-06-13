@@ -100,7 +100,7 @@ class SimpleTextGraph extends AbstractGraph {
         return (
             <div className="simpleText"
             style={{ fontSize: labelFontSize, marginBottom: 10, textAlign: 'center' }}>
-                {title !== undefined ? title : this.currentTitle()}
+                {(title !== undefined && title !== null) ? title : this.currentTitle()}
             </div>
         );
     }
