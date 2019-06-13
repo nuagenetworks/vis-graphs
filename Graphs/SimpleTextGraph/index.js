@@ -86,7 +86,7 @@ class SimpleTextGraph extends AbstractGraph {
         return "Untitled";
     }
 
-    renderTitleIfNeeded(requestedPosition, currentPosition) {
+    renderTitleIfNeeded(requestedPosition, currentPosition, title) {
         const { labelFontSize } = this.getConfiguredProperties();
         if (requestedPosition !== currentPosition)
             return;
@@ -94,7 +94,7 @@ class SimpleTextGraph extends AbstractGraph {
         return (
             <div className="simpleText"
             style={{ fontSize: labelFontSize, marginBottom: 10, textAlign: 'center' }}>
-                {this.currentTitle()}
+                {(title !== undefined && title !== null) ? title : this.currentTitle()}
             </div>
         );
     }
@@ -129,7 +129,8 @@ class SimpleTextGraph extends AbstractGraph {
         data,
         padding,
         targetedColumn,
-        titlePosition
+        titlePosition,
+        customText
     }) => {
         return (
             <div style={{
@@ -156,7 +157,7 @@ class SimpleTextGraph extends AbstractGraph {
                     whiteSpace: 'nowrap',
                 }}>
                     {this.displayText(data, targetedColumn)}
-                    {this.renderTitleIfNeeded(titlePosition, "bottom")}
+                    {this.renderTitleIfNeeded(titlePosition, "bottom", customText)}
                 </div>
             </div>
         );
