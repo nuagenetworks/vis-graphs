@@ -135,7 +135,8 @@ class SimpleTextGraph extends AbstractGraph {
         data,
         padding,
         targetedColumn,
-        titlePosition
+        titlePosition,
+        enableTitleInText
     }) => {
         return (
             <div style={{
@@ -162,7 +163,7 @@ class SimpleTextGraph extends AbstractGraph {
                     whiteSpace: 'nowrap',
                 }}>
                     {this.displayText(data, targetedColumn)}
-                    {this.renderTitleIfNeeded(titlePosition, "bottom")}
+                    {enableTitleInText && this.renderTitleIfNeeded(titlePosition, "bottom")}
                 </div>
             </div>
         );

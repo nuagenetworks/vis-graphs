@@ -481,6 +481,8 @@ __innerWidth__ - Define the percentage of the width for the area. `1` means 100%
 
 __innerHeight__ - Define the percentage of the height for the area. `1` means 100% of the width. Default is `0.4`
 
+__enableTitleInText__ - Specify if graph title is to be displayed within the text section. Default is `true`
+
 ## *VariationTextGraph*
 This graph shows a value and its variation from the previous one.
 
