@@ -978,12 +978,14 @@ class Table extends AbstractGraph {
         const {
             searchBar,
             selectColumnOption,
+            fixedHeader,
         } = this.getConfiguredProperties();
 
         let heightMargin = showFooter ? 95 : 80;
 
         heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
         heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
+        heightMargin = fixedHeader ? heightMargin + 25 : heightMargin;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
     }
@@ -1016,7 +1018,8 @@ class Table extends AbstractGraph {
             searchText,
             tableHeaderStyle,
             tableRowColumnStyle,
-            tableRowStyle = {}
+            tableRowStyle = {},
+            fixedHeader,
         } = this.getConfiguredProperties();
 
         const {
@@ -1039,7 +1042,7 @@ class Table extends AbstractGraph {
         return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
-                    onContextMenu={this.handleContextMenu}
+                    onContextMenu={this.handleContextMenu} 
                     >
                         <div style={{float:'right', display: 'flex', paddingRight: 15}}>
                             { this.resetScrollData() }
@@ -1055,6 +1058,7 @@ class Table extends AbstractGraph {
                             scroll && searchText && searchString === null ?
                             this.renderMessage("Filtering...")  : 
                             <DataTables
+                                fixedHeader={fixedHeader}
                                 columns={headerData}
                                 data={tableData}
                                 initialSort={initialSort}
@@ -1074,7 +1078,7 @@ class Table extends AbstractGraph {
                                 rowSize={pageSize}
                                 tableStyle={style.table}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
-                                tableHeaderStyle={tableHeaderStyle}
+                                tableHeaderStyle={fixedHeader ? {tableHeaderStyle, ...style.tableFixedHeader} : {tableHeaderStyle}}
                                 tableRowStyle={{...style.row, ...tableRowStyle}}
                                 tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
                                 tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}

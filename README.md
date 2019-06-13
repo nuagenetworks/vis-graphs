@@ -372,6 +372,8 @@ __onColumnSelection__ - (handler) Event to capture the list of selected columns 
 
 __highlight__ - (Array of columns) Highlighted the rows if value of columns is not null
 
+__fixedHeader__ - (boolean) fix table header while scrolling. Default is `true`.
+
 __hidePagination__ - Hide paging and search bar if data size is less than pagination limit - Default is `true`
 
 __border__
