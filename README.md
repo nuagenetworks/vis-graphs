@@ -450,6 +450,8 @@ __defaultOpacity__ -  Default opacity. Default is `0.6`
 
 __fadedOpacity__ - Hovered opacity. Default is `0.1`
 
+__bidirectionalTooltip__ - Indicates if tooltip needs to display content corresponding to both directions. Default is `true`
+
 ## *SimpleTextGraph*
 This graph allows you to display a simple text information.
 
