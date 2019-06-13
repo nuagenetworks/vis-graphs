@@ -36,7 +36,7 @@ export default class ChordGraph extends AbstractGraph {
       if(!this.chordDiagram) {
         this.chordDiagram = ChordDiagram(this.svg);
 
-        const { tooltip } = this.getConfiguredProperties();
+        const { tooltip, bidirectionalTooltip = true } = this.getConfiguredProperties();
 
         const { accessor, label } = (
             (tooltip && tooltip.length === 1)
@@ -63,11 +63,13 @@ export default class ChordGraph extends AbstractGraph {
                             <span> {accessor({ value: sourceValue})}</span>
                             { label ? <span> {label}</span>:null }
                         </div>
-                        <div>
-                            <strong>{`${source} to ${destination}:`}</strong>
-                            <span> {accessor({ value: destinationValue})}</span>
-                            { label ? <span> {label}</span>:null }
-                        </div>
+                        {bidirectionalTooltip &&
+                            <div>
+                                <strong>{`${source} to ${destination}:`}</strong>
+                                <span> {accessor({ value: destinationValue})}</span>
+                                { label ? <span> {label}</span>:null }
+                            </div>
+                        }
                     </React.Fragment>
                 );
             } else {
