@@ -403,9 +403,9 @@ __columns__ - (Array) Array of columns display in the table. Example -
         { 
             "column": "subnetName", 
             "label": "Subnet", 
-            "totalCharacters": 16, // to show 16 characters for column value
-            "tooltip": {"column": "nuage_metadata.subnetName"}, // to tooltip on column values
-            "fontColor": "red" // to give font-color to column value
+            "totalCharacters": 16, // show number of characters for column value
+            "tooltip": {"column": "nuage_metadata.subnetName"}, // show tooltip on column values
+            "fontColor": "red" // set the font color of the column value
         }
     ]
 ```
