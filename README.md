@@ -400,7 +400,13 @@ __columns__ - (Array) Array of columns display in the table. Example -
         },
         { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
-        { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
+        { 
+            "column": "subnetName", 
+            "label": "Subnet", 
+            "totalCharacters": 16, // to show 16 characters for column value
+            "tooltip": {"column": "nuage_metadata.subnetName"}, // to tooltip on column values
+            "fontColor": "red" // to give font-color to column value
+        }
     ]
 ```
 __tabifyOptions__ - Converting the provided array indexes to comma separated values, instead of generating the multiple rows (avoiding possible duplicates). E.g -
