@@ -11,6 +11,14 @@ import {properties} from "./default.config"
 
 const MAX_LABEL_LENGTH = 15;
 
+const renderTooltipContent = (from, to, value, accessor, label) => (
+    <div>
+        <strong>{`${from} to ${to}:`}</strong>
+        <span> {accessor({value})}</span>
+        {label ? <span> {label}</span>:null}
+    </div>
+);
+
 export default class ChordGraph extends AbstractGraph {
     chordDiagram = null;
 
@@ -36,7 +44,7 @@ export default class ChordGraph extends AbstractGraph {
       if(!this.chordDiagram) {
         this.chordDiagram = ChordDiagram(this.svg);
 
-        const { tooltip } = this.getConfiguredProperties();
+        const { tooltip, bidirectionalTooltip } = this.getConfiguredProperties();
 
         const { accessor, label } = (
             (tooltip && tooltip.length === 1)
@@ -58,16 +66,8 @@ export default class ChordGraph extends AbstractGraph {
 
                 return (
                     <React.Fragment>
-                        <div>
-                            <strong>{`${destination} to ${source}:`}</strong>
-                            <span> {accessor({ value: sourceValue})}</span>
-                            { label ? <span> {label}</span>:null }
-                        </div>
-                        <div>
-                            <strong>{`${source} to ${destination}:`}</strong>
-                            <span> {accessor({ value: destinationValue})}</span>
-                            { label ? <span> {label}</span>:null }
-                        </div>
+                        {renderTooltipContent(destination, source, sourceValue, accessor, label)}
+                        {bidirectionalTooltip && renderTooltipContent(source, destination, destinationValue, accessor, label)}
                     </React.Fragment>
                 );
             } else {

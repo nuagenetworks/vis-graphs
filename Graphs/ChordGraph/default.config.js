@@ -6,5 +6,6 @@ export const properties = {
     transitionDuration: 500,
     defaultOpacity: 0.6,
     fadedOpacity: 0.1,
-    chartWidthToPixel: 6
+    chartWidthToPixel: 6,
+    bidirectionalTooltip: true
 }
