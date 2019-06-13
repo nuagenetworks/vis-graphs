@@ -493,6 +493,13 @@ class Table extends AbstractGraph {
 
                     if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
+                        
+                        /**
+                        * define the font color of the column value
+                        */
+                        if (columnObj.fontColor) {
+                            data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
+                        }
                     }
                 }
             }
