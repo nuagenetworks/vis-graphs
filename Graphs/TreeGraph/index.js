@@ -689,9 +689,9 @@ class TreeGraph extends AbstractGraph {
         this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
     }
 
-    dragStart = (event, depth, moduleName) => {
+    dragStart = (event, depth, moduleName, subModule) => {
         const svg = this.getGraphContainer();
-        this.props.OnSetDragging(depth, moduleName, svg)
+        this.props.OnSetDragging(depth, moduleName, svg, subModule)
     }
 
     renderTopologyGraph = () => {
