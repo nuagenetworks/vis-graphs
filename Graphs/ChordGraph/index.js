@@ -11,9 +11,9 @@ import {properties} from "./default.config"
 
 const MAX_LABEL_LENGTH = 15;
 
-const renderTooltipContent = (source, destination, value, accessor, label) => (
+const renderTooltipContent = (from, to, value, accessor, label) => (
     <div>
-        <strong>{`${source} to ${destination}:`}</strong>
+        <strong>{`${from} to ${to}:`}</strong>
         <span> {accessor({value})}</span>
         {label ? <span> {label}</span>:null}
     </div>
