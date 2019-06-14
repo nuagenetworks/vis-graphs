@@ -2,7 +2,10 @@
     cursor: pointer;
 }
 
-svg { width:100% }
+.svgWidth {
+	width:100%
+}
+/* svg { width:100% } */
 
 .node circle {
     fill: #fff;
@@ -60,5 +63,6 @@ div.tooltip {
     border-radius: 8px;
 	pointer-events: none;
 	max-width: 200px;
-    height: auto;
+	height: auto;
+	z-index: 1;
 }

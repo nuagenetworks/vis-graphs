@@ -26,6 +26,8 @@ class TreeGraph extends AbstractGraph {
         this.transformAttr = null;
         this.rectWidth = 0
         this.rectHeight = 0
+        this.depth = 0;
+        this.module = null;
         this.initiate(props);
     }
 
@@ -39,6 +41,13 @@ class TreeGraph extends AbstractGraph {
 
         this.setSVGTransform(this.props)
         this.elementGenerator();
+        this.setDraggingRef(this.props)
+    }
+
+    setDraggingRef = (props) => {
+        if(props.onDragStartRef) {
+            props.onDragStartRef(this.dragStart)
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -91,7 +100,8 @@ class TreeGraph extends AbstractGraph {
     // generate methods which helps to create charts
     elementGenerator = () => {
         const {
-            data
+            data,
+            graphRenderView
         } = this.props;
 
         // declares a tree layout and assigns the size
@@ -99,7 +109,7 @@ class TreeGraph extends AbstractGraph {
         this.treeData = data[0];
         
         // Assigns parent, children, height, depth
-        this.root = hierarchy(this.treeData, (d) => { return d.children; });
+        this.root = hierarchy(this.treeData, (d) => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
         this.root.x0 = this.getAvailableHeight() / 2;
         this.root.y0 = 0;
@@ -147,7 +157,8 @@ class TreeGraph extends AbstractGraph {
             siteIcons: {
                 preBtn,
                 nextBtn
-            }
+            },
+            graphRenderView
         } = this.props;
 
         const {
@@ -179,73 +190,75 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
-        // ======================selected nodes notification to show==============================
-        this.renderSelectedNodesInfo(nodes)
-        
-        // ======================pagination starts here==============================
-        const parents = nodes.filter(function (d) {
-            return (d.data.kids && d.data.kids.length > max) ? true : false;
-        });
-        
-        svg.selectAll(".page").remove();
+        if (!graphRenderView) {
+            // ======================selected nodes notification to show==============================
+            this.renderSelectedNodesInfo(nodes)
 
-        parents.forEach((p) => {
-            if (p.children) {
-                const p1 = p.children[p.children.length - 1];
-                const p2 = p.children[0];
+            // ======================pagination starts here==============================
+            const parents = nodes.filter(function (d) {
+                return (d.data.kids && d.data.kids.length > max) ? true : false;
+            });
 
-                const pr = p.data;
-                const pagingData = [];
+            svg.selectAll(".page").remove();
 
-                if (pr.page > 1) {
-                    pagingData.push({
-                        type: "prev",
-                        parent: p,
-                        no: (pr.page - 1)
-                    });
+            parents.forEach((p) => {
+                if (p.children) {
+                    const p1 = p.children[p.children.length - 1];
+                    const p2 = p.children[0];
+
+                    const pr = p.data;
+                    const pagingData = [];
+
+                    if (pr.page > 1) {
+                        pagingData.push({
+                            type: "prev",
+                            parent: p,
+                            no: (pr.page - 1)
+                        });
+                    }
+
+                    if (pr.page < Math.ceil(pr.kids.length / max)) {
+                        pagingData.push({
+                            type: "next",
+                            parent: p,
+                            no: (pr.page + 1)
+                        });
+                    }
+
+                    const pageControl = svg.selectAll(".page")
+                        .data(pagingData, function (d) {
+                            return (d.parent.id + d.type);
+                        }).enter()
+                        .append("g")
+                        .attr("class", "page")
+                        .attr("transform", function (d) {
+                            const x = (d.type === "next") ? p2.y : p1.y;
+                            const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
+                            return "translate(" + x + "," + y + ")";
+                        }).on("click", this.paginate);
+
+                    pageControl
+                        .append("circle")
+                        .attr("r", 15)
+                        .style("fill", paginationIconColor)
+
+                    pageControl
+                        .append("image")
+                        .attr("xlink:href", function (d) {
+                            if (d.type === "next") {
+                                return nextBtn
+                            } else {
+                                return preBtn
+                            }
+                        })
+                        .attr("x", -12.5)
+                        .attr("y", -12.5)
+                        .attr("width", 25)
+                        .attr("height", 25);
+
                 }
-
-                if (pr.page < Math.ceil(pr.kids.length / max)) {
-                    pagingData.push({
-                        type: "next",
-                        parent: p,
-                        no: (pr.page + 1)
-                    });
-                }
-
-                const pageControl = svg.selectAll(".page")
-                    .data(pagingData, function (d) {
-                        return (d.parent.id + d.type);
-                    }).enter()
-                    .append("g")
-                    .attr("class", "page")
-                    .attr("transform", function (d) {
-                        const x = (d.type === "next") ? p2.y : p1.y;
-                        const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
-                        return "translate(" + x + "," + y + ")";
-                    }).on("click", this.paginate);
-
-                pageControl
-                    .append("circle")
-                    .attr("r", 15)
-                    .style("fill", paginationIconColor)
-
-                pageControl
-                    .append("image")
-                    .attr("xlink:href", function (d) {
-                        if (d.type === "next") {
-                            return nextBtn
-                        } else {
-                            return preBtn
-                        }
-                    })
-                    .attr("x", -12.5)
-                    .attr("y", -12.5)
-                    .attr("width", 25)
-                    .attr("height", 25);
-
-            }
-        });
+            });
+        }
     }
 
     renderSelectedNodesInfo = (nodes) => {
@@ -365,20 +378,15 @@ class TreeGraph extends AbstractGraph {
     }
 
     count_leaves = (node) => {
-        let count=0;
+        let count = 0;
         for (var i = 0; i < node.length; i++) {
-            if(node[i].children) {
-                for (var j = 0; j < node[i].children.length; j++) {
-                    if (node[i].children[j].children) {
-                        this.count_leaves(node[i].children[j]);
-                    }
-                    else {
-                        count++;
-                    }
+            if (node[i].children) {
+                if(node[i].children.length > count) {
+                    count = node[i].children.length
                 }
-                return count;
             }
         }
+        return count;
     }
 
     updateNodes = (source, nodes) => {
@@ -394,7 +402,8 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN
+            commonEN,
+            graphRenderView
         } = this.props;
 
         let i = 0,
@@ -403,9 +412,9 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = rectNode.width;
         this.rectHeight = rectNode.height;
 
-        if(this.count_leaves(nodes)) {
+        if (this.count_leaves(nodes) && !graphRenderView) {
             const countLeaves = this.count_leaves(nodes);
-            if(countLeaves > maximumNodesToShowOnPage) {
+            if (countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
                 this.rectHeight = rectNode.smallerHeight;
                 showOnlyImg = true;
@@ -431,26 +440,18 @@ class TreeGraph extends AbstractGraph {
                 "translate(" + d.parent.y + "," + d.parent.x + ")" :
                 "translate(" + source.y0 + "," + source.x0 + ")";
         })
-        .on("click", this.click);
+        .on("click", (d) => {
+            !graphRenderView ? this.click(d) : this.props.OnChangleContext(d);
+        })
+	    .on("dragleave", (event) => this.props.OnSubmitFormOnDragLeave(event));
 
         // ****************** Nodes section ***************************
-
-        nodeEnter.append('g').append('rect')
-            .attr('rx', 3)
-            .attr('ry', 3)
-            .attr('width', this.rectWidth)
-            .attr('height', this.rectHeight)
-            .attr("stroke", (d) => {
-                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
-            })
-            .attr("stroke-width", rectNode.stroke.width)
-            .attr('class', 'node-rect')
 
         if (showOnlyImg) {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = this.fetchImage(d.data.apiData, d.data.contextName);
+                    let img = this.fetchImage(d.data.data, d.data.contextName);
                     return img
                 })
                 .attr("width", 25)
@@ -458,9 +459,8 @@ class TreeGraph extends AbstractGraph {
                 .on("mouseover", function (d) {
                     tooltip.transition()
                         .duration(200)
-                        .style("opacity", 1)
-                        .style("z-index", 1);
-                    tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${ (d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0,100)}...` : d.data.description : commonEN.general.noDescription }</div>`)
+                        .style("opacity", 5)
+                    tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${(d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0, 100)}...` : d.data.description : commonEN.general.noDescription}</div>`)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 28) + "px");
                 })
@@ -478,6 +478,17 @@ class TreeGraph extends AbstractGraph {
                 })
                 .style("fill-opacity", 1);
         } else {
+            nodeEnter.append('g').append('rect')
+            .attr('rx', 3)
+            .attr('ry', 3)
+            .attr('width', this.rectWidth)
+            .attr('height', this.rectHeight)
+            .attr("stroke", (d) => {
+                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
+            })
+            .attr("stroke-width", rectNode.stroke.width)
+            .attr('class', 'node-rect')
+
             nodeEnter.append('foreignObject')
                 .attr('x', rectNode.textMargin)
                 .attr('y', rectNode.textMargin)
@@ -489,7 +500,7 @@ class TreeGraph extends AbstractGraph {
                     return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
                         (rectNode.height - rectNode.textMargin * 2)
                 })
-                .append('xhtml').html((d) => {
+                .html((d) => {
                     return this.renderRectNode(d);
                 })
         }
@@ -677,8 +688,13 @@ class TreeGraph extends AbstractGraph {
         const zm = transformAttr['scale'][0];
         this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
     }
-    
-    render() {
+
+    dragStart = (event, depth, moduleName, subModule) => {
+        const svg = this.getGraphContainer();
+        this.props.OnSetDragging(depth, moduleName, svg, subModule)
+    }
+
+    renderTopologyGraph = () => {
         let { height, transformAttr } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
@@ -694,14 +710,20 @@ class TreeGraph extends AbstractGraph {
                         .scaleExtent([1 / 2, 8])
                         .on("zoom", this.zoomed)
                     )}
-                }
+                    }
+                    className="svgWidth"
                 >
                     <g className='tree-graph-container' transform={transformAttr}>
 
                     </g>
                 </svg>
             </div>
-        );
+        )
+    }
+
+
+    render() {
+        return this.renderTopologyGraph();
     }
 }
 TreeGraph.propTypes = {
