@@ -30,6 +30,7 @@ export default class ProgressBarGraph extends AbstractGraph {
             display,
             maxDataFormat,
             defaultRange,
+            units
         } = this.getConfiguredProperties();
 
         if (display === PERCENTAGE) {
@@ -39,8 +40,9 @@ export default class ProgressBarGraph extends AbstractGraph {
 
         barData[usedData] = d3.format(maxDataFormat)(barData[usedData]);
         barData[maxData] = barData[maxData] ? d3.format(maxDataFormat)(barData[maxData]) : undefined;
+        const dataUnits = units ? ' ' + units : '';
 
-        return barData[maxData] ? `${barData[usedData]} / ${barData[maxData]}` : `${barData[usedData]} / ${defaultRange}`;
+        return barData[maxData] ? `${barData[usedData]}${dataUnits}/ ${barData[maxData]}${dataUnits}` : `${barData[usedData]}${dataUnits}/ ${defaultRange}${dataUnits}`;
     }
 
     getPercentage = (barData, width) => {
