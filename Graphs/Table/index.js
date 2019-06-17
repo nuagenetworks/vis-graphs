@@ -1027,6 +1027,7 @@ class Table extends AbstractGraph {
             tableRowColumnStyle,
             tableRowStyle = {},
             fixedHeader,
+            tableStyle = {}
         } = this.getConfiguredProperties();
 
         const {
@@ -1083,7 +1084,7 @@ class Table extends AbstractGraph {
                                 page={this.currentPage}
                                 count={totalRecords}
                                 rowSize={pageSize}
-                                tableStyle={style.table}
+                                tableStyle={{...style.table, ...tableStyle}}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
                                 tableHeaderStyle={fixedHeader ? {tableHeaderStyle, ...style.tableFixedHeader} : {tableHeaderStyle}}
                                 tableRowStyle={{...style.row, ...tableRowStyle}}
