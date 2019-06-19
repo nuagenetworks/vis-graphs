@@ -385,7 +385,7 @@ class Table extends AbstractGraph {
                         label: columnRow.label || columnRow.column,
                         sortable: columnRow.sort !== false,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
-                        columField: index,
+                        columnField: index,
                         filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
                         style: {

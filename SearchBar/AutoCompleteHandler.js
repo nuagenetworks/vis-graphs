@@ -12,12 +12,12 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
     }
 
     needValues(parsedCategory, parsedOperator) {
-        const found = _.find(this.options, f => f.columField === parsedCategory || f.columnText === parsedCategory);
+        const found = _.find(this.options, f => f.columnField === parsedCategory || f.columnText === parsedCategory);
 
         if (found === null) {
             return [];
         }
-        const parsedField = found.columField;
+        const parsedField = found.columnField;
 
         if (found.type === "selection" && this.data !== null) {
             if (!this.cache[parsedField]) {
