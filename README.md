@@ -595,11 +595,11 @@ __filters__ - List down columns in search bar
 "filters": [
             {
                 "columnText": "name",
-                "columField": "nsgatewayName",
+                "columnField": "nsgatewayName",
                 "type": "text"
             },
             {
-                "columField": "status",
+                "columnField": "status",
                 "type": "selection" // for `selection`, value of status field should be string
             }
 
