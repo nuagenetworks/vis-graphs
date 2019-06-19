@@ -153,7 +153,7 @@ export class VariationTextGraph extends AbstractGraph {
 
         const lastValue = this.getFormattedValue(this.settings.values.lastValue);
         const previousValue = this.getFormattedValue(this.settings.values.previousValue);
-        const info = !absolute ? lastValue : (lastValue/previousValue);
+        const info = !absolute ? lastValue : `${lastValue} / ${previousValue}`;
 
         let fullScreenFont = context && context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
         return (
