@@ -4,7 +4,7 @@ export const properties = {
     width: "100%",
     padding: 5,
     limit: 100,
-    fixedHeader: true,
+    fixedHeader: false,
     selectable: true,
     multiSelectable: false,
     showCheckboxes: false,
@@ -27,5 +27,8 @@ export const properties = {
             right: "0",
             bottom: "solid 2px " + theme.palette.greyLightColor,
         }
+    },
+    tableStyle: {
+        tableLayout: "auto"
     }
 }
