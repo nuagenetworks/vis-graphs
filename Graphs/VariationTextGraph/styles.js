@@ -1,3 +1,13 @@
+const infoBoxTextNoVariation = {
+    borderRadius: "2px 0 0 2px",
+    display: "flex",
+    height: "100%",
+    fontWeight: "bold",
+    fontSize: "1.2em",
+    alignItems: "center",
+    textAlign: "center"
+}
+
 const style = {
     infoBoxIcon: {
         float: "left",
@@ -10,27 +20,14 @@ const style = {
         fontSize: "2em"
     },
 
+    infoBoxTextNoVariation,
+
     infoBoxText: {
-        borderRadius: "2px 0 0 2px",
-        display: "flex",
+        ...infoBoxTextNoVariation,
         float: "right",
-        height: "100%",
         width: "60%",
-        textAlign: "center",
-        fontWeight: "bold",
-        alignItems: "center",
-        fontSize: "1.2em"
     },
-
-    infoBoxTextNoVariation: {
-        borderRadius: "2px 0 0 2px",
-        display: "flex",
-        height: "100%",
-        fontWeight: "bold",
-        fontSize: "1.2em",
-        alignItems: "center",
-    },
-
+    
     labelText: {
         textAlign: "center",
         fontWeight: "bold",
