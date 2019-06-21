@@ -145,6 +145,7 @@ export class VariationTextGraph extends AbstractGraph {
 
         const {
             absolute,
+            showVariation
         } = this.getConfiguredProperties();
 
         const {
@@ -159,15 +160,15 @@ export class VariationTextGraph extends AbstractGraph {
         return (
 
             <div style={{height: "100%"}}>
-                <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
+                {showVariation && <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
                     <div style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}>
                         <div style={Object.assign({}, style.labelText, fullScreenFont)}>
                             { this.renderIcon(this.settings.icon) } <br/>
                             {`${this.decimals(this.settings.values.variation)}%`}
                         </div>
                     </div>
-                </span>
-                <span style={Object.assign({}, style.infoBoxText, fullScreenFont)}>
+                </span>}
+                <span style={Object.assign({}, showVariation ? style.infoBoxText : style.infoBoxTextNoVariation, fullScreenFont)}>
                     <span style={{ color: this.settings.colors.content, margin:"auto" }}>
                         { info || info === 0 ? info : 'NaN'}
                     </span>

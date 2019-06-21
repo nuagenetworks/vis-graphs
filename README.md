@@ -502,6 +502,8 @@ __fontSize__ - Font size
 
 __fontColor__ - Font color
 
+__showVariation__ - Display percentage variation. Default is `true`
+
 ## *HeatmapGraph*
 This graph shows a value of a column at given timestamp.
 It is a graphical representation of data where the individual values contained in a matrix are represented as colors

@@ -22,6 +22,15 @@ const style = {
         fontSize: "1.2em"
     },
 
+    infoBoxTextNoVariation: {
+        borderRadius: "2px 0 0 2px",
+        display: "flex",
+        height: "100%",
+        fontWeight: "bold",
+        fontSize: "1.2em",
+        alignItems: "center",
+    },
+
     labelText: {
         textAlign: "center",
         fontWeight: "bold",

@@ -41,4 +41,5 @@ export const properties = {
         },
         iconBox: theme.palette.greenDarkColor
     },
+    showVariation: true
 }
