@@ -23,7 +23,8 @@ export default class ProgressBarGraph extends AbstractGraph {
         return barData[maxData] ? width * barData[usedData] / barData[maxData] : width * barData[usedData] * 0.01;
     }
 
-    getData = (barData) => {
+    getData = (dataFromProps) => {
+        const barData = {...dataFromProps};
         const {
             maxData,
             usedData,
@@ -40,7 +41,7 @@ export default class ProgressBarGraph extends AbstractGraph {
 
         barData[usedData] = d3.format(maxDataFormat)(barData[usedData]);
         barData[maxData] = barData[maxData] ? d3.format(maxDataFormat)(barData[maxData]) : undefined;
-        const dataUnits = units ? ' ' + units : '';
+        const dataUnits = units || barData['unit'] ? ` ${units||barData['unit']}` : '';
 
         return barData[maxData] ? `${barData[usedData]}${dataUnits}/ ${barData[maxData]}${dataUnits}` : `${barData[usedData]}${dataUnits}/ ${defaultRange}${dataUnits}`;
     }
