@@ -96,7 +96,7 @@ export default class ProgressBarGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         if (!data.length) {
-            return;
+            return this.renderMessage('No data to visualize');
         }
 
         const availableWidth = width - (margin.left + margin.right);
