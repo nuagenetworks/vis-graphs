@@ -1092,7 +1092,7 @@ class Table extends AbstractGraph {
         return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
-                    //onContextMenu={this.handleContextMenu} 
+                    onContextMenu={this.handleContextMenu} 
                     >
                         <div style={{float:'right', display: 'flex', paddingRight: 15}}>
                             { this.resetScrollData() }
