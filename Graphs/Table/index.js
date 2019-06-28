@@ -193,7 +193,9 @@ class Table extends AbstractGraph {
 
         const {
             selectColumnOption,
-            matchingRowColumn
+            matchingRowColumn,
+            fixedHeader,
+            headerPadding,
         } = this.getConfiguredProperties()
 
         const columns = this.getColumns();
@@ -213,8 +215,10 @@ class Table extends AbstractGraph {
                 types[d.column] = 1;
             }
 
-            
-            d.size = this.labelSize(d.label || d.column, this.state.fontSize) + 10;
+            if (fixedHeader) {
+                d.size = this.labelSize(d.label || d.column, this.state.fontSize) + headerPadding;
+            }
+
             columnNameList.push(d.column);
             this.keyColumns[ d.selection ? d.label : `${d.column}_${types[d.column]}`] = d;
             types[d.column]++;
@@ -376,7 +380,7 @@ class Table extends AbstractGraph {
     }
 
     // TODO - refactor this code
-    getTableRowWidth(columns) {
+    getRowWidthDiff(columns) {
         const { width } = this.props;
 
         let rowWidth = 0;
@@ -388,16 +392,18 @@ class Table extends AbstractGraph {
         }
 
         if (rowWidth < width) {
-            return Math.ceil((width - 5)/this.state.columns.length);
+            const diff = width - rowWidth;
+            return Math.ceil((diff - 10)/this.state.columns.length);
         }
 
-        return false;
+        return 0;
     }
 
     // filter and formatting columns for table header
     getHeaderData() {
+        const { fixedHeader } = this.getConfiguredProperties();
         const columns = this.getKeyColumns();
-        const columnWidth = this.getTableRowWidth(columns);
+        const rowWidthDiff = fixedHeader && this.getRowWidthDiff(columns);
 
         let headerData = [];
         this.tableWidth =  0;
@@ -406,7 +412,8 @@ class Table extends AbstractGraph {
                 const columnRow = columns[index];
                 if(this.state.columns.filter( d => d.value === columnRow.label).length) {
                     this.tableWidth += columnRow.size;
-                   
+                    const width = fixedHeader && (columnRow.size + rowWidthDiff);
+
                     headerData.push({
                         key: index,
                         label: columnRow.label || columnRow.column,
@@ -417,8 +424,8 @@ class Table extends AbstractGraph {
                         type: columnRow.selection ? "selection" : "text",
                         style: {
                             textIndent: '2px',
-                            minWidth: columnWidth || columnRow.size,
-                            maxWidth: columnWidth || columnRow.size,
+                            minWidth: width,
+                            maxWidth: width,
                         }
                     })
                 }
@@ -431,7 +438,9 @@ class Table extends AbstractGraph {
     getTableData(columns) {
         const {
             highlight,
-            highlightColor
+            highlightColor,
+            fixedHeader,
+            headerPadding,
         } = this.getConfiguredProperties();
 
         if(!columns)
@@ -459,9 +468,11 @@ class Table extends AbstractGraph {
                     }
 
                     // get with of the column data
-                    const blockSize = this.labelSize(columnData, this.state.fontSize);
-                    if (columnObj.size < blockSize) {
-                        columnObj.size = Math.ceil(blockSize) + 10;
+                    if (fixedHeader) {
+                        const blockSize = this.labelSize(columnData, this.state.fontSize);
+                        if (columnObj.size < blockSize) {
+                            columnObj.size = Math.ceil(blockSize) + headerPadding;
+                        }
                     }
 
                     // enable tooltip on mouse hover
@@ -528,13 +539,13 @@ class Table extends AbstractGraph {
 
                     if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData;
-                        data[key] = <div style={{ minWidth: columnObj.size, maxWidth: columnObj.size }}> {data[key]} </div>;
+                        data[key] = fixedHeader ? <div style={{ minWidth: columnObj.size, textIndent: '2px' }}> {data[key]} </div> : data[key];
                         
                         /**
                         * define the font color of the column value
                         */
                         if (columnObj.fontColor) {
-                            data[key] = <div style={{ color: columnObj.fontColor, textIndent: '2px' }}> {data[key]} </div>;
+                            data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
                         }
                     }
                 }

@@ -9,7 +9,7 @@ export const properties = {
     multiSelectable: false,
     showCheckboxes: false,
     enableSelectAll: true,
-
+    headerPadding: 10,
     rowHeight: 40,
     fontColor: theme.palette.blackLightColor,
     highlightColor: theme.palette.greenLighterColor,
