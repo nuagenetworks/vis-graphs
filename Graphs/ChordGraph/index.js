@@ -8,6 +8,7 @@ import * as d3 from "d3";
 
 import "./style.css";
 import {properties} from "./default.config"
+import isEqual from 'lodash/isEqual';
 
 const MAX_LABEL_LENGTH = 15;
 
@@ -24,7 +25,7 @@ export default class ChordGraph extends AbstractGraph {
 
     constructor(props) {
         super(props, properties);
-        this.filterData = []
+        this.state = {filterData: []}
     }
 
     componentDidMount() {
@@ -87,7 +88,10 @@ export default class ChordGraph extends AbstractGraph {
         chordDestinationColumn
       } = this.getConfiguredProperties();
 
-      this.filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
+        const filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
+        if (!isEqual(filterData, this.state.filterData)) {
+            this.setState({filterData});
+        }
     }
 
     getLabelLength() {
@@ -97,7 +101,7 @@ export default class ChordGraph extends AbstractGraph {
         outerPadding
       } = this.getConfiguredProperties();
 
-      let lableLength = this.longestLabelLength(this.filterData, (d) => d[chordSourceColumn]);
+      let lableLength = this.longestLabelLength(this.state.filterData, (d) => d[chordSourceColumn]);
 
       if(lableLength && lableLength > MAX_LABEL_LENGTH) {
         lableLength = MAX_LABEL_LENGTH;
@@ -113,7 +117,7 @@ export default class ChordGraph extends AbstractGraph {
           onMarkClick
         } = props;
 
-        if(!this.filterData || !this.filterData.length || !this.chordDiagram)
+        if(!this.state.filterData || !this.state.filterData.length || !this.chordDiagram)
           return
 
         const {
@@ -133,7 +137,7 @@ export default class ChordGraph extends AbstractGraph {
 
         // Pass values into the chord diagram via d3-style accessors.
         this.chordDiagram
-            .data(this.filterData)
+            .data(this.state.filterData)
             .width(width)
             .height(height)
             .chordWeightColumn(chordWeightColumn)
@@ -176,8 +180,12 @@ export default class ChordGraph extends AbstractGraph {
 
         const { data, width, height } = this.props;
 
-        if (!data || !data.length || !this.filterData.length)
+        if (!data || !data.length || !this.state.filterData.length) {
+            // need to make sure that svg is not stale in the chord diagram function since it gets unmounted here
+            this.svg = null;
+            this.chordDiagram = null;
             return this.renderMessage('No data to visualize')
+        }
 
         return (
             <div className="chord-graph">
