@@ -17,9 +17,9 @@ export default ({
 
     datum[column].forEach((d, i) => {
       if (d[stackColumn] < 0) {
-        sumMin -= -(d[stackColumn]) - (i === 0 ? 1 : 0)
+        sumMin -= -(d[stackColumn])
       } else {
-        sumMax += +(d[stackColumn]) - (i === 0 ? 1 : 0)
+        sumMax += +(d[stackColumn])
       }
     })
 
