@@ -111,7 +111,7 @@ export default class AbstractGraph extends React.Component {
                 let type = this.hoveredDatum.tooltipName || 'default'
                 return this.tooltipContent({ tooltip: this.tooltips[type], accessors: this.accessors[type] })
             } else {
-                return null;
+                return;
             }
         }
     }
