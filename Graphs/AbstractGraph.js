@@ -127,9 +127,12 @@ export default class AbstractGraph extends React.Component {
             <React.Fragment>
                 {/* Display each tooltip column as "label : value". */}
                 {tooltip.map(({ column, label }, i) => {
-                    let data = accessors[i](this.hoveredDatum)
+                    let data = accessors[i](this.hoveredDatum);
+                    if (typeof data  === 'boolean') {
+                        data = data.toString();
+                    }
 
-                    return (data !== null && data !== 'undefined') ?
+                    return (data || data === 0) ?
                         (<div key={column}>
                             <strong>
                                 {/* Use label if present, fall back to column name. */}
