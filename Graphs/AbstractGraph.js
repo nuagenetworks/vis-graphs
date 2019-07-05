@@ -69,7 +69,7 @@ export default class AbstractGraph extends React.Component {
                     getContent={[() => this.getTooltipContent(this.hoveredDatum), 200]}
                     afterHide={() => this.handleHideEvent()}
                     afterShow={() => this.handleShowEvent()}
-                    delayUpdate={500}
+                    delayUpdate={200}
                 />
             );
 
