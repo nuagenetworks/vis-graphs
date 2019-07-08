@@ -189,9 +189,7 @@ class TreeGraph extends AbstractGraph {
         const svg = this.getGraphContainer();
 
         // ======================selected nodes notification to show==============================
-        if(!graphRenderView) {
-            this.renderSelectedNodesInfo(nodes)
-        }
+        this.renderSelectedNodesInfo(nodes)
 
         // ======================pagination starts here==============================
         const parents = nodes.filter( (d) => {
@@ -441,7 +439,7 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = rectNode.width;
         this.rectHeight = rectNode.height;
 
-        if (this.count_leaves(nodes) && !graphRenderView) {
+        if (this.count_leaves(nodes)) {
             const countLeaves = this.count_leaves(nodes);
             if (countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
@@ -480,7 +478,8 @@ class TreeGraph extends AbstractGraph {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = this.fetchImage(d.data.data, d.data.contextName);
+                    const contextName = this.changeContextBasedOnSelection(d.data.contextName, 'template');
+                    let img = this.fetchImage(d.data.data, contextName);
                     return img
                 })
                 .attr("width", 25)
@@ -560,6 +559,11 @@ class TreeGraph extends AbstractGraph {
             .style("fill", (d) => {
                 return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
+    }
+
+    changeContextBasedOnSelection = (contextName, removalContext) => {
+        const isRemovalContextPos = contextName.search(removalContext)
+        return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
     }
 
     renderRectNode = (d) => {
