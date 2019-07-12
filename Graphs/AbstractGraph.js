@@ -111,7 +111,7 @@ export default class AbstractGraph extends React.Component {
                 let type = this.hoveredDatum.tooltipName || 'default'
                 return this.tooltipContent({ tooltip: this.tooltips[type], accessors: this.accessors[type] })
             } else {
-                return null;
+                return;
             }
         }
     }
@@ -127,9 +127,12 @@ export default class AbstractGraph extends React.Component {
             <React.Fragment>
                 {/* Display each tooltip column as "label : value". */}
                 {tooltip.map(({ column, label }, i) => {
-                    let data = accessors[i](this.hoveredDatum)
+                    let data = accessors[i](this.hoveredDatum);
+                    if (typeof data  === 'boolean') {
+                        data = data.toString();
+                    }
 
-                    return (data !== null && data !== 'undefined') ?
+                    return (data || data === 0) ?
                         (<div key={column}>
                             <strong>
                                 {/* Use label if present, fall back to column name. */}
