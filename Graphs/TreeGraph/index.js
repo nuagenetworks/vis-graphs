@@ -152,7 +152,6 @@ class TreeGraph extends AbstractGraph {
     }
 
     update = (source) => {
-
         const {
             siteIcons: {
                 preBtn,
@@ -167,7 +166,6 @@ class TreeGraph extends AbstractGraph {
                 max
             }
         } = this.getConfiguredProperties();
-
 
         // Assigns the x and y position for the nodes
         this.treeData = this.treemap(this.root);
@@ -190,25 +188,46 @@ class TreeGraph extends AbstractGraph {
 
         const svg = this.getGraphContainer();
 
-        if (!graphRenderView) {
-            // ======================selected nodes notification to show==============================
-            this.renderSelectedNodesInfo(nodes)
+        // ======================selected nodes notification to show==============================
+        this.renderSelectedNodesInfo(nodes)
 
-            // ======================pagination starts here==============================
-            const parents = nodes.filter(function (d) {
-                return (d.data.kids && d.data.kids.length > max) ? true : false;
-            });
+        // ======================pagination starts here==============================
+        const parents = nodes.filter( (d) => {
+            if(graphRenderView) {
+                return (d.data.pagination) ? true : false;
+            }
+            return (d.data.kids && d.data.kids.length > max) ? true : false;
+        });
 
-            svg.selectAll(".page").remove();
+        svg.selectAll(".page").remove();
 
-            parents.forEach((p) => {
-                if (p.children) {
-                    const p1 = p.children[p.children.length - 1];
-                    const p2 = p.children[0];
+        parents.forEach((p) => {
+            if (p.children) {
+                const p1 = p.children[p.children.length - 1];
+                const p2 = p.children[0];
 
-                    const pr = p.data;
-                    const pagingData = [];
+                const pr = p.data;
+                const pagingData = [];
 
+                if(graphRenderView) {
+                    if (p2.data.pageNumber > 1) {
+                        pagingData.push({
+                            type: "prev",
+                            parent: p,
+                            module: p2.data.context.moduleName,
+                            no: (p2.data.pageNumber - 1)
+                        });
+                    }
+    
+                    if (p1.data.pageNumber < p1.data.totalPages) {
+                        pagingData.push({
+                            type: "next",
+                            parent: p,
+                            module: p2.data.context.moduleName,
+                            no: (p1.data.pageNumber + 1)
+                        });
+                    }
+                } else {
                     if (pr.page > 1) {
                         pagingData.push({
                             type: "prev",
@@ -224,41 +243,41 @@ class TreeGraph extends AbstractGraph {
                             no: (pr.page + 1)
                         });
                     }
-
-                    const pageControl = svg.selectAll(".page")
-                        .data(pagingData, function (d) {
-                            return (d.parent.id + d.type);
-                        }).enter()
-                        .append("g")
-                        .attr("class", "page")
-                        .attr("transform", function (d) {
-                            const x = (d.type === "next") ? p2.y : p1.y;
-                            const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
-                            return "translate(" + x + "," + y + ")";
-                        }).on("click", this.paginate);
-
-                    pageControl
-                        .append("circle")
-                        .attr("r", 15)
-                        .style("fill", paginationIconColor)
-
-                    pageControl
-                        .append("image")
-                        .attr("xlink:href", function (d) {
-                            if (d.type === "next") {
-                                return nextBtn
-                            } else {
-                                return preBtn
-                            }
-                        })
-                        .attr("x", -12.5)
-                        .attr("y", -12.5)
-                        .attr("width", 25)
-                        .attr("height", 25);
-
                 }
-            });
-        }
+
+                const pageControl = svg.selectAll(".page")
+                    .data(pagingData, function (d) {
+                        return (d.parent.id + d.type);
+                    }).enter()
+                    .append("g")
+                    .attr("class", "page")
+                    .attr("transform", function (d) {
+                        const x = (d.type === "next") ? p2.y : p1.y;
+                        const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
+                        return "translate(" + x + "," + y + ")";
+                    }).on("click", this.paginate);
+
+                pageControl
+                    .append("circle")
+                    .attr("r", 15)
+                    .style("fill", paginationIconColor)
+
+                pageControl
+                    .append("image")
+                    .attr("xlink:href", function (d) {
+                        if (d.type === "next") {
+                            return nextBtn
+                        } else {
+                            return preBtn
+                        }
+                    })
+                    .attr("x", -12.5)
+                    .attr("y", -12.5)
+                    .attr("width", 25)
+                    .attr("height", 25);
+
+            }
+        });
     }
 
     renderSelectedNodesInfo = (nodes) => {
@@ -353,8 +372,16 @@ class TreeGraph extends AbstractGraph {
     }
 
     paginate = (d) => {
-        d.parent.data.page = d.no;
-        this.setPage(d.parent);
+        const {
+            graphRenderView,
+            updateTreeData
+        } = this.props;
+        if(graphRenderView) {
+            updateTreeData(d)
+        } else {
+            d.parent.data.page = d.no;
+            this.setPage(d.parent);
+        }
     }
 
     setPage = (d) => {
@@ -412,7 +439,7 @@ class TreeGraph extends AbstractGraph {
         this.rectWidth = rectNode.width;
         this.rectHeight = rectNode.height;
 
-        if (this.count_leaves(nodes) && !graphRenderView) {
+        if (this.count_leaves(nodes)) {
             const countLeaves = this.count_leaves(nodes);
             if (countLeaves > maximumNodesToShowOnPage) {
                 this.rectWidth = rectNode.smallerWidth;
@@ -451,7 +478,8 @@ class TreeGraph extends AbstractGraph {
             nodeEnter
                 .append("image")
                 .attr("xlink:href", (d) => {
-                    let img = this.fetchImage(d.data.data, d.data.contextName);
+                    const contextName = this.changeContextBasedOnSelection(d.data.contextName, 'template');
+                    let img = this.fetchImage(d.data.data, contextName);
                     return img
                 })
                 .attr("width", 25)
@@ -531,6 +559,11 @@ class TreeGraph extends AbstractGraph {
             .style("fill", (d) => {
                 return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
             });
+    }
+
+    changeContextBasedOnSelection = (contextName, removalContext) => {
+        const isRemovalContextPos = contextName.search(removalContext)
+        return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
     }
 
     renderRectNode = (d) => {
@@ -695,14 +728,14 @@ class TreeGraph extends AbstractGraph {
     }
 
     renderTopologyGraph = () => {
-        let { height, transformAttr } = this.props;
+        let { transformAttr } = this.props;
         if(!transformAttr) {
             transformAttr = this.transformAttr;
         }
         return (
-            <div className="line-graph">
+            <div className="tree-graph" style={{height:'100%'}}>
                 <svg
-                    height={height}
+                    height={'100%'}
                     ref={ (node) => {
                         this.node = node;
                         select(node)
