@@ -207,29 +207,15 @@ class Table extends AbstractGraph {
 
         // generate random key for each column and assign that key to the values in data
         const types = {};
-        
-        let lastColumn = '';
-        let firstColumn = true;
-        for(let index in columns) {
-            const columnRow = columns[index];
-            if(!types[columnRow.column]) {
-                types[columnRow.column] = 1;
-            }
-            
-            if(columns.hasOwnProperty(index) && this.state.columns.filter( d => d.value === columnRow.label).length){
-                if(columns[lastColumn] && columns[lastColumn].isLastCol)
-                        delete columns[lastColumn].isLastCol;
-                if(firstColumn)
-                    columnRow.isFirstCol = true;
-                firstColumn = false;
-                columnRow.isLastCol = true;
-                lastColumn = index;
+        columns.forEach( d => {
+            if(!types[d.column]) {
+                types[d.column] = 1;
             }
 
-            columnNameList.push(columnRow.column);
-            this.keyColumns[ columnRow.selection ? columnRow.label : `${columnRow.column}_${types[columnRow.column]}`] = columnRow;
-            types[columnRow.column]++;
-        }
+            columnNameList.push(d.column);
+            this.keyColumns[ d.selection ? d.label : `${d.column}_${types[d.column]}`] = d;
+            types[d.column]++;
+        });
 
         props.data.forEach( (d, i) => {
             const random = this.generateRandom();
@@ -295,6 +281,11 @@ class Table extends AbstractGraph {
                 return d.display !== false
             }
         })
+
+        if (filteredColumns.length) {
+            filteredColumns[0].firstColStyle = firstColToolTipStyle;
+            _.last(filteredColumns).lastColStyle = lastColToolTipStyle;
+        }
 
         this.updateData(filteredColumns);
     }
@@ -424,15 +415,13 @@ class Table extends AbstractGraph {
 
         const keyColumns = this.getKeyColumns();
 
-        let toolTipStyling;
-
         return this.state.data.map((d, j) => {
-            
+
             let data = {},
                 highlighter = false;
 
             const keyData = this.replaceKeyFromColumn(d)
-            
+
             for (let key in keyColumns) {
                 if(keyColumns.hasOwnProperty(key)) {
 
@@ -463,17 +452,10 @@ class Table extends AbstractGraph {
                             </div>
                         )
 
-                        toolTipStyling = toolTipStyle;
-                        
-                        if(columnObj.isFirstCol)
-                            toolTipStyling = firstColToolTipStyle;
-                        else if(columnObj.isLastCol)
-                            toolTipStyling = lastColToolTipStyle;
-
                         columnData = (
                             <Tooltip key={`tooltip_${j}_${key}`}
                                 content={[hoverContent]}
-                                styles={toolTipStyling}>
+                                styles={columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle }>
                                     {columnData}
                             </Tooltip>
                         )
@@ -1039,7 +1021,7 @@ class Table extends AbstractGraph {
             height,
             scroll,
         } = this.props;
-        
+
         const {
             selectable,
             multiSelectable,
@@ -1070,11 +1052,11 @@ class Table extends AbstractGraph {
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const initialSort = this.getInitialSort();
-        
+
         return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
-                   onContextMenu={this.handleContextMenu} 
+                    onContextMenu={this.handleContextMenu} 
                     >
                         <div style={{float:'right', display: 'flex', paddingRight: 15}}>
                             { this.resetScrollData() }

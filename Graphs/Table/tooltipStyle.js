@@ -47,6 +47,18 @@ const lastColToolTipStyle= {
     left: 'auto',
     right:0,
   },
+  arrow: {
+    position: 'absolute',
+    top: 'auto',
+    right: '10%',
+    left: '55%',
+    marginLeft: '5px',
+    borderLeft: 'solid transparent 5px',
+    borderRight: 'solid transparent 5px', 
+    borderBottom: 'none',
+    borderTop: 'solid #000 5px',
+    bottom:'-5px',
+  },
   content: {
     background: '#000',
     color: '#fff',
