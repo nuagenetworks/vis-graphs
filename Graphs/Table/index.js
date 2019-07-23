@@ -17,7 +17,7 @@ import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
 import columnAccessor from "../../utils/columnAccessor"
-import tooltipStyle from './tooltipStyle'
+import {toolTipStyle, lastColToolTipStyle, firstColToolTipStyle} from './tooltipStyle'
 import "./style.css"
 import style from './style'
 import {properties} from "./default.config"
@@ -207,15 +207,29 @@ class Table extends AbstractGraph {
 
         // generate random key for each column and assign that key to the values in data
         const types = {};
-        columns.forEach( d => {
-            if(!types[d.column]) {
-                types[d.column] = 1;
+        
+        let lastColumn = '';
+        let firstColumn = true;
+        for(let index in columns) {
+            const columnRow = columns[index];
+            if(!types[columnRow.column]) {
+                types[columnRow.column] = 1;
+            }
+            
+            if(columns.hasOwnProperty(index) && this.state.columns.filter( d => d.value === columnRow.label).length){
+                if(columns[lastColumn] && columns[lastColumn].isLastCol)
+                        delete columns[lastColumn].isLastCol;
+                if(firstColumn)
+                    columnRow.isFirstCol = true;
+                firstColumn = false;
+                columnRow.isLastCol = true;
+                lastColumn = index;
             }
 
-            columnNameList.push(d.column);
-            this.keyColumns[ d.selection ? d.label : `${d.column}_${types[d.column]}`] = d;
-            types[d.column]++;
-        });
+            columnNameList.push(columnRow.column);
+            this.keyColumns[ columnRow.selection ? columnRow.label : `${columnRow.column}_${types[columnRow.column]}`] = columnRow;
+            types[columnRow.column]++;
+        }
 
         props.data.forEach( (d, i) => {
             const random = this.generateRandom();
@@ -410,13 +424,15 @@ class Table extends AbstractGraph {
 
         const keyColumns = this.getKeyColumns();
 
-        return this.state.data.map((d, j) => {
+        let toolTipStyling;
 
+        return this.state.data.map((d, j) => {
+            
             let data = {},
                 highlighter = false;
 
             const keyData = this.replaceKeyFromColumn(d)
-
+            
             for (let key in keyColumns) {
                 if(keyColumns.hasOwnProperty(key)) {
 
@@ -447,10 +463,17 @@ class Table extends AbstractGraph {
                             </div>
                         )
 
+                        toolTipStyling = toolTipStyle;
+                        
+                        if(columnObj.isFirstCol)
+                            toolTipStyling = firstColToolTipStyle;
+                        else if(columnObj.isLastCol)
+                            toolTipStyling = lastColToolTipStyle;
+
                         columnData = (
                             <Tooltip key={`tooltip_${j}_${key}`}
                                 content={[hoverContent]}
-                                styles={tooltipStyle}>
+                                styles={toolTipStyling}>
                                     {columnData}
                             </Tooltip>
                         )
@@ -494,6 +517,7 @@ class Table extends AbstractGraph {
                     if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
                         
+                        data[key] = <div className="wrapper-data"> {data[key]} </div>;
                         /**
                         * define the font color of the column value
                         */
@@ -1015,7 +1039,7 @@ class Table extends AbstractGraph {
             height,
             scroll,
         } = this.props;
-
+        
         const {
             selectable,
             multiSelectable,
@@ -1046,11 +1070,11 @@ class Table extends AbstractGraph {
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const initialSort = this.getInitialSort();
-
+        
         return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
-                    onContextMenu={this.handleContextMenu} 
+                   onContextMenu={this.handleContextMenu} 
                     >
                         <div style={{float:'right', display: 'flex', paddingRight: 15}}>
                             { this.resetScrollData() }
