@@ -3,7 +3,7 @@ import React from 'react'
 import DataTables from 'material-ui-datatables'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
-import _ from 'lodash'
+import { last, isEqual, orderBy, isEmpty } from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
@@ -82,8 +82,8 @@ class Table extends AbstractGraph {
 
     shouldComponentUpdate(nextProps, nextState) {
 
-        return !_.isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
-            || !_.isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
+        return !isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
+            || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
     }
 
     componentDidUpdate(prevProps) {
@@ -91,7 +91,7 @@ class Table extends AbstractGraph {
             this.setState({ fontSize: style.defaultFontsize});
         }
 
-        if((!_.isEqual(prevProps.data, this.props.data) || !_.isEqual(prevProps.scrollData, this.props.scrollData))
+        if((!isEqual(prevProps.data, this.props.data) || !isEqual(prevProps.scrollData, this.props.scrollData))
             && (prevProps.context && prevProps.context[this.columns] === this.props.context[this.columns])) {
             this.initiate(this.props);
         }
@@ -160,7 +160,7 @@ class Table extends AbstractGraph {
     }
 
     isEmptyData(data) {
-        return _.isEmpty(data);
+        return isEmpty(data);
     }
 
     initiate(props) {
@@ -284,7 +284,7 @@ class Table extends AbstractGraph {
 
         if (filteredColumns.length) {
             filteredColumns[0].firstColStyle = firstColToolTipStyle;
-            _.last(filteredColumns).lastColStyle = lastColToolTipStyle;
+            last(filteredColumns).lastColStyle = lastColToolTipStyle;
         }
 
         this.updateData(filteredColumns);
@@ -539,7 +539,7 @@ class Table extends AbstractGraph {
     }
 
     handleStaticSorting(column, order) {
-        this.filterData = _.orderBy(this.filterData, [column], [order]);
+        this.filterData = orderBy(this.filterData, [column], [order]);
         /**
          * Resetting the paging due to sorting
          */
@@ -608,7 +608,7 @@ class Table extends AbstractGraph {
                     const value = objectPath.get(row, matchingRowColumn)
                     matchingRows = this.props.data.filter( (d) => {
                         const matchingRowValue = objectPath.get(d, matchingRowColumn)
-                        return (value || value === 0) && !_.isEqual(row, d) && value === matchingRowValue
+                        return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue
                     });
                 }
                 rows = this.replaceKeyFromColumn(row)
