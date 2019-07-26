@@ -92,7 +92,7 @@ export const properties = {
     },
     pagination: {
         "paginationIconColor": "#58A2FF",
-        "max": 5
+        "max": 10
     },
     "maximumNodesToShowOnPage": 15,
     "selectedNodesInfo": {

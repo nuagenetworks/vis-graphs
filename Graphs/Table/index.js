@@ -841,14 +841,14 @@ class Table extends AbstractGraph {
         let columnsData = []
         columns.forEach( d => {columnsData.push(d.label)});
 
-        if(onColumnSelection) {
-            onColumnSelection({[this.columns]: columnsData});
-        }
-
         delete context['query'];
-         
+
         this.setState({ columns });
-        goTo && goTo(window.location.pathname, Object.assign({}, context, {[this.columns]: JSON.stringify(columnsData)}))
+        if (onColumnSelection) {
+            onColumnSelection({ [this.columns]: columnsData });
+        } else {
+            goTo && goTo(window.location.pathname, Object.assign({}, context, { [this.columns]: JSON.stringify(columnsData) }))
+        }
 
     }
 
