@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 import AbstractGraph from "../AbstractGraph";
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
@@ -31,7 +31,7 @@ export class VariationTextGraph extends AbstractGraph {
     }
 
     componentDidUpdate (prevProps) {
-        if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+        if (!isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
             this.initialize();
         }
     }

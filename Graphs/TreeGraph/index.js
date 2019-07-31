@@ -1,7 +1,7 @@
 
 import PropTypes from 'prop-types';
 import React from "react";
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import AbstractGraph from "../AbstractGraph";
 import { properties } from "./default.config";
 import './styles.css'
@@ -51,7 +51,7 @@ class TreeGraph extends AbstractGraph {
     }
 
     componentDidUpdate(prevProps) {
-        if(!_.isEqual(prevProps, this.props)) {
+        if(!isEqual(prevProps, this.props)) {
             this.initiate(this.props);
         }
 

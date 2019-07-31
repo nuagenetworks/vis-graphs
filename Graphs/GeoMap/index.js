@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import AbstractGraph from '../AbstractGraph'
 import { Marker, InfoWindow, Polyline } from 'react-google-maps'
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import MarkerClusterer from "react-google-maps/lib/components/addons/MarkerClusterer"
 
 import GoogleMapsWrapper from '../../Map'
@@ -48,7 +48,7 @@ class GeoMap extends AbstractGraph {
   }
 
   componentDidUpdate(prevProps) {
-    if (!_.isEqual(prevProps.data, this.props.data)) {
+    if (!isEqual(prevProps.data, this.props.data)) {
       this.initiate(this.props);
     }
   }
@@ -99,7 +99,7 @@ class GeoMap extends AbstractGraph {
 
     let newCenter = bounds.getCenter().toJSON()
 
-    if (newCenter && !_.isEqual(this.center, newCenter)) {
+    if (newCenter && !isEqual(this.center, newCenter)) {
 
       if (!this.center && shouldFitToBounds) {
         this.map.fitBounds(bounds);
@@ -112,7 +112,7 @@ class GeoMap extends AbstractGraph {
 
   // toggle info window on marker click
   toggleInfoWindow = (data = null, position = null) => {
-    if(!data || !_.isEqual(position, this.state.infowindow.position)) {
+    if(!data || !isEqual(position, this.state.infowindow.position)) {
       this.setState({
         infowindow: {
           data,
@@ -271,7 +271,7 @@ class GeoMap extends AbstractGraph {
     if(zoom >= maxZoom  && markers.length > 1) {
 
       // check the cluster that is already expanded or not, if yes than collapse the clicked cluster
-      if(this.clusterCenter && _.isEqual(this.clusterCenter.toJSON(), cluster.getCenter().toJSON())) {
+      if(this.clusterCenter && isEqual(this.clusterCenter.toJSON(), cluster.getCenter().toJSON())) {
 
         this.clusterCenter = null
         this.setState({
@@ -357,7 +357,7 @@ class GeoMap extends AbstractGraph {
       100
     );
 
-    if (!_.isEqual(this.markers, markers)) {
+    if (!isEqual(this.markers, markers)) {
       this.markers = markers
       this.calculatePolylines(markers)
     }
@@ -496,7 +496,7 @@ class GeoMap extends AbstractGraph {
 
   // handle response after searching
   handleSearch(data, isSuccess) {
-    if(isSuccess && !_.isEqual(this.state.data, data)) {
+    if(isSuccess && !isEqual(this.state.data, data)) {
       this.clusterCenter = null;
       this.setState({
         spiderifyLines: [],

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react'
-import _ from 'lodash';
-
+import isEqual from 'lodash/isEqual';
 import XYGraph from '../XYGraph'
 import ReactTooltip from 'react-tooltip'
 
@@ -39,7 +38,7 @@ class AreaGraph extends XYGraph {
   }
 
   componentDidUpdate(prevProps) {
-    if (!_.isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
+    if (!isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
       this.initiate(this.props);
     }
 

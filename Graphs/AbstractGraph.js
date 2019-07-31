@@ -1,7 +1,8 @@
 import React from "react";
 import ReactTooltip from "react-tooltip";
 import * as d3 from "d3";
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
+import max from 'lodash/max';
 import objectPath from 'object-path';
 
 import "./style.css"
@@ -41,7 +42,7 @@ export default class AbstractGraph extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (!_.isEqual(prevProps.configuration.data, this.props.configuration.data)) {
+        if (!isEqual(prevProps.configuration.data, this.props.configuration.data)) {
             this.setConfiguredProperties(this.props, this.properties);
             this.setTooltip();
         }
@@ -670,7 +671,7 @@ export default class AbstractGraph extends React.Component {
             return this.labelSize(label(d), legend.labelFontSize || 10); 
         });
         
-        return _.max(highestLabel); 
+        return max(highestLabel); 
     }
 
     getLegendArea(data, dimension, label) {

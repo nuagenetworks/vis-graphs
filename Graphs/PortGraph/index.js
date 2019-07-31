@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import objectPath from 'object-path';
-import _ from 'lodash';
-
+import isEqual from 'lodash/isEqual'
+import chunk from 'lodash/chunk'
 import XYGraph from '../XYGraph';
 import columnAccessor from '../../utils/columnAccessor';
 import { properties } from './default.config';
@@ -28,7 +28,7 @@ class PortGraph extends XYGraph {
     }
     
     componentDidUpdate(prevProps) {
-        if (!_.isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
+        if (!isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
             this.initiate(this.props);
         }
     }
@@ -141,7 +141,7 @@ class PortGraph extends XYGraph {
         const { data } = this.props;
         const { rowLimit } = this.getConfiguredProperties();
 
-        return _.chunk(data, rowLimit);
+        return chunk(data, rowLimit);
     }
 
     renderGraph() {
