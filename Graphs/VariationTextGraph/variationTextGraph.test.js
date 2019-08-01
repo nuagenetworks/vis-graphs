@@ -4,9 +4,9 @@ import { mount, configure } from 'enzyme';
 import { getDataAndConfig } from '../testHelper';
 import VariationTextGraph from '.';
 import ReactDOM from 'react-dom';
+import Adapter from 'enzyme-adapter-react-16';
 
 const cheerio = require('cheerio')
-import Adapter from 'enzyme-adapter-react-16';
 
 configure({ adapter: new Adapter() });
 
