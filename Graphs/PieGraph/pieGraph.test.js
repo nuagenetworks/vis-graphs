@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom';
 
 import { getDataAndConfig, getHtml, checkSvg } from '../testHelper';
 import PieGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
 
 describe("PieGrpah", () => {
     let config;

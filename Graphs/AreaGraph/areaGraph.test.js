@@ -3,6 +3,9 @@ import { mount } from 'enzyme';
 
 import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import AreaGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
 
 describe("AreaGraph", () => {
     let config;

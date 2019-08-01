@@ -4,8 +4,11 @@ import ReactDOM from 'react-dom';
 
 import { getDataAndConfig } from '../testHelper';
 import SimpleTextGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
 
 const cheerio = require('cheerio')
+
+configure({ adapter: new Adapter() });
 
 describe("SimpleTextGraph", () => {
     let config;

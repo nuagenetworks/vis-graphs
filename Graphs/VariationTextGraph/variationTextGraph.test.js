@@ -6,6 +6,9 @@ import VariationTextGraph from '.';
 import ReactDOM from 'react-dom';
 
 const cheerio = require('cheerio')
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
 
 describe("VariationTextGraph", () => {
     let config

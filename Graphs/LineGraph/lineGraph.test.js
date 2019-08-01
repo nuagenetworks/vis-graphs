@@ -3,8 +3,11 @@ import { mount } from 'enzyme';
 
 import { getHtml, getDataAndConfig, checkSvg, checkLine } from '../testHelper';
 import LineGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
 
 const cheerio = require('cheerio');
+
+configure({ adapter: new Adapter() });
 
 describe("LineGraph", () => {
     let config;

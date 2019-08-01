@@ -3,6 +3,9 @@ import { mount } from 'enzyme';
 
 import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
 import ChordGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
 
 describe("ChordGraph", () => {
     let config;

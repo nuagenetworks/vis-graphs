@@ -4,8 +4,11 @@ import ReactDOM from 'react-dom';
 
 import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar } from '../testHelper';
 import BarGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
 
 const cheerio = require('cheerio');
+
+configure({ adapter: new Adapter() });
 
 describe("Bar Graph", () => {
     let config;

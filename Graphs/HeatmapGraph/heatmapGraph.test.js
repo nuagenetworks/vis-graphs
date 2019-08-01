@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom';
 
 import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import HeatmapGraph from '.';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({ adapter: new Adapter() });
 
 describe("HeatmapGraph", () => {
     let config;
