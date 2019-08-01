@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react'
 import * as d3 from 'd3'
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual';
 import ReactTooltip from "react-tooltip"
 
 import { properties } from './default.config'
@@ -36,11 +36,11 @@ class BarGraph extends XYGraph {
   }
 
   shouldComponentUpdate(nextProps) {
-    return !_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
+    return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
   } 
 
   componentDidUpdate(prevProps) {
-    if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+    if (!isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
       this.initiate(this.props);
     }
 

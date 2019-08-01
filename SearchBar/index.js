@@ -1,6 +1,6 @@
 import  React from 'react';
 import "react-filter-box/lib/react-filter-box.css";
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import ReactFilterBox from "react-filter-box";
 
 import "./index.css";
@@ -42,8 +42,8 @@ export default class SearchBar extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(nextProps.data, this.props.data)
-            || !_.isEqual(nextState, this.state)
+        return !isEqual(nextProps.data, this.props.data)
+            || !isEqual(nextState, this.state)
     }
 
     componentDidUpdate () {
@@ -73,7 +73,7 @@ export default class SearchBar extends React.Component {
             columns = false
         } = this.props;
 
-        if (!_.isEqual(this.expressions, expressions)) {
+        if (!isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
             clearTimeout(this.setTimeout);
 
