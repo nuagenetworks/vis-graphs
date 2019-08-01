@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 
 import { getHtml, getDataAndConfig, checkSvg } from '../testHelper';
 import ChordGraph from '.';

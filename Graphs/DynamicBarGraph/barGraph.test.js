@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 import ReactDOM from 'react-dom';
 
 import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar } from '../testHelper';

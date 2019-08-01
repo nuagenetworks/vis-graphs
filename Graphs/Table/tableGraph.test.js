@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 import ReactDOM from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn, checkTime } from '../testHelper';

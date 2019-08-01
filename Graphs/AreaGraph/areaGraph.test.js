@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 
 import { getHtml, getDataAndConfig, checkTicks, checkSvg } from '../testHelper';
 import AreaGraph from '.';

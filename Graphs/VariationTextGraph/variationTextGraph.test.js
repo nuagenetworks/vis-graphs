@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 
 import { getDataAndConfig } from '../testHelper';
 import VariationTextGraph from '.';
