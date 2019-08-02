@@ -1,11 +1,14 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 
 import { getDataAndConfig } from '../testHelper';
 import VariationTextGraph from '.';
 import ReactDOM from 'react-dom';
+import Adapter from 'enzyme-adapter-react-16';
 
 const cheerio = require('cheerio')
+
+configure({ adapter: new Adapter() });
 
 describe("VariationTextGraph", () => {
     let config
