@@ -17,7 +17,7 @@ import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 import { theme } from "../../theme";
 import AbstractGraph from "../AbstractGraph"
 import columnAccessor from "../../utils/columnAccessor"
-import {toolTipStyle, lastColToolTipStyle, firstColToolTipStyle} from './tooltipStyle'
+import { toolTipStyle, firstRowToolTipStyle, lastColToolTipStyle, lastColFirstRowToolTipStyle, firstColFirstRowToolTipStyle, firstColToolTipStyle } from './tooltipStyle';
 import "./style.css"
 import style from './style'
 import {properties} from "./default.config"
@@ -65,6 +65,7 @@ class Table extends AbstractGraph {
             showInfoBox: false,
             showConfirmationPopup: false
         }
+        this.tableWidth = 0;
         this.initiate(props);
     }
 
@@ -192,7 +193,9 @@ class Table extends AbstractGraph {
 
         const {
             selectColumnOption,
-            matchingRowColumn
+            matchingRowColumn,
+            fixedHeader,
+            headerPadding,
         } = this.getConfiguredProperties()
 
         const columns = this.getColumns();
@@ -210,6 +213,10 @@ class Table extends AbstractGraph {
         columns.forEach( d => {
             if(!types[d.column]) {
                 types[d.column] = 1;
+            }
+
+            if (fixedHeader) {
+                d.size = this.labelSize(d.label || d.column, this.state.fontSize) + headerPadding;
             }
 
             columnNameList.push(d.column);
@@ -264,22 +271,27 @@ class Table extends AbstractGraph {
             columnsContext = context && context.hasOwnProperty(this.columns) ? context[this.columns] : false
         }
 
+        this.tableWidth = 0;
+
         // filter columns who will be display in table
-        const filteredColumns = columns.filter( d => {
-            Object.assign(d, {value: d.label})
+        const filteredColumns = columns.filter(d => {
+            Object.assign(d, { value: d.label })
 
-            //Must return all the columns
-            if(!selectColumnOption) {
-                return true
+
+            /**
+             * !selectColumnOption: Must return all the columns
+             * columnsContext && (columnsContext.indexOf(d.label) > -1): Only selected Columns
+             * d.display !== false: Configured Columns
+             */
+            if (!selectColumnOption || (columnsContext && (columnsContext.indexOf(d.label) > -1)) || d.display !== false) {
+                if (this.state.columns.filter(c => c.value === d.label).length) {
+                    this.tableWidth += d.size;
+                }
+
+                return true;
             }
 
-            //Only selected Columns
-            if(columnsContext) {
-                return columnsContext.indexOf(d.label) > -1 || false
-            } else {
-                //Configured Columns
-                return d.display !== false
-            }
+            return false;
         })
 
         if (filteredColumns.length) {
@@ -378,13 +390,30 @@ class Table extends AbstractGraph {
     }
 
     // filter and formatting columns for table header
-    getHeaderData() {
-        const columns = this.getKeyColumns()
-        let headerData = []
+    getHeaderData(width) {
+
+        const {
+            headerPadding
+        } = this.getConfiguredProperties();
+
+        const { fixedHeader } = this.getConfiguredProperties();
+        const columns = this.getKeyColumns();
+
+        let headerData = [];
+        let extraWidth = this.tableWidth;
+        if (extraWidth < width) {
+            extraWidth = (width - extraWidth)/this.state.columns.length;
+        } else {
+            extraWidth = 0;
+        }
+        const rowWidthDiff = fixedHeader && extraWidth;
+
         for(let index in columns) {
             if(columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
                 if(this.state.columns.filter( d => d.value === columnRow.label).length) {
+                    const columnWidth = fixedHeader && (columnRow.size + (rowWidthDiff > 0 ? (rowWidthDiff - headerPadding * 0.4) : rowWidthDiff));
+
                     headerData.push({
                         key: index,
                         label: columnRow.label || columnRow.column,
@@ -394,7 +423,9 @@ class Table extends AbstractGraph {
                         filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
                         style: {
-                            textIndent: '2px'
+                            textIndent: '2px',
+                            minWidth: columnWidth,
+                            maxWidth: columnWidth,
                         }
                     })
                 }
@@ -407,7 +438,9 @@ class Table extends AbstractGraph {
     getTableData(columns) {
         const {
             highlight,
-            highlightColor
+            highlightColor,
+            fixedHeader,
+            headerPadding,
         } = this.getConfiguredProperties();
 
         if(!columns)
@@ -417,6 +450,7 @@ class Table extends AbstractGraph {
 
         return this.state.data.map((d, j) => {
 
+            let rowWidth = 0;
             let data = {},
                 highlighter = false;
 
@@ -432,6 +466,17 @@ class Table extends AbstractGraph {
                     // get substring of data upto defined total characters
                     if(columnObj.totalCharacters) {
                         columnData = columnAccessor({column: columnObj.column, totalCharacters: columnObj.totalCharacters})(keyData)
+                    }
+
+                    // get with of the column data
+                    if (fixedHeader) {
+                        const blockSize = this.labelSize(columnData, this.state.fontSize) + headerPadding;
+                        if (columnObj.size < blockSize) {
+                            columnObj.size = blockSize;
+                        }
+                        if (this.state.columns.filter(d => d.value === columnObj.label).length) {
+                            rowWidth += columnObj.size;
+                        }
                     }
 
                     // enable tooltip on mouse hover
@@ -452,11 +497,15 @@ class Table extends AbstractGraph {
                             </div>
                         )
 
+                        const firstColStyle = (columnObj.firstColStyle && j === 0 ? firstColFirstRowToolTipStyle : (columnObj.firstColStyle || false));
+                        const lastColStyle = (columnObj.lastColStyle && j === 0 ? lastColFirstRowToolTipStyle : (columnObj.lastColStyle || false));
+                        const colStyle = (j === 0 ? firstRowToolTipStyle : toolTipStyle);
+
                         columnData = (
                             <Tooltip key={`tooltip_${j}_${key}`}
                                 content={[hoverContent]}
-                                styles={columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle }>
-                                    {columnData}
+                                styles={firstColStyle || lastColStyle || colStyle}>
+                                {columnData}
                             </Tooltip>
                         )
                     }
@@ -497,7 +546,7 @@ class Table extends AbstractGraph {
                     }
 
                     if(columnData || columnData === 0) {
-                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
+                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData;
                         
                         data[key] = <div className="wrapper-data"> {data[key]} </div>;
                         /**
@@ -509,6 +558,7 @@ class Table extends AbstractGraph {
                     }
                 }
             }
+            this.tableWidth = rowWidth;
 
             if(highlighter)
                 Object.keys(data).map(key => {
@@ -998,7 +1048,7 @@ class Table extends AbstractGraph {
 
         heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
         heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
-        heightMargin = fixedHeader ? heightMargin + 25 : heightMargin;
+        heightMargin = fixedHeader ? heightMargin + 35 : heightMargin;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
     }
@@ -1018,10 +1068,11 @@ class Table extends AbstractGraph {
 
     render() {
         const {
+            width,
             height,
             scroll,
         } = this.props;
-
+        
         const {
             selectable,
             multiSelectable,
@@ -1047,12 +1098,17 @@ class Table extends AbstractGraph {
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData)
 
-        const headerData = this.getHeaderData();
+        const headerData = this.getHeaderData(width);
         const totalRecords = scroll ? size : this.filterData.length;
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const initialSort = this.getInitialSort();
-
+        const tableBodyStyle = {
+            height: `${height - heightMargin}px`,
+            minWidth: fixedHeader && (this.tableWidth > width ? (this.tableWidth + 35): width),
+            overflowX: fixedHeader ? "hidden": "auto"
+        }
+        
         return (
             <MuiThemeProvider muiTheme={theme}>
                 <div ref={(input) => { this.container = input; }}
@@ -1090,12 +1146,12 @@ class Table extends AbstractGraph {
                                 page={this.currentPage}
                                 count={totalRecords}
                                 rowSize={pageSize}
-                                tableStyle={{...style.table, ...tableStyle}}
+                                tableStyle={ fixedHeader ? { width: 'inherit', ...tableStyle} : {width: '100%',...tableStyle}}
                                 tableHeaderColumnStyle={Object.assign({}, style.headerColumn, {fontSize: this.state.fontSize})}
-                                tableHeaderStyle={fixedHeader ? {tableHeaderStyle, ...style.tableFixedHeader} : {tableHeaderStyle}}
+                                tableHeaderStyle={{tableHeaderStyle}}
                                 tableRowStyle={{...style.row, ...tableRowStyle}}
                                 tableRowColumnStyle={Object.assign({}, style.rowColumn, {fontSize: this.state.fontSize}, tableRowColumnStyle ? tableRowColumnStyle : {})}
-                                tableBodyStyle={Object.assign({}, style.body, {height: `${height - heightMargin}px`})}
+                                tableBodyStyle={tableBodyStyle}
                                 footerToolbarStyle={style.footerToolbar}
                             />
                         }
