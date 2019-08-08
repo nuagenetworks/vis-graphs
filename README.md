@@ -269,6 +269,17 @@ __brush__ (number) To enble brushing with pre selected bars.Currently support in
 
 ![dynamicbargraph](https://user-images.githubusercontent.com/26645756/36250751-b6872a64-1264-11e8-961c-1cb895518fc0.png)
 
+__xTicksLabel__ - (object) used to override labels of x axis ticks with some predefined strings. E.g - 
+ ```javascript
+    "xTicksLabel": {
+        "NETFLIX": "NET",
+        "WEBEX": "WEB",
+        "HTTP": "HT",
+        "GOOGLE": "Google",
+        "MSOffice365": "Office"
+    }
+```
+
 ## *LineGraph*
 Display one or multiple lines
 >[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/lineGraph)
