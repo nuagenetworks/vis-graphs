@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
-import { isEqual, orderBy, isEmpty } from 'lodash'
+import { last, isEqual, orderBy, isEmpty } from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
@@ -14,7 +14,7 @@ import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 
 import AbstractGraph from "../AbstractGraph"
 import columnAccessor from "../../utils/columnAccessor"
-import { toolTipStyle } from './tooltipStyle'
+import { toolTipStyle, lastColToolTipStyle, firstColToolTipStyle } from './tooltipStyle'
 import "./style.css"
 import style from './style'
 import {properties} from "./default.config"
@@ -283,6 +283,11 @@ class Table extends AbstractGraph {
             }
         })
 
+        if (filteredColumns.length) {
+            filteredColumns[0].firstColStyle = firstColToolTipStyle;
+            last(filteredColumns).lastColStyle = lastColToolTipStyle;
+        }
+
         this.updateData(filteredColumns);
     }
 
@@ -372,11 +377,11 @@ class Table extends AbstractGraph {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
                 if (this.state.columns.filter(d => d.value === columnRow.label).length) {
-
+                    
                     headerData.push({
                         name: index,
                         label: columnRow.label || columnRow.column,
-                        columnField: index,
+                        columnField: columnRow.column,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                         filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
@@ -463,7 +468,7 @@ class Table extends AbstractGraph {
                         columnData = (
                             <Tooltip key={`tooltip_${j}_${key}`}
                                 content={[hoverContent]}
-                                styles={toolTipStyle}>
+                                styles={ columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle}>
                                 {columnData}
                             </Tooltip>
                         )
@@ -1069,7 +1074,7 @@ class Table extends AbstractGraph {
                 overrides: {
                     MUIDataTableHeadCell: {
                         fixedHeader: {
-                            zIndex: "10000"
+                            zIndex: "9999"
                         }
                     },
                     MuiTableRow: {
