@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
-import { Tooltip } from 'react-lightweight-tooltip'
+import {Tooltip} from 'react-lightweight-tooltip'
 import { isEqual, orderBy, isEmpty } from 'lodash'
 import SuperSelectField from 'material-ui-superselectfield';
 import Dialog from 'material-ui/Dialog';
@@ -17,7 +17,7 @@ import columnAccessor from "../../utils/columnAccessor"
 import { toolTipStyle } from './tooltipStyle'
 import "./style.css"
 import style from './style'
-import { properties } from "./default.config"
+import {properties} from "./default.config"
 import { pick, expandExpression, labelToField } from '../../utils/helpers';
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
@@ -33,8 +33,6 @@ class Table extends AbstractGraph {
     constructor(props, context) {
         super(props, properties)
         this.handleSortOrderChange   = this.handleSortOrderChange.bind(this)
-        this.handlePreviousPageClick = this.handlePreviousPageClick.bind(this)
-        this.handleNextPageClick     = this.handleNextPageClick.bind(this)
         this.handleSearch            = this.handleSearch.bind(this)
         this.handleRowSelection      = this.handleRowSelection.bind(this)
         this.handleContextMenu       = this.handleContextMenu.bind(this)
@@ -72,7 +70,7 @@ class Table extends AbstractGraph {
     static getDerivedStateFromProps(nextProps, prevState) {
         if(!prevState.columns.length) {
             return Table.updateColumn(nextProps);
-        } 
+        }
         return null;
     }
 
@@ -96,7 +94,7 @@ class Table extends AbstractGraph {
             && (prevProps.context && prevProps.context[this.columns] === this.props.context[this.columns])) {
             this.initiate(this.props);
         }
-        
+
         this.checkFontsize();
         const { contextMenu } = this.state;
         if (contextMenu) {
@@ -109,6 +107,7 @@ class Table extends AbstractGraph {
             scrollData,
             data
         } = props;
+
         // Total, per page, current page must be set and only applicable for Table component only.
         return {
             searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
@@ -122,7 +121,7 @@ class Table extends AbstractGraph {
 
     static updateColumn(props) {
         const column = `${props.configuration.id}-columns`;
-        
+
         const {
             context,
             selectedColumns
@@ -181,9 +180,7 @@ class Table extends AbstractGraph {
         let endIndex = size - 1;
 
         if(scroll) {
-            
             startIndex = (currentPage - 1) * pageSize;
-            
             endIndex = startIndex + pageSize - 1;
             this.selectedRows = objectPath.has(scrollData, 'selectedRows') ? objectPath.get(scrollData, 'selectedRows') : {};
 
@@ -195,8 +192,6 @@ class Table extends AbstractGraph {
         const {
             selectColumnOption,
             matchingRowColumn,
-            fixedHeader,
-            headerPadding,
         } = this.getConfiguredProperties()
 
         const columns = this.getColumns();
@@ -219,7 +214,7 @@ class Table extends AbstractGraph {
             };
 
             if(i >= startIndex && i <= endIndex) {
-                
+
                 for(let key in columns) {
                     if(columns.hasOwnProperty(key)) {
                         const columnData = {...columns[key]};
@@ -246,6 +241,7 @@ class Table extends AbstractGraph {
         })
 
         this.originalData = this.filterData
+
         /*
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
@@ -369,42 +365,26 @@ class Table extends AbstractGraph {
     }
 
     // filter and formatting columns for table header
-    getHeaderData(initialSort) {
+    getHeaderData() {
         const columns = this.getColumns()
         let headerData = []
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
                 if (this.state.columns.filter(d => d.value === columnRow.label).length) {
-                    if (this.sortOrder && this.sortOrder.column === columnRow.column) {
-                        headerData.push({
-                            name: index,
-                            label: columnRow.label || columnRow.column,
-                            options: {
-                                filter: columnRow.filter !== false,
-                                sort: true,
-                                sortDirection: this.sortOrder.order,
-                            },
-                            type: columnRow.selection ? "selection" : "text",
-                            style: {
-                                textIndent: '2px'
-                            }
-                        })
-                    }
-                    else {
-                        headerData.push({
-                            name: index,
-                            label: columnRow.label || columnRow.column,
-                            options: {
-                                filter: columnRow.filter !== false,
-                                sort: true,
-                            },
-                            type: columnRow.selection ? "selection" : "text",
-                            style: {
-                                textIndent: '2px'
-                            }
-                        })
-                    }
+
+                    headerData.push({
+                        name: index,
+                        label: columnRow.label || columnRow.column,
+                        columnField: index,
+                        columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+                        filter: columnRow.filter !== false,
+                        type: columnRow.selection ? "selection" : "text",
+                        style: {
+                            textIndent: '2px'
+                        },
+                        options: (this.sortOrder && this.sortOrder.column === columnRow.column) ? { sortDirection: this.sortOrder.order } : {}
+                    })
                 }
             }
         }
@@ -429,7 +409,7 @@ class Table extends AbstractGraph {
         const keyColumns = this.getColumns();
         const offset = pageSize * (this.currentPage - 1);
 
-        const dataList = this.state.data.map((d, j) => {
+        return this.state.data.map((d, j) => {
 
             if (j < offset || j > (offset + pageSize - 1)) {
                 return d;
@@ -440,15 +420,15 @@ class Table extends AbstractGraph {
                 highlighter = false;
 
             for (let key in keyColumns) {
-                if (keyColumns.hasOwnProperty(key)) {
+                if(keyColumns.hasOwnProperty(key)) {
 
-                    const columnObj = keyColumns[key],
+                    const columnObj  = keyColumns[key],
                         originalData = d[columnObj.column];
-                    let columnData = originalData;
+                    let columnData   = originalData;
 
                     // get substring of data upto defined total characters
-                    if (columnObj.totalCharacters) {
-                        columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d)
+                    if(columnObj.totalCharacters) {
+                        columnData = columnAccessor({column: columnObj.column, totalCharacters: columnObj.totalCharacters})(d)
                     }
 
                     // get with of the column data
@@ -463,7 +443,7 @@ class Table extends AbstractGraph {
                     }
 
                     // enable tooltip on mouse hover
-                    if ((columnData || columnData === 0) && columnObj.tooltip) {
+                    if((columnData || columnData === 0) && columnObj.tooltip) {
 
                         let fullText = d[columnObj.tooltip.column] || originalData
 
@@ -473,7 +453,7 @@ class Table extends AbstractGraph {
                             <div key={`tooltip_${j}_${key}`}>
                                 {fullText} &nbsp;
                                 <CopyToClipboard text={fullText ? fullText.toString() : ''}>
-                                    <button style={{ background: '#000', padding: 1 }} title="copy">
+                                    <button style={{background: '#000', padding: 1}} title="copy">
                                         <FaRegClipboard size={10} color="#fff" />
                                     </button>
                                 </CopyToClipboard>
@@ -490,7 +470,7 @@ class Table extends AbstractGraph {
                     }
 
                     // highlight the entire row if highlight array have a column with non-empty value
-                    if (highlight && highlight.includes(columnObj.column) && originalData) {
+                    if(highlight && highlight.includes(columnObj.column) && originalData) {
                         highlighter = true
                     }
 
@@ -500,16 +480,16 @@ class Table extends AbstractGraph {
                      * color {"insla": "red", "outsla": "green"}
                      */
                     if (columnObj.colors && columnObj.colors[originalData]) {
-                        columnData = (
-                            <div style={{ background: columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+                        columnData =  (
+                            <div style={{ background:  columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
                         )
                     }
 
-                    if (columnObj.infoBox && columnData) {
-                        columnData = (
+                    if(columnObj.infoBox && columnData) {
+                        columnData =  (
                             <div>
                                 {columnData}
-                                <span style={{ padding: "0px 5px" }} onClick={(e) => {
+                                <span style={{padding: "0px 5px"}} onClick={(e) => {
                                     e.stopPropagation();
                                     this.openInfoBox({
                                         infoBoxRow: d,
@@ -523,8 +503,9 @@ class Table extends AbstractGraph {
                             </div>
                         )
                     }
-                    if (columnData || columnData === 0) {
-                        data[key] = typeof (columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData
+
+                    if(columnData || columnData === 0) {
+                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() : columnData;
 
                         data[key] = <div className="wrapper-data"> {data[key]} </div>;
                         /**
@@ -538,15 +519,14 @@ class Table extends AbstractGraph {
             }
             this.tableWidth = rowWidth;
 
-            if (highlighter)
+            if(highlighter)
                 Object.keys(data).map(key => {
                     return data[key] = <div style={{ background: highlightColor || '', height: style.row.height, padding: "10px 0" }}>
                         {data[key]}</div>
                 })
-            return data;
 
-        });
-        return dataList;
+            return data
+        })
     }
 
     // when scroll is enabled then call this function
@@ -591,22 +571,6 @@ class Table extends AbstractGraph {
         this.scroll ? this.handleScrollSorting(columnData.column) : this.handleStaticSorting(columnData.column)
     }
 
-    handlePreviousPageClick() {
-        --this.currentPage;
-        this.scroll ? this.updateTableStatus({currentPage: this.currentPage,  event: events.PAGING}) : this.updateData();
-    }
-
-    handleNextPageClick() {
-        // show confirmation popup to refresh data if scroll is enable
-        if(this.isScrollExpired() && !this.isScrollDataExists(this.currentPage + 1)) {
-            this.setState({showConfirmationPopup: true});
-            return;
-        }
-
-        ++this.currentPage
-        this.scroll ? this.updateTableStatus({currentPage: this.currentPage, event: events.PAGING}) : this.updateData();
-    }
-
     handlePageClick = (page) => {
         if (page > this.currentPage - 1) {
 
@@ -617,12 +581,12 @@ class Table extends AbstractGraph {
             }
 
             ++this.currentPage
-            this.scroll ? this.updateTableStatus({ currentPage: this.currentPage, event: events.PAGING }) : this.updateData();
         } else {
-            --this.currentPage;
-            this.scroll ? this.updateTableStatus({ currentPage: this.currentPage, event: events.PAGING }) : this.updateData();
 
+            --this.currentPage;
         }
+
+        this.scroll ? this.updateTableStatus({ currentPage: this.currentPage, event: events.PAGING }) : this.updateData();
     }
 
     handleClick(key) {
@@ -746,7 +710,7 @@ class Table extends AbstractGraph {
             const li = document.createElement('li');
             li.textContent = text;
             const queryParams = (params && Object.getOwnPropertyNames(params).length > 0) ?
-                    Object.assign({}, context, params) : Object.assign({}, context);
+                Object.assign({}, context, params) : Object.assign({}, context);
             li.onclick = (e) => {
                 // dispatch a push to the menu link
                 goTo && goTo(pathname, queryParams);
@@ -786,7 +750,7 @@ class Table extends AbstractGraph {
             return;
 
         const search = searchString !== null ? searchString : searchText,
-            filteroption = headerData.filter( d => d.filter === true);
+        filteroption = headerData.filter( d => d.filter === true);
 
         return (
             <SearchBar
@@ -940,7 +904,7 @@ class Table extends AbstractGraph {
                         <RefreshIcon color={style.button.icon.color} />
                     </IconButton>
                 </div>
-            : ''
+                : ''
         )
     }
 
@@ -1060,8 +1024,8 @@ class Table extends AbstractGraph {
         const {
             showCheckboxes,
             hidePagination,
+            fixedHeader,
         } = this.getConfiguredProperties();
-
         const {
             pageSize,
             size
@@ -1070,27 +1034,30 @@ class Table extends AbstractGraph {
         const tableCurrentPage = this.currentPage - 1;
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData);
-        const initialSort = this.getInitialSort();
-        const headerData = this.getHeaderData(initialSort);
+        const initialSort = this.getInitialSort();//Todo
+        const headerData = this.getHeaderData();
         const totalRecords = scroll ? size : this.filterData.length;
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const options = {
-            filterType: "dropdown",
+            print: false,
+            filter: false,
+            download: false,
+            search: false,
+            sort: true,
             responsive: "scroll",
-            fixedHeader: true,
-            pagination: scroll,
+            fixedHeader: fixedHeader,
+            pagination: showFooter,
             rowsPerPage: pageSize,
             count: totalRecords,
             page: tableCurrentPage,
             selectableRows: showCheckboxes || "single",
             onChangePage: this.handlePageClick,
             rowsSelected: this.state.selected,
-            sort: true,
             onRowsSelect: this.handleRowSelection,
             rowsSelected: this.state.selected,
             selectableRowsOnClick: true,
         };
-        if (this.scroll) {
+        if (scroll) {
             options.customSort = this.handleSortOrderChange;
         } else {
             options.onColumnSortChange = this.handleSortOrderChange;
@@ -1100,6 +1067,11 @@ class Table extends AbstractGraph {
         if (!showCheckboxes) {
             theme = createMuiTheme({
                 overrides: {
+                    MUIDataTableHeadCell: {
+                        fixedHeader: {
+                            zIndex: "10000"
+                        }
+                    },
                     MuiTableRow: {
                         root: {
                             '&$selected': {
@@ -1121,6 +1093,11 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                     onContextMenu={this.handleContextMenu}
                 >
+                    <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                        {this.resetScrollData()}
+                    </div>
+                    <div style={{ clear: "both" }}></div>
+                    {this.renderSearchBarIfNeeded(headerData)}
                     <MUIDataTable
                         data={tableData}
                         columns={headerData}
