@@ -128,9 +128,7 @@ export default class XYGraph extends AbstractGraph {
             this.axis.x
             .tickValues(Object.keys(xTicksLabel))
             .tickFormat( value => xTicksLabel[value] || null);
-        }
-            
-        if(xTickFormat){
+        } else if(xTickFormat){
             this.axis.x.tickFormat(format(xTickFormat));
         }
 
