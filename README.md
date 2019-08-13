@@ -302,7 +302,7 @@ __linesColumn__ (array || string)- attribute name in your results to display lin
 ```
 
 __showNull__ - (Boolean) If false, Show truncated line if yValue is null . Default is true
-
+__connected__ - (Boolean) If true then it will create the lines without any gaps and zero for missing x axis. Default is `false`.
 __defaultY__ - (string | object) default yAxis value used to draw straight horizontal line to show cut off value. It can be object which define data `source` and `column` to get data from another query and you may define separate `tooltip` for this staright line from data `source`. Example -
 
 ```javascript
