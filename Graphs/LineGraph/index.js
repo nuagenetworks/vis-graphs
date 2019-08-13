@@ -80,6 +80,7 @@ class LineGraph extends XYGraph {
           yTickFontSize,
           xTickFontSize,
           yTicksLabel,
+          connected,
         } = this.getConfiguredProperties();
 
         let finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
@@ -170,8 +171,8 @@ class LineGraph extends XYGraph {
                     && typeof d.values[index][this.yValue] !== 'object'
                 ) {
                     elem.values.push(d.values[index])
-                } else {
-                    // If showNull is true, insert new object with yValue=0
+                } else if (!connected) {
+                  // If showNull is true, insert new object with yValue=0
                     if(showNull !== false) {
                         elem.values.push({
                             [this.yValue]: 0,
