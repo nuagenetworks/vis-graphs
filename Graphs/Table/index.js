@@ -3,7 +3,6 @@ import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
 import { last, isEqual, orderBy, isEmpty } from 'lodash'
-import SuperSelectField from 'material-ui-superselectfield';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -292,8 +291,13 @@ class Table extends AbstractGraph {
     }
 
     updateData(columns = this.state.columns) {
+        const {
+            pageSize,
+        } = this.getGraphProperties();
+
+        const offset = pageSize * (this.currentPage - 1);
         this.setState({
-            data : this.filterData,
+            data : this.filterData.slice(0, offset + pageSize),
             selected: this.selectedRows[this.currentPage] || [],
             columns
         });
@@ -344,7 +348,7 @@ class Table extends AbstractGraph {
         const {
             pageSize,
         } = this.getGraphProperties();
-
+        
         if (!columns)
             return []
 
@@ -400,7 +404,7 @@ class Table extends AbstractGraph {
                     }
 
                     // highlight the entire row if highlight array have a column with non-empty value
-                    if(highlight && highlight.includes(columnObj.column) && originalData) {
+                    if(highlight && highlight.includes(columnObj.column) && originalData) {           
                         highlighter = true
                     }
 
@@ -417,7 +421,7 @@ class Table extends AbstractGraph {
 
                     if(columnObj.infoBox && columnData) {
                         columnData =  (
-                            <div>
+                            <React.Fragment>
                                 {columnData}
                                 <span style={{padding: "0px 5px"}} onClick={(e) => {
                                     e.stopPropagation();
@@ -430,7 +434,7 @@ class Table extends AbstractGraph {
                                 }}>
                                     <EyeIcon size={this.state.fontSize + 2} color="#555555" />
                                 </span>
-                            </div>
+                            </React.Fragment>
                         )
                     }
 
@@ -677,8 +681,8 @@ class Table extends AbstractGraph {
 
         const search = searchString !== null ? searchString : searchText,
         filteroption = headerData.filter( d => d.filter === true);
-
-        return (
+        
+        return ( filteroption.length &&
             <SearchBar
                 data={this.originalData}
                 searchText={search}
@@ -877,7 +881,7 @@ class Table extends AbstractGraph {
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const options = {
             print: false,
-            filter: 'checkbox',
+            filter: false,
             download: false,
             search: false,
             sort: true,
@@ -929,6 +933,10 @@ class Table extends AbstractGraph {
                     <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
                         {this.resetScrollData()}
                     </div>
+
+                    { this.renderConfirmationDialog()}
+                    { this.renderInfoBox() }
+
                     <div style={{ clear: "both" }}></div>
                     {this.renderSearchBarIfNeeded(headerData)}
                      {this.renderNoData()}
