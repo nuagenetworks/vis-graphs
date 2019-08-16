@@ -312,15 +312,15 @@ class Table extends AbstractGraph {
     }
 
     // filter and formatting columns for table header
-    getHeaderData() {
+    getHeaderData(initialSort) {
         const columns = this.getColumns()
-        let headerData = []
+        let headerData = [];
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
                 if (this.state.columns.filter(d => d.value === columnRow.label).length) {
                     
-                    headerData.push({
+                    const headerColumn = {
                         name: index,
                         label: columnRow.label || columnRow.column,
                         columnField: columnRow.column,
@@ -330,8 +330,16 @@ class Table extends AbstractGraph {
                         style: {
                             textIndent: '2px'
                         },
-                        options: (this.sortOrder && this.sortOrder.column === columnRow.column) ? { sortDirection: this.sortOrder.order } : {}
-                    })
+                    };
+
+                    if((initialSort && initialSort.column === columnRow.column) ||
+                    (this.sortOrder && this.sortOrder.column === columnRow.column)){
+                        headerColumn.options = {
+                            sortDirection: this.isEmptyData(initialSort) ? this.sortOrder.order : initialSort.order
+                        }
+                    }
+
+                    headerData.push(headerColumn);
                 }
             }
         }
@@ -876,7 +884,7 @@ class Table extends AbstractGraph {
         // overrite style of highlighted selected row
         tableData = this.removeHighlighter(tableData);
         const initialSort = this.getInitialSort();//Todo
-        const headerData = this.getHeaderData();
+        const headerData = this.getHeaderData(initialSort);
         const totalRecords = scroll ? size : this.filterData.length;
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const options = {
@@ -896,12 +904,8 @@ class Table extends AbstractGraph {
             rowsSelected: this.state.selected,
             onRowsSelect: this.handleRowSelection,
             selectableRowsOnClick: true,
+            onColumnSortChange: this.handleSortOrderChange
         };
-        if (scroll) {
-            options.customSort = this.handleSortOrderChange;
-        } else {
-            options.onColumnSortChange = this.handleSortOrderChange;
-        }
 
         const theme = createMuiTheme({
                 overrides: {
