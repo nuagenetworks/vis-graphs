@@ -269,6 +269,17 @@ __brush__ (number) To enble brushing with pre selected bars.Currently support in
 
 ![dynamicbargraph](https://user-images.githubusercontent.com/26645756/36250751-b6872a64-1264-11e8-961c-1cb895518fc0.png)
 
+__xTicksLabel__ - (object) used to override labels of x axis ticks with some predefined strings. E.g - 
+ ```javascript
+    "xTicksLabel": {
+        "NETFLIX": "NET",
+        "WEBEX": "WEB",
+        "HTTP": "HT",
+        "GOOGLE": "Google",
+        "MSOffice365": "Office"
+    }
+```
+
 ## *LineGraph*
 Display one or multiple lines
 >[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/lineGraph)
@@ -291,7 +302,7 @@ __linesColumn__ (array || string)- attribute name in your results to display lin
 ```
 
 __showNull__ - (Boolean) If false, Show truncated line if yValue is null . Default is true
-
+__connected__ - (Boolean) If true then it will create the lines without any gaps and zero for missing x axis. Default is `false`.
 __defaultY__ - (string | object) default yAxis value used to draw straight horizontal line to show cut off value. It can be object which define data `source` and `column` to get data from another query and you may define separate `tooltip` for this staright line from data `source`. Example -
 
 ```javascript
