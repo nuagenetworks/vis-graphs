@@ -871,7 +871,8 @@ class Table extends AbstractGraph {
             showCheckboxes,
             hidePagination,
             fixedHeader,
-            multiSelectable
+            multiSelectable,
+            selectColumnOption
         } = this.getConfiguredProperties();
 
         const {
@@ -893,6 +894,7 @@ class Table extends AbstractGraph {
             download: false,
             search: false,
             sort: true,
+            viewColumns: selectColumnOption || false,
             responsive: "scroll",
             fixedHeader: fixedHeader,
             pagination: showFooter,
