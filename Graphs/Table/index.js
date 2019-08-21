@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
-import { last, isEqual, orderBy, isEmpty } from 'lodash'
+import { last, isEqual, orderBy, isEmpty, uniq } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -36,6 +36,7 @@ class Table extends AbstractGraph {
         this.handleRowSelection      = this.handleRowSelection.bind(this)
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
+        this.handleColumnViewChange  = this.handleColumnViewChange.bind(this);
 
         /**
         */
@@ -49,12 +50,12 @@ class Table extends AbstractGraph {
         this.selectedRows = {}
         this.htmlData = {}
         this.sortOrder = {}
+        this.removedColumns = []
         this.state = {
             selected: [],
             data: [],
             fontSize: style.defaultFontsize,
             contextMenu: null,
-            columns: [],
             showInfoBox: false,
             showConfirmationPopup: false
         }
@@ -102,6 +103,7 @@ class Table extends AbstractGraph {
             pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+            removedColumns: objectPath.has(scrollData, 'removedColumns') ? objectPath.get(scrollData, 'removedColumns') : uniq(this.removedColumns),
         }
     }
 
@@ -208,18 +210,18 @@ class Table extends AbstractGraph {
         }
 
         // filter columns who will be display in table
-        const filteredColumns = columns.filter(d => {
-            Object.assign(d, { value: d.label })
+        const filteredColumns = columns.filter((d,index) => {
+            if (d.display === false) {
+                this.removedColumns.push(`${index}`);
+            }
 
             //Only selected Columns
-            if(columnsContext) {
+            if (columnsContext) {
                 return columnsContext.indexOf(d.label) > -1 || false
-            } else {
-                //Configured Columnst
-                return d.display !== false
             }
-        })
 
+            return false;
+        })
         if (filteredColumns.length) {
             filteredColumns[0].firstColStyle = firstColToolTipStyle;
             last(filteredColumns).lastColStyle = lastColToolTipStyle;
@@ -290,7 +292,7 @@ class Table extends AbstractGraph {
         }
     }
 
-    updateData(columns = this.state.columns) {
+    updateData() {
         const {
             pageSize,
         } = this.getGraphProperties();
@@ -299,7 +301,6 @@ class Table extends AbstractGraph {
         this.setState({
             data : this.filterData.slice(0, offset + pageSize),
             selected: this.selectedRows[this.currentPage] || [],
-            columns
         });
     }
 
@@ -313,34 +314,41 @@ class Table extends AbstractGraph {
 
     // filter and formatting columns for table header
     getHeaderData(initialSort) {
+        const {
+            removedColumns,
+        } = this.getGraphProperties();
+
         const columns = this.getColumns()
         let headerData = [];
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
-                const columnRow = columns[index];
-                if (this.state.columns.filter(d => d.value === columnRow.label).length) {
-                    
-                    const headerColumn = {
-                        name: index,
-                        label: columnRow.label || columnRow.column,
-                        columnField: columnRow.column,
-                        columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
-                        filter: columnRow.filter !== false,
-                        type: columnRow.selection ? "selection" : "text",
-                        style: {
-                            textIndent: '2px'
-                        },
-                    };
-
-                    if((initialSort && initialSort.column === columnRow.column) ||
-                    (this.sortOrder && this.sortOrder.column === columnRow.column)){
-                        headerColumn.options = {
-                            sortDirection: this.isEmptyData(initialSort) ? this.sortOrder.order : initialSort.order
-                        }
+                const columnRow = columns[index];                    
+                const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
+                const headerColumn = {
+                    name: index,
+                    label: columnRow.label || columnRow.column,
+                    columnField: columnRow.column,
+                    columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+                    filter: columnRow.filter !== false,
+                    type: columnRow.selection ? "selection" : "text",
+                    style: {
+                        textIndent: '2px'
+                    },
+                    options: {
+                        display: displayColumn
                     }
+                };
 
-                    headerData.push(headerColumn);
+                if((initialSort && initialSort.column === columnRow.column) ||
+                (this.sortOrder && this.sortOrder.column === columnRow.column)){
+                    headerColumn.options = {
+                        display: displayColumn,
+                        sortDirection: this.isEmptyData(initialSort) ? this.sortOrder.order : initialSort.order,
+                        sort: true
+                    }
                 }
+
+                headerData.push(headerColumn);
             }
         }
 
@@ -468,6 +476,36 @@ class Table extends AbstractGraph {
 
             return data
         })
+    }
+
+    handleColumnViewChange(changedColumn, action) {
+        const {
+            removedColumns
+        } = this.getGraphProperties();
+
+        if (action === 'remove') {
+            this.updateTableStatus({
+                removedColumns: [...removedColumns, changedColumn],
+                event: events.REMOVED_COLUMNS
+            });
+        } else {
+            const removedIndex = removedColumns.indexOf(changedColumn);
+            if (removedIndex > -1) {
+                removedColumns.splice(removedIndex, 1);
+            }
+            this.updateTableStatus({
+                removedColumns: [...removedColumns],
+                event: events.REMOVED_COLUMNS
+            });
+        }
+    }
+
+    handleRowsPerPageChange = (numberOfRows) => {
+        this.updateTableStatus({
+            pageSize: numberOfRows,
+            event: events.PAGING
+        });
+        this.pageSize = numberOfRows;
     }
 
     // when scroll is enabled then call this function
@@ -688,9 +726,9 @@ class Table extends AbstractGraph {
             return;
 
         const search = searchString !== null ? searchString : searchText,
-        filteroption = headerData.filter( d => d.filter === true);
-        
-        return ( filteroption.length &&
+        filteroption = headerData.filter( d => d.options.display === 'true');
+
+        return ( (filteroption.length || (this.originalData.length === 0)) &&
             <SearchBar
                 data={this.originalData}
                 searchText={search}
@@ -723,17 +761,6 @@ class Table extends AbstractGraph {
             })
         }
         return data
-    }
-
-
-    renderNoData() {
-        const { data } = this.props;
-
-        if(this.isEmptyData(data)) {
-            return this.renderMessage('No data to visualize')
-        }
-
-        return null;
     }
 
     // reset scroll data.
@@ -906,7 +933,9 @@ class Table extends AbstractGraph {
             rowsSelected: this.state.selected,
             onRowsSelect: this.handleRowSelection,
             selectableRowsOnClick: true,
-            onColumnSortChange: this.handleSortOrderChange
+            onColumnSortChange: this.handleSortOrderChange,
+            onChangeRowsPerPage: this.handleRowsPerPageChange,
+            onColumnViewChange: this.handleColumnViewChange
         };
 
         const theme = createMuiTheme({
@@ -945,7 +974,7 @@ class Table extends AbstractGraph {
 
                     <div style={{ clear: "both" }}></div>
                     {this.renderSearchBarIfNeeded(headerData)}
-                     {this.renderNoData()}
+
                     <MUIDataTable
                         data={tableData}
                         columns={headerData}
