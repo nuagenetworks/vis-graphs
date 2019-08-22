@@ -170,25 +170,22 @@ class Table extends AbstractGraph {
                 'row_id': random
             };
 
-            if(i >= startIndex && i <= endIndex) {
+            for(let key in columns) {
+                if(columns.hasOwnProperty(key)) {
+                    const columnData = {...columns[key]};
+                    delete columnData.totalCharacters;
 
-                for(let key in columns) {
-                    if(columns.hasOwnProperty(key)) {
-                        const columnData = {...columns[key]};
-                        delete columnData.totalCharacters;
+                    const accessor = columnAccessor(columnData);
+                    data[columnData.column] = accessor(d);
 
-                        const accessor = columnAccessor(columnData);
-                        data[columnData.column] = accessor(d);
+                    // add tooltip column data if it doesn't exist in column array
+                    if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                        data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
+                    }
 
-                        // add tooltip column data if it doesn't exist in column array
-                        if(columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
-                            data[columnData.tooltip.column] = columnAccessor({column: columnData.tooltip.column})(d)
-                        }
-
-                        // add matching row data if it doesn't exist in column array
-                        if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
-                            data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
-                        }
+                    // add matching row data if it doesn't exist in column array
+                    if(matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                        data[matchingRowColumn] = columnAccessor({column: matchingRowColumn})(d)
                     }
                 }
             }
@@ -372,10 +369,7 @@ class Table extends AbstractGraph {
         const offset = pageSize * (this.currentPage - 1);
 
         return this.state.data.map((d, j) => {
-
-            if (j < offset || j > (offset + pageSize - 1)) {
-                return d;
-            }
+ 
 
             let data = {},
                 highlighter = false;
