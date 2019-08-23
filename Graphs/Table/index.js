@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
-import { last, isEqual, orderBy, isEmpty, uniq } from 'lodash'
+import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -43,6 +43,7 @@ class Table extends AbstractGraph {
         const { limit } = this.getConfiguredProperties();
         this.pageSize =  limit || 500;
         this.searchText = '';
+        this.removedColumnsKey = 'default';
         this.scroll = props.scroll;
         this.originalData = []
         this.keyColumns = {}
@@ -103,7 +104,7 @@ class Table extends AbstractGraph {
             pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-            removedColumns: objectPath.has(scrollData, 'removedColumns') ? objectPath.get(scrollData, 'removedColumns') : uniq(this.removedColumns),
+            removedColumns: objectPath.has(scrollData, `removedColumns_${this.removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${this.removedColumnsKey}`) : uniq(this.removedColumns),
         }
     }
 
@@ -147,9 +148,8 @@ class Table extends AbstractGraph {
         }
 
         const {
-            selectColumnOption,
-            matchingRowColumn,
-        } = this.getConfiguredProperties()
+            matchingRowColumn
+        } = this.getConfiguredProperties();
 
         const columns = this.getColumns();
 
@@ -200,31 +200,20 @@ class Table extends AbstractGraph {
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
-        let columnsContext = false
 
-        if(selectedColumns) {
-            columnsContext = selectedColumns
-        }
+        this.removedColumns = [];
 
-        // filter columns who will be display in table
-        const filteredColumns = columns.filter((d,index) => {
-            if (d.display === false) {
+        // remove un-selected columns
+        columns.forEach((d, index) => {
+            if (selectedColumns && selectedColumns.length) {
+                if (!selectedColumns.find(column => d.label === column)) {
+                    this.removedColumns.push(`${index}`)
+                }
+            } else if (d.display === false) {
                 this.removedColumns.push(`${index}`);
             }
-
-            //Only selected Columns
-            if (columnsContext) {
-                return columnsContext.indexOf(d.label) > -1 || false
-            }
-
-            return false;
-        })
-        if (filteredColumns.length) {
-            filteredColumns[0].firstColStyle = firstColToolTipStyle;
-            last(filteredColumns).lastColStyle = lastColToolTipStyle;
-        }
-
-        this.updateData(filteredColumns);
+        });
+        this.updateData();
     }
 
     isScrollExpired() {
@@ -296,7 +285,7 @@ class Table extends AbstractGraph {
 
         const offset = pageSize * (this.currentPage - 1);
         this.setState({
-            data : this.filterData.slice(0, offset + pageSize),
+            data : this.scroll ?  this.filterData.slice(0, offset + pageSize) : this.filterData,
             selected: this.selectedRows[this.currentPage] || [],
         });
     }
@@ -348,7 +337,7 @@ class Table extends AbstractGraph {
                 headerData.push(headerColumn);
             }
         }
-
+        
         return headerData
     }
 
@@ -358,8 +347,10 @@ class Table extends AbstractGraph {
             highlightColor,
             headerPadding,
         } = this.getConfiguredProperties();
+
         const {
             pageSize,
+            removedColumns,
         } = this.getGraphProperties();
         
         if (!columns)
@@ -368,13 +359,17 @@ class Table extends AbstractGraph {
         const keyColumns = this.getColumns();
         const offset = pageSize * (this.currentPage - 1);
 
+        const usedColumns = keyColumns.filter((el) => !uniq(removedColumns).includes(el));
+
+        first(usedColumns).firstColStyle = firstColToolTipStyle;
+        last(usedColumns).lastColStyle = lastColToolTipStyle;
         return this.state.data.map((d, j) => {
  
 
             let data = {},
                 highlighter = false;
 
-            for (let key in keyColumns) {
+            for (let key in usedColumns) {
                 if(keyColumns.hasOwnProperty(key)) {
 
                     const columnObj  = keyColumns[key],
@@ -479,7 +474,7 @@ class Table extends AbstractGraph {
 
         if (action === 'remove') {
             this.updateTableStatus({
-                removedColumns: [...removedColumns, changedColumn],
+                [`removedColumns_${this.removedColumnsKey}`]: [...removedColumns, changedColumn],
                 event: events.REMOVED_COLUMNS
             });
         } else {
@@ -488,17 +483,20 @@ class Table extends AbstractGraph {
                 removedColumns.splice(removedIndex, 1);
             }
             this.updateTableStatus({
-                removedColumns: [...removedColumns],
+                [`removedColumns_${this.removedColumnsKey}`]: [...removedColumns],
                 event: events.REMOVED_COLUMNS
             });
         }
     }
 
     handleRowsPerPageChange = (numberOfRows) => {
-        this.updateTableStatus({
-            pageSize: numberOfRows,
-            event: events.PAGING
-        });
+        if (this.scroll) {
+            this.updateTableStatus({
+                pageSize: numberOfRows,
+                event: events.PAGING
+            });
+        }
+
         this.pageSize = numberOfRows;
     }
 
@@ -537,9 +535,9 @@ class Table extends AbstractGraph {
         this.updateData();
     }
 
-    handleSortOrderChange(data, column, order = null) {
+    handleSortOrderChange(column, order) {
         const columnList = this.getColumns();
-        const columnData = columnList[order ? column : data];
+        const columnData = columnList[column];
 
         this.scroll ? this.handleScrollSorting(columnData.column) : this.handleStaticSorting(columnData.column)
     }
@@ -728,7 +726,6 @@ class Table extends AbstractGraph {
                 searchText={search}
                 options={filteroption}
                 handleSearch={this.handleSearch}
-                columns={this.getColumns()}
                 scroll={this.props.scroll}
             />
         );
@@ -901,12 +898,12 @@ class Table extends AbstractGraph {
             size
         } = this.getGraphProperties();
 
-        let tableData = this.getTableData(this.getColumns());
         const tableCurrentPage = this.currentPage - 1;
         // overrite style of highlighted selected row
-        tableData = this.removeHighlighter(tableData);
         const initialSort = this.getInitialSort();//Todo
         const headerData = this.getHeaderData(initialSort);
+        let tableData = this.getTableData(this.getColumns());
+        tableData = this.removeHighlighter(tableData);
         const totalRecords = scroll ? size : this.filterData.length;
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const options = {
