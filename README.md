@@ -397,6 +397,32 @@ __header__ - header specific parameters includes
 
 __fontColor__ - Color of the header text
 
+__contextColumns__ - (Object) containing array of column labels to be displayed. If empty or not present then columns will be displayed according to `display` key.
+
+```javascript
+"contextColumns": {
+  "app": {
+    "facebook": [
+      "Timestmp",
+      "SIP",
+      "DIP"
+    ],
+    "google": [
+      "Proto",
+      "DIP",
+      "SIP"
+    ]
+  },
+  "aclId": {
+    "013c868a-d9a1-41ee-95bb-8c14290bf405": [
+      "Timestamp",
+      "SIP",
+      "DIP"
+    ]
+  }
+}
+```
+
 __columns__ - (Array) Array of columns display in the table. Example -
 
   ```javascript

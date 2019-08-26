@@ -148,7 +148,8 @@ class Table extends AbstractGraph {
         }
 
         const {
-            matchingRowColumn
+            matchingRowColumn,
+            contextColumns,
         } = this.getConfiguredProperties();
 
         const columns = this.getColumns();
@@ -201,11 +202,26 @@ class Table extends AbstractGraph {
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
 
+        let filterColumns = [];
+        for (let key in contextColumns) {
+            if (context.hasOwnProperty(key)) {
+                this.removedColumnsKey = context[key];
+                for (let value in contextColumns[key]) {
+                    if (context[key] === value) {
+                        filterColumns = contextColumns[key][value];
+                    }
+                }
+            }
+        }
         this.removedColumns = [];
 
         // remove un-selected columns
         columns.forEach((d, index) => {
-            if (selectedColumns && selectedColumns.length) {
+            if (filterColumns.length) {
+                if (!filterColumns.find(column => d.label === column))
+                    this.removedColumns.push(`${index}`)
+
+            } else if (selectedColumns && selectedColumns.length) {
                 if (!selectedColumns.find(column => d.label === column)) {
                     this.removedColumns.push(`${index}`)
                 }
@@ -349,7 +365,6 @@ class Table extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            pageSize,
             removedColumns,
         } = this.getGraphProperties();
         
@@ -357,9 +372,8 @@ class Table extends AbstractGraph {
             return []
 
         const keyColumns = this.getColumns();
-        const offset = pageSize * (this.currentPage - 1);
 
-        const usedColumns = keyColumns.filter((el) => !uniq(removedColumns).includes(el));
+        const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
 
         first(usedColumns).firstColStyle = firstColToolTipStyle;
         last(usedColumns).lastColStyle = lastColToolTipStyle;
