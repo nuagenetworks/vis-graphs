@@ -200,12 +200,15 @@ class Table extends AbstractGraph {
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
-
+        const filterColumns = this.getColumnByContext(columns);
         this.removedColumns = [];
 
-        // remove un-selected columns
         columns.forEach((d, index) => {
-            if (selectedColumns && selectedColumns.length) {
+            if (filterColumns.length) {
+                if (!filterColumns.find(column => d.column === column))
+                    this.removedColumns.push(`${index}`)
+
+            } else if (selectedColumns && selectedColumns.length) {
                 if (!selectedColumns.find(column => d.label === column)) {
                     this.removedColumns.push(`${index}`)
                 }
@@ -215,6 +218,25 @@ class Table extends AbstractGraph {
         });
         this.updateData();
     }
+
+    // update column dynamically according to the value passed through the context
+    getColumnByContext(columns) {
+        const { context } = this.props;
+        const filterColumns = []
+        columns.forEach((d, index) => {
+            if (d.displayOption) {
+                for(let key in d.displayOption) {
+                    if(context.hasOwnProperty(key)) {
+                        this.removedColumnsKey = context[key];
+                        if(context[key] === d.displayOption[key]) {
+                            filterColumns.push(d.column);
+                        }
+                    }   
+                }
+            }
+        })
+        return filterColumns.length ? filterColumns : [];
+    }    
 
     isScrollExpired() {
         const {
