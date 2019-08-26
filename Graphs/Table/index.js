@@ -345,11 +345,9 @@ class Table extends AbstractGraph {
         const {
             highlight,
             highlightColor,
-            headerPadding,
         } = this.getConfiguredProperties();
 
         const {
-            pageSize,
             removedColumns,
         } = this.getGraphProperties();
         
@@ -357,9 +355,7 @@ class Table extends AbstractGraph {
             return []
 
         const keyColumns = this.getColumns();
-        const offset = pageSize * (this.currentPage - 1);
-
-        const usedColumns = keyColumns.filter((el) => !uniq(removedColumns).includes(el));
+        const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
 
         first(usedColumns).firstColStyle = firstColToolTipStyle;
         last(usedColumns).lastColStyle = lastColToolTipStyle;
