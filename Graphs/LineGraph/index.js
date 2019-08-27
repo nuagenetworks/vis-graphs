@@ -12,7 +12,8 @@ import {
     brushX,
     voronoi,
     merge,
-    event
+    event,
+    timeFormat
 } from "d3";
 import moment from 'moment';
 import momentDuration from 'moment-duration-format';
@@ -300,7 +301,7 @@ class LineGraph extends XYGraph {
           .tickSizeOuter(xTickSizeOuter);
 
         if(xTickFormat){
-            xAxis.tickFormat(format(xTickFormat));
+            xAxis.tickFormat(dateHistogram ? timeFormat(xTickFormat) : format(xTickFormat));
         }
 
         if(xTicks){
