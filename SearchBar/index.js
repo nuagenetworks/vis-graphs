@@ -57,6 +57,8 @@ export default class SearchBar extends React.Component {
     onChange (query, result) {
         if(!result.isError) {
             this.query = query;
+        } else {
+            clearTimeout(this.setTimeout);
         }
 
         this.setState({
