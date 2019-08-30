@@ -70,7 +70,22 @@ class Table extends AbstractGraph {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if(!prevState.columns.length) {
+        const {
+            context,
+            selectedColumns
+        } = nextProps;
+
+        const column = `${nextProps.configuration.id}-columns`;
+
+        let columnsContext = false
+
+        if(selectedColumns) {
+            columnsContext = selectedColumns
+        } else {
+            columnsContext = context && context.hasOwnProperty(column) ? context[column] : false
+        }
+
+        if(prevState.columns.length != columnsContext.length) {
             return Table.updateColumn(nextProps);
         } 
         return null;
