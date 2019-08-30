@@ -16,6 +16,8 @@ class BarGraph extends XYGraph {
 
   customExtent = [];
   nestedData = [];
+  startIndex = 0;
+  endIndex = 0;
 
   constructor(props) {
     super(props, properties);
@@ -463,6 +465,14 @@ class BarGraph extends XYGraph {
     }
   }
 
+  getStartIndex() {
+    return this.startIndex;    
+  }
+
+  getEndIndex() {
+    return this.endIndex;
+  }
+
   configureMinGraph() {
     const {
       data
@@ -505,7 +515,7 @@ class BarGraph extends XYGraph {
       brushXY = d3.brushX()
         .extent([[0, 0], [this.getAvailableWidth(), this.getAvailableMinHeight()]])
 
-      range = [0, (this.getAvailableWidth()/this.getNestedData().length) * brush]
+      range = [this.getStartIndex(), this.getEndIndex() || (this.getAvailableWidth()/this.getNestedData().length) * brush]
 
     } else {
 
@@ -525,7 +535,7 @@ class BarGraph extends XYGraph {
       minScale.x.range([0, this.getAvailableMinWidth()])
       minScale.y.range([this.getAvailableHeight(), 0])
 
-      range = [0, (this.getAvailableHeight()/this.getNestedData().length) * brush]
+      range = [this.getStartIndex(), this.getEndIndex() || (this.getAvailableHeight()/this.getNestedData().length) * brush]
 
       brushXY = d3.brushY()
         .extent([[0, 0], [this.getAvailableMinWidth(), this.getAvailableHeight()]])
@@ -537,6 +547,9 @@ class BarGraph extends XYGraph {
           originalRange = mainZoom.range()
 
         let [start, end] = d3.event.selection || range;
+
+        this.startIndex = start;
+        this.endIndex = end;
 
         if(this.isVertical()) {
           mainZoom.domain([start, end]);
