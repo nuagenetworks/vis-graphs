@@ -445,7 +445,7 @@ class Table extends AbstractGraph {
             let data = {},
                 highlighter = false;
 
-            for (let key in usedColumns) {
+            for (let key in keyColumns) {
                 if(keyColumns.hasOwnProperty(key)) {
 
                     const columnObj  = keyColumns[key],
