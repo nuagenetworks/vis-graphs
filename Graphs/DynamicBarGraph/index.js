@@ -119,7 +119,8 @@ class BarGraph extends XYGraph {
       yColumn,
       stackColumn,
       otherOptions,
-      stackSequence
+      stackSequence,
+      xTicksLabel
     } = this.getConfiguredProperties()
  
     if (this.isVertical()) {
@@ -139,7 +140,12 @@ class BarGraph extends XYGraph {
       stack: this.stack,
       otherOptions,
       stackSequence,
-    })
+    });
+  
+    if (xTicksLabel) {
+      this.nestedData = this.nestedData.filter((data) => (Object.keys(xTicksLabel).includes(data.key.toString())) || false);
+    }
+    
 
     // check condition to apply brush on chart
     this.isBrushable(this.nestedData)
