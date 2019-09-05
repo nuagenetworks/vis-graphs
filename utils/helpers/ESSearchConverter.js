@@ -95,8 +95,8 @@ export const convertElementToElastic = (elem) => {
 
       case 'contains':
         return {
-          match: {
-            [element.category]: element.value
+          regexp: {
+            [element.category]: `.*${element.value}.*`
           }
         };
 
