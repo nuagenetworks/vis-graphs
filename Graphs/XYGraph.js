@@ -125,9 +125,19 @@ export default class XYGraph extends AbstractGraph {
             .tickSizeOuter(xTickSizeOuter);
 
         if (xTicksLabel && typeof xTicksLabel === 'object') {
+            const externalTicksLable = {};
+            const xTicksLabelValue = data.map((barData) => {
+                if (!Object.keys(xTicksLabel).includes(barData.key.toString())) {
+                    externalTicksLable[barData.key] = barData.key;
+                }
+                return barData.key;
+            });
+
+            const finalTikcLabel = { ...xTicksLabel, ...externalTicksLable }
+
             this.axis.x
-            .tickValues(Object.keys(xTicksLabel))
-            .tickFormat( value => xTicksLabel[value] || null);
+                .tickValues(xTicksLabelValue)
+                .tickFormat(value => finalTikcLabel[value]);
         } else if(xTickFormat){
             this.axis.x.tickFormat(format(xTickFormat));
         }
