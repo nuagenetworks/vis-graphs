@@ -142,11 +142,6 @@ class BarGraph extends XYGraph {
       stackSequence,
     });
   
-    if (xTicksLabel) {
-      this.nestedData = this.nestedData.filter((data) => (Object.keys(xTicksLabel).includes(data.key.toString())) || false);
-    }
-    
-
     // check condition to apply brush on chart
     this.isBrushable(this.nestedData)
   }
