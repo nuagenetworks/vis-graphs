@@ -347,6 +347,8 @@ __highlight__ - (Array of columns) Highlighted the rows if value of columns is n
 
 __hidePagination__ - Hide paging and search bar if data size is less than pagination limit - Default is `true`
 
+__autoSearch__ - Enable auto-search in the search bar, the search will be automatically invoked with a delay of `1 sec` after the user has typed the query in the search bar. Default value for autoSearch is `true`. When autoSearch is disabled the user has to click the search icon next to the search bar to invoke the search query.
+
 __border__
 - **top** set top border. Default is `solid 1px #ccc`
 - **bottom** set bottom border. Default is `0`
