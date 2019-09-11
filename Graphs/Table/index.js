@@ -929,7 +929,7 @@ class Table extends AbstractGraph {
                     onSelect={this.handleColumnSelection}
                     value={this.state.columns}
                     keepSearchOnSelect
-                    elementHeight={40}
+                    elementHeight={35}
                     selectionsRenderer={this.selectionColumnRenderer}
                     style={{ minWidth: 150, margin: 10, outline: 'white', fontSize: '1em'}}
                     innerDivStyle={{border: '1px solid #dad1d1'}}
