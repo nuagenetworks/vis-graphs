@@ -2,6 +2,7 @@ import  React from 'react';
 import "react-filter-box/lib/react-filter-box.css";
 import isEqual from 'lodash/isEqual'
 import ReactFilterBox from "react-filter-box";
+import { searchIcon } from './../Images';
 
 import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
@@ -31,6 +32,7 @@ export default class SearchBar extends React.Component {
         this.setTimeout = null;
         this.expressions = null;
         this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
+        this.finalExpression = null;
     }
 
     componentDidMount () {
@@ -57,6 +59,7 @@ export default class SearchBar extends React.Component {
     onChange (query, result) {
         if(!result.isError) {
             this.query = query;
+            this.finalExpression = result;
         } else {
             clearTimeout(this.setTimeout);
         }
@@ -69,10 +72,20 @@ export default class SearchBar extends React.Component {
 
     onParseOk(expressions) {
         const {
+            autoSearch,
+        } = this.props;
+
+        if(autoSearch !== false) {
+            this.processQuery(expressions);
+        }
+    }
+
+    processQuery(expressions) {
+        const {
             options,
             data,
             scroll,
-            columns = false
+            columns = false,
         } = this.props;
 
         if (!isEqual(this.expressions, expressions)) {
@@ -107,8 +120,9 @@ export default class SearchBar extends React.Component {
 
         const {
             options,
-            data
-        } = this.props
+            data,
+            autoSearch,
+        } = this.props;
 
         return (
             <div style={{display: "flex", margin: "5px"}}>
@@ -116,19 +130,26 @@ export default class SearchBar extends React.Component {
                     Search: &nbsp;
                 </div>
                 <div className="filter search">
-                    <ReactFilterBox
-                        ref="filterBox"
-                        data={data}
-                        onChange={this.onChange}
-                        autoCompleteHandler={this.autoCompleteHandler}
-                        query={query}
-                        options={options}
-                        onParseOk={this.onParseOk}
-                    />
+                        <ReactFilterBox
+                            ref="filterBox"
+                            data={data}
+                            onChange={this.onChange}
+                            autoCompleteHandler={this.autoCompleteHandler}
+                            query={query}
+                            options={options}
+                            onParseOk={this.onParseOk}
+                        /> 
                     <div className="filter-icon">
                         { this.renderIcon() }
                     </div>
                 </div>
+               {autoSearch === false && <div style={{marginTop: "6px"}}> 
+               <img
+                    src={searchIcon}
+                    size={12}
+                    onClick={() => this.processQuery(this.finalExpression)}
+                />
+                </div>}
             </div>
         )
     }
