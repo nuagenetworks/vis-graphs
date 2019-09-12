@@ -9,6 +9,8 @@ import * as d3 from "d3";
 import "./style.css";
 import {properties} from "./default.config"
 import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
+import pick from 'lodash/pick';
 
 const MAX_LABEL_LENGTH = 15;
 
@@ -130,7 +132,8 @@ export default class ChordGraph extends AbstractGraph {
             transitionDuration,
             defaultOpacity,
             fadedOpacity,
-            colors
+            colors,
+            additionalKey
         } = this.getConfiguredProperties();
 
         const outerPadding = this.getLabelLength();
@@ -153,21 +156,26 @@ export default class ChordGraph extends AbstractGraph {
             .colors(colors);
 
         if(onMarkClick){
-            this.chordDiagram.onSelectedRibbonChange((d) => {
-                const selectedRibbon = this.chordDiagram.selectedRibbon();
-                if(selectedRibbon) {
-                    const { source, destination } = selectedRibbon;
-                    onMarkClick({
-                        [chordSourceColumn]: source,
-                        [chordDestinationColumn]: destination
-                    });
-                } else {
-                    onMarkClick({
-                        [chordSourceColumn]: undefined,
-                        [chordDestinationColumn]: undefined
-                    });
-                }
-            });
+          this.chordDiagram.onSelectedRibbonChange((d) => {
+            const selectedRibbon = this.chordDiagram.selectedRibbon();
+            if (selectedRibbon) {
+              const { source, destination, data } = selectedRibbon;
+              let finalData = [];
+              if (additionalKey) {
+                finalData = data.map((d) => pick(d, additionalKey));
+              }
+              onMarkClick({
+                [chordSourceColumn]: source,
+                [chordDestinationColumn]: destination,
+                data: uniq(finalData)
+              });
+            } else {
+              onMarkClick({
+                [chordSourceColumn]: undefined,
+                [chordDestinationColumn]: undefined
+              });
+            }
+          });
         } else {
             this.chordDiagram.onSelectedRibbonChange(null);
         }
@@ -352,7 +360,8 @@ function ChordDiagram(svg){
           source: matrix.names[d.source.index],
           destination: matrix.names[d.target.index],
           sourceValue: d.source.value,
-          destinationValue: d.target.value
+          destinationValue: d.target.value,
+          data: matrix.data[d.source.index][d.target.index]
         };
       }
 
@@ -497,6 +506,7 @@ function ChordDiagram(svg){
     var indices = {},
         matrix = [],
         names = [],
+        matrixData = [],
         n = 0, i, j;
 
     function recordIndex(name){
@@ -513,8 +523,10 @@ function ChordDiagram(svg){
 
     for(i = 0; i < n; i++){
       matrix.push([]);
+      matrixData.push([]);
       for(j = 0; j < n; j++){
         matrix[i].push(0);
+        matrixData[i].push([]);
       }
     }
 
@@ -530,9 +542,11 @@ function ChordDiagram(svg){
         // by making the chord weight fixed on both sides.
         matrix[j][i] = matrix[i][j] = 1;
       }
+      matrixData[j][i].push(d);
     });
 
     matrix.names = names;
+    matrix.data = matrixData;
 
     return matrix;
   }
