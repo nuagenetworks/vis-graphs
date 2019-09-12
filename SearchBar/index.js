@@ -2,13 +2,12 @@ import  React from 'react';
 import "react-filter-box/lib/react-filter-box.css";
 import isEqual from 'lodash/isEqual'
 import ReactFilterBox from "react-filter-box";
-import { searchIcon } from './../Images';
 
 import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
-import { FaRegSmile as SmileUp, FaRegFrown as SmileDown } from 'react-icons/fa';
+import { FaRegSmile as SmileUp, FaRegFrown as SmileDown, FaSearch as SearchIcon } from 'react-icons/fa';
 
 export default class SearchBar extends React.Component {
     constructor(props) {
@@ -75,8 +74,9 @@ export default class SearchBar extends React.Component {
             autoSearch,
         } = this.props;
 
-        if(autoSearch !== false) {
-            this.processQuery(expressions);
+        if (autoSearch !== false) {
+            clearTimeout(this.setTimeout);
+            this.setTimeout = setTimeout(() => this.processQuery(expressions), 1000);
         }
     }
 
@@ -90,16 +90,12 @@ export default class SearchBar extends React.Component {
 
         if (!isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
-            clearTimeout(this.setTimeout);
-
-            this.setTimeout = setTimeout(() => {
-                if (scroll) {
-                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
-                } else {
-                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                    this.props.handleSearch(filteredData, this.state.isOk)
-                }
-            }, 1000);
+            if (scroll) {
+                this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+            } else {
+                const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                this.props.handleSearch(filteredData, this.state.isOk)
+            }
         }
     }
 
@@ -143,13 +139,12 @@ export default class SearchBar extends React.Component {
                         { this.renderIcon() }
                     </div>
                 </div>
-               {autoSearch === false && <div style={{marginTop: "6px"}}> 
-               <img
-                    src={searchIcon}
-                    size={12}
-                    onClick={() => this.processQuery(this.finalExpression)}
-                />
-                </div>}
+                {
+                    autoSearch === false &&
+                    <div style={{marginTop: "10px"}}>
+                        <SearchIcon size={18} style={{cursor: 'hand'}} onClick={() => this.processQuery(this.finalExpression)}/>
+                    </div>
+                }
             </div>
         )
     }
