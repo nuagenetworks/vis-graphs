@@ -133,7 +133,7 @@ export default class ChordGraph extends AbstractGraph {
             defaultOpacity,
             fadedOpacity,
             colors,
-            additionalKey
+            additionalKeys
         } = this.getConfiguredProperties();
 
         const outerPadding = this.getLabelLength();
@@ -161,8 +161,8 @@ export default class ChordGraph extends AbstractGraph {
             if (selectedRibbon) {
               const { source, destination, data } = selectedRibbon;
               let finalData = [];
-              if (additionalKey) {
-                finalData = data.map((d) => pick(d, additionalKey));
+              if (additionalKeys) {
+                finalData = data.map((d) => pick(d, additionalKeys));
               }
               onMarkClick({
                 [chordSourceColumn]: source,

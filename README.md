@@ -477,6 +477,11 @@ __defaultOpacity__ -  Default opacity. Default is `0.6`
 
 __fadedOpacity__ - Hovered opacity. Default is `0.1`
 
+__additionalKeys__ - (array) declare additional fields to pass on context on event listener. E.g - 
+```javascript
+    "additionalKeys": ["SumOf", "doc_count", "hash"],
+```
+
 __bidirectionalTooltip__ - Indicates if tooltip needs to display content corresponding to both directions. Default is `true`
 
 ## *SimpleTextGraph*
