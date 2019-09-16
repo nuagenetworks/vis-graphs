@@ -113,6 +113,16 @@ Configuration is a little more complex as it has more options. But it is working
 
 Here is the list of common options:
 
+__excludedColumns__ - (object) return array of fields/columns which need to remove from advance search filter. E.g -
+
+```javascript
+
+ "excludedColumns": {
+        "columnList": "['tcpflags', 'bytes', 'packets', 'classification.type']" // columnList may be a function or an array which will return an array of fields.
+    }
+
+```
+
 __Tolltip__ - If you want to add tooltips on an existing configuration ? Update its configuration:
   - **column*** - attribute name to use to display the value
   - **label** - tooltip label. If not specified, column will be used.
