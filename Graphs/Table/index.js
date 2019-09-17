@@ -808,6 +808,7 @@ class Table extends AbstractGraph {
         const {
             searchBar,
             searchText,
+            autoSearch,
         } = this.getConfiguredProperties();
 
         if(searchBar === false)
@@ -824,6 +825,7 @@ class Table extends AbstractGraph {
                 handleSearch={this.handleSearch}
                 columns={this.getColumns()}
                 scroll={this.props.scroll}
+                autoSearch={autoSearch}
             />
         );
     }
