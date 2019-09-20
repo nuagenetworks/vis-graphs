@@ -167,7 +167,7 @@ export default class ChordGraph extends AbstractGraph {
               onMarkClick({
                 [chordSourceColumn]: source,
                 [chordDestinationColumn]: destination,
-                data: uniq(finalData)
+                additionalData: uniq(finalData)
               });
             } else {
               onMarkClick({
