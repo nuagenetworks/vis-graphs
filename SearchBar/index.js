@@ -7,7 +7,7 @@ import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
-import { FaRegSmile as SmileUp, FaRegFrown as SmileDown } from 'react-icons/fa';
+import { FaRegSmile as SmileUp, FaRegFrown as SmileDown, FaSearch as SearchIcon } from 'react-icons/fa';
 
 export default class SearchBar extends React.Component {
     constructor(props) {
@@ -31,6 +31,7 @@ export default class SearchBar extends React.Component {
         this.setTimeout = null;
         this.expressions = null;
         this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
+        this.finalExpression = null;
     }
 
     componentDidMount () {
@@ -57,6 +58,7 @@ export default class SearchBar extends React.Component {
     onChange (query, result) {
         if(!result.isError) {
             this.query = query;
+            this.finalExpression = result;
         } else {
             clearTimeout(this.setTimeout);
         }
@@ -69,24 +71,31 @@ export default class SearchBar extends React.Component {
 
     onParseOk(expressions) {
         const {
+            autoSearch,
+        } = this.props;
+
+        if (autoSearch !== false) {
+            clearTimeout(this.setTimeout);
+            this.setTimeout = setTimeout(() => this.processQuery(expressions), 1000);
+        }
+    }
+
+    processQuery(expressions) {
+        const {
             options,
             data,
             scroll,
-            columns = false
+            columns = false,
         } = this.props;
 
         if (!isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
-            clearTimeout(this.setTimeout);
-
-            this.setTimeout = setTimeout(() => {
-                if (scroll) {
-                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
-                } else {
-                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                    this.props.handleSearch(filteredData, this.state.isOk)
-                }
-            }, 1000);
+            if (scroll) {
+                this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+            } else {
+                const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                this.props.handleSearch(filteredData, this.state.isOk)
+            }
         }
     }
 
@@ -107,8 +116,9 @@ export default class SearchBar extends React.Component {
 
         const {
             options,
-            data
-        } = this.props
+            data,
+            autoSearch,
+        } = this.props;
 
         return (
             <div style={{display: "flex", margin: "5px"}}>
@@ -116,19 +126,25 @@ export default class SearchBar extends React.Component {
                     Search: &nbsp;
                 </div>
                 <div className="filter search">
-                    <ReactFilterBox
-                        ref="filterBox"
-                        data={data}
-                        onChange={this.onChange}
-                        autoCompleteHandler={this.autoCompleteHandler}
-                        query={query}
-                        options={options}
-                        onParseOk={this.onParseOk}
-                    />
+                        <ReactFilterBox
+                            ref="filterBox"
+                            data={data}
+                            onChange={this.onChange}
+                            autoCompleteHandler={this.autoCompleteHandler}
+                            query={query}
+                            options={options}
+                            onParseOk={this.onParseOk}
+                        /> 
                     <div className="filter-icon">
                         { this.renderIcon() }
                     </div>
                 </div>
+                {
+                    autoSearch === false &&
+                    <div style={{marginTop: "10px"}}>
+                        <SearchIcon size={18} style={{cursor: 'hand'}} onClick={() => this.processQuery(this.finalExpression)}/>
+                    </div>
+                }
             </div>
         )
     }
