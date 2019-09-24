@@ -37,6 +37,58 @@ const tableStyle = {
         labelStyle: {
             fontWeight: 700
         }
+    },
+    muiStyling: {
+        MUIDataTableHeadCell: {
+            fixedHeader: {
+                zIndex: '9999'
+            }
+        },
+        MuiTableRow: {
+            root: {
+                '&$selected': {
+                    backgroundColor: '#d9d9d9'
+                }
+            },
+            footer: {
+                height: "40px",
+            }
+        },
+        MuiTableCell: {
+            head: {
+                fontSize: '11px',
+            },
+            body: {
+                fontSize: '10px',
+                fontWeight: '350',
+            },
+            root: {
+                padding: '0px 40px 0px 15px',
+            }
+        },
+        MuiPopover: {
+            paper: {
+                maxHeight: '300px'
+            }
+        },
+        MuiIconButton: {
+            root: {
+                '&:hover': {
+                    backgroundColor: 'rgb(255, 255, 255)'
+                }
+            }
+        },
+        MuiTableFooter: {
+            root: {
+                borderTop: "1px solid #e0e0e0",
+            }
+        },
+        MuiTablePagination: {
+            toolbar: {
+                height: "40px",
+                minHeight: "40px",
+            }
+        }
     }
   }
   

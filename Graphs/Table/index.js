@@ -881,6 +881,8 @@ class Table extends AbstractGraph {
     render() {
         const {
             scroll,
+            width,
+            height,
         } = this.props;
 
         const {
@@ -904,6 +906,7 @@ class Table extends AbstractGraph {
         tableData = this.removeHighlighter(tableData);
         const totalRecords = scroll ? size : this.filterData.length;
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
+        const heightMargin = this.getHeightMargin(showFooter);
         const options = {
             print: false,
             filter: false,
@@ -927,37 +930,36 @@ class Table extends AbstractGraph {
             onColumnViewChange: this.handleColumnViewChange
         };
 
-        const theme = createMuiTheme({
-                overrides: {
-                    MUIDataTableHeadCell: {
-                        fixedHeader: {
-                            zIndex: "9999"
-                        }
-                    },
-                    MuiTableRow: {
-                        root: {
-                            '&$selected': {
-                                backgroundColor: "#d9d9d9"
-                            }
-                        }
-                    },
-                    MUIDataTableSelectCell: {
-                        root: {
-                            display: showCheckboxes ? '' : 'none'
-                        }
-                    },
+        const muiTableStyle = {
+            MUIDataTableSelectCell: {
+                root: {
+                    display: showCheckboxes ? '' : 'none'
                 }
+            },
+            MUIDataTableBody: {
+                emptyTitle: {
+                    maxWidth: width
+                }
+            },
+            MUIDataTable: {
+                responsiveScroll: {
+                    height: (height - heightMargin),
+                }
+            },
+        }
+        const theme = createMuiTheme({
+                overrides: {...style.muiStyling, ...muiTableStyle}
             });
 
         return (
             <MuiThemeProvider theme={theme}>
                 <div ref={(input) => { this.container = input; }}
-                    onContextMenu={this.handleContextMenu}
+                   onContextMenu={this.handleContextMenu}
                 >
                     <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
                         {this.resetScrollData()}
                     </div>
-
+            
                     { this.renderConfirmationDialog()}
                     { this.renderInfoBox() }
 
