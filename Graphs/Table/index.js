@@ -709,6 +709,7 @@ class Table extends AbstractGraph {
             searchBar,
             searchText,
             autoSearch,
+            disableRefresh
         } = this.getConfiguredProperties();
 
         if(searchBar === false)
@@ -725,6 +726,7 @@ class Table extends AbstractGraph {
                 handleSearch={this.handleSearch}
                 scroll={this.props.scroll}
                 autoSearch={autoSearch}
+                enableRefresh={!disableRefresh && this.scroll}
             />
         );
     }
@@ -764,7 +766,7 @@ class Table extends AbstractGraph {
                         style={style.button.design}
                         onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
                     >
-                        <RefreshIcon color={style.button.icon.color} />
+                        <RefreshIcon className='refreshIcon' />
                     </IconButton>
                 </div>
                 : ''
@@ -857,10 +859,10 @@ class Table extends AbstractGraph {
             selectColumnOption,
         } = this.getConfiguredProperties();
 
-        let heightMargin = showFooter ? 95 : 80;
+        let heightMargin = showFooter ? 90 : 80;
 
         heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
+        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin + 5;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
     }
@@ -956,7 +958,7 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                    onContextMenu={this.handleContextMenu}
                 >
-                    <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                    <div style={{ float: 'right', paddingRight: 40 }}>
                         {this.resetScrollData()}
                     </div>
             

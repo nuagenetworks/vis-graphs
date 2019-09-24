@@ -25,15 +25,12 @@ const tableStyle = {
         design: {
             margin: '10px',
             float: 'right',
-            height: '28px',
-            minWidth: '60px',
+            maxHeight: '0px',
+            minWidth: '20px',
             padding: '0',
-            background: theme.palette.greyLightColor
+            top: '-37px',
         },
         background: theme.palette.greyLightColor,
-        icon: {
-            color: theme.palette.blackLightColor
-        },
         labelStyle: {
             fontWeight: 700
         }
@@ -74,7 +71,7 @@ const tableStyle = {
         MuiIconButton: {
             root: {
                 '&:hover': {
-                    backgroundColor: 'rgb(255, 255, 255)'
+                    backgroundColor: ''
                 }
             }
         },
@@ -88,7 +85,13 @@ const tableStyle = {
                 height: "40px",
                 minHeight: "40px",
             }
-        }
+        },
+        MuiToolbar: {
+            regular: {
+                maxHeight: '30px !important',
+                minHeight: '20px !important',
+            }
+        },
     }
   }
   
