@@ -451,6 +451,7 @@ class TreeGraph extends AbstractGraph {
         // Define the div for the tooltip
         const tooltip = d3.select("body").append("div")
             .attr("class", "tooltip")
+            .style("background", '#F2F2F2')
             .style("opacity", 0);
 
         // Update the nodes...
@@ -474,6 +475,23 @@ class TreeGraph extends AbstractGraph {
 
         // ****************** Nodes section ***************************
 
+        const showToolTip = (d, showToolTip) => {
+            if (showToolTip){
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", 5)
+                tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+            }
+        }
+
+        const hideToolTip = (d) => {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        }
+
         if (showOnlyImg) {
             nodeEnter
                 .append("image")
@@ -484,19 +502,8 @@ class TreeGraph extends AbstractGraph {
                 })
                 .attr("width", 25)
                 .attr("height", 25)
-                .on("mouseover", function (d) {
-                    tooltip.transition()
-                        .duration(200)
-                        .style("opacity", 5)
-                    tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${(d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0, 100)}...` : d.data.description : commonEN.general.noDescription}</div>`)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 28) + "px");
-                })
-                .on("mouseout", function (d) {
-                    tooltip.transition()
-                        .duration(500)
-                        .style("opacity", 0);
-                });
+                .on("mouseover", (d) => showToolTip (d, true))
+                .on("mouseout", (d) => hideToolTip (d))
 
             nodeEnter.append("text")
                 .attr("x", 28)
@@ -516,7 +523,9 @@ class TreeGraph extends AbstractGraph {
             })
             .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
-
+            .on("mouseover", (d) => showToolTip (d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.name.description > 25)))
+            .on("mouseout", (d) => hideToolTip (d))
+            
             nodeEnter.append('foreignObject')
                 .attr('x', rectNode.textMargin)
                 .attr('y', rectNode.textMargin)
