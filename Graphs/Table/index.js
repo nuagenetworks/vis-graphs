@@ -438,7 +438,7 @@ class Table extends AbstractGraph {
                         filter: columnRow.filter !== false,
                         type: columnRow.selection ? "selection" : "text",
                         style: {
-                            textIndent: '2px',
+                            textIndent: columnRow.hasOwnProperty('firstColStyle') ? '2px': '0px',
                             minWidth: columnWidth,
                             maxWidth: columnWidth,
                         }
