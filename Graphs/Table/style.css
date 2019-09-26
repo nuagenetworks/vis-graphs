@@ -34,3 +34,6 @@ table th > div:nth-child(2) {
 .wrapper-data > div:hover{
     z-index: 99999 !important;
 }
+.refreshIcon{
+    height: 20px !important;
+}

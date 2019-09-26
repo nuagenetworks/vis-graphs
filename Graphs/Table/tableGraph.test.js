@@ -1,12 +1,9 @@
 import React from 'react';
 import { mount, configure } from 'enzyme';
 import ReactDOM from 'react-dom';
-// import injectTapEventPlugin from 'react-tap-event-plugin';
 import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn, checkTime } from '../testHelper';
 import Table from '.';
 import Adapter from 'enzyme-adapter-react-16';
-
-// injectTapEventPlugin();
 
 const cheerio = require('cheerio');
 

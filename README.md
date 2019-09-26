@@ -478,6 +478,46 @@ __defaultOpacity__ -  Default opacity. Default is `0.6`
 
 __fadedOpacity__ - Hovered opacity. Default is `0.1`
 
+__additionalKeys__ - (array) declare additional fields to pass on context on event listener. E.g - 
+```javascript
+    "additionalKeys": ["SumOf", "doc_count", "hash"],
+```
+
+__additionalMapping__ - (array) declare additional key and value to insert dynamically into query. It is replace the `replace` keyword from the query and insert dynamically generated content. E.g - 
+
+```javascript
+"additionalMapping": [
+        {
+            "fieldName": "nuage_metadata.flowid", // define key name for the query
+            "additonalKey": "hash" // define value to insert into query correspnding to the defined key (it should be present in additionalKeys array)
+        },
+        {
+            "fieldName": "nuage_metadata.packets", 
+            "additonalKey": "SumOf" 
+        }
+    ],
+```
+**Note:** - to use additionalMapping in the destination visualization, please define additionalKeys in source visualization.
+To replace additional keys you have to use following syntax:
+```javascript 
+"query": {
+            "bool": {
+              "should": [
+                {
+                    "bool": {
+                    "must": [
+                        {"term": {"nuage_metadata.enterpriseName": "{{enterpriseName:chord_enterprise}}"} },
+                        {
+                        "replace": "additionalData"
+                        }
+                    ]
+                    }
+                }
+              ]
+            }
+          } 
+```          
+
 __bidirectionalTooltip__ - Indicates if tooltip needs to display content corresponding to both directions. Default is `true`
 
 ## *SimpleTextGraph*

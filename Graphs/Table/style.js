@@ -25,18 +25,73 @@ const tableStyle = {
         design: {
             margin: '10px',
             float: 'right',
-            height: '28px',
-            minWidth: '60px',
+            maxHeight: '0px',
+            minWidth: '20px',
             padding: '0',
-            background: theme.palette.greyLightColor
+            top: '-37px',
         },
         background: theme.palette.greyLightColor,
-        icon: {
-            color: theme.palette.blackLightColor
-        },
         labelStyle: {
             fontWeight: 700
         }
+    },
+    muiStyling: {
+        MUIDataTableHeadCell: {
+            fixedHeader: {
+                zIndex: '9999'
+            }
+        },
+        MuiTableRow: {
+            root: {
+                '&$selected': {
+                    backgroundColor: '#d9d9d9'
+                }
+            },
+            footer: {
+                height: "40px",
+            }
+        },
+        MuiTableCell: {
+            head: {
+                fontSize: '11px',
+            },
+            body: {
+                fontSize: '10px',
+                fontWeight: '350',
+            },
+            root: {
+                padding: '0px 40px 0px 15px',
+            }
+        },
+        MuiPopover: {
+            paper: {
+                maxHeight: '300px'
+            }
+        },
+        MuiIconButton: {
+            root: {
+                '&:hover': {
+                    backgroundColor: ''
+                }
+            }
+        },
+        MuiTableFooter: {
+            root: {
+                borderTop: "1px solid #e0e0e0",
+            }
+        },
+        MuiTablePagination: {
+            toolbar: {
+                height: "40px",
+                minHeight: "40px",
+            }
+        },
+        MuiToolbar: {
+            regular: {
+                maxHeight: '30px !important',
+                minHeight: '20px !important',
+            }
+        },
     }
   }
   
