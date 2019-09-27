@@ -509,7 +509,7 @@ class TreeGraph extends AbstractGraph {
                 .attr("x", 28)
                 .attr("dy", "18px")
                 .text(function (d) {
-                    return d.data.name;
+                    return d.data.name && d.data.name.length > 10 ? `${d.data.name.substring(0,15)}...` : d.data.name;
                 })
                 .style("fill-opacity", 1);
         } else {
@@ -527,6 +527,7 @@ class TreeGraph extends AbstractGraph {
             .on("mouseout", (d) => hideToolTip (d))
             
             nodeEnter.append('foreignObject')
+                .attr("id", (d) => `node-${d.id}`)
                 .attr('x', rectNode.textMargin)
                 .attr('y', rectNode.textMargin)
                 .attr('width', () => {
@@ -587,7 +588,7 @@ class TreeGraph extends AbstractGraph {
         if (!isFunction(renderNode)) return '<div/>';
 
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        return renderNode({data: d.data, textColor: rectColorText, ...rectNode});
+        return renderNode({data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, ...rectNode});
     }
 
     fetchImage =(apiData, contextName) => {
