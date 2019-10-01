@@ -1059,12 +1059,13 @@ class Table extends AbstractGraph {
             searchBar,
             selectColumnOption,
             fixedHeader,
+            disableRefresh,
         } = this.getConfiguredProperties();
 
         let heightMargin = showFooter ? 95 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin;
+        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
+        heightMargin = (selectColumnOption || (this.scroll && !disableRefresh)) ? heightMargin + 50 : heightMargin;
         heightMargin = fixedHeader ? heightMargin + 35 : heightMargin;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
