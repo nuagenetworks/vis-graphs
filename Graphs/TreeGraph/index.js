@@ -416,6 +416,27 @@ class TreeGraph extends AbstractGraph {
         return count;
     }
 
+    showToolTip = (tooltip, d, showToolTip) => {
+        if (showToolTip){
+            const {
+                commonEN,
+            } = this.props;
+            
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 5)
+            tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        }
+    }
+
+    hideToolTip = (tooltip, d) => {
+        tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    }
+
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
@@ -429,7 +450,6 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            commonEN,
             graphRenderView
         } = this.props;
 
@@ -451,6 +471,7 @@ class TreeGraph extends AbstractGraph {
         // Define the div for the tooltip
         const tooltip = d3.select("body").append("div")
             .attr("class", "tooltip")
+            .style("background", '#F2F2F2')
             .style("opacity", 0);
 
         // Update the nodes...
@@ -484,31 +505,20 @@ class TreeGraph extends AbstractGraph {
                 })
                 .attr("width", 25)
                 .attr("height", 25)
-                .on("mouseover", function (d) {
-                    tooltip.transition()
-                        .duration(200)
-                        .style("opacity", 5)
-                    tooltip.html(`<div style="font-weight:bold;word-wrap: break-word;text-align: center;font-size: 14px;padding: 4px;">${d.data.name}</div> <div style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 12px;padding: 4px;">${(d.data.description) ? d.data.description.length > 25 ? `${d.data.description.substring(0, 100)}...` : d.data.description : commonEN.general.noDescription}</div>`)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 28) + "px");
-                })
-                .on("mouseout", function (d) {
-                    tooltip.transition()
-                        .duration(500)
-                        .style("opacity", 0);
-                });
+                .on("mouseover", (d) => this.showToolTip (tooltip, d, true))
+                .on("mouseout", (d) => this.hideToolTip (tooltip, d))
 
             nodeEnter.append("text")
                 .attr("x", 28)
                 .attr("dy", "18px")
                 .text(function (d) {
-                    return d.data.name;
+                    return d.data.name && d.data.name.length > 10 ? `${d.data.name.substring(0,15)}...` : d.data.name;
                 })
                 .style("fill-opacity", 1);
         } else {
             nodeEnter.append('g').append('rect')
-            .attr('rx', 3)
-            .attr('ry', 3)
+            .attr('rx', 0)
+            .attr('ry', 0)
             .attr('width', this.rectWidth)
             .attr('height', this.rectHeight)
             .attr("stroke", (d) => {
@@ -516,10 +526,11 @@ class TreeGraph extends AbstractGraph {
             })
             .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
-
+            
             nodeEnter.append('foreignObject')
+                .attr("id", (d) => `node-${d.id}`)
                 .attr('x', rectNode.textMargin)
-                .attr('y', rectNode.textMargin)
+                .attr('y', rectNode.textMargin + 12)
                 .attr('width', () => {
                     return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
                         (rectNode.width - rectNode.textMargin * 2)
@@ -531,6 +542,8 @@ class TreeGraph extends AbstractGraph {
                 .html((d) => {
                     return this.renderRectNode(d);
                 })
+                .on("mouseover", (d) => this.showToolTip (tooltip, d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.name.description > 25)))
+                .on("mouseout", (d) => this.hideToolTip (tooltip, d))
         }
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
@@ -578,7 +591,7 @@ class TreeGraph extends AbstractGraph {
         if (!isFunction(renderNode)) return '<div/>';
 
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        return renderNode({data: d.data, textColor: rectColorText, ...rectNode});
+        return renderNode({data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, ...rectNode});
     }
 
     fetchImage =(apiData, contextName) => {
@@ -733,7 +746,7 @@ class TreeGraph extends AbstractGraph {
             transformAttr = this.transformAttr;
         }
         return (
-            <div className="tree-graph" style={{height:'100%'}}>
+            <div className="tree-graph" style={{height:'100%', background: '#FCFCFC'}}>
                 <svg
                     height={'100%'}
                     ref={ (node) => {
