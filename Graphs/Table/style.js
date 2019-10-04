@@ -92,6 +92,16 @@ const tableStyle = {
                 minHeight: '20px !important',
             }
         },
+        MUIDataTableToolbarSelect: {
+            root: {
+                maxHeight: '20px',
+            }
+        },
+        MUIDataTableToolbarSelect: {
+            deleteIcon: {
+                display: 'none',
+            }
+        }
     }
   }
   

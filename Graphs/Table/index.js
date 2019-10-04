@@ -709,8 +709,13 @@ class Table extends AbstractGraph {
             searchBar,
             searchText,
             autoSearch,
-            disableRefresh
+            disableRefresh,
+            selectColumnOption,
         } = this.getConfiguredProperties();
+
+        const {
+            width,
+        } = this.props;
 
         if(searchBar === false)
             return;
@@ -727,6 +732,8 @@ class Table extends AbstractGraph {
                 scroll={this.props.scroll}
                 autoSearch={autoSearch}
                 enableRefresh={!disableRefresh && this.scroll}
+                columnOption={selectColumnOption}
+                cardWidth={width}
             />
         );
     }
@@ -861,8 +868,8 @@ class Table extends AbstractGraph {
 
         let heightMargin = showFooter ? 90 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin + 5;
+        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
+        heightMargin = selectColumnOption ? heightMargin + 43 : heightMargin + 5;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
     }
@@ -892,7 +899,8 @@ class Table extends AbstractGraph {
             hidePagination,
             fixedHeader,
             multiSelectable,
-            selectColumnOption
+            selectColumnOption,
+            searchBar,
         } = this.getConfiguredProperties();
 
         const {
@@ -929,9 +937,29 @@ class Table extends AbstractGraph {
             selectableRowsOnClick: true,
             onColumnSortChange: this.handleSortOrderChange,
             onChangeRowsPerPage: this.handleRowsPerPageChange,
-            onColumnViewChange: this.handleColumnViewChange
+            onColumnViewChange: this.handleColumnViewChange,
+            textLabels: {
+                body: {
+                  noMatch: "No data to visualize",
+                  toolTip: "Sort",
+                },
+                pagination: {
+                  next: "Next Page",
+                  previous: "Previous Page",
+                  rowsPerPage: "Rows per page:",
+                  displayRows: "of",
+                },
+                toolbar: {
+                  viewColumns: "Select Column",
+                },
+                selectedRows: {
+                  text: "row(s) selected",
+                  delete: "Delete",
+                  deleteAria: "Delete Selected Rows",
+                },
+              },
         };
-
+        
         const muiTableStyle = {
             MUIDataTableSelectCell: {
                 root: {
@@ -948,6 +976,17 @@ class Table extends AbstractGraph {
                     height: (height - heightMargin),
                 }
             },
+            MUIDataTableToolbar: {
+                actions: {
+                    marginTop: searchBar || searchBar === undefined ? '-90px' : '0px',
+                    marginRight: searchBar || searchBar === undefined ? '-10px' : '0px',
+                }
+            },
+            MuiPaper: {
+                elevation4: {
+                    boxShadow: (searchBar || searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
+                }
+            }
         }
         const theme = createMuiTheme({
                 overrides: {...style.muiStyling, ...muiTableStyle}

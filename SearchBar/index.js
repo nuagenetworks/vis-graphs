@@ -16,7 +16,7 @@ export default class SearchBar extends React.Component {
         this.state = {
             data: [],
             isOk: true,
-            query: (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : ''
+            query: (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '',
         }
 
         const {
@@ -32,6 +32,7 @@ export default class SearchBar extends React.Component {
         this.expressions = null;
         this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
         this.finalExpression = null;
+        this.searchWidth = this.props.cardWidth;
     }
 
     componentDidMount () {
@@ -43,8 +44,12 @@ export default class SearchBar extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return !isEqual(nextProps.data, this.props.data)
-            || !isEqual(nextState, this.state)
+        if (!isEqual(nextProps.data, this.props.data) || !isEqual(nextState, this.state) || !isEqual(nextProps.cardWidth, this.props.cardWidth)) {
+            this.searchWidth = nextProps.cardWidth;
+            return true;
+        }
+
+        return false;
     }
 
     componentDidUpdate () {
@@ -118,11 +123,12 @@ export default class SearchBar extends React.Component {
             options,
             data,
             autoSearch,
-            enableRefresh
+            enableRefresh,
+            columnOption,
         } = this.props;
 
         return (
-            <div style={{display: "flex", margin: enableRefresh ? "0px 5px 5px 6px" : "6px 5px 0px 5px"}}>
+            <div style={{ display: "flex", maxWidth: (columnOption ? this.searchWidth - 70 : this.searchWidth), margin: enableRefresh ? "0px 5px 5px 6px" : "6px 5px 0px 5px"}}>
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
