@@ -523,8 +523,6 @@ class TreeGraph extends AbstractGraph {
             })
             .attr("stroke-width", rectNode.stroke.width)
             .attr('class', 'node-rect')
-            .on("mouseover", (d) => showToolTip (d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.name.description > 25)))
-            .on("mouseout", (d) => hideToolTip (d))
             
             nodeEnter.append('foreignObject')
                 .attr("id", (d) => `node-${d.id}`)
@@ -541,6 +539,8 @@ class TreeGraph extends AbstractGraph {
                 .html((d) => {
                     return this.renderRectNode(d);
                 })
+                .on("mouseover", (d) => showToolTip (d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.description.length > 15)))
+                .on("mouseout", (d) => hideToolTip (d))
         }
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
