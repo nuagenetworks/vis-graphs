@@ -514,8 +514,8 @@ class TreeGraph extends AbstractGraph {
                 .style("fill-opacity", 1);
         } else {
             nodeEnter.append('g').append('rect')
-            .attr('rx', 3)
-            .attr('ry', 3)
+            .attr('rx', 0)
+            .attr('ry', 0)
             .attr('width', this.rectWidth)
             .attr('height', this.rectHeight)
             .attr("stroke", (d) => {
@@ -527,7 +527,7 @@ class TreeGraph extends AbstractGraph {
             nodeEnter.append('foreignObject')
                 .attr("id", (d) => `node-${d.id}`)
                 .attr('x', rectNode.textMargin)
-                .attr('y', rectNode.textMargin)
+                .attr('y', rectNode.textMargin + 12)
                 .attr('width', () => {
                     return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
                         (rectNode.width - rectNode.textMargin * 2)
@@ -539,7 +539,7 @@ class TreeGraph extends AbstractGraph {
                 .html((d) => {
                     return this.renderRectNode(d);
                 })
-                .on("mouseover", (d) => showToolTip (d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.description.length > 15)))
+                .on("mouseover", (d) => showToolTip (d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.description.length > 30)))
                 .on("mouseout", (d) => hideToolTip (d))
         }
         // UPDATE
@@ -743,7 +743,7 @@ class TreeGraph extends AbstractGraph {
             transformAttr = this.transformAttr;
         }
         return (
-            <div className="tree-graph" style={{height:'100%'}}>
+            <div className="tree-graph" style={{height:'100%', background: '#FCFCFC'}}>
                 <svg
                     height={'100%'}
                     ref={ (node) => {
