@@ -502,7 +502,7 @@ class TreeGraph extends AbstractGraph {
                 .attr("x", 28)
                 .attr("dy", "18px")
                 .text(function (d) {
-                    return d.data.name;
+                    return d.data.name && d.data.name.length > 20 ? `${d.data.name.substring(0,20)}...` : d.data.name;
                 })
                 .style("fill-opacity", 1);
         } else {
