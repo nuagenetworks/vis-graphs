@@ -952,8 +952,12 @@ class Table extends AbstractGraph {
                 toolbar: {
                   viewColumns: "Select Column",
                 },
+                viewColumns: {
+                  title: "Select Column",
+                  titleAria: "Show/Hide Table Columns",
+                },
                 selectedRows: {
-                  text: "row(s) selected",
+                  text: "row(s) selected",  
                   delete: "Delete",
                   deleteAria: "Delete Selected Rows",
                 },
