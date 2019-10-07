@@ -915,6 +915,9 @@ class Table extends AbstractGraph {
         let tableData = this.getTableData(this.getColumns());
         tableData = this.removeHighlighter(tableData);
         const totalRecords = scroll ? size : this.filterData.length;
+
+        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
+        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
@@ -930,6 +933,7 @@ class Table extends AbstractGraph {
             rowsPerPage: pageSize,
             count: totalRecords,
             page: tableCurrentPage,
+            rowsPerPageOptions: rowsPerPageOptions,
             selectableRows: multiSelectable ? 'multiple' : 'single',
             onChangePage: this.handlePageClick,
             rowsSelected: this.state.selected,
@@ -1001,9 +1005,7 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                    onContextMenu={this.handleContextMenu}
                 >
-                    <div style={{ float: 'right', paddingRight: 40 }}>
-                        {this.resetScrollData()}
-                    </div>
+                    {this.resetScrollData()}
             
                     { this.renderConfirmationDialog()}
                     { this.renderInfoBox() }

@@ -26,9 +26,10 @@ const tableStyle = {
             margin: '10px',
             float: 'right',
             maxHeight: '0px',
-            minWidth: '20px',
+            maxWidth: '30px',
             padding: '0',
             top: '-37px',
+            right: '50px'
         },
         background: theme.palette.greyLightColor,
         labelStyle: {
