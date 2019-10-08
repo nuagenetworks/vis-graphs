@@ -276,6 +276,97 @@ class TreeGraph extends AbstractGraph {
         });
     }
 
+    renderSelectedNodesInfo = (nodes) => {
+    
+        const {
+            selectedNodesInfo
+        } = this.getConfiguredProperties();
+    
+        const svg = this.getGraphContainer();
+        const selectedNodes = nodes.filter(function (d) {
+            return (d.data.clicked) ? true : false;
+        });
+        if(selectedNodes.length > 1)
+        {
+            const line = svg.selectAll(".genealogy")
+                .data(selectedNodes, d => d.data);
+    
+            const newLine = line.enter()
+                .append("g")
+                .attr("class", "genealogy");
+    
+            let yAxis1 =  5;
+            let yAxis2 =  20;
+    
+            newLine.append("svg:defs").append("svg:marker")
+            .attr("id", "triangle")
+            .attr("refX", 6)
+            .attr("refY", 6)
+            .attr("markerWidth", 30)
+            .attr("markerHeight", 30)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 12 6 0 12 3 6")
+            .style("fill", selectedNodesInfo.stroke);
+    
+            newLine.append("line")          // attach a line
+            .style("stroke", selectedNodesInfo.stroke)  // colour the line
+            .style("opacity", (d, i) => {
+                if(selectedNodes.length === ++i || !d.children) {
+                    return 0;
+                }
+            })  // colour the line
+            .attr("x1", 5)     // x position of the first end of the line
+            .attr("y1", (d, i)=>{
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis1 += parseInt(axisDifference)
+                return yAxis1;
+            })                  // y position of the first end of the line
+            .attr("x2", 5)     // x position of the second end of the line
+            .attr("y2", (d, i) => {
+                const axisDifference = i > 0 ? 40 : 0;
+                yAxis2 += parseInt(axisDifference)
+                return yAxis2;
+            })
+            .attr("marker-end", "url(#triangle)");
+    
+            newLine.append("text")
+            .attr("dy", (d, i) => {
+                const height = 10*i*4;
+                return height;
+            })
+            .text((d) => d.data.name)
+            .style('fill', selectedNodesInfo.fontColor)
+            .style('font-weight', 'bold')
+    
+            newLine.merge(line);
+    
+            let xTra = 0;
+            let yTra = 0;
+    
+            svg.selectAll('.genealogy')
+            .data(selectedNodes)
+            .each(function (d) {
+                if(d.children) {
+                    const firstChild = d.children[0];
+                    if(!firstChild.data.loaded) {
+                        xTra = firstChild.x + 40
+                        yTra = firstChild.y + 200
+                    }
+                } else if(d.data.clicked) {
+                    xTra = d.x + 40
+                    yTra = d.y + 200
+                }
+            })
+    
+            d3.selectAll('.genealogy').attr("transform", "translate(" + yTra + ","+ xTra +")");
+    
+            line.exit().remove();
+        } else {
+            svg.selectAll(".genealogy").remove();
+        }
+    }
+    
     paginate = (d) => {
         const {
             graphRenderView,
