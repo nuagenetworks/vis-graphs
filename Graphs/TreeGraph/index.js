@@ -15,6 +15,7 @@ import {
     hierarchy
   } from "d3";
 
+import * as d3 from "d3";
 
 class TreeGraph extends AbstractGraph {
 
@@ -175,6 +176,27 @@ class TreeGraph extends AbstractGraph {
         this.removePreviousChart();
     }
 
+    showToolTip = (tooltip, d, showToolTip) => {
+        if (showToolTip){
+            const {
+                commonEN,
+            } = this.props;
+            
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 5)
+            tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        }
+    }
+
+    hideToolTip = (tooltip, d) => {
+        tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    }
+
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
@@ -187,6 +209,13 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         let i = 0;
+
+        d3.select(".tooltip").remove();
+        // Define the div for the tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("background", '#F2F2F2')
+            .style("opacity", 0);
 
         // ****************** Nodes section ***************************
 
@@ -231,6 +260,8 @@ class TreeGraph extends AbstractGraph {
             .append('xhtml').html((d) => {
                 return this.renderRectNode(d);
             })
+            .on("mouseover", (d) => this.showToolTip (tooltip, d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.name.description > 25)))
+            .on("mouseout", (d) => this.hideToolTip (tooltip, d))
 
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
