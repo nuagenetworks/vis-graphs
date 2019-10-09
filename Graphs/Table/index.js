@@ -93,14 +93,14 @@ class Table extends AbstractGraph {
     getGraphProperties(props = this.props) {
         const {
             scrollData,
-            data
+            data,
+            size,
         } = props;
-
         // Total, per page, current page must be set and only applicable for Table component only.
         return {
             searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
             sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
-            size: objectPath.has(scrollData, 'size') ? objectPath.get(scrollData, 'size') : data.length, // response length for normal table otherwise total hits for scroll based table.
+            size: size || data.length, // response length for normal table otherwise total hits for scroll based table.
             pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
@@ -581,11 +581,7 @@ class Table extends AbstractGraph {
         }
 
         this.selectedRows[this.currentPage] = selectedRows.slice();
-
-        this.setState({
-            selected: this.selectedRows[this.currentPage]
-        })
-
+        
         const { onSelect } = this.props;
         if (onSelect) {
             let matchingRows = [];
