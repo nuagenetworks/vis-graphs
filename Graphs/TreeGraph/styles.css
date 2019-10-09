@@ -49,3 +49,17 @@ svg { width:100% }
 	font: 7px sans-serif;
 	fill: #CC0000;
 }
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+	pointer-events: none;
+	max-width: 200px;
+	height: auto;
+	z-index: 1;
+}
