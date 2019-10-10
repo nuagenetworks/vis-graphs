@@ -52,6 +52,8 @@ class Table extends AbstractGraph {
         this.htmlData = {}
         this.sortOrder = {}
         this.removedColumns = []
+        this.displayColumns = [];
+        this.updateScrollNow = false;
         this.state = {
             selected: [],
             data: [],
@@ -63,6 +65,15 @@ class Table extends AbstractGraph {
         this.initiate(props);
     }
 
+    componentWillUnmount() {
+        if (this.displayColumns) {
+            this.updateTableStatus({
+                [`removedColumns_${this.removedColumnsKey}`]: this.displayColumns,
+                event: events.REMOVED_COLUMNS
+            });
+        }
+    }
+
     componentDidMount() {
         this.initiate(this.props);
         this.checkFontsize();
@@ -71,8 +82,8 @@ class Table extends AbstractGraph {
     shouldComponentUpdate(nextProps, nextState) {
 
         return !isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
-            || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
-    }
+        || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
+}
 
     componentDidUpdate(prevProps) {
         if(prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
@@ -303,7 +314,7 @@ class Table extends AbstractGraph {
         const {
             removedColumns,
         } = this.getGraphProperties();
-
+        
         const columns = this.getColumns()
         let headerData = [];
         for (let index in columns) {
@@ -469,19 +480,13 @@ class Table extends AbstractGraph {
         } = this.getGraphProperties();
 
         if (action === 'remove') {
-            this.updateTableStatus({
-                [`removedColumns_${this.removedColumnsKey}`]: [...removedColumns, changedColumn],
-                event: events.REMOVED_COLUMNS
-            });
+            this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
         } else {
             const removedIndex = removedColumns.indexOf(changedColumn);
-            if (removedIndex > -1) {
+            if (removedIndex > -1 && !isEmpty(removedColumns)) {
                 removedColumns.splice(removedIndex, 1);
             }
-            this.updateTableStatus({
-                [`removedColumns_${this.removedColumnsKey}`]: [...removedColumns],
-                event: events.REMOVED_COLUMNS
-            });
+            this.displayColumns = [...removedColumns];
         }
     }
 
@@ -608,8 +613,10 @@ class Table extends AbstractGraph {
             onSelect({ rows, matchingRows });
         }
 
-        if (this.scroll)
+        if (this.scroll && this.updateScrollNow) {
             this.updateTableStatus({ selectedRows: this.selectedRows })
+        }
+        this.updateScrollNow = true;
 
     }
 
