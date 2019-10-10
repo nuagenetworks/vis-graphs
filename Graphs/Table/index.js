@@ -50,6 +50,11 @@ class Table extends AbstractGraph {
         this.selectedRows = {}
         this.htmlData = {}
         this.sortOrder = {}
+<<<<<<< HEAD
+=======
+        this.displayColumns = [];
+        this.updateScrollNow = false;
+>>>>>>> fix-MUI-vulnerabilityIssue
         this.state = {
             selected: [],
             data: [],
@@ -61,6 +66,15 @@ class Table extends AbstractGraph {
             removedColumnsKey: 'default',
         }
         this.initiate(props);
+    }
+
+    componentWillUnmount() {
+        if (!isEmpty(this.displayColumns)) {
+            this.updateTableStatus({
+                [`removedColumns_${this.state.removedColumnsKey}`]: this.displayColumns,
+                event: events.REMOVED_COLUMNS
+            });
+        }
     }
 
     componentDidMount() {
@@ -83,8 +97,8 @@ class Table extends AbstractGraph {
     shouldComponentUpdate(nextProps, nextState) {
 
         return !isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
-            || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
-    }
+        || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
+}
 
     componentDidUpdate(prevProps) {
         if(prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
@@ -143,7 +157,8 @@ class Table extends AbstractGraph {
     getGraphProperties(props = this.props) {
         const {
             scrollData,
-            data
+            data,
+            size,
         } = props;
 
         const {
@@ -155,7 +170,7 @@ class Table extends AbstractGraph {
         return {
             searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
             sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
-            size: objectPath.has(scrollData, 'size') ? objectPath.get(scrollData, 'size') : data.length, // response length for normal table otherwise total hits for scroll based table.
+            size: size || data.length, // response length for normal table otherwise total hits for scroll based table.
             pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
@@ -258,6 +273,12 @@ class Table extends AbstractGraph {
         const filterColumns = this.getColumnByContext(columns);
         const removedColumns = [];
 
+<<<<<<< HEAD
+=======
+        const removedColumns = [];
+
+        // remove un-selected columns
+>>>>>>> fix-MUI-vulnerabilityIssue
         columns.forEach((d, index) => {
             if (filterColumns.length) {
                 if (!filterColumns.find(column => d.column === column))
@@ -381,7 +402,7 @@ class Table extends AbstractGraph {
         const {
             removedColumns,
         } = this.getGraphProperties();
-
+        
         const columns = this.getColumns()
         let headerData = [];
         for (let index in columns) {
@@ -553,19 +574,27 @@ class Table extends AbstractGraph {
         } = this.state;
 
         if (action === 'remove') {
+<<<<<<< HEAD
             this.updateTableStatus({
                 [`removedColumns_${removedColumnsKey}`]: [...removedColumns, changedColumn],
                 event: events.REMOVED_COLUMNS
             });
+=======
+            this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
+>>>>>>> fix-MUI-vulnerabilityIssue
         } else {
             const removedIndex = removedColumns.indexOf(changedColumn);
-            if (removedIndex > -1) {
+            if (removedIndex > -1 && !isEmpty(removedColumns)) {
                 removedColumns.splice(removedIndex, 1);
             }
+<<<<<<< HEAD
             this.updateTableStatus({
                 [`removedColumns_${removedColumnsKey}`]: [...removedColumns],
                 event: events.REMOVED_COLUMNS
             });
+=======
+            this.displayColumns = [...removedColumns];
+>>>>>>> fix-MUI-vulnerabilityIssue
         }
     }
 
@@ -665,11 +694,7 @@ class Table extends AbstractGraph {
         }
 
         this.selectedRows[this.currentPage] = selectedRows.slice();
-
-        this.setState({
-            selected: this.selectedRows[this.currentPage]
-        })
-
+        
         const { onSelect } = this.props;
         if (onSelect) {
             let matchingRows = [];
@@ -696,8 +721,10 @@ class Table extends AbstractGraph {
             onSelect({ rows, matchingRows });
         }
 
-        if (this.scroll)
+        if (this.scroll && this.updateScrollNow) {
             this.updateTableStatus({ selectedRows: this.selectedRows })
+        }
+        this.updateScrollNow = true;
 
     }
 
@@ -793,8 +820,13 @@ class Table extends AbstractGraph {
             searchBar,
             searchText,
             autoSearch,
-            disableRefresh
+            disableRefresh,
+            selectColumnOption,
         } = this.getConfiguredProperties();
+
+        const {
+            width,
+        } = this.props;
 
         if(searchBar === false)
             return;
@@ -811,6 +843,8 @@ class Table extends AbstractGraph {
                 scroll={this.props.scroll}
                 autoSearch={autoSearch}
                 enableRefresh={!disableRefresh && this.scroll}
+                columnOption={selectColumnOption}
+                cardWidth={width}
             />
         );
     }
@@ -945,8 +979,8 @@ class Table extends AbstractGraph {
 
         let heightMargin = showFooter ? 90 : 80;
 
-        heightMargin = searchBar === false ? heightMargin * 0.2 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 50 : heightMargin + 5;
+        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
+        heightMargin = selectColumnOption ? heightMargin + 43 : heightMargin + 5;
 
         return configuration.filterOptions ? heightMargin + 50 : heightMargin;
     }
@@ -976,7 +1010,8 @@ class Table extends AbstractGraph {
             hidePagination,
             fixedHeader,
             multiSelectable,
-            selectColumnOption
+            selectColumnOption,
+            searchBar,
         } = this.getConfiguredProperties();
 
         const {
@@ -991,6 +1026,9 @@ class Table extends AbstractGraph {
         let tableData = this.getTableData(this.getColumns());
         tableData = this.removeHighlighter(tableData);
         const totalRecords = scroll ? size : this.filterData.length;
+
+        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
+        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
@@ -1006,6 +1044,7 @@ class Table extends AbstractGraph {
             rowsPerPage: pageSize,
             count: totalRecords,
             page: tableCurrentPage,
+            rowsPerPageOptions: rowsPerPageOptions,
             selectableRows: multiSelectable ? 'multiple' : 'single',
             onChangePage: this.handlePageClick,
             rowsSelected: this.state.selected,
@@ -1013,9 +1052,33 @@ class Table extends AbstractGraph {
             selectableRowsOnClick: true,
             onColumnSortChange: this.handleSortOrderChange,
             onChangeRowsPerPage: this.handleRowsPerPageChange,
-            onColumnViewChange: this.handleColumnViewChange
+            onColumnViewChange: this.handleColumnViewChange,
+            textLabels: {
+                body: {
+                  noMatch: "No data to visualize",
+                  toolTip: "Sort",
+                },
+                pagination: {
+                  next: "Next Page",
+                  previous: "Previous Page",
+                  rowsPerPage: "Rows per page:",
+                  displayRows: "of",
+                },
+                toolbar: {
+                  viewColumns: "Select Column",
+                },
+                viewColumns: {
+                  title: "Select Column",
+                  titleAria: "Show/Hide Table Columns",
+                },
+                selectedRows: {
+                  text: "row(s) selected",  
+                  delete: "Delete",
+                  deleteAria: "Delete Selected Rows",
+                },
+              },
         };
-
+        
         const muiTableStyle = {
             MUIDataTableSelectCell: {
                 root: {
@@ -1032,6 +1095,17 @@ class Table extends AbstractGraph {
                     height: (height - heightMargin),
                 }
             },
+            MUIDataTableToolbar: {
+                actions: {
+                    marginTop: searchBar || searchBar === undefined ? '-90px' : '0px',
+                    marginRight: searchBar || searchBar === undefined ? '-10px' : '0px',
+                }
+            },
+            MuiPaper: {
+                elevation4: {
+                    boxShadow: (searchBar || searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
+                }
+            }
         }
         const theme = createMuiTheme({
                 overrides: {...style.muiStyling, ...muiTableStyle}
@@ -1042,9 +1116,7 @@ class Table extends AbstractGraph {
                 <div ref={(input) => { this.container = input; }}
                    onContextMenu={this.handleContextMenu}
                 >
-                    <div style={{ float: 'right', paddingRight: 40 }}>
-                        {this.resetScrollData()}
-                    </div>
+                    {this.resetScrollData()}
             
                     { this.renderConfirmationDialog()}
                     { this.renderInfoBox() }
