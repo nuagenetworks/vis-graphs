@@ -123,6 +123,19 @@ __excludedColumns__ - (object) return array of fields/columns which need to remo
 
 ```
 
+__enabledCount__ - (boolean) used to get the data length instead of data.
+
+```javascript
+
+ // ...
+    "data": {
+        // ...
+        "enabledCount": true,
+    }
+    // ...
+
+```
+
 __Tolltip__ - If you want to add tooltips on an existing configuration ? Update its configuration:
   - **column*** - attribute name to use to display the value
   - **label** - tooltip label. If not specified, column will be used.
