@@ -48,7 +48,7 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
 
             <span style={{
                 display: "inline-block",
-                verticalAlign: "middle",
+                verticalAlign: "right",
                 textAlign: "center",
                 width: "75%"}}>
                 {text}
