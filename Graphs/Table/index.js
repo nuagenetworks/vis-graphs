@@ -85,7 +85,7 @@ class Table extends AbstractGraph {
             columnsContext = context && context.hasOwnProperty(column) ? context[column] : false
         }
 
-        if(prevState.columns.length != columnsContext.length) {
+        if(prevState.columns.length !== columnsContext.length) {
             return Table.updateColumn(nextProps);
         } 
         return null;
