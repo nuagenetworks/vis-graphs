@@ -143,6 +143,7 @@ class Table extends AbstractGraph {
             selectedColumns,
             scroll,
             scrollData,
+            requestId,
         } = props;
 
         const {
@@ -157,7 +158,7 @@ class Table extends AbstractGraph {
         if(scroll) {
             startIndex = (currentPage - 1) * pageSize;
             endIndex = startIndex + pageSize - 1;
-            this.selectedRows = objectPath.has(scrollData, 'selectedRows') ? objectPath.get(scrollData, 'selectedRows') : {};
+            this.selectedRows = objectPath.has(scrollData, [`selectedRow_${requestId}`]) ? objectPath.get(scrollData, [`selectedRow_${requestId}`]) : {};
 
             if (!objectPath.has(scrollData, 'pageSize')) {
                 this.updateTableStatus({ pageSize: this.pageSize })
@@ -621,7 +622,7 @@ class Table extends AbstractGraph {
         }
 
         if (this.scroll && this.updateScrollNow) {
-            this.updateTableStatus({ selectedRows: this.selectedRows })
+            this.updateTableStatus({ [`selectedRow_${this.props.requestId}`]: this.selectedRows })
         }
         this.updateScrollNow = true;
 
@@ -928,7 +929,7 @@ class Table extends AbstractGraph {
 
         const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
-        const showFooter = (totalRecords <= pageSize && hidePagination !== false) ? false : true;
+        const showFooter = (totalRecords <= pageSize &&  totalRecords !== 0 && hidePagination !== false) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
             print: false,
