@@ -26,7 +26,7 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters }) => {
     } else if (timeFormat) {
         const formatter = d3.timeFormat(timeFormat);
         return (d) => {
-            let data = value(d)
+            let data = Number(value(d));
             if (Array.isArray(data)) {
                 return data.map(e => formatter(new Date(value(e)))).join(', ')
             } else {
