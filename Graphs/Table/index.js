@@ -117,10 +117,8 @@ class Table extends AbstractGraph {
     static getRemovedColumns(columns, filterColumns, selectedColumns) {
         let removedColumns = [];
         columns.forEach((d, index) => {
-            if (filterColumns.length) {
-                if (!filterColumns.find(column => d.column === column))
-                    removedColumns.push(`${index}`)
-
+            if (d.displayOption && filterColumns.length && !filterColumns.find(column => d.column === column)) {
+                    removedColumns.push(`${index}`);
             } else if (selectedColumns && selectedColumns.length) {
                 if (!selectedColumns.find(column => d.label === column)) {
                     removedColumns.push(`${index}`)
