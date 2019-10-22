@@ -191,8 +191,6 @@ class Table extends AbstractGraph {
 
     initiate(props) {
         const {
-            context,
-            selectedColumns,
             scroll,
             scrollData,
             requestId,
@@ -200,16 +198,9 @@ class Table extends AbstractGraph {
 
         const {
             currentPage,
-            pageSize,
-            size
         } = this.getGraphProperties(props);
 
-        let startIndex = 0;
-        let endIndex = size - 1;
-
         if(scroll) {
-            startIndex = (currentPage - 1) * pageSize;
-            endIndex = startIndex + pageSize - 1;
             this.selectedRows = objectPath.has(scrollData, [`selectedRow_${requestId}`]) ? objectPath.get(scrollData, [`selectedRow_${requestId}`]) : {};
 
             if (!objectPath.has(scrollData, 'pageSize')) {
@@ -526,10 +517,6 @@ class Table extends AbstractGraph {
         const {
             removedColumns
         } = this.getGraphProperties();
-
-        const {
-            removedColumnsKey
-        } = this.state;
 
         if (action === 'remove') {
             this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
