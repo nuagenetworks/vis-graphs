@@ -15,7 +15,7 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
     needValues(parsedCategory, parsedOperator) {
         const found = find(this.options, f => f.columnField === parsedCategory || f.columnText === parsedCategory);
 
-        if (found === null) {
+        if (!found || found === null) {
             return [];
         }
         const parsedField = found.columnField;
