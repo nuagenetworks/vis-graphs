@@ -120,7 +120,7 @@ class Table extends AbstractGraph {
         let removedColumns = [];
         columns.forEach((d, index) => {
             if (d.displayOption) {
-                if (!filterColumns.length || !filterColumns.find(column => d.column === column)) {
+                if (d.display === false || !filterColumns.length || !filterColumns.find(column => d.column === column)) {
                     removedColumns.push(`${index}`);
                 }
             } else if (selectedColumns && selectedColumns.length) {
