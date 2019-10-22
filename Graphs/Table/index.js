@@ -83,7 +83,7 @@ class Table extends AbstractGraph {
         const { context, selectedColumns, configuration } = nextProps;
         const columns = configuration.data.columns || [];
 
-        const { filterColumns, removedColumnsKey } = Table.getStaticColumnByContext(columns, context);
+        const { filterColumns, removedColumnsKey } = Table.getColumnByContext(columns, context);
         const removedColumns = Table.getRemovedColumns(columns, filterColumns, selectedColumns);
 
         if (removedColumnsKey !== prevState.removedColumnsKey || !isEqual(removedColumns, prevState.removedColumns)) {
@@ -135,7 +135,7 @@ class Table extends AbstractGraph {
     }
 
     // update column dynamically according to the value passed through the context
-    static getStaticColumnByContext(columns, context) {
+    static getColumnByContext(columns, context) {
         const filterColumns = [];
         let removedColumnsKey = '';
         columns.forEach((d, index) => {
@@ -270,30 +270,8 @@ class Table extends AbstractGraph {
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
-        const filterColumns = this.getColumnByContext(columns);
-        const removedColumns = Table.getRemovedColumns(columns, filterColumns, selectedColumns);
-        this.setState({ removedColumns })
         this.updateData();
     }
-
-    // update column dynamically according to the value passed through the context
-    getColumnByContext(columns) {
-        const { context } = this.props;
-        const filterColumns = []
-        columns.forEach((d, index) => {
-            if (d.displayOption) {
-                for (let key in d.displayOption) {
-                    if (context.hasOwnProperty(key)) {
-                        this.setState({removedColumnsKey: context[key]});
-                        if (context[key] === d.displayOption[key]) {
-                            filterColumns.push(d.column);
-                        }
-                    }
-                }
-            }
-        })
-        return filterColumns.length ? filterColumns : [];
-    }    
 
     isScrollExpired() {
         const {
