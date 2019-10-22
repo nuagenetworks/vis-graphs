@@ -442,6 +442,7 @@ __columns__ - (Array) Array of columns display in the table. Example -
             "totalCharacters": 16, // show number of characters for column value
             "tooltip": {"column": "nuage_metadata.subnetName"}, // show tooltip on column values
             "fontColor": "red" // set the font color of the column value
+            "displayOption": {"app": "facebook", "nsg": "ovs-1"} // if request parameter (context) contain any key-value of displayOption then only show given columns.
         }
     ]
 ```
