@@ -50,11 +50,8 @@ class Table extends AbstractGraph {
         this.selectedRows = {}
         this.htmlData = {}
         this.sortOrder = {}
-<<<<<<< HEAD
-=======
         this.displayColumns = [];
         this.updateScrollNow = false;
->>>>>>> fix-MUI-vulnerabilityIssue
         this.state = {
             selected: [],
             data: [],
@@ -274,12 +271,7 @@ class Table extends AbstractGraph {
         const filterColumns = this.getColumnByContext(columns);
         const removedColumns = [];
 
-<<<<<<< HEAD
-=======
-        const removedColumns = [];
-
         // remove un-selected columns
->>>>>>> fix-MUI-vulnerabilityIssue
         columns.forEach((d, index) => {
             if (filterColumns.length) {
                 if (!filterColumns.find(column => d.column === column))
@@ -575,27 +567,13 @@ class Table extends AbstractGraph {
         } = this.state;
 
         if (action === 'remove') {
-<<<<<<< HEAD
-            this.updateTableStatus({
-                [`removedColumns_${removedColumnsKey}`]: [...removedColumns, changedColumn],
-                event: events.REMOVED_COLUMNS
-            });
-=======
             this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
->>>>>>> fix-MUI-vulnerabilityIssue
         } else {
             const removedIndex = removedColumns.indexOf(changedColumn);
             if (removedIndex > -1 && !isEmpty(removedColumns)) {
                 removedColumns.splice(removedIndex, 1);
             }
-<<<<<<< HEAD
-            this.updateTableStatus({
-                [`removedColumns_${removedColumnsKey}`]: [...removedColumns],
-                event: events.REMOVED_COLUMNS
-            });
-=======
             this.displayColumns = [...removedColumns];
->>>>>>> fix-MUI-vulnerabilityIssue
         }
     }
 
