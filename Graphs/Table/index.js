@@ -79,16 +79,18 @@ class Table extends AbstractGraph {
         this.checkFontsize();
     }
 
-    static getDerivedStateFromProps(nextProps, state) {
+    static getDerivedStateFromProps(nextProps, prevState) {
         const { context, selectedColumns, configuration } = nextProps;
         const columns = configuration.data.columns || [];
 
         const { filterColumns, removedColumnsKey } = Table.getStaticColumnByContext(columns, context);
+        const removedColumns = Table.getRemovedColumns(columns, filterColumns, selectedColumns);
 
-        return {
-            removedColumns: Table.getRemovedColumns(columns, filterColumns, selectedColumns),
-            removedColumnsKey: removedColumnsKey,
+        if (removedColumnsKey !== prevState.removedColumnsKey || !isEqual(removedColumns, prevState.removedColumns)) {
+            return { removedColumns, removedColumnsKey};
         }
+
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -267,22 +269,7 @@ class Table extends AbstractGraph {
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
         const filterColumns = this.getColumnByContext(columns);
-        const removedColumns = [];
-
-        // remove un-selected columns
-        columns.forEach((d, index) => {
-            if (filterColumns.length) {
-                if (!filterColumns.find(column => d.column === column))
-                    removedColumns.push(`${index}`)
-
-            } else if (selectedColumns && selectedColumns.length) {
-                if (!selectedColumns.find(column => d.label === column)) {
-                    removedColumns.push(`${index}`)
-                }
-            } else if (d.display === false) {
-                removedColumns.push(`${index}`);
-            }
-        });
+        const removedColumns = Table.getRemovedColumns(columns, filterColumns, selectedColumns);
         this.setState({ removedColumns })
         this.updateData();
     }
