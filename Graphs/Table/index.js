@@ -50,8 +50,11 @@ class Table extends AbstractGraph {
         this.selectedRows = {}
         this.htmlData = {}
         this.sortOrder = {}
+<<<<<<< HEAD
+=======
         this.displayColumns = [];
         this.updateScrollNow = false;
+>>>>>>> fix-MUI-vulnerabilityIssue
         this.state = {
             selected: [],
             data: [],
@@ -79,6 +82,18 @@ class Table extends AbstractGraph {
         this.checkFontsize();
     }
 
+    static getDerivedStateFromProps(nextProps, state) {
+        const { context, selectedColumns, configuration } = nextProps;
+        const columns = configuration.data.columns || [];
+
+        const { filterColumns, removedColumnsKey } = Table.getStaticColumnByContext(columns, context);
+
+        return {
+            removedColumns: Table.getRemovedColumns(columns, filterColumns, selectedColumns),
+            removedColumnsKey: removedColumnsKey,
+        }
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
 
         return !isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
@@ -100,6 +115,44 @@ class Table extends AbstractGraph {
             this.openContextMenu();
         }
     }
+
+    // removed columns on the basis of dynamic and display columns
+    static getRemovedColumns(columns, filterColumns, selectedColumns) {
+        let removedColumns = [];
+        columns.forEach((d, index) => {
+            if (filterColumns.length) {
+                if (!filterColumns.find(column => d.column === column))
+                    removedColumns.push(`${index}`)
+
+            } else if (selectedColumns && selectedColumns.length) {
+                if (!selectedColumns.find(column => d.label === column)) {
+                    removedColumns.push(`${index}`)
+                }
+            } else if (d.display === false) {
+                removedColumns.push(`${index}`);
+            }
+        });
+        return removedColumns;
+    }
+
+    // update column dynamically according to the value passed through the context
+    static getStaticColumnByContext(columns, context) {
+        const filterColumns = [];
+        let removedColumnsKey = '';
+        columns.forEach((d, index) => {
+            if (d.displayOption) {
+                for (let key in d.displayOption) {
+                    if (context.hasOwnProperty(key)) {
+                        removedColumnsKey = context[key];
+                        if (context[key] === d.displayOption[key]) {
+                            filterColumns.push(d.column);
+                        }
+                    }
+                }
+            }
+        })
+        return { filterColumns, removedColumnsKey };
+    } 
 
     getGraphProperties(props = this.props) {
         const {
@@ -218,12 +271,21 @@ class Table extends AbstractGraph {
          * On data change, resetting the paging and filtered data to 1 and false respectively.
          */
         this.resetFilters((currentPage || 1), this.selectedRows);
+        const filterColumns = this.getColumnByContext(columns);
+        const removedColumns = [];
 
+<<<<<<< HEAD
+=======
         const removedColumns = [];
 
         // remove un-selected columns
+>>>>>>> fix-MUI-vulnerabilityIssue
         columns.forEach((d, index) => {
-            if (selectedColumns && selectedColumns.length) {
+            if (filterColumns.length) {
+                if (!filterColumns.find(column => d.column === column))
+                    removedColumns.push(`${index}`)
+
+            } else if (selectedColumns && selectedColumns.length) {
                 if (!selectedColumns.find(column => d.label === column)) {
                     removedColumns.push(`${index}`)
                 }
@@ -234,6 +296,25 @@ class Table extends AbstractGraph {
         this.setState({ removedColumns })
         this.updateData();
     }
+
+    // update column dynamically according to the value passed through the context
+    getColumnByContext(columns) {
+        const { context } = this.props;
+        const filterColumns = []
+        columns.forEach((d, index) => {
+            if (d.displayOption) {
+                for (let key in d.displayOption) {
+                    if (context.hasOwnProperty(key)) {
+                        this.state.removedColumnsKey = context[key];
+                        if (context[key] === d.displayOption[key]) {
+                            filterColumns.push(d.column);
+                        }
+                    }
+                }
+            }
+        })
+        return filterColumns.length ? filterColumns : [];
+    }    
 
     isScrollExpired() {
         const {
@@ -376,8 +457,10 @@ class Table extends AbstractGraph {
         const keyColumns = this.getColumns();
         const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
 
-        first(usedColumns).firstColStyle = firstColToolTipStyle;
-        last(usedColumns).lastColStyle = lastColToolTipStyle;
+        if(usedColumns.length){
+            first(usedColumns).firstColStyle = firstColToolTipStyle;
+            last(usedColumns).lastColStyle = lastColToolTipStyle;
+        }
         return this.state.data.map((d, j) => {
  
 
@@ -487,14 +570,32 @@ class Table extends AbstractGraph {
             removedColumns
         } = this.getGraphProperties();
 
+        const {
+            removedColumnsKey
+        } = this.state;
+
         if (action === 'remove') {
+<<<<<<< HEAD
+            this.updateTableStatus({
+                [`removedColumns_${removedColumnsKey}`]: [...removedColumns, changedColumn],
+                event: events.REMOVED_COLUMNS
+            });
+=======
             this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
+>>>>>>> fix-MUI-vulnerabilityIssue
         } else {
             const removedIndex = removedColumns.indexOf(changedColumn);
             if (removedIndex > -1 && !isEmpty(removedColumns)) {
                 removedColumns.splice(removedIndex, 1);
             }
+<<<<<<< HEAD
+            this.updateTableStatus({
+                [`removedColumns_${removedColumnsKey}`]: [...removedColumns],
+                event: events.REMOVED_COLUMNS
+            });
+=======
             this.displayColumns = [...removedColumns];
+>>>>>>> fix-MUI-vulnerabilityIssue
         }
     }
 
