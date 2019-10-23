@@ -446,6 +446,8 @@ __innerWidth__ - Define the percentage of the width for the area. `1` means 100%
 
 __innerHeight__ - Define the percentage of the height for the area. `1` means 100% of the width. Default is `0.4`
 
+__customText__ - Additional text to be displayed along with the primary text. If not provided, title will be used in its place
+
 ## *VariationTextGraph*
 This graph shows a value and its variation from the previous one.
 
