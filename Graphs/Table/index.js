@@ -908,7 +908,7 @@ class Table extends AbstractGraph {
             selectColumnOption,
         } = this.getConfiguredProperties();
 
-        let heightMargin = showFooter ? 90 : 80;
+        let heightMargin = showFooter ? 90 : 50;
 
         heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
         heightMargin = selectColumnOption ? heightMargin + 43 : heightMargin + 5;
@@ -960,7 +960,7 @@ class Table extends AbstractGraph {
 
         const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
-        const showFooter = (totalRecords <= pageSize &&  totalRecords !== 0 && hidePagination !== false) ? false : true;
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll != true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
             print: false,
