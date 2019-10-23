@@ -432,27 +432,6 @@ class TreeGraph extends AbstractGraph {
             .style("opacity", 0);
     }
 
-    showToolTip = (tooltip, d, showToolTip) => {
-        if (showToolTip){
-            const {
-                commonEN,
-            } = this.props;
-            
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", 5)
-            tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        }
-    }
-
-    hideToolTip = (tooltip, d) => {
-        tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
-    }
-
     updateNodes = (source, nodes) => {
         // update graph
         const svg = this.getGraphContainer();
