@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import * as d3 from 'd3'
 import isEqual from 'lodash/isEqual';
+import uniqBy from 'lodash/unionBy';
 import ReactTooltip from "react-tooltip"
 
 import { properties } from './default.config'
@@ -601,7 +602,10 @@ class BarGraph extends XYGraph {
     const {
       margin,
       legend,
+      stackColumn
     } = this.getConfiguredProperties();
+
+    const filterData = (stackColumn && uniqBy(data, stackColumn)) || data;
 
     {this.setColor()}
 
@@ -620,7 +624,7 @@ class BarGraph extends XYGraph {
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
         <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-          {this.renderLegend(data, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
+          {this.renderLegend(filterData, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
           <div className='graphContainer' style={ graphStyle }>
             <svg width={graphWidth} height={graphHeight}>
               <g ref={node => this.node = node}>

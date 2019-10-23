@@ -46,6 +46,9 @@ export const getDataAndConfig = (graphName) => {
 }
 
 export const getHtml = (component, tag) => {
+    if(tag === 'table') {
+        return cheerio.load(component.first(tag).html());
+    }
     const cheerioData = cheerio.load(component.find(tag).html());
     return cheerioData;
 }
@@ -74,7 +77,8 @@ export const checkRowData = ($, rowNo) => {
         table = table.next();
     value = table.find('td').map(
         function (i) {
-            return $(this).text();
+            if($(this).attr('data-testid'))
+                return $(this).text().trim();
         }
     ).get();
     return value;

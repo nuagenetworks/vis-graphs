@@ -361,7 +361,7 @@ function ChordDiagram(svg){
           destination: matrix.names[d.target.index],
           sourceValue: d.source.value,
           destinationValue: d.target.value,
-          data: matrix.data[d.source.index][d.target.index]
+          data: [...matrix.data[d.source.index][d.target.index], ...matrix.data[d.target.index][d.source.index]]
         };
       }
 
