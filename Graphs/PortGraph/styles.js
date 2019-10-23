@@ -12,19 +12,16 @@ const styles = {
     },
     labelContainer: {
         width: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-        gridGap: '5px',
-        margin: '0px 10px 0px 10px',
-        fontSize: '1em'
+        display: 'flex',
+        flexWrap: 'wrap',
+        fontSize: '.8em'
     },
     labelRow: {
         width: '100%',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-        gridGap: '5px',
-        margin: '0px 10px 0px 10px',
-        gridColumn: '1 / -1'
+        display: 'flex',
+        overflow: 'hidden',
+        listStyle: 'none',
+        padding: '0.6em 1em'
     },
     labelBox: {
         padding: '2px'
