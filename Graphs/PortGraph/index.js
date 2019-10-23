@@ -118,7 +118,7 @@ class PortGraph extends XYGraph {
     getIcon(row) {
         const { portIcon } = this.getConfiguredProperties();
         const fontSize = this.calculatePortFontSize();
-        const IconSvg = getIconPath(portIcon, row, true);
+        const { IconSvg, viewBox } = getIconPath(portIcon, row, true);
 
         return (
             <svg
@@ -128,7 +128,7 @@ class PortGraph extends XYGraph {
                 onMouseMove={() => this.hoveredDatum = row}
                 width={fontSize}
                 height={fontSize}
-                viewBox="107.618 156.5 1830.713 1629.989"
+                viewBox={viewBox}
             >
                 <IconSvg color={this.getIconColor(row)}/>
             </svg>
@@ -189,16 +189,21 @@ class PortGraph extends XYGraph {
         );
     }
 
-    getColumns = (columns, data, isLabel) => (
+    getColumns = (columns, data) => (
         columns.map(column => {
                 const accessor = columnAccessor(column);
-                return data.map(d => {
-                    return (
-                        <div style={styles.labelBox}>
-                            {isLabel ? column.label ? <strong>{column.label} </strong> : undefined : accessor(d)}
-                        </div>
-                    );
-                });
+                const columnsData = [];
+                for (let d of data) {
+                    const val = accessor(d);
+                    if (val) {
+                        columnsData.push(
+                            <div style={{flexGrow: 1}}>
+                                <strong>{column.label}:</strong> {val}
+                            </div>
+                        );
+                    }
+                }
+                return columnsData;
             }
         )
     )
@@ -206,20 +211,19 @@ class PortGraph extends XYGraph {
     // show "key: value" data in top section of the graph
     renderColumns() {
         const { data2 } = this.props;
-        const { columns } = this.getConfiguredProperties();
+        const { columns, rows } = this.getConfiguredProperties();
 
-        let columnData = null;
-        let columnLabels = null;
-        if (columns && columns.length && data2.length) {
-            columnLabels = this.getColumns(columns, data2, true);
-            columnData = this.getColumns(columns, data2, false);
+        let columnData = [];
+        if (Array.isArray(rows) && rows.length && data2.length) {
+            columnData = rows.map( rowItem => this.getColumns(rowItem, data2))
+        }
+        else if (Array.isArray(columns) && columns.length && data2.length) {
+            columnData.push(this.getColumns(columns, data2));
+
         }
 
         return (
-            <div style={styles.labelContainer}>
-                <div style={styles.labelRow}>{columnLabels}</div>
-                <div style={{...styles.labelRow, fontSize: '.8em'}}>{columnData}</div>
-            </div>
+            columnData.map((rowData, idx) => (<div style={styles.labelContainer}><div style={{...styles.labelRow, order: idx + 1}}>{rowData}</div></div>))
         )
     }
 
