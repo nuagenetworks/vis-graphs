@@ -149,17 +149,20 @@ export default class ProgressBarGraph extends AbstractGraph {
                                         height: barHeight,
                                         ...style.innerBarSection
                                     }}>
+                                        <div>{this.tooltip}</div>
                                         <svg style={{ width: barWidth, height: barHeight }}>
                                             <g>
                                                 <rect
                                                     width={barWidth}
                                                     height={barHeight}
                                                     fill={backgroundColor}
+                                                    {...this.tooltipProps(d)}
                                                 />
                                                 <rect
                                                     width={this.getWidth(d, barWidth)}
                                                     height={barHeight}
                                                     fill={this.getColor(d, barWidth)}
+                                                    {...this.tooltipProps(d)}
                                                 />
                                             </g>
                                         </svg>

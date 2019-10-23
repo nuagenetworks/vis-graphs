@@ -1,4 +1,3 @@
-
 import PropTypes from 'prop-types';
 import React from "react";
 import isEqual from 'lodash/isEqual';
@@ -187,9 +186,6 @@ class TreeGraph extends AbstractGraph {
         });
 
         const svg = this.getGraphContainer();
-
-        // ======================selected nodes notification to show==============================
-        this.renderSelectedNodesInfo(nodes)
 
         // ======================pagination starts here==============================
         const parents = nodes.filter( (d) => {
@@ -415,6 +411,26 @@ class TreeGraph extends AbstractGraph {
         }
         return count;
     }
+    showToolTip = (tooltip, d, showToolTip) => {
+        if (showToolTip){
+            const {
+                commonEN,
+            } = this.props;
+            
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 5)
+            tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        }
+    }
+
+    hideToolTip = (tooltip, d) => {
+        tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    }
 
     showToolTip = (tooltip, d, showToolTip) => {
         if (showToolTip){
@@ -512,7 +528,7 @@ class TreeGraph extends AbstractGraph {
                 .attr("x", 28)
                 .attr("dy", "18px")
                 .text(function (d) {
-                    return d.data.name && d.data.name.length > 10 ? `${d.data.name.substring(0,15)}...` : d.data.name;
+                    return d.data.name && d.data.name.length > 20 ? `${d.data.name.substring(0,20)}...` : d.data.name;
                 })
                 .style("fill-opacity", 1);
         } else {

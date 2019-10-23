@@ -4,4 +4,5 @@ export const events = Object.freeze({
     SEARCH: 'search',
     FILTER: 'filter',
     REFRESH: 'refresh',
+    REMOVED_COLUMNS: 'removedColumns'
 })
