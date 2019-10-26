@@ -66,12 +66,21 @@ class Table extends AbstractGraph {
     }
 
     componentWillUnmount() {
+        const {
+            scrollData,
+            requestId,
+        } = this.props;
+        
         if (!isEmpty(this.displayColumns)) {
             this.updateTableStatus({
                 [`removedColumns_${this.state.removedColumnsKey}`]: this.displayColumns,
                 event: events.REMOVED_COLUMNS
             });
         }
+        
+        if(!objectPath.has(scrollData, [`selectedRow_${requestId}`]) && !isEmpty(this.selectedRows)) {
+            this.updateTableStatus({ [`selectedRow_${requestId}`]: this.selectedRows })
+        } 
     }
 
     componentDidMount() {
