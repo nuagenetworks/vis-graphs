@@ -806,13 +806,17 @@ class Table extends AbstractGraph {
     // reset scroll data.
     resetScrollData() {
         const { disableRefresh } = this.getConfiguredProperties();
+        const {
+            isVSDService,
+        } = this.props;
+
         return (
             this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={style.button.design}
+                        style={isVSDService ? {...style.button.design, margin: "10px 30px 10px 10px"} : style.button.design}
                         onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -901,8 +905,12 @@ class Table extends AbstractGraph {
     getHeightMargin(showFooter) {
         const {
             configuration,
+            isVSDService,
         } = this.props;
-
+        
+        if(isVSDService) {
+            return 0;
+        }
         const {
             searchBar,
             selectColumnOption,
