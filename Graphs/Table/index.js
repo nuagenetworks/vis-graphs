@@ -816,16 +816,15 @@ class Table extends AbstractGraph {
     resetScrollData() {
         const { disableRefresh } = this.getConfiguredProperties();
         const {
-            isVSDService,
+            configuration,
         } = this.props;
-
         return (
             this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={isVSDService ? {...style.button.design, margin: "10px 30px 10px 10px"} : style.button.design}
+                        style={configuration.filterOptions ? {...style.button.design, margin: "10px 7% 10px 10px"} : style.button.design}
                         onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -913,24 +912,13 @@ class Table extends AbstractGraph {
 
     getHeightMargin(showFooter) {
         const {
-            configuration,
-            isVSDService,
-        } = this.props;
-        
-        if(isVSDService) {
-            return 0;
-        }
-        const {
             searchBar,
-            selectColumnOption,
         } = this.getConfiguredProperties();
 
-        let heightMargin = showFooter ? 90 : 50;
-
-        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 43 : heightMargin + 5;
-
-        return configuration.filterOptions ? heightMargin + 50 : heightMargin;
+        let heightMargin = showFooter ? 90 : 0;
+        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin + 50;
+        
+        return heightMargin;
     }
 
     getInitialSort() {
@@ -979,6 +967,7 @@ class Table extends AbstractGraph {
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll != true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
+        console.error("heightMargin",heightMargin);
         const options = {
             print: false,
             filter: false,
