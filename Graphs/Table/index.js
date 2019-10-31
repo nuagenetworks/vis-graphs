@@ -627,10 +627,11 @@ class Table extends AbstractGraph {
             multiSelectable,
             matchingRowColumn
         } = this.getConfiguredProperties();
-
+        
         if (!multiSelectable) {
             this.handleClick(...selectedRows)
             this.selectedRows = {}
+            this.updateScrollNow = true;
         }
 
         this.selectedRows[this.currentPage] = selectedRows.slice();
@@ -661,9 +662,9 @@ class Table extends AbstractGraph {
             onSelect({ rows, matchingRows });
         }
 
-        if (this.scroll && this.updateScrollNow) {
+        if (this.updateScrollNow) {
             this.updateTableStatus({ [`selectedRow_${this.props.requestId}`]: this.selectedRows })
-        }
+        } 
         this.updateScrollNow = true;
 
     }
@@ -824,7 +825,7 @@ class Table extends AbstractGraph {
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={configuration.filterOptions ? {...style.button.design, margin: "10px 7% 10px 10px"} : style.button.design}
+                        style={configuration.filterOptions ? {...style.button.design, margin: "8px 0px 0px", position: "fixed", top: "0px"} : style.button.design}
                         onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -915,9 +916,8 @@ class Table extends AbstractGraph {
             searchBar,
         } = this.getConfiguredProperties();
 
-        let heightMargin = showFooter ? 90 : 0;
+        let heightMargin = showFooter ? 40 : 0;
         heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin + 50;
-        
         return heightMargin;
     }
 
@@ -967,7 +967,6 @@ class Table extends AbstractGraph {
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll != true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
-        console.error("heightMargin",heightMargin);
         const options = {
             print: false,
             filter: false,
