@@ -43,7 +43,7 @@ class LineGraph extends XYGraph {
         } = this.props;
 
         if (!data || !data.length)
-            return this.renderMessage('No data to visualize')
+            return <div style={{marginTop: '25em', marginLeft: '20em', marginBottom: '25em'}}>No data to visualize</div>
 
         const {
           chartHeightToPixel,
