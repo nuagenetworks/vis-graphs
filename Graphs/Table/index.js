@@ -816,16 +816,14 @@ class Table extends AbstractGraph {
     // reset scroll data.
     resetScrollData() {
         const { disableRefresh } = this.getConfiguredProperties();
-        const {
-            configuration,
-        } = this.props;
+        
         return (
             this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={configuration.filterOptions ? {...style.button.design, margin: "8px 0px 0px", position: "fixed", top: "0px"} : style.button.design}
+                        style={style.button.design}
                         onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -917,7 +915,7 @@ class Table extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         let heightMargin = showFooter ? 40 : 0;
-        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin + 50;
+        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
         return heightMargin;
     }
 
@@ -965,7 +963,7 @@ class Table extends AbstractGraph {
 
         const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
-        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll != true) ? false : true;
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
             print: false,
@@ -1040,6 +1038,11 @@ class Table extends AbstractGraph {
             MuiPaper: {
                 elevation4: {
                     boxShadow: (searchBar || searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
+                }
+            },
+            MUIDataTableToolbarSelect: {
+                root: {
+                    display: "none"
                 }
             }
         }
