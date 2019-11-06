@@ -476,9 +476,10 @@ export default class AbstractGraph extends React.Component {
         const {
             configuration
         } = this.props;
+        const { data: { classes: { messageClass } } } = configuration
 
         return (
-            <div id={`${configuration.id}-message`} className="center-text">
+            <div id={`${configuration.id}-message`} className={messageClass ? messageClass : "center-text"}>
                 {message}
             </div>
         )
