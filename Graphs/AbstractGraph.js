@@ -546,10 +546,10 @@ export default class AbstractGraph extends React.Component {
         const {
             configuration
         } = this.props;
-        const noDataMessageStyle = configuration && configuration.data && configuration.data.noDataMessageStyle;
-        
+        const customNoDataMessageStylePresent = configuration && configuration.data && configuration.data.customNoDataMessageStylePresent;
+
         return (
-            <div id={`${configuration.id}-message`} className={noDataMessageStyle ? '' : 'center-text'} style={noDataMessageStyle}>
+            <div id={`${configuration.id}-message`} className={customNoDataMessageStylePresent ? "customNoDataMessageClass" : "center-text"}>
                 {message}
             </div>
         )
