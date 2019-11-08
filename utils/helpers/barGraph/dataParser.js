@@ -1,5 +1,6 @@
 
-import { nest, nestStack, nestMinMaxSum, limit } from '../../helpers'
+import { limit } from '../../helpers/limit';
+import { nest, nestStack, nestMinMaxSum } from '../../helpers/nest';
 
 export default ({
   data,

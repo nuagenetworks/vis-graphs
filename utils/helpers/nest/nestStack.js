@@ -2,7 +2,7 @@
  * Stacking of Nested Groups and calculating of overall sum
  */
 
-import { stack } from "../"
+import stack from "../stack";
 
 export default ({
     data, 

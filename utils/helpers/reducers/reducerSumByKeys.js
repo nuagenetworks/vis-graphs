@@ -35,7 +35,7 @@
  * 
  */
 
-import { pick } from '../'
+import pick from '../pick';
 
 export default ({
     data,
