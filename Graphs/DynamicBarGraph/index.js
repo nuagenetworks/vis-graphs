@@ -9,7 +9,8 @@ import { properties } from './default.config'
 import XYGraph from '../XYGraph'
 import "./style.css";
 
-import { dataParser, pick, barWidth } from '../../utils/helpers'
+import { pick } from '../../utils/helpers';
+import {dataParser, barWidth} from '../../utils/helpers/barGraph';
 
 const FILTER_KEY = ['data', 'height', 'width', 'context']
 
