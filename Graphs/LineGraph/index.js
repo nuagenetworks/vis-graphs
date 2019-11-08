@@ -21,7 +21,8 @@ import isEqual from 'lodash/isEqual';
 import * as d3 from 'd3'
 
 import XYGraph from "../XYGraph";
-import { nest, pick } from "../../utils/helpers"
+import { pick } from "../../utils/helpers";
+import { nest } from "../../utils/helpers/nest";
 import {properties} from "./default.config";
 
 momentDuration(moment);
@@ -32,8 +33,6 @@ class LineGraph extends XYGraph {
 
     yKey   = 'columnType'
     yValue = 'yColumn'
-    startIndex = 0;
-    endIndex = 0;
 
     constructor(props) {
         super(props, properties);
@@ -47,6 +46,8 @@ class LineGraph extends XYGraph {
         this.graphId = new Date().valueOf();
         this.leftMargin = 0;
         this.miniGraphXScale = 0;
+        this.startIndex = 0;
+        this.endIndex = 0;
     }
 
     shouldComponentUpdate(nextProps) {
@@ -90,7 +91,7 @@ class LineGraph extends XYGraph {
     elementGenerator() {
         const svg = this.getGraph();
         svg.append("defs").append("svg:clipPath")
-            .attr("id", `clip${this.graphId}`)
+            .attr("id", `clips${this.graphId}`)
             .append("svg:rect")
             .attr("width", this.availableWidth)
             .attr("height", this.availableHeight + 2.25 * this.getXAxisHeight())
@@ -579,7 +580,7 @@ class LineGraph extends XYGraph {
                                         }
                                     />
 
-                                    <g className='line' style={{"clipPath": `url(#clip${this.graphId})`}}>
+                                    <g className='line' style={{"clipPath": `url(#clips${this.graphId})`}}>
                                     {linesData.map((d, i) =>
                                         (d.values.length === 1) ?
                                             <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
