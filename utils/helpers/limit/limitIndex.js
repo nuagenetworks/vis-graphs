@@ -2,7 +2,7 @@
  * To sort array of objects by provided column and sorting order
  * Must be done in the provided format - We dont arrange it in any order
  */
-import { reducerSum } from "../"
+import { reducerSum } from "../reducers";
 
 export default ({
     data,

@@ -7,7 +7,8 @@ import ReactTooltip from "react-tooltip"
 
 import XYGraph from "../XYGraph"
 import {properties} from "./default.config"
-import { nest as dataNest, pick } from "../../utils/helpers"
+import { pick } from "../../utils/helpers";
+import {nest as dataNest} from "../../utils/helpers/nest";
 
 const FILTER_KEY = ['data', 'height', 'width', 'context']
 

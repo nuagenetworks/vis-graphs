@@ -8,7 +8,8 @@ import * as d3 from "d3";
 import "./style.css";
 
 import {properties} from "./default.config"
-import { filterEmptyData, limit } from "../../utils/helpers"
+import { filterEmptyData } from "../../utils/helpers";
+import {limit} from '../../utils/helpers/limit';
 
 
 export default class PieGraph extends AbstractGraph {
