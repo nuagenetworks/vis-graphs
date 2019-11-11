@@ -23,14 +23,6 @@ export default ({
     } = {}
   }) => {
 
-    /**
-     * Sorting the array
-     */
-    let sortedData = data.slice().sort(sorter({
-      column: metric,
-      order: order
-    }))
-
     let limitedData = [], othersData = []
     let counter
 
@@ -51,11 +43,11 @@ export default ({
     }
 
     if (!limit) {
-      return sortedData
+      return data
     }
 
-    limitedData = sortedData.slice(0, counter)
-    othersData = sortedData.slice(counter)
+    limitedData = data.slice(0, counter)
+    othersData = data.slice(counter)
 
     if(!othersData.length) {
       return limitedData
