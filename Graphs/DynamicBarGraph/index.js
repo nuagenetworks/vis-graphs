@@ -221,6 +221,74 @@ class BarGraph extends XYGraph {
     this.scale.y.range([this.getAvailableHeight(), 0])
   }
 
+  setAxis(data) {
+
+    if (!data || !data.length)
+      return;
+
+    const {
+      xTickSizeInner,
+      xTickSizeOuter,
+      xTickFormat,
+      xTickGrid,
+      xTicks,
+      yTickFormat,
+      yTickGrid,
+      yTicks,
+      yTickSizeInner,
+      yTickSizeOuter,
+      xTicksLabel
+    } = this.getConfiguredProperties();
+
+    this.axis = {};
+
+    // X axis
+    this.axis.x = d3.axisBottom(this.getScale().x)
+      .tickSizeInner(xTickGrid ? -this.getAvailableHeight() : xTickSizeInner)
+      .tickSizeOuter(xTickSizeOuter);
+
+    if (xTicksLabel && typeof xTicksLabel === 'object') {
+      const externalTicksLable = {};
+      const xTicksLabelValue = data.map((barData) => {
+        if (!Object.keys(xTicksLabel).includes(barData.key.toString())) {
+          externalTicksLable[barData.key] = barData.key;
+        }
+        return barData.key;
+      });
+
+      const finalTikcLabel = { ...xTicksLabel, ...externalTicksLable }
+
+      this.axis.x
+        .tickValues(xTicksLabelValue)
+        .tickFormat(value => finalTikcLabel[value]);
+    } else if (xTickFormat) {
+      this.axis.x.tickFormat(d3.format(xTickFormat));
+    }
+
+    if (xTicks) {
+      this.axis.x.ticks(xTicks);
+    }
+
+    this.axis.y = d3.axisLeft(this.getScale().y)
+      .tickSizeInner(yTickGrid ? -this.getAvailableWidth() : yTickSizeInner)
+      .tickSizeOuter(yTickSizeOuter);
+
+    // Y axis
+    if (yTickFormat) {
+      this.axis.y.tickFormat(d3.format(yTickFormat));
+    } else {
+      const yAxisTicks = this.getScale().y.ticks()
+        .filter(tick => Number.isInteger(tick));
+      this.axis.y
+        .tickValues(yAxisTicks)
+        .tickFormat(d3.format('d'));
+    }
+
+    if (yTicks) {
+      this.axis.y.ticks(yTicks);
+    }
+  }
+
   // generate methods which helps to create charts
   elementGenerator() {
     
