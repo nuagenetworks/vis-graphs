@@ -151,8 +151,16 @@ export default class XYGraph extends AbstractGraph {
             .tickSizeInner(yTickGrid ? -this.getAvailableWidth() : yTickSizeInner)
             .tickSizeOuter(yTickSizeOuter);
 
-        if(yTickFormat){
-            this.axis.y.tickFormat(format(yTickFormat));
+        if (yTickFormat) {
+            if (yTickFormat === 'integer') {
+                const yAxisTicks = this.getScale().y.ticks()
+                    .filter(tick => Number.isInteger(tick));
+                this.axis.y
+                    .tickValues(yAxisTicks)
+                    .tickFormat(format('d'));
+            } else {
+                this.axis.y.tickFormat(format(yTickFormat));
+            }
         }
 
         if(yTicks){

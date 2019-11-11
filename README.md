@@ -232,7 +232,7 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yColumn*** attribute name in your results to use for y-axis
 - **yLabel** y-axis title
 - **yTicks** number of ticks to use on y-axis
-- **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
+- **yTickFormat** use either integer to exclude the decimal ticks or [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
 - **yTickFormatType** If y axis data is in duration(miliseconds) then set `yTickFormatType: 'duration'` and define format in `yTickFormat` property to make it readable. Here is the link for the duration format - https://www.npmjs.com/package/moment-duration-format.
 
 E.g -
