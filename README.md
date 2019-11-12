@@ -303,6 +303,14 @@ __xTicksLabel__ - (object) used to override labels of x axis ticks with some pre
     }
 ```
 
+__isSort__ - (boolean) - disable sorting on data to be display on bar graph. Default is `true`
+
+E.g - 
+```javascript
+    "yColumn": "SumofBytes",
+    "isSort": false
+```
+
 ## *LineGraph*
 Display one or multiple lines
 >[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/lineGraph)
