@@ -19,7 +19,7 @@ import moment from 'moment';
 import momentDuration from 'moment-duration-format';
 
 import XYGraph from "../XYGraph";
-import { nest } from "../../utils/helpers"
+import { nest } from "../../utils/helpers/nest"
 import {properties} from "./default.config";
 
 momentDuration(moment);
