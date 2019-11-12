@@ -329,7 +329,7 @@ export default class AbstractGraph extends React.Component {
 
         yColumn = yColumn ? yColumn : 'yColumn'
         const yLabelFn = (d) => {
-            if (!yTickFormat) {
+            if (yTickFormat === undefined || yTickFormat === null) {
                 return d[yColumn];
             }
             const formatter = format(yTickFormat);

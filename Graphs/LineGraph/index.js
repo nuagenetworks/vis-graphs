@@ -312,7 +312,7 @@ class LineGraph extends XYGraph {
           .tickSizeInner(yTickGrid ? -availableWidth : yTickSizeInner)
           .tickSizeOuter(yTickSizeOuter);
 
-        if (yTickFormat) {
+        if (yTickFormat || yTickFormat === "") {
             const yAxisTickFormat = (yTickFormatType === duration) ? (d) => moment.duration(d).format(yTickFormat, { trim: false }) : format(yTickFormat);
             yAxis.tickFormat(yAxisTickFormat);
         }
