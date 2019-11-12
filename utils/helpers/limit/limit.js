@@ -11,6 +11,7 @@ import merge from "../merge"
 
 export default ({
     data,
+    isSort,
     dimension = 'key',
     metric = 'total',
     order = 'DESC',
@@ -23,13 +24,13 @@ export default ({
     } = {}
   }) => {
 
-    /**
-     * Sorting the array
-     */
-    let sortedData = data.slice().sort(sorter({
-      column: metric,
-      order: order
-    }))
+    /**	
+     * Sorting the array	
+     */	
+    let sortedData = isSort === false ? data : data.slice().sort(sorter({	
+      column: metric,	
+      order: order	
+    }));	
 
     let limitedData = [], othersData = []
     let counter
