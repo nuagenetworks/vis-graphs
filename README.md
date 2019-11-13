@@ -113,10 +113,34 @@ Configuration is a little more complex as it has more options. But it is working
 
 Here is the list of common options:
 
+__excludedColumns__ - (object) return array of fields/columns which need to remove from advance search filter. E.g -
+
+```javascript
+
+ "excludedColumns": {
+        "columnList": "['tcpflags', 'bytes', 'packets', 'classification.type']" // columnList may be a function or an array which will return an array of fields.
+    }
+
+```
+
+__enabledCount__ - (boolean) used to get the data length instead of data.
+
+```javascript
+
+ // ...
+    "data": {
+        // ...
+        "enabledCount": true,
+    }
+    // ...
+
+```
+
 __Tolltip__ - If you want to add tooltips on an existing configuration ? Update its configuration:
   - **column*** - attribute name to use to display the value
   - **label** - tooltip label. If not specified, column will be used.
   - **format** - [d3 format](https://github.com/d3/d3-format) style to display the column value
+  - **duration** - used to dispaly duration in date time format. You may set the format as per your choice.
 
 ```javascript
 {
@@ -125,7 +149,8 @@ __Tolltip__ - If you want to add tooltips on an existing configuration ? Update 
         // ...
         "tooltip": [
             { "column": "L7Classification", "label": "L7 Signature" },
-            { "column": "Sum of MB", "format": ",.2s"}
+            { "column": "Sum of MB", "format": ",.2s"},
+            { "column": "timestamp", "label": "Value", "duration": "h [hrs], m [min], s [sec]"}
         ]
     }
     // ...
@@ -207,7 +232,19 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yColumn*** attribute name in your results to use for y-axis
 - **yLabel** y-axis title
 - **yTicks** number of ticks to use on y-axis
-- **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
+- **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels. Use empty string `""` if whole number ticks are required.
+- **yTickFormatType** If y axis data is in duration(miliseconds) then set `yTickFormatType: 'duration'` and define format in `yTickFormat` property to make it readable. Here is the link for the duration format - https://www.npmjs.com/package/moment-duration-format.
+
+E.g -
+```javascript
+    "data": {
+    ...
+    "yTickFormat": "mm:ss",
+    "yTickFormatType": "duration",
+    ...
+    }
+```
+
 - **yTickGrid** (boolean) If set to `true` then the complete grid will be drawn
 - **yTickSizeInner** If size is specified, sets the inner tick size to the specified value and returns the axis.
 - **yTickSizeOuter** If size is specified, sets the outer tick size to the specified value and returns the axis.
@@ -255,6 +292,25 @@ __brush__ (number) To enble brushing with pre selected bars.Currently support in
 
 ![dynamicbargraph](https://user-images.githubusercontent.com/26645756/36250751-b6872a64-1264-11e8-961c-1cb895518fc0.png)
 
+__xTicksLabel__ - (object) used to override labels of x axis ticks with some predefined strings. E.g - 
+ ```javascript
+    "xTicksLabel": {
+        "NETFLIX": "NET",
+        "WEBEX": "WEB",
+        "HTTP": "HT",
+        "GOOGLE": "Google",
+        "MSOffice365": "Office"
+    }
+```
+
+__isSort__ - (boolean) - disable sorting on data to be display on bar graph. Default is `true`
+
+E.g - 
+```javascript
+    "yColumn": "SumofBytes",
+    "isSort": false
+```
+
 ## *LineGraph*
 Display one or multiple lines
 >[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/lineGraph)
@@ -277,7 +333,7 @@ __linesColumn__ (array || string)- attribute name in your results to display lin
 ```
 
 __showNull__ - (Boolean) If false, Show truncated line if yValue is null . Default is true
-
+__connected__ - (Boolean) If true then it will create the lines without any gaps and zero for missing x axis. Default is `false`.
 __defaultY__ - (string | object) default yAxis value used to draw straight horizontal line to show cut off value. It can be object which define data `source` and `column` to get data from another query and you may define separate `tooltip` for this staright line from data `source`. Example -
 
 ```javascript
@@ -358,6 +414,8 @@ __onColumnSelection__ - (handler) Event to capture the list of selected columns 
 
 __highlight__ - (Array of columns) Highlighted the rows if value of columns is not null
 
+__fixedHeader__ - (boolean) fix table header while scrolling. Default is `true`.
+
 __hidePagination__ - Hide paging and search bar if data size is less than pagination limit - Default is `true`
 
 __border__
@@ -386,7 +444,14 @@ __columns__ - (Array) Array of columns display in the table. Example -
         },
         { "column": "protocol", "label": "Proto", "selection": true  } // set `selection: true` to enable autocompleter for values of `protocol` column in search bar and must be string only.
         { "column": "sourceip", "label": "SIP" },
-        { "column": "subnetName", "label": "Subnet", "totalCharacters":    16, "tooltip" : {"column": "nuage_metadata.subnetName"} }
+        { 
+            "column": "subnetName", 
+            "label": "Subnet", 
+            "totalCharacters": 16, // show number of characters for column value
+            "tooltip": {"column": "nuage_metadata.subnetName"}, // show tooltip on column values
+            "fontColor": "red" // set the font color of the column value
+            "displayOption": {"app": "facebook", "nsg": "ovs-1"} // if request parameter (context) contain any key-value of displayOption then only show given columns.
+        }
     ]
 ```
 __tabifyOptions__ - Converting the provided array indexes to comma separated values, instead of generating the multiple rows (avoiding possible duplicates). E.g -
@@ -434,6 +499,48 @@ __defaultOpacity__ -  Default opacity. Default is `0.6`
 
 __fadedOpacity__ - Hovered opacity. Default is `0.1`
 
+__additionalKeys__ - (array) declare additional fields to pass on context on event listener. E.g - 
+```javascript
+    "additionalKeys": ["SumOf", "doc_count", "hash"],
+```
+
+__additionalMapping__ - (array) declare additional key and value to insert dynamically into query. It is replace the `replace` keyword from the query and insert dynamically generated content. E.g - 
+
+```javascript
+"additionalMapping": [
+        {
+            "fieldName": "nuage_metadata.flowid", // define key name for the query
+            "additonalKey": "hash" // define value to insert into query correspnding to the defined key (it should be present in additionalKeys array)
+        },
+        {
+            "fieldName": "nuage_metadata.packets", 
+            "additonalKey": "SumOf" 
+        }
+    ],
+```
+**Note:** - to use additionalMapping in the destination visualization, please define additionalKeys in source visualization.
+To replace additional keys you have to use following syntax:
+```javascript 
+"query": {
+            "bool": {
+              "should": [
+                {
+                    "bool": {
+                    "must": [
+                        {"term": {"nuage_metadata.enterpriseName": "{{enterpriseName:chord_enterprise}}"} },
+                        {
+                        "replace": "additionalData"
+                        }
+                    ]
+                    }
+                }
+              ]
+            }
+          } 
+```          
+
+__bidirectionalTooltip__ - Indicates if tooltip needs to display content corresponding to both directions. Default is `true`
+
 ## *SimpleTextGraph*
 This graph allows you to display a simple text information.
 
@@ -457,6 +564,8 @@ __innerWidth__ - Define the percentage of the width for the area. `1` means 100%
 
 __innerHeight__ - Define the percentage of the height for the area. `1` means 100% of the width. Default is `0.4`
 
+__customText__ - Additional text to be displayed along with the primary text. If not provided, title will be used in its place
+
 ## *VariationTextGraph*
 This graph shows a value and its variation from the previous one.
 
@@ -475,6 +584,8 @@ __textAlign__ - Align text on `left`, `center` or `right`. Default is `center`
 __fontSize__ - Font size
 
 __fontColor__ - Font color
+
+__showVariation__ - Display percentage variation. Default is `true`
 
 ## *HeatmapGraph*
 This graph shows a value of a column at given timestamp.
@@ -569,11 +680,11 @@ __filters__ - List down columns in search bar
 "filters": [
             {
                 "columnText": "name",
-                "columField": "nsgatewayName",
+                "columnField": "nsgatewayName",
                 "type": "text"
             },
             {
-                "columField": "status",
+                "columnField": "status",
                 "type": "selection" // for `selection`, value of status field should be string
             }
 

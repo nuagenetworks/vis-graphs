@@ -113,7 +113,8 @@ export default class XYGraph extends AbstractGraph {
             yTickGrid,
             yTicks,
             yTickSizeInner,
-            yTickSizeOuter
+            yTickSizeOuter,
+            xTicksLabel
         } = this.getConfiguredProperties();
 
         this.axis = {};
@@ -123,7 +124,21 @@ export default class XYGraph extends AbstractGraph {
             .tickSizeInner(xTickGrid ? -this.getAvailableHeight() : xTickSizeInner)
             .tickSizeOuter(xTickSizeOuter);
 
-        if(xTickFormat){
+        if (xTicksLabel && typeof xTicksLabel === 'object') {
+            const externalTicksLable = {};
+            const xTicksLabelValue = data.map((barData) => {
+                if (!Object.keys(xTicksLabel).includes(barData.key.toString())) {
+                    externalTicksLable[barData.key] = barData.key;
+                }
+                return barData.key;
+            });
+
+            const finalTikcLabel = { ...xTicksLabel, ...externalTicksLable }
+
+            this.axis.x
+                .tickValues(xTicksLabelValue)
+                .tickFormat(value => finalTikcLabel[value]);
+        } else if(xTickFormat){
             this.axis.x.tickFormat(format(xTickFormat));
         }
 
@@ -138,6 +153,12 @@ export default class XYGraph extends AbstractGraph {
 
         if(yTickFormat){
             this.axis.y.tickFormat(format(yTickFormat));
+        } else if (yTickFormat === "") {
+            const yAxisTicks = this.getScale().y.ticks()
+                .filter(tick => Number.isInteger(tick));
+            this.axis.y
+                .tickValues(yAxisTicks)
+                .tickFormat(format('d'));
         }
 
         if(yTicks){
@@ -166,7 +187,7 @@ export default class XYGraph extends AbstractGraph {
                 :  margin.top + this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
             },
             y: {
-              left: margin.left + chartWidthToPixel + (this.checkIsVerticalLegend() ? this.getLegendConfig().width : 0),
+              left: margin.left + chartWidthToPixel,
               top: margin.top + this.getAvailableHeight() / 2
             }
         }

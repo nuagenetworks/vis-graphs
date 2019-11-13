@@ -1,7 +1,7 @@
 /**
  * Stacking of Nested Groups and calculating of overall sum of negative and positive values respectively
  */
-import { reducerSum } from "../"
+import { reducerSum } from "../reducers";
 
 export default ({
     data,
@@ -17,9 +17,9 @@ export default ({
 
     datum[column].forEach((d, i) => {
       if (d[stackColumn] < 0) {
-        sumMin -= -(d[stackColumn]) - (i === 0 ? 1 : 0)
+        sumMin -= -(d[stackColumn])
       } else {
-        sumMax += +(d[stackColumn]) - (i === 0 ? 1 : 0)
+        sumMax += +(d[stackColumn])
       }
     })
 

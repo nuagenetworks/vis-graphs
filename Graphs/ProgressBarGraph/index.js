@@ -1,5 +1,6 @@
 import React from "react";
 import * as d3 from 'd3';
+import PropTypes from 'prop-types';
 
 import { properties } from './default.config';
 import AbstractGraph from "../AbstractGraph";
@@ -22,13 +23,15 @@ export default class ProgressBarGraph extends AbstractGraph {
         return barData[maxData] ? width * barData[usedData] / barData[maxData] : width * barData[usedData] * 0.01;
     }
 
-    getData = (barData) => {
+    getData = (dataFromProps) => {
+        const barData = {...dataFromProps};
         const {
             maxData,
             usedData,
             display,
             maxDataFormat,
             defaultRange,
+            units
         } = this.getConfiguredProperties();
 
         if (display === PERCENTAGE) {
@@ -38,8 +41,9 @@ export default class ProgressBarGraph extends AbstractGraph {
 
         barData[usedData] = d3.format(maxDataFormat)(barData[usedData]);
         barData[maxData] = barData[maxData] ? d3.format(maxDataFormat)(barData[maxData]) : undefined;
+        const dataUnits = barData['unit'] || units ? ` ${barData['unit']||units}` : '';
 
-        return barData[maxData] ? `${barData[usedData]} / ${barData[maxData]}` : `${barData[usedData]} / ${defaultRange}`;
+        return barData[maxData] ? `${barData[usedData]}${dataUnits}/ ${barData[maxData]}${dataUnits}` : `${barData[usedData]}${dataUnits}/ ${defaultRange}${dataUnits}`;
     }
 
     getPercentage = (barData, width) => {
@@ -92,7 +96,7 @@ export default class ProgressBarGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         if (!data.length) {
-            return;
+            return this.renderMessage('No data to visualize');
         }
 
         const availableWidth = width - (margin.left + margin.right);
@@ -145,17 +149,20 @@ export default class ProgressBarGraph extends AbstractGraph {
                                         height: barHeight,
                                         ...style.innerBarSection
                                     }}>
+                                        <div>{this.tooltip}</div>
                                         <svg style={{ width: barWidth, height: barHeight }}>
                                             <g>
                                                 <rect
                                                     width={barWidth}
                                                     height={barHeight}
                                                     fill={backgroundColor}
+                                                    {...this.tooltipProps(d)}
                                                 />
                                                 <rect
                                                     width={this.getWidth(d, barWidth)}
                                                     height={barHeight}
                                                     fill={this.getColor(d, barWidth)}
+                                                    {...this.tooltipProps(d)}
                                                 />
                                             </g>
                                         </svg>
@@ -178,8 +185,8 @@ export default class ProgressBarGraph extends AbstractGraph {
 }
 
 ProgressBarGraph.propTypes = {
-    configuration: React.PropTypes.object,
-    data: React.PropTypes.arrayOf(React.PropTypes.object),
+    configuration: PropTypes.object,
+    data: PropTypes.arrayOf(PropTypes.object),
 };
 
 ProgressBarGraph.defaultProps = {

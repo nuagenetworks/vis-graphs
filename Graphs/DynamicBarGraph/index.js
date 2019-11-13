@@ -1,20 +1,25 @@
 import PropTypes from 'prop-types';
 import React from 'react'
 import * as d3 from 'd3'
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual';
+import uniqBy from 'lodash/unionBy';
 import ReactTooltip from "react-tooltip"
 
 import { properties } from './default.config'
 import XYGraph from '../XYGraph'
 import "./style.css";
 
-import { dataParser, pick, barWidth } from '../../utils/helpers'
+import { pick } from '../../utils/helpers';
+import {dataParser, barWidth} from '../../utils/helpers/barGraph';
 
 const FILTER_KEY = ['data', 'height', 'width', 'context']
 
 class BarGraph extends XYGraph {
 
-  customExtent = []
+  customExtent = [];
+  nestedData = [];
+  startIndex = 0;
+  endIndex = 0;
 
   constructor(props) {
     super(props, properties);
@@ -35,11 +40,11 @@ class BarGraph extends XYGraph {
   }
 
   shouldComponentUpdate(nextProps) {
-    return !_.isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
+    return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
   } 
 
   componentDidUpdate(prevProps) {
-    if (!_.isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+    if (!isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
       this.initiate(this.props);
     }
 
@@ -100,8 +105,7 @@ class BarGraph extends XYGraph {
         return
 
     this.parseData(props)
-    this.setDimensions(props, this.getNestedData(), this.isVertical() ? 'total' : 'key')
-    this.updateLegend(props)
+    this.setDimensions(props, this.getNestedData(), this.isVertical() ? 'total' : 'key', this.getStackLabelFn())
     this.configureAxis({
       data: this.getNestedData()
     })
@@ -117,7 +121,9 @@ class BarGraph extends XYGraph {
       yColumn,
       stackColumn,
       otherOptions,
-      stackSequence
+      stackSequence,
+      xTicksLabel,
+      isSort
     } = this.getConfiguredProperties()
  
     if (this.isVertical()) {
@@ -137,8 +143,9 @@ class BarGraph extends XYGraph {
       stack: this.stack,
       otherOptions,
       stackSequence,
-    })
-
+      isSort
+    });
+  
     // check condition to apply brush on chart
     this.isBrushable(this.nestedData)
   }
@@ -153,45 +160,6 @@ class BarGraph extends XYGraph {
 
   getStack() {
     return this.stack
-  }
-
-  updateLegend(props) {
-    const {
-      data
-    } = props
-
-    const {
-      chartHeightToPixel,
-      chartWidthToPixel,
-      circleToPixel,
-      legend: originalLegend
-    } = this.getConfiguredProperties()
-    
-
-    const legendWidth = this.longestLabelLength(data, this.getStackLabelFn()) * chartWidthToPixel    
-
-    let legend = Object.assign({}, originalLegend)
-    
-    if (legend.show) {
-      legend.width = legendWidth
-
-      // Compute the available space considering a legend
-      if (this.checkIsVerticalLegend()) {
-        this.leftMargin += legend.width
-        this.availableWidth -= legend.width
-      }
-      else {
-        const nbElementsPerLine = parseInt(this.availableWidth / legend.width, 10)
-        const nbLines = parseInt(data.length / nbElementsPerLine, 10)
-        this.availableHeight -= nbLines * legend.circleSize * circleToPixel + chartHeightToPixel
-      }
-
-      this.legendConfig = legend
-    }
-  }
-
-  getLegendConfig() {
-    return this.legendConfig
   }
 
   // calculate range and make starting point from zero
@@ -273,10 +241,13 @@ class BarGraph extends XYGraph {
       yLabelLimit,
       xLabelLimit,
       xLabelRotate,
-      xTickFontSize
+      xTickFontSize,
+      margin
     } = this.getConfiguredProperties()
 
-    const svg =  this.getGraph()
+    const svg =  this.getGraph();
+    svg.attr('transform', `translate(${this.getLeftMargin()},${margin.top})`)
+
 
     // set nested bar colors
     this.setColor()
@@ -313,7 +284,6 @@ class BarGraph extends XYGraph {
     } 
 
     this.setAxisTitles()
-    this.renderLegendIfNeeded()
 
     if(this.isBrush()) {
       this.configureMinGraph()
@@ -362,19 +332,6 @@ class BarGraph extends XYGraph {
 
   getBarWidth() {
     return this.barWidth
-  }
- 
-  renderLegendIfNeeded() {
-    const {
-      data
-    } = this.props;
-
-    const {
-      stackColumn
-    } = this.getConfiguredProperties();
-
-    const filterData = (stackColumn && _.uniqBy(data, stackColumn)) || data;
-    this.renderNewLegend(filterData, this.getLegendConfig(), this.getColor(), this.getStackLabelFn())
   }
 
   getBarDimensions(scale) {
@@ -513,6 +470,14 @@ class BarGraph extends XYGraph {
     }
   }
 
+  getStartIndex() {
+    return this.startIndex;    
+  }
+
+  getEndIndex() {
+    return this.endIndex;
+  }
+
   configureMinGraph() {
     const {
       data
@@ -555,7 +520,7 @@ class BarGraph extends XYGraph {
       brushXY = d3.brushX()
         .extent([[0, 0], [this.getAvailableWidth(), this.getAvailableMinHeight()]])
 
-      range = [0, (this.getAvailableWidth()/this.getNestedData().length) * brush]
+      range = [this.getStartIndex(), this.getEndIndex() || (this.getAvailableWidth()/this.getNestedData().length) * brush]
 
     } else {
 
@@ -575,7 +540,7 @@ class BarGraph extends XYGraph {
       minScale.x.range([0, this.getAvailableMinWidth()])
       minScale.y.range([this.getAvailableHeight(), 0])
 
-      range = [0, (this.getAvailableHeight()/this.getNestedData().length) * brush]
+      range = [this.getStartIndex(), this.getEndIndex() || (this.getAvailableHeight()/this.getNestedData().length) * brush]
 
       brushXY = d3.brushY()
         .extent([[0, 0], [this.getAvailableMinWidth(), this.getAvailableHeight()]])
@@ -587,6 +552,9 @@ class BarGraph extends XYGraph {
           originalRange = mainZoom.range()
 
         let [start, end] = d3.event.selection || range;
+
+        this.startIndex = start;
+        this.endIndex = end;
 
         if(this.isVertical()) {
           mainZoom.domain([start, end]);
@@ -635,39 +603,60 @@ class BarGraph extends XYGraph {
       return this.renderMessage('No data to visualize')
 
     const {
-      margin
-    } = this.getConfiguredProperties()
+      margin,
+      legend,
+      stackColumn
+    } = this.getConfiguredProperties();
+
+    const filterData = (stackColumn && uniqBy(data, stackColumn)) || data;
+
+    {this.setColor()}
+
+    const {
+      graphHeight,
+      graphWidth,
+    } = this.getGraphDimension(this.getStackLabelFn());
+
+    const graphStyle = {
+      width: graphWidth,
+      height: graphHeight,
+      order:this.checkIsVerticalLegend() ? 2 : 1,
+    };
 
     return (
       <div className='dynamic-bar-graph'>
         <div>{this.tooltip}</div>
-        <svg width={width} height={height}>
-          <g ref={node => this.node = node}>
-            <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+        <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
+          {this.renderLegend(filterData, legend, this.getColor(), this.getStackLabelFn(), this.checkIsVerticalLegend())}
+          <div className='graphContainer' style={ graphStyle }>
+            <svg width={graphWidth} height={graphHeight}>
+              <g ref={node => this.node = node}>
+                <g className='graph-container' transform={`translate(${this.getLeftMargin()},${margin.top})`}>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='graph-bars'></g>
+                </g>
+                <g className='mini-graph-container'>
+                  <g className='min-horizontal-line'>
+                    <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
+                  </g>
+                  <g className='min-graph-bars'></g>
+                  <g className='xAxis'></g>
+                  <g className='yAxis'></g>
+                  <g className='brush'></g>
+                </g>
+                <g className='axis-title'>
+                  <text className='x-axis-label' textAnchor="middle"></text>
+                  <text className='y-axis-label' textAnchor="middle"></text>
+                </g>
               </g>
-              <g className='graph-bars'></g>
-            </g>
-            <g className='mini-graph-container'>
-              <g className='min-horizontal-line'>
-                <line className='line' style={{stroke: 'black', strokeWidth: '0.4'}}></line>
-              </g>
-              <g className='min-graph-bars'></g>
-              <g className='xAxis'></g>
-              <g className='yAxis'></g>
-              <g className='brush'></g>
-            </g>
-            <g className='axis-title'>
-              <text className='x-axis-label' textAnchor="middle"></text>
-              <text className='y-axis-label' textAnchor="middle"></text>
-            </g>
-            <g className='legend'></g>
-          </g>
-        </svg>
-      </div>
+            </svg>
+          </div>  
+        </div>
+      </div>  
     )
   }
 }

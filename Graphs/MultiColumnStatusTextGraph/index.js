@@ -23,12 +23,12 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
     }
 
     renderRow = ({data, column, text, color, fontColor, inline, key}) => (
-        <div key={key} style={inline ? {padding: '10px'} : {display: "block", marginTop: '5%'}}>
+        <div key={key} style={inline ? {} : {display: "block", marginTop: '2%'}}>
             <div style={{width: "25%", display: "inline-block"}}>
                 <div style={{
                     borderRadius: "100%",
-                    height: "1.8em",
-                    width: "1.8em",
+                    height: "2.9em",
+                    width: "2.9em",
                     textAlign: "center",
                     background: color,
                     display: "inline-block",
@@ -37,7 +37,7 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                 }}
                 >
                     <div style={{
-                        marginTop: "0.32em",
+                        marginTop: "27%",
                         fontSize: "1em",
                         color: fontColor,
                     }}>
@@ -48,8 +48,8 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
 
             <span style={{
                 display: "inline-block",
-                verticalAlign: "middle",
-                textAlign: "left",
+                verticalAlign: "right",
+                textAlign: "center",
                 width: "75%"}}>
                 {text}
             </span>

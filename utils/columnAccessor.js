@@ -1,10 +1,14 @@
 import { format, timeFormat } from "d3";
+import moment from 'moment';
+import momentDuration from 'moment-duration-format';
+
+momentDuration(moment);
 
 const d3 = { format, timeFormat };
 
 // Compute accessor functions that apply number and date formatters.
 // Useful for presenting numbers in tables or tooltips.
-const columnAccessor = ({ column, format, timeFormat, totalCharacters }) => {
+const columnAccessor = ({ column, format, timeFormat, totalCharacters, duration }) => {
 
     // Generate the accessor for nested values (e.g. "foo.bar").
     const keys = column.split(".");
@@ -26,7 +30,7 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters }) => {
     } else if (timeFormat) {
         const formatter = d3.timeFormat(timeFormat);
         return (d) => {
-            let data = value(d)
+            let data = Number(value(d));
             if (Array.isArray(data)) {
                 return data.map(e => formatter(new Date(value(e)))).join(', ')
             } else {
@@ -45,8 +49,10 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters }) => {
                         : parsedData
                 )
         }
+    } else if (duration) {
+        return (d) => moment.duration(value(d)).format(duration);
     } else {
-        return value
+        return value;
     }
 };
 

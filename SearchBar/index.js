@@ -1,13 +1,13 @@
 import  React from 'react';
 import "react-filter-box/lib/react-filter-box.css";
-import _ from 'lodash'
+import isEqual from 'lodash/isEqual'
 import ReactFilterBox from "react-filter-box";
 
 import "./index.css";
 import AutoCompleteHandler from './AutoCompleteHandler';
 import AdvancedResultProcessing from './AdvancedResultProcessing';
 
-import { FaRegSmile as SmileUp, FaRegFrown as SmileDown } from 'react-icons/fa';
+import { FaRegSmile as SmileUp, FaRegFrown as SmileDown, FaSearch as SearchIcon } from 'react-icons/fa';
 
 export default class SearchBar extends React.Component {
     constructor(props) {
@@ -16,7 +16,7 @@ export default class SearchBar extends React.Component {
         this.state = {
             data: [],
             isOk: true,
-            query: (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : ''
+            query: (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '',
         }
 
         const {
@@ -31,6 +31,8 @@ export default class SearchBar extends React.Component {
         this.setTimeout = null;
         this.expressions = null;
         this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
+        this.finalExpression = null;
+        this.searchWidth = this.props.cardWidth;
     }
 
     componentDidMount () {
@@ -42,8 +44,12 @@ export default class SearchBar extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return !_.isEqual(nextProps.data, this.props.data)
-            || !_.isEqual(nextState, this.state)
+        if (!isEqual(nextProps.data, this.props.data) || !isEqual(nextState, this.state) || !isEqual(nextProps.cardWidth, this.props.cardWidth)) {
+            this.searchWidth = nextProps.cardWidth;
+            return true;
+        }
+
+        return false;
     }
 
     componentDidUpdate () {
@@ -57,6 +63,9 @@ export default class SearchBar extends React.Component {
     onChange (query, result) {
         if(!result.isError) {
             this.query = query;
+            this.finalExpression = result;
+        } else {
+            clearTimeout(this.setTimeout);
         }
 
         this.setState({
@@ -67,24 +76,31 @@ export default class SearchBar extends React.Component {
 
     onParseOk(expressions) {
         const {
+            autoSearch,
+        } = this.props;
+
+        if (autoSearch !== false) {
+            clearTimeout(this.setTimeout);
+            this.setTimeout = setTimeout(() => this.processQuery(expressions), 1000);
+        }
+    }
+
+    processQuery(expressions) {
+        const {
             options,
             data,
             scroll,
-            columns = false
+            columns = false,
         } = this.props;
 
-        if (!_.isEqual(this.expressions, expressions)) {
+        if (!isEqual(this.expressions, expressions)) {
             this.expressions = expressions;
-            clearTimeout(this.setTimeout);
-
-            this.setTimeout = setTimeout(() => {
-                if (scroll) {
-                    this.props.handleSearch(data, this.state.isOk, expressions, this.query)
-                } else {
-                    const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
-                    this.props.handleSearch(filteredData, this.state.isOk)
-                }
-            }, 1000);
+            if (scroll) {
+                this.props.handleSearch(data, this.state.isOk, expressions, this.query)
+            } else {
+                const filteredData = new AdvancedResultProcessing(options, columns).process(data, expressions)
+                this.props.handleSearch(filteredData, this.state.isOk)
+            }
         }
     }
 
@@ -105,28 +121,36 @@ export default class SearchBar extends React.Component {
 
         const {
             options,
-            data
-        } = this.props
+            data,
+            autoSearch,
+            columnOption,
+        } = this.props;
 
         return (
-            <div style={{display: "flex", margin: "5px"}}>
+            <div style={{ display: "flex", maxWidth: (columnOption ? this.searchWidth - 70 : this.searchWidth), margin: "6px 5px 5px 6px"}}>
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
                 <div className="filter search">
-                    <ReactFilterBox
-                        ref="filterBox"
-                        data={data}
-                        onChange={this.onChange}
-                        autoCompleteHandler={this.autoCompleteHandler}
-                        query={query}
-                        options={options}
-                        onParseOk={this.onParseOk}
-                    />
+                        <ReactFilterBox
+                            ref="filterBox"
+                            data={data}
+                            onChange={this.onChange}
+                            autoCompleteHandler={this.autoCompleteHandler}
+                            query={query}
+                            options={options}
+                            onParseOk={this.onParseOk}
+                        /> 
                     <div className="filter-icon">
                         { this.renderIcon() }
                     </div>
                 </div>
+                {
+                    autoSearch === false &&
+                    <div style={{marginTop: "10px"}}>
+                        <SearchIcon size={18} style={{cursor: 'hand'}} onClick={() => this.processQuery(this.finalExpression)}/>
+                    </div>
+                }
             </div>
         )
     }

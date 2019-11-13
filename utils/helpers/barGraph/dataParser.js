@@ -1,5 +1,6 @@
 
-import { nest, nestStack, nestMinMaxSum, limit } from '../../helpers'
+import { limit } from '../../helpers/limit';
+import { nest, nestStack, nestMinMaxSum } from '../../helpers/nest';
 
 export default ({
   data,
@@ -7,9 +8,10 @@ export default ({
   metric,
   stack,
   otherOptions,
-  stackSequence = null
+  stackSequence = null,
+  isSort
     }) => {
-
+      
   return nestStack({
     data: limit({
       data: nestMinMaxSum({
@@ -17,7 +19,8 @@ export default ({
           data,
           key: dimension,
           sortColumn: stack,
-          sequence: stackSequence
+          sequence: stackSequence,
+          isSort
         }),
         stackColumn: metric
       }),
@@ -32,7 +35,8 @@ export default ({
         ]
       }
         , otherOptions || {}
-      )
+      ),
+      isSort
     }),
     stackColumn: metric
   })

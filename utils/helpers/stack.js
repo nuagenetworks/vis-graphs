@@ -17,11 +17,11 @@ return data.map((d, i) => {
 
   if(d[column] < 0) {
     y0 = negativeSum < 0 ? negativeSum : 0
-    negativeSum -= -(d[column]) - (i === 0 ? 1 : 0)
+    negativeSum -= -(d[column])
     isNegative = true
   } else {
     y0 = sum
-    sum += +(d[column]) - (i === 0 ? 1 : 0)
+    sum += +(d[column])
   }
 
   return Object.assign({}, d, {

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
+import isEqual from 'lodash/isEqual';
 
 import AbstractGraph from "../AbstractGraph";
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
@@ -7,7 +8,10 @@ import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 import style from "./styles"
 import {properties} from "./default.config"
 import { format, timeFormat } from "d3";
+import { pick } from '../../utils/helpers';
+
 const d3 = { format, timeFormat };
+const FILTER_KEY = ['data', 'height', 'width', 'context'];
 
 /*
     This graph will present the variation between 2 values:
@@ -24,6 +28,12 @@ export class VariationTextGraph extends AbstractGraph {
             values: null
         }
         this.initialize();
+    }
+
+    componentDidUpdate (prevProps) {
+        if (!isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
+            this.initialize();
+        }
     }
 
     initialize() {
@@ -83,8 +93,8 @@ export class VariationTextGraph extends AbstractGraph {
         if (!data || !target)
             return;
 
-        let lastInfo,
-            previousInfo;
+        let lastInfo = {},
+            previousInfo = {};
 
         data.forEach((d) => {
             if (d[target.column] === target.value)
@@ -135,6 +145,7 @@ export class VariationTextGraph extends AbstractGraph {
 
         const {
             absolute,
+            showVariation
         } = this.getConfiguredProperties();
 
         const {
@@ -143,21 +154,21 @@ export class VariationTextGraph extends AbstractGraph {
 
         const lastValue = this.getFormattedValue(this.settings.values.lastValue);
         const previousValue = this.getFormattedValue(this.settings.values.previousValue);
-        const info = !absolute ? lastValue : (lastValue/previousValue);
+        const info = !absolute ? lastValue : `${lastValue} / ${previousValue}`;
 
         let fullScreenFont = context && context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
         return (
 
             <div style={{height: "100%"}}>
-                <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
+                {showVariation && <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
                     <div style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}>
                         <div style={Object.assign({}, style.labelText, fullScreenFont)}>
                             { this.renderIcon(this.settings.icon) } <br/>
                             {`${this.decimals(this.settings.values.variation)}%`}
                         </div>
                     </div>
-                </span>
-                <span style={Object.assign({}, style.infoBoxText, fullScreenFont)}>
+                </span>}
+                <span style={Object.assign({}, showVariation ? style.infoBoxText : style.infoBoxTextNoVariation, fullScreenFont)}>
                     <span style={{ color: this.settings.colors.content, margin:"auto" }}>
                         { info || info === 0 ? info : 'NaN'}
                     </span>

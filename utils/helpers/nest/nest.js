@@ -3,19 +3,22 @@
  */
 
 import { nest, ascending } from "d3";
-import { sorter } from "../"
+import sorter from "../sorter";
 
 export default ({
     data,
     key,
     sortColumn = null,
     sortOrder = null,
-    sequence = null
+    sequence = null,
+    isSort
   }) => {
 
-  return nest()
-    .key(function (d) { return d[key] }).sortKeys(ascending)
-    .sortValues(sortColumn
+  const keyList = isSort === false ? nest().key(function (d) { return d[key] }) 
+  : nest().key(function (d) { return d[key] }).sortKeys(ascending);
+
+  return keyList
+    .sortValues(sortColumn && isSort !== false
       ? sorter({
         column: sortColumn,
         order: sortOrder,
@@ -23,5 +26,4 @@ export default ({
       })
       : null)
     .entries(data)
-
 }

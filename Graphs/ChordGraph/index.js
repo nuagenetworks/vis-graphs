@@ -8,15 +8,26 @@ import * as d3 from "d3";
 
 import "./style.css";
 import {properties} from "./default.config"
+import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
+import pick from 'lodash/pick';
 
 const MAX_LABEL_LENGTH = 15;
+
+const renderTooltipContent = (from, to, value, accessor, label) => (
+    <div>
+        <strong>{`${from} to ${to}:`}</strong>
+        <span> {accessor({value})}</span>
+        {label ? <span> {label}</span>:null}
+    </div>
+);
 
 export default class ChordGraph extends AbstractGraph {
     chordDiagram = null;
 
     constructor(props) {
         super(props, properties);
-        this.filterData = []
+        this.state = {filterData: []}
     }
 
     componentDidMount() {
@@ -36,7 +47,7 @@ export default class ChordGraph extends AbstractGraph {
       if(!this.chordDiagram) {
         this.chordDiagram = ChordDiagram(this.svg);
 
-        const { tooltip } = this.getConfiguredProperties();
+        const { tooltip, bidirectionalTooltip } = this.getConfiguredProperties();
 
         const { accessor, label } = (
             (tooltip && tooltip.length === 1)
@@ -58,16 +69,8 @@ export default class ChordGraph extends AbstractGraph {
 
                 return (
                     <React.Fragment>
-                        <div>
-                            <strong>{`${destination} to ${source}:`}</strong>
-                            <span> {accessor({ value: sourceValue})}</span>
-                            { label ? <span> {label}</span>:null }
-                        </div>
-                        <div>
-                            <strong>{`${source} to ${destination}:`}</strong>
-                            <span> {accessor({ value: destinationValue})}</span>
-                            { label ? <span> {label}</span>:null }
-                        </div>
+                        {renderTooltipContent(destination, source, sourceValue, accessor, label)}
+                        {bidirectionalTooltip && renderTooltipContent(source, destination, destinationValue, accessor, label)}
                     </React.Fragment>
                 );
             } else {
@@ -87,7 +90,10 @@ export default class ChordGraph extends AbstractGraph {
         chordDestinationColumn
       } = this.getConfiguredProperties();
 
-      this.filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
+        const filterData = data.filter( d => d[chordSourceColumn] && d[chordDestinationColumn])
+        if (!isEqual(filterData, this.state.filterData)) {
+            this.setState({filterData});
+        }
     }
 
     getLabelLength() {
@@ -97,7 +103,7 @@ export default class ChordGraph extends AbstractGraph {
         outerPadding
       } = this.getConfiguredProperties();
 
-      let lableLength = this.longestLabelLength(this.filterData, (d) => d[chordSourceColumn]);
+      let lableLength = this.longestLabelLength(this.state.filterData, (d) => d[chordSourceColumn]);
 
       if(lableLength && lableLength > MAX_LABEL_LENGTH) {
         lableLength = MAX_LABEL_LENGTH;
@@ -113,7 +119,7 @@ export default class ChordGraph extends AbstractGraph {
           onMarkClick
         } = props;
 
-        if(!this.filterData || !this.filterData.length || !this.chordDiagram)
+        if(!this.state.filterData || !this.state.filterData.length || !this.chordDiagram)
           return
 
         const {
@@ -126,14 +132,15 @@ export default class ChordGraph extends AbstractGraph {
             transitionDuration,
             defaultOpacity,
             fadedOpacity,
-            colors
+            colors,
+            additionalKeys
         } = this.getConfiguredProperties();
 
         const outerPadding = this.getLabelLength();
 
         // Pass values into the chord diagram via d3-style accessors.
         this.chordDiagram
-            .data(this.filterData)
+            .data(this.state.filterData)
             .width(width)
             .height(height)
             .chordWeightColumn(chordWeightColumn)
@@ -149,21 +156,26 @@ export default class ChordGraph extends AbstractGraph {
             .colors(colors);
 
         if(onMarkClick){
-            this.chordDiagram.onSelectedRibbonChange((d) => {
-                const selectedRibbon = this.chordDiagram.selectedRibbon();
-                if(selectedRibbon) {
-                    const { source, destination } = selectedRibbon;
-                    onMarkClick({
-                        [chordSourceColumn]: source,
-                        [chordDestinationColumn]: destination
-                    });
-                } else {
-                    onMarkClick({
-                        [chordSourceColumn]: undefined,
-                        [chordDestinationColumn]: undefined
-                    });
-                }
-            });
+          this.chordDiagram.onSelectedRibbonChange((d) => {
+            const selectedRibbon = this.chordDiagram.selectedRibbon();
+            if (selectedRibbon) {
+              const { source, destination, data } = selectedRibbon;
+              let finalData = [];
+              if (additionalKeys) {
+                finalData = data.map((d) => pick(d, additionalKeys));
+              }
+              onMarkClick({
+                [chordSourceColumn]: source,
+                [chordDestinationColumn]: destination,
+                additionalData: uniq(finalData)
+              });
+            } else {
+              onMarkClick({
+                [chordSourceColumn]: undefined,
+                [chordDestinationColumn]: undefined
+              });
+            }
+          });
         } else {
             this.chordDiagram.onSelectedRibbonChange(null);
         }
@@ -176,8 +188,12 @@ export default class ChordGraph extends AbstractGraph {
 
         const { data, width, height } = this.props;
 
-        if (!data || !data.length || !this.filterData.length)
+        if (!data || !data.length || !this.state.filterData.length) {
+            // need to make sure that svg is not stale in the chord diagram function since it gets unmounted here
+            this.svg = null;
+            this.chordDiagram = null;
             return this.renderMessage('No data to visualize')
+        }
 
         return (
             <div className="chord-graph">
@@ -344,7 +360,8 @@ function ChordDiagram(svg){
           source: matrix.names[d.source.index],
           destination: matrix.names[d.target.index],
           sourceValue: d.source.value,
-          destinationValue: d.target.value
+          destinationValue: d.target.value,
+          data: [...matrix.data[d.source.index][d.target.index], ...matrix.data[d.target.index][d.source.index]]
         };
       }
 
@@ -489,6 +506,7 @@ function ChordDiagram(svg){
     var indices = {},
         matrix = [],
         names = [],
+        matrixData = [],
         n = 0, i, j;
 
     function recordIndex(name){
@@ -505,8 +523,10 @@ function ChordDiagram(svg){
 
     for(i = 0; i < n; i++){
       matrix.push([]);
+      matrixData.push([]);
       for(j = 0; j < n; j++){
         matrix[i].push(0);
+        matrixData[i].push([]);
       }
     }
 
@@ -515,16 +535,18 @@ function ChordDiagram(svg){
       j = indices[destination(d)];
 
       if(chordWeightColumn){
-        matrix[j][i] = weight(d);
+          matrix[j][i] += weight(d);
       } else {
 
         // Handle the case where no weight column was specified
         // by making the chord weight fixed on both sides.
         matrix[j][i] = matrix[i][j] = 1;
       }
+      matrixData[j][i].push(d);
     });
 
     matrix.names = names;
+    matrix.data = matrixData;
 
     return matrix;
   }

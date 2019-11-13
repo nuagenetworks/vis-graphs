@@ -8,15 +8,6 @@ export const properties = {
     legend: {
         show: false
     },
-    colors: [
-        theme.palette.orangeLightColor,
-        theme.palette.blueLightColor,
-        theme.palette.pinkLightColor,
-        theme.palette.orangeLighterColor,
-        theme.palette.greenColor,
-        theme.palette.yellowLightColor,
-        theme.palette.yellowDarkColor,
-    ],
     zeroStart: true,
     circleRadius: 5,
     defaultYColor: theme.palette.greenColor,

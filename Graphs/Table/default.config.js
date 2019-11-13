@@ -4,14 +4,13 @@ export const properties = {
     width: "100%",
     padding: 5,
     limit: 100,
-
+    fixedHeader: true,
     selectable: true,
     multiSelectable: false,
     showCheckboxes: false,
     enableSelectAll: true,
-
+    headerPadding: 10,
     rowHeight: 40,
-    colors: [theme.palette.greyLighterColor, theme.palette.whiteColor],
     fontColor: theme.palette.blackLightColor,
     highlightColor: theme.palette.greenLighterColor,
     border: {
@@ -28,5 +27,8 @@ export const properties = {
             right: "0",
             bottom: "solid 2px " + theme.palette.greyLightColor,
         }
+    },
+    tableStyle: {
+        tableLayout: "auto"
     }
 }
