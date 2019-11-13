@@ -1,7 +1,7 @@
 /**
  * Stacking of Nested Groups and calculating of overall sum
  */
-import { reducerSum } from "../reducers";
+import { reducerSum } from "../"
 
 export default ({
     data, 

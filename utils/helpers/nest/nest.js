@@ -3,7 +3,7 @@
  */
 
 import { nest, ascending } from "d3";
-import sorter from "../sorter";
+import { sorter } from "../"
 
 export default ({
     data,

@@ -4,8 +4,7 @@ import isEqual from 'lodash/isEqual';
 import XYGraph from '../XYGraph'
 import ReactTooltip from 'react-tooltip'
 
-import { merge, sorter, pick } from "../../utils/helpers";
-import {nest, nestStack} from "../../utils/helpers/nest";
+import { nest, nestStack, merge, sorter, pick } from "../../utils/helpers"
 
 import {
     line,

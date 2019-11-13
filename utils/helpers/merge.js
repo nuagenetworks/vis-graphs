@@ -2,7 +2,7 @@
  * This will merge the array of Objects
  * 
  */
-import { reducerSumByKeys } from "./reducers";
+import { reducerSumByKeys } from "./"
 
 export default ({
     data,
