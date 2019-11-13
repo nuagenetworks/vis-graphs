@@ -128,6 +128,10 @@ export default class AbstractGraph extends React.Component {
             yTicksLabel = {};
         }
 
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
+
         return (
             /* Display each tooltip column as "label : value". */
             tooltip.map(({ column, label }, i) => {
