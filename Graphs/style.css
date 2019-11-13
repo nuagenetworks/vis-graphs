@@ -51,10 +51,9 @@ stroke-dasharray: 2,2;
 }
 
 .legendContainer {
-  overflow: hidden;
+  overflow: auto;
   box-sizing: border-box;
   white-space: nowrap;
-  padding: 5px;
 }
 
 .graphContainer {
