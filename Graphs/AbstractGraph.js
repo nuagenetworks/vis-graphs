@@ -125,28 +125,28 @@ export default class AbstractGraph extends React.Component {
             yTicksLabel = {};
         }
 
-        return (
-            <React.Fragment>
-                {/* Display each tooltip column as "label : value". */}
-                {tooltip.map(({ column, label }, i) => {
-                    let data = accessors[i](this.hoveredDatum);
-                    if (typeof data  === 'boolean') {
-                        data = data.toString();
-                    }
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
 
-                    return (data || data === 0) ?
-                        (<div key={column}>
-                            <strong>
-                                {/* Use label if present, fall back to column name. */}
-                                {label || column}
-                            </strong> : <span>
-                                {/* Apply number and date formatting to the value. */}
-                                { yTicksLabel[data] || data }
-                            </span>
-                        </div>
-                        ) : null
-                })}
-            </React.Fragment>
+        return (
+            /* Display each tooltip column as "label : value". */
+            tooltip.map(({ column, label }, i) => {
+                let data = accessors[i](this.hoveredDatum)
+
+                return (data !== null && data !== 'undefined') ?
+                    (<div key={column}>
+                        <strong>
+                            {/* Use label if present, fall back to column name. */}
+                            {label || column}
+                        </strong> : <span>
+                            {/* Apply number and date formatting to the value. */}
+                            { yTicksLabel[data] || data }
+                        </span>
+                    </div>
+                    ) : null
+            })
+
         )
     }
 
