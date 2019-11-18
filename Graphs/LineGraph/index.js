@@ -110,7 +110,7 @@ class LineGraph extends XYGraph {
 
         let range = [this.getStartIndex(), this.getEndIndex() || this.availableWidth];
         const brush = d3.brushX()
-        .extent([[0, 0], [this.availableWidth, 1.25 * this.availableMinHeight]])
+        .extent([[0, 0], [this.availableWidth, this.availableMinHeight]])
         .on("brush end", () => {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
             this.linesData.map((d, i) => {
@@ -119,7 +119,7 @@ class LineGraph extends XYGraph {
                 this.startIndex = start;
                 this.endIndex = end;
                 this.scaleX.domain(lineScale.map(this.miniGraphXScale.invert, this.miniGraphXScale));
-                line.select('.line').select("path").attr("d", this.lineGenerator(d.values));
+                line.select('.line').select(`.${d.key}`).attr("d", this.lineGenerator(d.values));
                 line.select('.axis--x').call(this.xAxis).selectAll('.tick text')
                     .style('font-size', xTickFontSize)
                     .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
@@ -461,7 +461,7 @@ class LineGraph extends XYGraph {
 
         let xTitlePosition = {
             left: leftMargin + availableWidth / 2,
-            top: brushEnabled ? xTitlePostionTop + 4 * this.getXAxisHeight() : xTitlePostionTop
+            top: brushEnabled ? xTitlePostionTop + this.availableMinHeight + chartHeightToPixel*1.25 + xAxisHeight : xTitlePostionTop
         }
 
         let yTitlePosition = {
@@ -549,10 +549,9 @@ class LineGraph extends XYGraph {
                 margin
             } = this.getConfiguredProperties();
     
-            return this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight();
+            return this.availableHeight + (margin.top * 2.5) + chartHeightToPixel + this.getXAxisHeight();
         }
         
-
         return (
             <div className="line-graph">
                 <div>{this.tooltip}</div>
@@ -587,6 +586,7 @@ class LineGraph extends XYGraph {
                                         :
                                         <path
                                             key={ d.key }
+                                            className={ d.key }
                                             fill="none"
                                             stroke={ getColor(d.values[0] || d) }
                                             strokeWidth={ stroke.width }
@@ -645,14 +645,14 @@ class LineGraph extends XYGraph {
 
                                         />
                                     )}
-                                    <g className='axis axis--x'
+                                    <g className='axis'
                                         key="xAxis"
                                         ref={ (el) => select(el).call(miniGraphXAxis)
                                             .selectAll('.tick text')
                                             .style('font-size', xTickFontSize)
                                             .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
                                         }
-                                        transform={ `translate(0,${chartHeightToPixel + this.getXAxisHeight()})` }
+                                        transform={ `translate(0,${this.availableMinHeight})` }
                                     />
                                    <g className='brush'></g>
                                 </g>}  
