@@ -28,25 +28,18 @@ export default class InfoBox extends React.Component {
     const { modalIsOpen } = this.state;
 
     return (
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={onInfoBoxClose}
-        style={style.modal}
-      >
-        <React.Fragment>
-          <div style={style.container}>
-            {children}
-          </div>
-          <div style={style.footer}>
-            <RaisedButton
-              label="Close"
-              backgroundColor={style.button.background}
-              labelColor={style.button.label}
-              onClick={onInfoBoxClose}
-            />
-          </div>
-        </React.Fragment>
-      </Modal>
+        <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={onInfoBoxClose}
+            style={style.modal}
+        >
+          <React.Fragment>
+            <div style={{float: 'right', fontSize: '28px',fontWeight: 'bold', marginRight: '5px', cursor: 'pointer'}} onClick={onInfoBoxClose}>&times;</div>
+            <div style={style.container}>
+              {children}
+            </div>
+          </React.Fragment>
+        </Modal>
     );
   }
 }
