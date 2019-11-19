@@ -311,6 +311,27 @@ E.g -
     "isSort": false
 ```
 
+## *GroupBarGraph*
+Display group bar graph
+>[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/groupBarGraph)
+
+[![Screenshot from Gyazo](https://gyazo.com/008f658e0852ba53c0f5c468df5ff9e7/raw)](https://gyazo.com/008f658e0852ba53c0f5c468df5ff9e7)
+
+__groupedKeys__ (array) - Define an array of keys which are used to form a group of bars. E.g - 
+
+```javascript 
+    "groupedKeys": [
+        "Under 5 Years",
+        "5 to 13 Years",
+        "14 to 17 Years",
+        "18 to 24 Years",
+        "25 to 44 Years",
+        "45 to 64 Years",
+        "65 Years and Over"
+    ]
+```
+**Note:** - Rest properties can import from dynamic bar graph to build group bar graph.
+
 ## *LineGraph*
 Display one or multiple lines
 >[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/lineGraph)
