@@ -114,6 +114,7 @@ class LineGraph extends XYGraph {
         .on("brush end", () => {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
             this.linesData.map((d, i) => {
+                d.key = d.key || `line${i}`;
                 const lineScale = d3.event.selection || range;
                 let [start, end] = lineScale;
                 this.startIndex = start;
@@ -586,7 +587,7 @@ class LineGraph extends XYGraph {
                                         :
                                         <path
                                             key={ d.key }
-                                            className={ d.key }
+                                            className={ d.key || `line${i}`}
                                             fill="none"
                                             stroke={ getColor(d.values[0] || d) }
                                             strokeWidth={ stroke.width }
