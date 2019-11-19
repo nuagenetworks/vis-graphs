@@ -9,6 +9,7 @@ import { properties } from './default.config';
 import styles from './styles';
 import evalExpression from 'eval-expression';
 import { getIconPath, pick } from '../../utils/helpers';
+import InfoBox from "../../InfoBox";
 
 const PROPS_FILTER_KEY = ['data', 'context', 'data2', 'height', 'width'];
 class PortGraph extends XYGraph {
@@ -20,13 +21,14 @@ class PortGraph extends XYGraph {
         this.state = {
             portAreaWidth: 100,
             rowCount: 0,
+            openModal: false
         }
     }
 
     componentDidMount() {
         this.initiate(this.props);
     }
-    
+
     componentDidUpdate(prevProps) {
         if (!isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
             this.initiate(this.props);
@@ -37,6 +39,22 @@ class PortGraph extends XYGraph {
         this.checkMultipleRows(props);
         this.setPortAreaWidth(props);
         this.setRowCount(props);
+        this.getTooltipContent = () => {
+            if(this.hoveredDatum) {
+                const { tooltipScript }  = this.getConfiguredProperties();
+                if (tooltipScript) {
+                    const Scripts = require('@/scripts');
+                    const TooltipComponent = Scripts[tooltipScript];
+                    return (
+                        <TooltipComponent data={this.hoveredDatum} data2={props.data2} {...this.getConfiguredProperties()}/>
+                    )
+                }
+                let type = this.hoveredDatum.tooltipName || 'default'
+                return this.tooltipContent({ tooltip: this.tooltips[type], accessors: this.accessors[type] })
+            } else {
+                return <div>Hover over a port icon to see details.</div>;
+            }
+        }
     }
 
 
@@ -61,7 +79,7 @@ class PortGraph extends XYGraph {
         this.setState({ portAreaWidth: portWidth < minPortWidth ? minPortWidth : portWidth });
     }
 
-    // calculate length of the row to show number of ports in each row. 
+    // calculate length of the row to show number of ports in each row.
     setRowCount(props) {
         const { data } = props;
         const { rowLimit } = this.getConfiguredProperties();
@@ -86,7 +104,7 @@ class PortGraph extends XYGraph {
                 }
             }
             catch (e) {
-               console.error(`Failed to evaluate getColor function`, e);
+                console.error(`Failed to evaluate getColor function`, e);
             }
         }
         if (portColor && typeof portColor === 'object' && portColor.field) {
@@ -144,6 +162,43 @@ class PortGraph extends XYGraph {
         return chunk(data, rowLimit);
     }
 
+    onInfoBoxCloseHandler = () => {
+        this.setState({
+            openModal: false,
+        });
+    }
+
+    openInfoBox = (data) => ev => {
+        ev.stopPropagation();
+        this.setState({
+            infoBoxData: data,
+            infoBoxScript: null,
+            openModal: true
+        })
+    }
+
+    renderInfoBox() {
+        const {
+            data2
+        } = this.props;
+
+        let { openModal, infoBoxData  } = this.state;
+        const { tooltipScript }  = this.getConfiguredProperties();
+        if (!tooltipScript) {
+            return;
+        }
+        const Scripts = require('@/scripts');
+        const TooltipComponent = Scripts[tooltipScript];
+        return (
+            openModal &&
+            <InfoBox
+                onInfoBoxClose={this.onInfoBoxCloseHandler}
+            >
+                <TooltipComponent data={infoBoxData} data2={data2} {...this.getConfiguredProperties()}/>
+            </InfoBox>
+        )
+    }
+
     renderGraph() {
         const {
             topColumn,
@@ -158,6 +213,7 @@ class PortGraph extends XYGraph {
                 ...styles.iconContainer,
                 justifyContent: nextRow ? 'flex-start' : 'space-between',
             }}>
+                { this.renderInfoBox()}
                 {
                     portRowset.map((portRow, index) => {
                         return (
@@ -174,6 +230,7 @@ class PortGraph extends XYGraph {
                                                     ...styles.portBox,
                                                     minWidth: this.state.portAreaWidth,
                                                 }}
+                                                onClick={this.openInfoBox(data)}
                                             >
                                                 {this.getPortAttribute(data, topColumn)}
                                                 <div style={{ borderRight: (i % rowCount) < (rowCount - 1) ? styles.borderRight : '' }}>
