@@ -152,7 +152,10 @@ class Table extends AbstractGraph {
                 for (let key in d.displayOption) {
                     if (context.hasOwnProperty(key)) {
                         removedColumnsKey = context[key];
-                        if (context[key] === d.displayOption[key]) {
+                        const keyValue = d.displayOption[key];
+                        const contextKeyValue = context[key];
+                        if ((typeof keyValue === 'string' && contextKeyValue === keyValue) ||
+                            (Array.isArray(keyValue) && keyValue.includes(contextKeyValue))) {
                             filterColumns.push(d.column);
                         }
                     }
