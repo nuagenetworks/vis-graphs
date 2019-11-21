@@ -911,12 +911,29 @@ class Table extends AbstractGraph {
 
     getHeightMargin(showFooter) {
         const {
+            scroll,
+            data,
+            configuration,
+        } = this.props;
+
+        const {
             searchBar,
+            selectColumnOption,
         } = this.getConfiguredProperties();
+
+        const {
+            pageSize,
+            size,
+        } = this.getGraphProperties();
 
         let heightMargin = showFooter ? 40 : 0;
         heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
-        return heightMargin;
+        const totalRecords = scroll ? size : this.filterData.length;
+
+        let scrollMargin = (totalRecords > pageSize) ? 10 : showFooter ? 10 : data && data.length > 0 ? 10 : 0;
+        scrollMargin = configuration.filterOptions ? scrollMargin - 10 : scrollMargin;
+        const selectColumnMargin = selectColumnOption ? 20 : 0;
+        return heightMargin + scrollMargin + selectColumnMargin;
     }
 
     getInitialSort() {
