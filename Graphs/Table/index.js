@@ -914,8 +914,6 @@ class Table extends AbstractGraph {
 
     getHeightMargin(showFooter) {
         const {
-            scroll,
-            data,
             configuration,
         } = this.props;
 
@@ -924,19 +922,12 @@ class Table extends AbstractGraph {
             selectColumnOption,
         } = this.getConfiguredProperties();
 
-        const {
-            pageSize,
-            size,
-        } = this.getGraphProperties();
-
         let heightMargin = showFooter ? 40 : 0;
-        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
-        const totalRecords = scroll ? size : this.filterData.length;
+        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;        
+        heightMargin = configuration.filterOptions ? heightMargin : heightMargin + 10;
+        heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
 
-        let scrollMargin = (totalRecords > pageSize) ? 10 : showFooter ? 10 : data && data.length > 0 ? 10 : 0;
-        scrollMargin = configuration.filterOptions ? scrollMargin - 10 : scrollMargin;
-        const selectColumnMargin = selectColumnOption ? 20 : 0;
-        return heightMargin + scrollMargin + selectColumnMargin;
+        return heightMargin;
     }
 
     getInitialSort() {
