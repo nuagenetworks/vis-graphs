@@ -17,14 +17,18 @@ import {
 } from "d3";
 import moment from 'moment';
 import momentDuration from 'moment-duration-format';
+import isEqual from 'lodash/isEqual';
+import * as d3 from 'd3'
 
 import XYGraph from "../XYGraph";
-import { nest } from "../../utils/helpers/nest"
+import { pick } from "../../utils/helpers";
+import { nest } from "../../utils/helpers/nest";
 import {properties} from "./default.config";
 
 momentDuration(moment);
 
 const duration = "duration";
+const FILTER_KEY = ['data', 'height', 'width', 'context'];
 class LineGraph extends XYGraph {
 
     yKey   = 'columnType'
@@ -32,7 +36,108 @@ class LineGraph extends XYGraph {
 
     constructor(props) {
         super(props, properties);
-        this.brush = brushX();
+        this.brushed = 0;
+        this.xAxis = 0;
+        this.lineGenerator = 0;
+        this.scaleX = 0;
+        this.availableHeight = 0;
+        this.availableWidth = 0;
+        this.availableMinHeight = 0;
+        this.graphId = new Date().valueOf();
+        this.leftMargin = 0;
+        this.miniGraphXScale = 0;
+        this.startIndex = 0;
+        this.endIndex = 0;
+    }
+
+    shouldComponentUpdate(nextProps) {
+        return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
+    } 
+    
+    componentDidUpdate() {
+        const {
+            data
+        } = this.props;
+
+        if (!data || !data.length) {
+            return
+        }
+
+        this.updateElements(); 
+    }
+
+    componentDidMount() {
+        const {
+            data
+        } = this.props;
+
+        const {
+            brushEnabled
+        } = this.getConfiguredProperties();
+
+        if (!data || !data.length) {
+            return
+        }
+        if (brushEnabled) {
+            this.elementGenerator();
+            this.updateElements();
+        }
+    }
+
+    getGraph() {
+        return d3.select('.graph-container');
+    }
+
+    elementGenerator() {
+        const svg = this.getGraph();
+        svg.append("defs").append("svg:clipPath")
+            .attr("id", `clips${this.graphId}`)
+            .append("svg:rect")
+            .attr("width", this.availableWidth)
+            .attr("height", this.availableHeight + 2.25 * this.getXAxisHeight())
+            .attr("x", 0)
+            .attr("y", 0);
+    }
+
+    updateElements() {
+        const miniGraph = d3.select('.mini-graph-container');
+        const line = d3.select('.graph-container');
+        const {
+            xLabelRotate,
+            xLabelLimit,
+            xTickFontSize,
+        } = this.getConfiguredProperties();
+
+        let range = [this.getStartIndex(), this.getEndIndex() || this.availableWidth];
+        const brush = d3.brushX()
+        .extent([[0, 0], [this.availableWidth, this.availableMinHeight]])
+        .on("brush end", () => {
+            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+            this.linesData.map((d, i) => {
+                d.key = d.key || `line${i}`;
+                const lineScale = d3.event.selection || range;
+                let [start, end] = lineScale;
+                this.startIndex = start;
+                this.endIndex = end;
+                this.scaleX.domain(lineScale.map(this.miniGraphXScale.invert, this.miniGraphXScale));
+                line.select('.line').select(`.${d.key}`).attr("d", this.lineGenerator(d.values));
+                line.select('.axis--x').call(this.xAxis).selectAll('.tick text')
+                    .style('font-size', xTickFontSize)
+                    .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
+            });
+        });    
+
+        miniGraph.select(".brush")
+            .call(brush)
+            .call(brush.move, range);     
+    }
+
+    getStartIndex() {
+        return this.startIndex;
+    }
+
+    getEndIndex() {
+        return this.endIndex;
     }
 
     render() {
@@ -240,6 +345,11 @@ class LineGraph extends XYGraph {
         let availableWidth    = graphWidth - (margin.left + margin.right + yLabelWidth);
         let availableHeight   = graphHeight - (margin.top + margin.bottom + chartHeightToPixel + xAxisHeight);
 
+        if (brushEnabled) {
+            availableHeight = availableHeight * 0.75;
+            this.availableMinHeight = height - (availableHeight + (margin.top * 4) + margin.bottom + chartHeightToPixel + this.getXAxisHeight());
+        }
+
         if (xLabelRotate) {
             availableHeight -= xLabelRotateHeight;
         }
@@ -247,12 +357,14 @@ class LineGraph extends XYGraph {
         let range = extent(filterDatas, yLabelFn)
 
         let yExtent = this.updateYExtent(range);
-        let xScale;
+        let xScale, miniGraphXScale;
 
         if (dateHistogram) {
-            xScale = scaleTime()
+            xScale = scaleTime();
+            miniGraphXScale = scaleTime();
         } else {
-            xScale = scaleLinear()
+            xScale = scaleLinear();
+            miniGraphXScale = scaleLinear();
         }
 
         let xExtent = extent(filterDatas, xLabelFn);
@@ -267,13 +379,19 @@ class LineGraph extends XYGraph {
         }
 
         xScale.domain(xExtent);
-                
+        miniGraphXScale.domain(xExtent);        
 
         const yScale = scaleLinear()
           .domain(yExtent);
-
+        
         xScale.range([0, availableWidth]);
+        miniGraphXScale.range([0, availableWidth]);
         yScale.range([availableHeight, 0]);
+        
+        const miniGraphYScale = scaleLinear()
+        .domain(yExtent);
+        
+        miniGraphYScale.range([this.availableMinHeight, 0]);
 
         // calculate new range from defaultY
         let horizontalLine,
@@ -300,12 +418,18 @@ class LineGraph extends XYGraph {
           .tickSizeInner(xTickGrid ? -availableHeight : xTickSizeInner)
           .tickSizeOuter(xTickSizeOuter);
 
+        const miniGraphXAxis = axisBottom(miniGraphXScale)
+          .tickSizeInner(xTickGrid ? -availableHeight : xTickSizeInner)
+          .tickSizeOuter(xTickSizeOuter);
+
         if(xTickFormat){
             xAxis.tickFormat(dateHistogram ? timeFormat(xTickFormat) : format(xTickFormat));
+            miniGraphXAxis.tickFormat(dateHistogram ? timeFormat(xTickFormat) : format(xTickFormat))
         }
 
         if(xTicks){
             xAxis.ticks(xTicks);
+            miniGraphXAxis.ticks(xTicks);
         }
 
         const yAxis = axisLeft(yScale)
@@ -326,33 +450,25 @@ class LineGraph extends XYGraph {
             yAxis.tickFormat( value => yTicksLabel[value] || null);
         }
 
-        const lineGenerator = line()
+        const lineGenerator = d3.line()
           .x( d => xScale(d[xColumn]))
-          .y( d => yScale(d[this.yValue]))
+          .y( d => yScale(d[this.yValue]));
+
+        const lineGenerator2 = d3.line()
+          .x( d => xScale(d[xColumn]))
+          .y( d => miniGraphYScale(d[this.yValue])); 
+         
+        const xTitlePostionTop = margin.top + availableHeight + chartHeightToPixel + xAxisHeight + ( xLabelRotate ? xLabelRotateHeight : 0); 
 
         let xTitlePosition = {
             left: leftMargin + availableWidth / 2,
-            top: margin.top + availableHeight + chartHeightToPixel + xAxisHeight + ( xLabelRotate ? xLabelRotateHeight : 0)
+            top: brushEnabled ? xTitlePostionTop + this.availableMinHeight + chartHeightToPixel*1.25 + xAxisHeight : xTitlePostionTop
         }
+
         let yTitlePosition = {
             // We use chartWidthToPixel to compensate the rotation of the title
             left: margin.left + chartWidthToPixel, 
             top: margin.top + availableHeight / 2
-        }
-
-        if(brushEnabled){
-            this.brush
-                .extent([[0, 0], [availableWidth, availableHeight]])
-                .on("end", () => {
-                    // If there is a brushed region...
-                    if(event.selection){
-                        const [startTime, endTime] = event.selection
-                          .map(xScale.invert, xScale) // Convert from pixel coords to Date objects.
-                          .map((date) => date.getTime()); // Convert from Date to epoch milliseconds.
-                        const queryParams = Object.assign({}, this.props.context, { startTime, endTime });
-                        this.props.goTo && this.props.goTo(window.location.pathname, queryParams);
-                    }
-                });
         }
 
         const tooltipOverlay = voronoi()
@@ -417,8 +533,26 @@ class LineGraph extends XYGraph {
             width: graphWidth,
             height: graphHeight,
             order:this.checkIsVerticalLegend() ? 2 : 1,
-        };        
+        };    
+           
+        this.xAxis = xAxis;
+        this.lineGenerator = lineGenerator;
+        this.scaleX = xScale;
+        this.availableHeight = availableHeight;
+        this.availableWidth = availableWidth;
+        this.leftMargin = leftMargin;
+        this.miniGraphXScale = miniGraphXScale;
+        this.linesData = linesData;
 
+        const getMinMarginTop = () => {
+            const {
+                chartHeightToPixel,
+                margin
+            } = this.getConfiguredProperties();
+    
+            return this.availableHeight + (margin.top * 2.5) + chartHeightToPixel + this.getXAxisHeight();
+        }
+        
         return (
             <div className="line-graph">
                 <div>{this.tooltip}</div>
@@ -427,84 +561,102 @@ class LineGraph extends XYGraph {
                     <div className='graphContainer' style={ graphStyle }>
                         <svg width={graphWidth} height={graphHeight}>
                             {this.axisTitles(xTitlePosition, yTitlePosition)}
-                            <g transform={ `translate(${leftMargin},${margin.top})` } >
-                                <g
-                                    key="xAxis"
-                                    ref={ (el) => select(el).call(xAxis)
-                                        .selectAll('.tick text')
-                                        .style('font-size', xTickFontSize)
-                                        .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
-                                    }
-                                    transform={ `translate(0,${availableHeight})` }
-                                />
-                                <g
-                                    key="yAxis"
-                                    ref={ (el) => select(el)
-                                        .call(yAxis)
-                                        .selectAll('.tick text')
-                                        .style('font-size', yTickFontSize)
-                                        .call(this.wrapD3Text, yLabelLimit)
-                                    }
-                                />
-
-
-                                <g>
-                                {linesData.map((d, i) =>
-                                    (d.values.length === 1) ?
-                                        <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
-                                    :
-                                    <path
-                                        key={ d.key }
-                                        fill="none"
-                                        stroke={ getColor(d.values[0] || d) }
-                                        strokeWidth={ stroke.width }
-                                        d={ lineGenerator(d.values) }
-
+                                <g className='graph-container' transform={ `translate(${leftMargin},${margin.top})` } >
+                                    <g className='axis axis--x'
+                                        key="xAxis"
+                                        ref={ (el) => select(el).call(xAxis)
+                                            .selectAll('.tick text')
+                                            .style('font-size', xTickFontSize)
+                                            .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
+                                        }
+                                        transform={ `translate(0,${availableHeight})` }
                                     />
-                                )}
-                                </g>
-                                <g className= {"lineGraph"}>
-                                {tooltipOverlay.map((d, i) =>
-                                    <g
-                                        key={ i }
-                                        { ...this.tooltipProps(d.data) }
-                                        offset={tooltipOffset(d.data)}
-                                    >
+                                    <g className='axis axis--y'
+                                        key="yAxis"
+                                        ref={ (el) => select(el)
+                                            .call(yAxis)
+                                            .selectAll('.tick text')
+                                            .call(this.wrapD3Text, yLabelLimit)
+                                        }
+                                    />
 
-                                        /*
-                                            This rectangle is a hack
-                                            to position tooltips correctly.
-                                            Due to this rectangle, the boundingClientRect
-                                            used by ReactTooltip for positioning the tooltips
-                                            has an upper left corner at (0, 0).
-                                        */
-                                        <rect
-                                            x={-leftMargin}
-                                            y={-margin.top}
-                                            width="1"
-                                            height="1"
-                                            fill="none"
-                                        />
-
+                                    <g className='line' style={{"clipPath": `url(#clips${this.graphId})`}}>
+                                    {linesData.map((d, i) =>
+                                        (d.values.length === 1) ?
+                                            <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
+                                        :
                                         <path
-                                            key={ i }
+                                            key={ d.key }
+                                            className={ d.key || `line${i}`}
                                             fill="none"
-                                            d={ d == null ? null : "M" + d.join("L") + "Z" }
-                                            style={{"pointerEvents": "all", "opacity": 0.5}}
+                                            stroke={ getColor(d.values[0] || d) }
+                                            strokeWidth={ stroke.width }
+                                            d={ lineGenerator(d.values) }
+
                                         />
+                                    )}
                                     </g>
-                                )}
+                                    <g className= {"lineGraph"}>
+                                    {tooltipOverlay.map((d, i) =>
+                                        <g
+                                            key={ i }
+                                            { ...this.tooltipProps(d.data) }
+                                            offset={tooltipOffset(d.data)}
+                                        >
+
+                                            /*
+                                                This rectangle is a hack
+                                                to position tooltips correctly.
+                                                Due to this rectangle, the boundingClientRect
+                                                used by ReactTooltip for positioning the tooltips
+                                                has an upper left corner at (0, 0).
+                                            */
+                                            <rect
+                                                x={-leftMargin}
+                                                y={-margin.top}
+                                                width="1"
+                                                height="1"
+                                                fill="none"
+                                            />
+
+                                            <path
+                                                key={ i }
+                                                fill="none"
+                                                d={ d == null ? null : "M" + d.join("L") + "Z" }
+                                                style={{"pointerEvents": "all", "opacity": 0.5}}
+                                            />
+                                        </g>
+                                    )}
+                                    </g>
+                                    { defaultLine }
+                                    { horizontalLine }
                                 </g>
-                                { defaultLine }
-                                { horizontalLine }
-                                {
-                                    brushEnabled &&
-                                    <g
-                                        key="brush"
-                                        ref={ (el) => select(el).call(this.brush) }
+                                { brushEnabled &&
+                                <g className="mini-graph-container" transform={ `translate(${leftMargin},${getMinMarginTop()})`} > 
+                                    {linesData.map((d, i) =>
+                                        (d.values.length === 1) ?
+                                            <circle key={d.key} cx={xScale(d.values[0][xColumn])} cy={yScale(d.values[0][this.yValue])} r={circleRadius} fill={getColor(d.values[0])} />
+                                        :
+                                        <path
+                                            key={ d.key }
+                                            fill="none"
+                                            stroke={ getColor(d.values[0] || d) }
+                                            strokeWidth={ stroke.width }
+                                            d={ lineGenerator2(d.values) }
+
+                                        />
+                                    )}
+                                    <g className='axis'
+                                        key="xAxis"
+                                        ref={ (el) => select(el).call(miniGraphXAxis)
+                                            .selectAll('.tick text')
+                                            .style('font-size', xTickFontSize)
+                                            .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit }) 
+                                        }
+                                        transform={ `translate(0,${this.availableMinHeight})` }
                                     />
-                                }
-                            </g>
+                                   <g className='brush'></g>
+                                </g>}  
                         </svg>
                     </div>
                 </div> 
