@@ -66,12 +66,21 @@ class Table extends AbstractGraph {
     }
 
     componentWillUnmount() {
+        const {
+            scrollData,
+            requestId,
+        } = this.props;
+        
         if (!isEmpty(this.displayColumns)) {
             this.updateTableStatus({
                 [`removedColumns_${this.state.removedColumnsKey}`]: this.displayColumns,
                 event: events.REMOVED_COLUMNS
             });
         }
+        
+        if(!objectPath.has(scrollData, [`selectedRow_${requestId}`]) && !isEmpty(this.selectedRows)) {
+            this.updateTableStatus({ [`selectedRow_${requestId}`]: this.selectedRows })
+        } 
     }
 
     componentDidMount() {
@@ -143,7 +152,10 @@ class Table extends AbstractGraph {
                 for (let key in d.displayOption) {
                     if (context.hasOwnProperty(key)) {
                         removedColumnsKey = context[key];
-                        if (context[key] === d.displayOption[key]) {
+                        const keyValue = d.displayOption[key];
+                        const contextKeyValue = context[key];
+                        if ((typeof keyValue === 'string' && contextKeyValue === keyValue) ||
+                            (Array.isArray(keyValue) && keyValue.includes(contextKeyValue))) {
                             filterColumns.push(d.column);
                         }
                     }
@@ -618,10 +630,11 @@ class Table extends AbstractGraph {
             multiSelectable,
             matchingRowColumn
         } = this.getConfiguredProperties();
-
+        
         if (!multiSelectable) {
             this.handleClick(...selectedRows)
             this.selectedRows = {}
+            this.updateScrollNow = true;
         }
 
         this.selectedRows[this.currentPage] = selectedRows.slice();
@@ -652,9 +665,9 @@ class Table extends AbstractGraph {
             onSelect({ rows, matchingRows });
         }
 
-        if (this.scroll && this.updateScrollNow) {
+        if (this.updateScrollNow) {
             this.updateTableStatus({ [`selectedRow_${this.props.requestId}`]: this.selectedRows })
-        }
+        } 
         this.updateScrollNow = true;
 
     }
@@ -806,6 +819,7 @@ class Table extends AbstractGraph {
     // reset scroll data.
     resetScrollData() {
         const { disableRefresh } = this.getConfiguredProperties();
+        
         return (
             this.scroll && !disableRefresh ?
                 <div style={{flex: "none"}}>
@@ -900,20 +914,12 @@ class Table extends AbstractGraph {
 
     getHeightMargin(showFooter) {
         const {
-            configuration,
-        } = this.props;
-
-        const {
             searchBar,
-            selectColumnOption,
         } = this.getConfiguredProperties();
 
-        let heightMargin = showFooter ? 90 : 50;
-
-        heightMargin = searchBar === false ? heightMargin * 0.4 : heightMargin;
-        heightMargin = selectColumnOption ? heightMargin + 43 : heightMargin + 5;
-
-        return configuration.filterOptions ? heightMargin + 50 : heightMargin;
+        let heightMargin = showFooter ? 40 : 0;
+        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
+        return heightMargin;
     }
 
     getInitialSort() {
@@ -960,7 +966,7 @@ class Table extends AbstractGraph {
 
         const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
-        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll != true) ? false : true;
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
         const options = {
             print: false,
@@ -1035,6 +1041,11 @@ class Table extends AbstractGraph {
             MuiPaper: {
                 elevation4: {
                     boxShadow: (searchBar || searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
+                }
+            },
+            MUIDataTableToolbarSelect: {
+                root: {
+                    display: "none"
                 }
             }
         }

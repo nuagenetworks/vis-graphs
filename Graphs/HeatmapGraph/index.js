@@ -1,17 +1,23 @@
 import PropTypes from 'prop-types';
 import React from "react"
-import isEqual from 'lodash/isEqual'
+import isEqual from 'lodash/isEqual';
+import isEmpty from 'lodash/isEmpty';
 import * as d3 from "d3"
 import ReactTooltip from "react-tooltip"
 
 import XYGraph from "../XYGraph"
 import {properties} from "./default.config"
-import { nest as dataNest, pick } from "../../utils/helpers"
+import { pick } from "../../utils/helpers";
+import {nest as dataNest} from "../../utils/helpers/nest";
 
 const FILTER_KEY = ['data', 'height', 'width', 'context']
 
 
 class HeatmapGraph extends XYGraph {
+
+  state = {
+    filterData: []
+  }
 
   constructor(props) {
     super(props, properties);
@@ -31,8 +37,8 @@ class HeatmapGraph extends XYGraph {
     this.updateElements()
   }
 
-  shouldComponentUpdate(nextProps) {
-    return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY)) || !isEqual(this.state, nextState);
   }
 
   componentDidUpdate(prevProps) {
@@ -143,6 +149,10 @@ class HeatmapGraph extends XYGraph {
     // check condition to apply brush on chart
     if(this.filterData.length)
       this.isBrushable(this.nestedYData)
+
+    if (!isEqual(this.filterData, this.state.filterData)) {
+      this.setState({filterData: this.filterData});
+    }
   }
 
   getNestedYData() {
@@ -290,6 +300,9 @@ class HeatmapGraph extends XYGraph {
 
   // generate methods which helps to create charts
   elementGenerator() {
+
+    if (isEmpty(this.node)) return;
+
     const svg =  this.getGraph()
 
     svg.append("defs").append("clipPath")
@@ -300,6 +313,9 @@ class HeatmapGraph extends XYGraph {
 
   // update data on props change or resizing
   updateElements() {
+
+    if (isEmpty(this.node)) return;
+
     const {
       xTickFontSize,
       yTickFontSize,

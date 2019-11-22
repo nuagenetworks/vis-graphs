@@ -9,7 +9,8 @@ import { properties } from './default.config'
 import XYGraph from '../XYGraph'
 import "./style.css";
 
-import { dataParser, pick, barWidth } from '../../utils/helpers'
+import { pick } from '../../utils/helpers';
+import {dataParser, barWidth} from '../../utils/helpers/barGraph';
 
 const FILTER_KEY = ['data', 'height', 'width', 'context']
 
@@ -121,7 +122,8 @@ class BarGraph extends XYGraph {
       stackColumn,
       otherOptions,
       stackSequence,
-      xTicksLabel
+      xTicksLabel,
+      isSort
     } = this.getConfiguredProperties()
  
     if (this.isVertical()) {
@@ -141,6 +143,7 @@ class BarGraph extends XYGraph {
       stack: this.stack,
       otherOptions,
       stackSequence,
+      isSort
     });
   
     // check condition to apply brush on chart

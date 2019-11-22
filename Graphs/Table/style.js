@@ -23,13 +23,14 @@ const tableStyle = {
 
     button: {
         design: {
-            margin: '10px',
+            margin: "10px 5px 0px 0px",
             float: 'right',
             maxHeight: '0px',
             maxWidth: '30px',
             padding: '0',
-            top: '-37px',
-            right: '50px'
+            top: "0px",       
+            right: '50px',
+            position: "fixed"
         },
         background: theme.palette.greyLightColor,
         labelStyle: {

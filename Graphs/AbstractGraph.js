@@ -125,28 +125,28 @@ export default class AbstractGraph extends React.Component {
             yTicksLabel = {};
         }
 
-        return (
-            <React.Fragment>
-                {/* Display each tooltip column as "label : value". */}
-                {tooltip.map(({ column, label }, i) => {
-                    let data = accessors[i](this.hoveredDatum);
-                    if (typeof data  === 'boolean') {
-                        data = data.toString();
-                    }
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
 
-                    return (data || data === 0) ?
-                        (<div key={column}>
-                            <strong>
-                                {/* Use label if present, fall back to column name. */}
-                                {label || column}
-                            </strong> : <span>
-                                {/* Apply number and date formatting to the value. */}
-                                { yTicksLabel[data] || data }
-                            </span>
-                        </div>
-                        ) : null
-                })}
-            </React.Fragment>
+        return (
+            /* Display each tooltip column as "label : value". */
+            tooltip.map(({ column, label }, i) => {
+                let data = accessors[i](this.hoveredDatum)
+
+                return (data !== null && data !== 'undefined') ?
+                    (<div key={column}>
+                        <strong>
+                            {/* Use label if present, fall back to column name. */}
+                            {label || column}
+                        </strong> : <span>
+                            {/* Apply number and date formatting to the value. */}
+                            { yTicksLabel[data] || data }
+                        </span>
+                    </div>
+                    ) : null
+            })
+
         )
     }
 
@@ -329,7 +329,7 @@ export default class AbstractGraph extends React.Component {
 
         yColumn = yColumn ? yColumn : 'yColumn'
         const yLabelFn = (d) => {
-            if (!yTickFormat) {
+            if (yTickFormat === undefined || yTickFormat === null) {
                 return d[yColumn];
             }
             const formatter = format(yTickFormat);
@@ -476,9 +476,10 @@ export default class AbstractGraph extends React.Component {
         const {
             configuration
         } = this.props;
+        const messageClass = configuration && configuration.data && configuration.data.classes && configuration.data.classes.messageClass;
 
         return (
-            <div id={`${configuration.id}-message`} className="center-text">
+            <div id={`${configuration.id}-message`} className={messageClass ? messageClass : "center-text"}>
                 {message}
             </div>
         )

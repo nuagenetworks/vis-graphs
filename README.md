@@ -232,7 +232,7 @@ __x-axis__ __and__ __y-axis__ - (Supported Graphs - BarGraph, PieGraph, AreaGrap
 - **yColumn*** attribute name in your results to use for y-axis
 - **yLabel** y-axis title
 - **yTicks** number of ticks to use on y-axis
-- **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels
+- **yTickFormat** [d3 format](https://github.com/d3/d3-format) style to display y-axis labels. Use empty string `""` if whole number ticks are required.
 - **yTickFormatType** If y axis data is in duration(miliseconds) then set `yTickFormatType: 'duration'` and define format in `yTickFormat` property to make it readable. Here is the link for the duration format - https://www.npmjs.com/package/moment-duration-format.
 
 E.g -
@@ -301,6 +301,14 @@ __xTicksLabel__ - (object) used to override labels of x axis ticks with some pre
         "GOOGLE": "Google",
         "MSOffice365": "Office"
     }
+```
+
+__isSort__ - (boolean) - disable sorting on data to be display on bar graph. Default is `true`
+
+E.g - 
+```javascript
+    "yColumn": "SumofBytes",
+    "isSort": false
 ```
 
 ## *LineGraph*
@@ -811,6 +819,11 @@ __maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (
 __minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
 
 __rowLimit__ (number) show number of ports in each row. Default is 8.
+
+__tooltipScript__ (string) a custom Tooltip component to allow for more customization of the tooltip.
+The tooltip component must be available at: `@/scripts` and it will have available 2 props:
+ - `data` which is the data coming from the port hovered over
+ - `data2` which is data from the second query
 
 ## *ProgressBarGraph*
 This graph is used to display process data out of the total data

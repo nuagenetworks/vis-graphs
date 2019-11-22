@@ -153,6 +153,12 @@ export default class XYGraph extends AbstractGraph {
 
         if(yTickFormat){
             this.axis.y.tickFormat(format(yTickFormat));
+        } else if (yTickFormat === "") {
+            const yAxisTicks = this.getScale().y.ticks()
+                .filter(tick => Number.isInteger(tick));
+            this.axis.y
+                .tickValues(yAxisTicks)
+                .tickFormat(format('d'));
         }
 
         if(yTicks){
