@@ -914,11 +914,19 @@ class Table extends AbstractGraph {
 
     getHeightMargin(showFooter) {
         const {
+            configuration,
+        } = this.props;
+
+        const {
             searchBar,
+            selectColumnOption,
         } = this.getConfiguredProperties();
 
         let heightMargin = showFooter ? 40 : 0;
-        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
+        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;        
+        heightMargin = configuration.filterOptions ? heightMargin : heightMargin + 10;
+        heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
+
         return heightMargin;
     }
 
