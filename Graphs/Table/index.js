@@ -998,6 +998,7 @@ class Table extends AbstractGraph {
             onColumnSortChange: this.handleSortOrderChange,
             onChangeRowsPerPage: this.handleRowsPerPageChange,
             onColumnViewChange: this.handleColumnViewChange,
+            disableToolbarSelect: true,
             textLabels: {
                 body: {
                   noMatch: "No data to visualize",
@@ -1055,7 +1056,13 @@ class Table extends AbstractGraph {
                 root: {
                     display: "none"
                 }
-            }
+            },
+            MuiTableCell: {
+              root: {
+                padding: "10px 40px 10px 15px",
+                fontSize: "10px"
+              }
+           }
         }
         const theme = createMuiTheme({
                 overrides: {...style.muiStyling, ...muiTableStyle}
