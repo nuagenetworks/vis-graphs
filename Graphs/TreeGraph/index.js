@@ -174,7 +174,7 @@ class TreeGraph extends AbstractGraph {
             links = this.treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach((d) => { d.y = d.depth * 180 });
+        nodes.forEach((d) => { d.y = d.depth * 280 });
 
         this.updateNodes(source, nodes);
         this.updateLinks(source, links);
