@@ -64,7 +64,7 @@ export default class AbstractGraph extends React.Component {
             this.tooltip = (
                 <ReactTooltip
                     id={this.tooltipId}
-                    place="top"
+                    place="right"
                     type="dark"
                     effect="float"
                     getContent={[() => this.getTooltipContent(this.hoveredDatum), 200]}
@@ -558,6 +558,7 @@ export default class AbstractGraph extends React.Component {
         } = this.getGraphDimension(label, data);
 
         const legendContainerStyle = {
+            marginLeft: '5px',
             width: legendWidth,
             height: legendHeight,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
