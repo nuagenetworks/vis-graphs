@@ -77,9 +77,9 @@ class Table extends AbstractGraph {
                 event: events.REMOVED_COLUMNS
             });
         }
-        
-        if(!objectPath.has(scrollData, [`selectedRow_${requestId}`]) && !isEmpty(this.selectedRows)) {
-            this.updateTableStatus({ [`selectedRow_${requestId}`]: this.selectedRows })
+        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
+        if(!objectPath.has(scrollData, 'selectedRow') && !isEmpty(this.selectedRows)) {
+            this.updateTableStatus({ selectedRow: {...rowsInStore, [this.props.requestId] : this.selectedRows } })
         } 
     }
 
@@ -213,8 +213,8 @@ class Table extends AbstractGraph {
         } = this.getGraphProperties(props);
 
         if(scroll) {
-            this.selectedRows = objectPath.has(scrollData, [`selectedRow_${requestId}`]) ? objectPath.get(scrollData, [`selectedRow_${requestId}`]) : {};
-
+            this.selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
+            this.selectedRows = this.selectedRows[requestId];
             if (!objectPath.has(scrollData, 'pageSize')) {
                 this.updateTableStatus({ pageSize: this.pageSize })
             }
@@ -328,7 +328,7 @@ class Table extends AbstractGraph {
                 this.filterData = data;
 
                 if(!searchText || searchString !== searchText) {
-                    this.updateTableStatus({search, searchText , selectedRows: {}, currentPage: 1, event: events.SEARCH})
+                    this.updateTableStatus({search, searchText , selectedRow: {}, currentPage: 1, event: events.SEARCH})
                 }
             } else {
                 this.filterData = data;
@@ -563,7 +563,7 @@ class Table extends AbstractGraph {
         this.updateTableStatus({
             sort: { column: column, order: colOrder },
             currentPage: 1,
-            selectedRows: {},
+            selectedRow: {},
             event: events.SORTING
         })
     }
@@ -639,7 +639,7 @@ class Table extends AbstractGraph {
 
         this.selectedRows[this.currentPage] = selectedRows.slice();
         
-        const { onSelect } = this.props;
+        const { onSelect, scrollData } = this.props;
         if (onSelect) {
             let matchingRows = [];
             let rows = {};
@@ -664,9 +664,10 @@ class Table extends AbstractGraph {
             }
             onSelect({ rows, matchingRows });
         }
+        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
 
         if (this.updateScrollNow) {
-            this.updateTableStatus({ [`selectedRow_${this.props.requestId}`]: this.selectedRows })
+            this.updateTableStatus({ selectedRow: {...rowsInStore, [this.props.requestId] : this.selectedRows }})
         } 
         this.updateScrollNow = true;
 
@@ -827,7 +828,7 @@ class Table extends AbstractGraph {
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
                         style={style.button.design}
-                        onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH})}
+                        onClick={ () => this.updateTableStatus({currentPage: 1, selectedRow: {}, event: events.REFRESH})}
                     >
                         <RefreshIcon className='refreshIcon' />
                     </IconButton>
@@ -892,7 +893,7 @@ class Table extends AbstractGraph {
                 label="Continue"
                 labelStyle={style.button.labelStyle}
                 primary={true}
-                onClick={ () => this.updateTableStatus({currentPage: 1, selectedRows: {}, event: events.REFRESH}) }
+                onClick={ () => this.updateTableStatus({currentPage: 1, selectedRow: {}, event: events.REFRESH}) }
             />,
         ];
 
