@@ -1,6 +1,5 @@
 import { GridDataAutoCompleteHandler } from 'react-filter-box';
 import find from 'lodash/find';
-import chain from 'lodash/chain';
 
 export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
     constructor(data, options, scroll = false) {
@@ -22,7 +21,7 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
 
         if (found.type === "selection" && this.data !== null) {
             if (!this.cache[parsedField]) {
-                this.cache[parsedField] = chain(this.data).map(f => f[parsedField]).uniq().value();
+                this.cache[parsedField] = Array.from(new Set(this.data.map(f => f[parsedField])));
             }
             return this.cache[parsedField];
         }
