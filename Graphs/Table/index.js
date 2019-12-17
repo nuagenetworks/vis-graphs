@@ -565,7 +565,7 @@ class Table extends AbstractGraph {
                         // in certain cases the data is process incorrectly and the columns shows as an object.
                         // We do not support javascript object to display in a column
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() :
-                            (typeof columnData === "object") ? null : columnData;
+                            (typeof originalData === "object") ? null : columnData;
                         
                         data[key] = <div className="wrapper-data"> {data[key]} </div>;
                         /**
