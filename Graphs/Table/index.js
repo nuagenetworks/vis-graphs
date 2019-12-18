@@ -503,7 +503,7 @@ class Table extends AbstractGraph {
 
                     if(columnData || columnData === 0) {
                         data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() :
-                            (typeof columnData === 'object') ? null : columnData;
+                            (typeof originalData === 'object') ? null : columnData;
 
                         data[key] = <div className="wrapper-data"> {data[key]} </div>;
                         /**
