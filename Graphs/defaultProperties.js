@@ -89,5 +89,5 @@ export default {
     ],
     zeroStart: true,
     yRangePadding: true,
-    legendArea: 0.20,
+    legendArea: 0.10,
 }
