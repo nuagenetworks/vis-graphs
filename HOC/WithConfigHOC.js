@@ -7,9 +7,9 @@ export default (config) => (WrappedComponent) => (props) => {
         <WrappedComponent 
             {...rest}
             properties = {{
-                ...defaultProperties, 
-                ...config, 
-                ...configuration.data
+                ...defaultProperties, // common default properties for all the graphs
+                ...config, // default properties of a given specific graph
+                ...configuration.data // override & new properties of a given specific graph
             }}
         />
     );
