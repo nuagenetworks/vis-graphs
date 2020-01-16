@@ -36,6 +36,7 @@ export default {
         orientation: 'vertical',    // Orientation between 'vertical' and 'horizontal'
         circleSize: 4,              // Size in pixel of the circle
         labelOffset: 2,             // Space in pixels between the circle and the label
+        separate: 20
     },
     labelFontSize: 10,
     labelLimit: 10,

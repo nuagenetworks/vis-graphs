@@ -1,10 +1,13 @@
-import { SimpleTextGraph } from './GraphsV2';
+import { 
+    SimpleTextGraph,
+    PieGraph,
+} from './GraphsV2';
+
 import {
     VariationTextGraph,
     BarGraph,
     LineGraph,
     MultiLineGraph,
-    PieGraph,
     ChordGraph,
     GaugeGraph,
     HeatmapGraph,
