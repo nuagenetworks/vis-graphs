@@ -1,6 +1,7 @@
 import { 
     SimpleTextGraph,
     PieGraph,
+    AreaGraph
 } from './GraphsV2';
 
 import {
@@ -11,7 +12,6 @@ import {
     ChordGraph,
     GaugeGraph,
     HeatmapGraph,
-    AreaGraph,
     DynamicBarGraph,
     Table,
     GeoMap,
