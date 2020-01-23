@@ -26,7 +26,6 @@ const GraphAxis = (props) => {
       value: payload.value,
       tickFormat
     })
-    
 
     return (
         <g transform={`translate(${x},${y})`}>

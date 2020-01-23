@@ -19,12 +19,12 @@ const Item = styled('div')({
 const StandardLegend = ({ payload: legends, labelColumn, legend }) => (
     <Container legend={legend}>
         {
-            legends.map(({ color, payload }, index) => (
+            legends.map(({ color, payload, value }, index) => (
                 <Item key={`item-${index}`} color={color}>
                     <svg height='0.8rem' width='0.9rem'>
                         <circle cx="7" cy="9" r="3.5" fill={color} />
                     </svg>
-                    {payload[labelColumn]}
+                    {payload[labelColumn] || value}
                 </Item>
             ))
         }

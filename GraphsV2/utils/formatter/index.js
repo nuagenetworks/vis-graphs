@@ -1,20 +1,12 @@
 import TimeFormatter  from './Time';
 import NumbersFormatter  from './Numbers';
-import React from 'react'
 
-const Formatter = (props) => {
-    let {
+export default (props) => {
+    const {
         value,
         tickFormat,
-        dateHistogram
+        dateHistogram,
     } = props;
-    let parsedData = value;
-    if(dateHistogram) {
-      parsedData = TimeFormatter({tickFormat, value});
-    }
-    else {
-      parsedData = NumbersFormatter({tickFormat, value});
-    }
-    return parsedData;
+
+    return dateHistogram ? TimeFormatter({tickFormat, value}) : NumbersFormatter({tickFormat, value});
 }
-export default Formatter;

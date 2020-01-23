@@ -1,17 +1,10 @@
-import React from 'react'
 import * as d3 from 'd3';
 
-const Numbers = (props) => {
-    let {
+export default (props) => {
+    const {
         value,
         tickFormat,
     } = props;
 
-    if(tickFormat) {
-      const format = d3.format(tickFormat);
-      const parsed = format(value);
-      return  parsed;
-    }
-    return value;
+    return tickFormat ? d3.format(tickFormat)(value) : value;
 }
-export default Numbers;

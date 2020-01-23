@@ -1,13 +1,10 @@
-import React from 'react'
 import moment from 'moment';
 
-const Time = (props) => {
-    let {
+export default (props) => {
+    const {
         value,
         tickFormat,
     } = props;
-    const format = tickFormat || "LT";
-    const parsed = moment(value).format(format);
-    return  parsed;
+
+    return moment(value).format(tickFormat || "LT");
 }
-export default Time;
