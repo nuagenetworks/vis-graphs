@@ -1,5 +1,5 @@
 
-export const config = {
+export default {
     strokeWidth: '2px',
     opacity: '0.4',
     legend: {
@@ -23,6 +23,6 @@ export const config = {
     YAxisLabelConfig: {
       position: "insideLeft",
       dy: -10,
-      dx:-15
-    }
+      dx:-15,
+    },
 }
