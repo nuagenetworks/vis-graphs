@@ -1,18 +1,16 @@
-import React from 'react'
-
-const ParseData = ({ data, key, xColumn, yColumn }) => {
-    let uniqueKeys = new Set();
-    let map = [];
-    let xData, yData;
-    data.map((item, index) => {
+export default ({ data, key, xColumn, yColumn }) => {
+    const uniqueKeys = new Set();
+    const map = [];
+    data.map((item) => {
         uniqueKeys.add(item[key]);
-        xData = item[xColumn];
-        yData = item[yColumn];
-        map.push({ ...item, [`${item[key]}X`]: xData, [`${item[key]}Y`]: yData });
+        map.push({
+            ...item,
+            [`${item[key]}X`]: item[xColumn],
+            [`${item[key]}Y`]: item[yColumn]
+        });
     });
     return {
-        'uniqueKeys' :  Array.from(uniqueKeys),
-        'parsedData' : map,
+        'uniqueKeys': Array.from(uniqueKeys),
+        'parsedData': map,
     }
 }
-export default ParseData
