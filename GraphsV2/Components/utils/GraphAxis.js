@@ -1,5 +1,5 @@
 import React from 'react';
-import Formatter from './formatter';
+import Formatter from '../../utils/formatter';
 
 const GraphAxis = (props) => {
     const {
