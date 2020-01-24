@@ -6,7 +6,6 @@ import {
 
 import {
     VariationTextGraph,
-    BarGraph,
     LineGraph,
     MultiLineGraph,
     ChordGraph,
@@ -18,7 +17,8 @@ import {
     MultiColumnStatusTextGraph,
     TreeGraph,
     PortGraph,
-    ProgressBarGraph
+    ProgressBarGraph,
+    BarGraph,
 } from './Graphs/';
 
 /*

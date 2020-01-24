@@ -13,16 +13,12 @@ import {
 } from 'recharts';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
-import ValiddataHOC from '../../HOC/ValiddataHOC';
+import WithValiddataHOC from '../../HOC/WithValidationHOC';
 import CustomTooltip from '../utils/CustomTooltip';
-import * as dataParser from '../utils/DataParser';
-import GraphLegend from '../utils/Legends/';
+import dataParser from '../utils/DataParser';
+import GraphLegend from '../utils/Legends/Legend';
 import GraphAxis from '../utils/GraphAxis';
 import config from './default.config';
-import {
-    PERCENTAGE,
-    STANDARD
-} from './../../constants';
 
 const AreaGraph = (props) => {
 
@@ -40,7 +36,6 @@ const AreaGraph = (props) => {
         yColumn,
         tooltip,
         legend,
-        percentages,
         XAxisLabelConfig,
         YAxisLabelConfig,
         margin,
@@ -53,10 +48,9 @@ const AreaGraph = (props) => {
     } = properties;
 
     // Formatting data for direct consumption by Area Graph
-    const parsedData = dataParser.PraseData({ data, key: linesColumn, xColumn, yColumn });
+    const parsedData = dataParser({ data, key: linesColumn, xColumn, yColumn });
     const finalParsedData = parsedData.parsedData;
     const uniqueKeys = parsedData.uniqueKeys;
-    const type = percentages ? PERCENTAGE : STANDARD;
     const legendHeight = (legend.separate * height) / 100;
     const colors = scaleOrdinal(schemeCategory10).range();
 
@@ -66,7 +60,13 @@ const AreaGraph = (props) => {
             width={width}
             height={height}
             data={finalParsedData}
-            margin={margin}
+            margin={{
+              ...margin, 
+              top: margin.top * 3,
+              bottom: margin.top * 3,
+              right: margin.right * 3,
+              left: margin.left * 3
+            }}
         >
             <XAxis
                 dataKey={xColumn}
@@ -99,7 +99,6 @@ const AreaGraph = (props) => {
                         content={(props) => (
                             <GraphLegend
                                 legend={legend}
-                                type={type}
                                 {...props}
                             />
                         )}
@@ -117,7 +116,7 @@ const AreaGraph = (props) => {
             {
                 uniqueKeys.map((areaItem, index) => {
                     const color = colors[index % 20];
-                    return (<Area type="monotone" name={areaItem} dataKey={`${areaItem}Y`} stackId={stacked ? "1" : index} stroke={color} fill={color} />)
+                    return (<Area type="monotone" name={areaItem} dataKey={areaItem} stackId={stacked ? "1" : index} stroke={color} fill={color} />)
                 })
             }
         </AreaChart>
@@ -130,6 +129,6 @@ AreaGraph.propTypes = {
 };
 
 export default compose(
-    ValiddataHOC(),
+    WithValiddataHOC(),
     (WithConfigHOC(config))
 )(AreaGraph);

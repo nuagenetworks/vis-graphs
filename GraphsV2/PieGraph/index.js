@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { config } from './default.config';
 import { compose } from 'redux';
 import {
     PieChart,
@@ -13,14 +12,13 @@ import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
 
 import { 
-    PERCENTAGE,
-    STANDARD
+    LEGEND_PERCENTAGE
 } from './../../constants';
-
+import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
-import ValiddataHOC from '../../HOC/ValiddataHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
 import CustomTooltip from '../utils/CustomTooltip';
-import GraphLegend from '../utils/Legends/';
+import GraphLegend from '../utils/Legends/Legend';
 import { filterEmptyData } from "../../utils/helpers";
 import { limit } from '../../utils/helpers/limit';
 
@@ -62,7 +60,7 @@ const PieGraph = (props) => {
         ...settings
     });
 
-    const type = percentages ? PERCENTAGE : STANDARD;
+    const type = percentages ? LEGEND_PERCENTAGE : undefined;
     const legendHeight = (legend.separate * height) / 100;
 
     return (
@@ -119,10 +117,11 @@ const PieGraph = (props) => {
 }
 
 PieGraph.propTypes = {
-    configuration: PropTypes.object
+    configuration: PropTypes.object,
+    data: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default compose(
-    ValiddataHOC(),
+    WithValidationHOC(),
     (WithConfigHOC(config))
 )(PieGraph);
