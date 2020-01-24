@@ -1,3 +1,3 @@
 export const NO_DATA_FOUND = 'No data to visualize!';
-export const PERCENTAGE = 'percentage';
-export const STANDARD = 'standard';
+export const LEGEND_PERCENTAGE = 'PercentageLegend';
+export const DEFAULT_BARGRAPH_ORIENTATION = 'vertical';

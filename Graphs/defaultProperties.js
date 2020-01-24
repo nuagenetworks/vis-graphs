@@ -91,4 +91,14 @@ export default {
     zeroStart: true,
     yRangePadding: true,
     legendArea: 0.20,
+    XAxisLabelConfig: {
+        position: "insideBottom",
+        dy: 30, 
+        dx: -10,
+    },
+    YAxisLabelConfig: {
+        position: "insideLeft",
+        dy: -10,
+        dx:-15,
+    },
 }

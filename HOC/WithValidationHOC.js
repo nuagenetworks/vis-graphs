@@ -1,5 +1,6 @@
 import React from 'react';
 import { styled } from '@material-ui/core/styles';
+
 import { NO_DATA_FOUND } from '../constants';
 
 const Container = styled('div')({
@@ -16,6 +17,7 @@ const Item = styled('div')({
 
 export default () => (WrappedComponent) => (props) => {
     const { data } = props;
+    
     if (!data || !data.length) {
         return (
             <Container>

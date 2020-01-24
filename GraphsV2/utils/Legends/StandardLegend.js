@@ -16,7 +16,8 @@ const Item = styled('div')({
     padding: '0.15rem 0',
 });
 
-const StandardLegend = ({ payload: legends, labelColumn, legend }) => (
+export default ({ payload: legends, labelColumn, legend }) => {
+    return (
     <Container legend={legend}>
         {
             legends.map(({ color, payload, value }, index) => (
@@ -29,6 +30,4 @@ const StandardLegend = ({ payload: legends, labelColumn, legend }) => (
             ))
         }
     </Container>
-);
-
-export default StandardLegend;
+)}

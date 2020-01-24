@@ -14,24 +14,23 @@ const Item = styled('div')({
     padding: '0 0.5rem',
 });
 
-const PercentageLegend = ({ payload: legends, legend, labelColumn }) => (
+
+export default ({ payload: legends, legend, labelColumn }) => (
     <>
         {
             legends.map(({ color, payload }, index) => (
-                <Container legend={legend}>
-                    <Item key={`item-${index}`} color={color}>
+                <Container key={`item-${index}`} legend={legend}>
+                    <Item color={color}>
                         <svg height='0.8rem' width='0.9rem'>
                             <circle cx="7" cy="9" r="3.5" fill={color} />
                         </svg>
                         {payload[labelColumn]}
                     </Item>
-                    <Item key={`item-${index}`} color={color}>
+                    <Item color={color}>
                         {`${(payload.percent * 100).toFixed(2)} %`}
                     </Item>
                 </Container>
             ))
         }
     </>
-)
-
-export default PercentageLegend;
+);
