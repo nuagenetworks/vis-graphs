@@ -11,7 +11,6 @@ import {
     Tooltip,
     Legend
 } from 'recharts';
-
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
 import CustomTooltip from '../utils/CustomTooltip';
@@ -83,7 +82,6 @@ const AreaGraph = (props) => {
                 }
             />
             <YAxis
-                dataKey={yColumn}
                 label={{ value: yLabel, ...YAxisLabelConfig }}
                 tick={
                     <GraphAxis
