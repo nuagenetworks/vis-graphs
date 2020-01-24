@@ -1,16 +1,14 @@
 export default ({ data, key, xColumn, yColumn }) => {
-    const uniqueKeys = new Set();
     const map = [];
     data.map((item) => {
-        uniqueKeys.add(item[key]);
         map.push({
             ...item,
-            [`${item[key]}X`]: item[xColumn],
-            [`${item[key]}Y`]: item[yColumn]
+            'xVal': [0,item[xColumn]],
+            'yVal': item[yColumn]
         });
     });
     return {
-        'uniqueKeys': Array.from(uniqueKeys),
+        'uniqueKeys': ['yVal'],
         'parsedData': map,
     }
 }

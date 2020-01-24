@@ -6,7 +6,7 @@ import { config } from './default.config';
 import { compose } from 'redux'
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
-import ValiddataHOC from '../../HOC/ValiddataHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
 
 /*
     This is a very basic graph that displays a text message
@@ -61,6 +61,6 @@ SimpleTextGraph.propTypes = {
 };
 
 export default compose(
-    ValiddataHOC(),
+    WithValidationHOC(),
     (WithConfigHOC(config))
 )(SimpleTextGraph)

@@ -10,14 +10,14 @@ const Item = styled('p')({
     color: 'white',
 });
 
-const CustomTooltip = ({ active, payload, label, tooltip }) => {
+export default ({ active, payload, label, tooltip }) => {
     if (!active) {
         return null;
     }
 
     return (
         <Container>
-            {tooltip && tooltip.map((element, index) => (
+            {tooltip && payload.length && tooltip.map((element, index) => (
                 <Item className="label">
                     {element.label || element.column} : {payload[0]['payload'][element.column]}
                 </Item>
@@ -25,5 +25,3 @@ const CustomTooltip = ({ active, payload, label, tooltip }) => {
         </Container>
     );
 }
-
-export default CustomTooltip;
