@@ -6,18 +6,16 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import {
     AreaChart,
     Area,
-    XAxis,
-    YAxis,
     Tooltip,
-    Legend
 } from 'recharts';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
-import CustomTooltip from '../utils/CustomTooltip';
+import CustomTooltip from '../Components/utils/CustomTooltip';
 import dataParser from '../utils/DataParser';
-import GraphLegend from '../utils/Legends/Legend';
-import GraphAxis from '../utils/GraphAxis';
+import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
+import xAxis from '../Components/utils/xAxis';
+import yAxis from '../Components/utils/yAxis';
 
 const AreaGraph = (props) => {
 
@@ -47,18 +45,20 @@ const AreaGraph = (props) => {
     } = properties;
 
     // Formatting data for direct consumption by Area Graph
-    const parsedData = dataParser({ data, key: linesColumn, xColumn, yColumn });
-    const finalParsedData = parsedData.parsedData;
-    const uniqueKeys = parsedData.uniqueKeys;
+    const { parsedData, uniqueKeys: areaKeys } = dataParser({ 
+      data, 
+      key: linesColumn, 
+      xColumn, 
+      yColumn 
+    });
     const legendHeight = (legend.separate * height) / 100;
     const colors = scaleOrdinal(schemeCategory10).range();
 
     return (
-        // Area chart
         <AreaChart
             width={width}
             height={height}
-            data={finalParsedData}
+            data={parsedData}
             margin={{
               ...margin, 
               top: margin.top * 3,
@@ -67,41 +67,28 @@ const AreaGraph = (props) => {
               left: margin.left * 3
             }}
         >
-            <XAxis
-                dataKey={xColumn}
-                interval={0}
-                label={{ value: xLabel, ...XAxisLabelConfig }}
-                tick={
-                    <GraphAxis
-                        rotation={xLabelRotateHeight * -1}
-                        tickFormat={xTickFormat}
-                        dateHistogram={dateHistogram}
-                        dy="15"
-                        dx="-15"
-                    />
-                }
-            />
-            <YAxis
-                label={{ value: yLabel, ...YAxisLabelConfig }}
-                tick={
-                    <GraphAxis
-                        tickFormat={yTickFormat}
-                        dy="5"
-                    />
-                }
-            />
             {
-                legend && legend.show && (
-                    <Legend
-                        wrapperStyle={{ overflowY: 'auto', height: legendHeight }}
-                        content={(props) => (
-                            <GraphLegend
-                                legend={legend}
-                                {...props}
-                            />
-                        )}
-                    />
-                )
+              xAxis({
+                xColumn, 
+                xLabel, 
+                XAxisLabelConfig, 
+                xLabelRotateHeight, 
+                xTickFormat, 
+                dateHistogram
+              })
+            }
+            {
+              yAxis({
+                yLabel,
+                YAxisLabelConfig,
+                yTickFormat,
+              })
+            }
+            {
+              renderLegend({
+                legend,
+                legendHeight,
+              })
             }
             {
                 tooltip && (
@@ -112,9 +99,11 @@ const AreaGraph = (props) => {
                 )
             }
             {
-                uniqueKeys.map((areaItem, index) => {
+                areaKeys.map((areaItem, index) => {
                     const color = colors[index % 20];
-                    return (<Area type="monotone" name={areaItem} dataKey={areaItem} stackId={stacked ? "1" : index} stroke={color} fill={color} />)
+                    return (
+                      <Area type="monotone" name={areaItem} dataKey={areaItem} stackId={stacked ? "1" : index} stroke={color} fill={color} />
+                    )
                 })
             }
         </AreaChart>
