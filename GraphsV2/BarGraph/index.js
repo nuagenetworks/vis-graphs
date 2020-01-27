@@ -33,7 +33,8 @@ const BarGraph = (props) => {
         data,
         height,
         width,
-        properties
+        properties,
+        onMarkClick
     } = props;
 
     const {
@@ -43,7 +44,6 @@ const BarGraph = (props) => {
         tooltip,
         stackColumn,
         orientation,
-        onMarkClick,
         otherOptions,
         XAxisLabelConfig,
         xLabel,
@@ -81,6 +81,7 @@ const BarGraph = (props) => {
             height={height}
             data={parsedData}
             layout={orientation != DEFAULT_BARGRAPH_ORIENTATION ? "vertical" : 'horizontal'}
+            cursor={onMarkClick ? "pointer" : ''}
             margin={{
                 ...margin,
                 top: margin.top * 1.5,
