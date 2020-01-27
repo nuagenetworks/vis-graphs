@@ -6,11 +6,10 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import {
     AreaChart,
     Area,
-    Tooltip,
 } from 'recharts';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
-import CustomTooltip from '../Components/utils/CustomTooltip';
+import customTooltip from '../Components/utils/CustomTooltip';
 import dataParser from '../utils/DataParser';
 import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
@@ -34,7 +33,6 @@ const AreaGraph = (props) => {
         tooltip,
         legend,
         XAxisLabelConfig,
-        YAxisLabelConfig,
         margin,
         xLabelRotateHeight,
         dateHistogram,
@@ -80,7 +78,6 @@ const AreaGraph = (props) => {
             {
               yAxis({
                 yLabel,
-                YAxisLabelConfig,
                 yTickFormat,
               })
             }
@@ -91,12 +88,7 @@ const AreaGraph = (props) => {
               })
             }
             {
-                tooltip && (
-                    <Tooltip
-                        content={<CustomTooltip tooltip={tooltip} />}
-                        wrapperStyle={{ backgroundColor: "black" }}
-                    />
-                )
+                customTooltip({ tooltip })
             }
             {
                 areaKeys.map((areaItem, index) => {
