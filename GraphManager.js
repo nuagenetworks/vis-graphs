@@ -1,6 +1,7 @@
 import { 
     SimpleTextGraph,
     PieGraph,
+    BarGraph,
 } from './GraphsV2';
 
 import {
@@ -18,7 +19,6 @@ import {
     TreeGraph,
     PortGraph,
     ProgressBarGraph,
-    BarGraph,
 } from './Graphs/';
 
 /*
