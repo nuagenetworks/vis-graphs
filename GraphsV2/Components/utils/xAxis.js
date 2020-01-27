@@ -15,7 +15,7 @@ export default ({
 }) => {
     return (
         <XAxis
-            type={orientation != DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined}
+            type={ orientation && orientation != DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined}
             dataKey={xColumn}
             interval={0}
             label={{ value: xLabel, ...XAxisLabelConfig }}

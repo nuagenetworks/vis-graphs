@@ -25,7 +25,7 @@ export default ({ tooltip }) => {
 const TooltipComponent = ({ tooltip, payload }) => {
     return (
         <Container>
-            {tooltip && payload.length && tooltip.map((element, index) => (
+            {tooltip && payload && payload.length && tooltip.map((element, index) => (
                 <Item className="label">
                     {element.label || element.column} :
                         {(payload[0]['payload'][element.column]) || payload[0].name}
