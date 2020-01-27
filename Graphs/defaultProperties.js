@@ -96,9 +96,4 @@ export default {
         dy: 30, 
         dx: -10,
     },
-    YAxisLabelConfig: {
-        position: "insideLeft",
-        dy: -10,
-        dx:-15,
-    },
 }
