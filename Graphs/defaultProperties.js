@@ -93,7 +93,7 @@ export default {
     legendArea: 0.20,
     XAxisLabelConfig: {
         position: "insideBottom",
-        dy: 30, 
+        dy: 10, 
         dx: -10,
     },
 }

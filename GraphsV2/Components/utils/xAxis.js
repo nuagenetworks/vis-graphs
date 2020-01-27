@@ -1,7 +1,7 @@
 import React from 'react';
 import { XAxis } from 'recharts';
 
-import { DEFAULT_BARGRAPH_ORIENTATION } from '../../../constants';
+import { DEFAULT_BARGRAPH_ORIENTATION, X_AXIS_HEIGHT } from '../../../constants';
 import GraphAxis from './GraphAxis';
 
 export default ({
@@ -19,6 +19,7 @@ export default ({
             dataKey={xColumn}
             interval={0}
             label={{ value: xLabel, ...XAxisLabelConfig }}
+            height={X_AXIS_HEIGHT}
             tick={
                 <GraphAxis
                     rotation={xLabelRotateHeight * -1}
