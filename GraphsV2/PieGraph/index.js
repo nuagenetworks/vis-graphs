@@ -17,8 +17,8 @@ import {
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-import CustomTooltip from '../utils/CustomTooltip';
-import GraphLegend from '../utils/Legends/Legend';
+import customTooltip from '../Components/utils/CustomTooltip';
+import renderLegend from '../Components/utils/Legend';
 import { filterEmptyData } from "../../utils/helpers";
 import { limit } from '../../utils/helpers/limit';
 
@@ -69,28 +69,12 @@ const PieGraph = (props) => {
             height={height}
             cursor={onMarkClick ? "pointer" : ''}
         >
-            {
-                legend && legend.show && (
-                    <Legend
-                        wrapperStyle={{ overflowY: 'auto', height: legendHeight }}
-                        content={(props) => (
-                            <GraphLegend
-                                labelColumn={labelColumn}
-                                legend={legend}
-                                type={type}
-                                {...props}
-                            />
-                        )}
-                    />
-                )
+           
+            {   
+                renderLegend({ legend, legendHeight, labelColumn, type})        
             }
             {
-                tooltip && (
-                    <Tooltip
-                        content={<CustomTooltip tooltip={tooltip} />}
-                        wrapperStyle={{ backgroundColor: "black" }}
-                    />
-                )
+                customTooltip({ tooltip })
             }
             <Pie
                 labelLine={false}

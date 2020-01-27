@@ -1,6 +1,6 @@
-import LinearParser from './LinearParser';
-import StackedParser from './StackedParser';
+import standardParser from './standardParser';
+import stackedParser from './stackedParser';
 
 export default (props) => {
-    return props.key ? StackedParser(props) : LinearParser(props);
-}
+    return props.key ? stackedParser(props) : standardParser(props);
+} 
