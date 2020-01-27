@@ -51,7 +51,8 @@ class LineGraph extends XYGraph {
     }
 
     shouldComponentUpdate(nextProps) {
-        return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY))
+        return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY)) || 
+        !isEqual(this.props.configuration, nextProps.configuration)
     } 
     
     componentDidUpdate() {
