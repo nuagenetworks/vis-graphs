@@ -4,10 +4,6 @@ import { compose } from 'redux';
 import {
     BarChart,
     Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    Legend,
     Cell,
     Brush,
 } from 'recharts';
@@ -125,11 +121,17 @@ const BarGraph = (props) => {
                     return (
                         <Bar
                             dataKey={item}
-                            onClick={(d) => (
-                                onMarkClick && (!otherOptions || d[dimension] !== otherOptions.label)
-                                    ? onMarkClick(d)
-                                    : ''
-                            )}
+                            onClick={(d) => {
+                                if (stack) {
+                                    const value = d.value;
+                                    d[stackColumn] = Object.keys(d).find(k => d[k] === (value[1] - value[0]));
+                                }
+                                return (
+                                    onMarkClick && (!otherOptions || d[dimension] !== otherOptions.label)
+                                        ? onMarkClick(d)
+                                        : ''
+                                )
+                            }}
                             fill={colors[index % 10]}
                             stackId={stack ? "1" : undefined}
                         >
