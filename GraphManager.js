@@ -1,6 +1,7 @@
 import { 
     SimpleTextGraph,
     PieGraph,
+    PortGraph,
 } from './GraphsV2';
 
 import {
@@ -16,7 +17,6 @@ import {
     GeoMap,
     MultiColumnStatusTextGraph,
     TreeGraph,
-    PortGraph,
     ProgressBarGraph,
     BarGraph,
 } from './Graphs/';
