@@ -14,14 +14,13 @@ const styles = {
         width: '100%',
         display: 'flex',
         flexWrap: 'wrap',
-        fontSize: '.8em'
+        fontSize: '.7em'
     },
     labelRow: {
         width: '100%',
         display: 'flex',
         overflow: 'hidden',
-        listStyle: 'none',
-        padding: '0.6em 1em'
+        listStyle: 'none'
     },
     labelBox: {
         padding: '2px'

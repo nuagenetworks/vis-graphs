@@ -336,11 +336,13 @@ class BarGraph extends XYGraph {
 
   getBarDimensions(scale) {
 
+    const { dateHistogram } = this.getConfiguredProperties();
+
     return (
         this.isVertical() ? {
             x: d => scale.x(d.key),
             y: d => scale.y(d.y1 >= 0 ? d.y1 : d.y0),
-            width: scale.x.bandwidth(),
+            width: !dateHistogram ? scale.x.bandwidth() : this.barWidth,
             height: d => d.y1 >= 0 ? scale.y(d.y0) - scale.y(d.y1) : scale.y(d.y1) - scale.y(d.y0),
             initialY: d => scale.y(0),
             initialHeight: 0,
