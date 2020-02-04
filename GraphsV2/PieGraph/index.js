@@ -17,7 +17,7 @@ import {
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-import customTooltip from '../Components/utils/CustomTooltip';
+import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import { filterEmptyData } from "../../utils/helpers";
 import { limit } from '../../utils/helpers/limit';
