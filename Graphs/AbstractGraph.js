@@ -550,14 +550,24 @@ export default class AbstractGraph extends React.Component {
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-        
         const {
             labelWidth,
             legendWidth,
             legendHeight,
         } = this.getGraphDimension(label, data);
-        let legendContentHeight = 4;
-        data.map(() => legendContentHeight += 12);        
+
+        const {
+            circleToPixel,
+        } = this.getConfiguredProperties();
+
+        const {
+            bottomMargin
+        } = defaultProperties;
+
+        const lineHeight = legend.circleSize * circleToPixel;
+        let legendContentHeight = bottomMargin;
+        data.map(() => legendContentHeight += lineHeight); 
+
         const legendContainerStyle = {
             marginLeft: '5px',
             width: legendWidth,

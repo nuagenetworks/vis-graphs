@@ -90,4 +90,5 @@ export default {
     zeroStart: true,
     yRangePadding: true,
     legendArea: 0.20,
+    bottomMargin: 4,
 }
