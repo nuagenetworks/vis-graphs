@@ -556,7 +556,8 @@ export default class AbstractGraph extends React.Component {
             legendWidth,
             legendHeight,
         } = this.getGraphDimension(label, data);
-
+        let legendContentHeight = 4;
+        data.map(() => legendContentHeight += 12);        
         const legendContainerStyle = {
             marginLeft: '5px',
             width: legendWidth,
@@ -568,7 +569,7 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { alignSelf: 'flex-end' }
+            legendStyle = { alignSelf: 'flex-end', height: legendContentHeight }
         } else {
             // Place legends horizontally
             legendStyle = {
