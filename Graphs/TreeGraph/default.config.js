@@ -41,44 +41,9 @@ export const properties = {
             defaultColor: "rgba(60, 57, 57, 0.37)",
             width: "1px"
         },
-        width: 120,
+        width: 180,
         height: 45,
         textMargin: 5,
-        attributesToShow: {
-            enterprises: {
-                'name': true,
-                'description': true
-            },
-            domain: {
-                'name': true,
-                'description': true
-            },
-            l2domain: {
-                'name': true,
-                'description': true
-            },
-            zone: {
-                'name': true,
-                'description': true
-            },
-            subnet: {
-                'name': true,
-                'description': false,
-                'address': true
-            },
-            vport: {
-                'name': true,
-                'description': true
-            },
-            vminterface: {
-                'name': true,
-                'description': true
-            },
-            default: {
-                'name': true,
-                'description': true
-            }
-        }
     },
     margin: {
         top: -80,
