@@ -542,6 +542,14 @@ export default class AbstractGraph extends React.Component {
 
     getValueFromPercentage = (value, percentage) => {
         return (percentage * value) / 100;
+    };
+
+    getLegendLineHeight(legend) {
+        const {
+            circleToPixel,
+        } = this.getConfiguredProperties();
+
+        return legend.circleSize * circleToPixel;
     }
 
     renderLegend(data, legend, getColor, label, isVertical) {
@@ -557,22 +565,30 @@ export default class AbstractGraph extends React.Component {
             legendHeight,
         } = this.getGraphDimension(label, data);
 
+        const lineHeight = this.getLegendLineHeight(legend);
+        let legendContentHeight = ((data.length + 2) * lineHeight);
+        if(legendContentHeight > legendHeight) {
+            legendContentHeight = legendHeight;
+        }
+        const marginTop = legendHeight - legendContentHeight;
+
         const legendContainerStyle = {
             marginLeft: '5px',
             width: legendWidth,
-            height: legendHeight,
+            height: legendContentHeight,
+            marginTop,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
 
-        let legendStyle = {};
+        let legendStyle = {width: '100%'};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { alignSelf: 'flex-end' }
+            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight - lineHeight }
         } else {
             // Place legends horizontally
             legendStyle = {
-                width: '100%',
+                ...legendStyle,
                 display: 'grid',
                 gridTemplateColumns: `repeat(auto-fit, minmax(${labelWidth * 2}px, 1fr))`,
             }
@@ -589,15 +605,14 @@ export default class AbstractGraph extends React.Component {
 
     getLegendContent(data, legend, getColor, label) {
         const {
-            fontColor,
-            circleToPixel,
+            fontColor
         } = this.getConfiguredProperties();
 
         const {
             labelWidth
         } = this.getGraphDimension(label, data);
 
-        const lineHeight = legend.circleSize * circleToPixel;
+        const lineHeight = this.getLegendLineHeight(legend);
 
         return data.map((d, i) => {
             return (
