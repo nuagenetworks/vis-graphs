@@ -550,17 +550,28 @@ export default class AbstractGraph extends React.Component {
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-        
         const {
             labelWidth,
             legendWidth,
             legendHeight,
         } = this.getGraphDimension(label, data);
 
+        const {
+            circleToPixel,
+        } = this.getConfiguredProperties();
+
+        const lineHeight = legend.circleSize * circleToPixel;
+        let legendContentHeight = ((data.length + 2) * lineHeight);
+        if(legendContentHeight > legendHeight) {
+          legendContentHeight = legendHeight;
+        }
+        const marginTop = legendHeight - legendContentHeight;
+
         const legendContainerStyle = {
             marginLeft: '5px',
             width: legendWidth,
-            height: legendHeight,
+            height: legendContentHeight,
+            marginTop: marginTop,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
@@ -568,7 +579,7 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { alignSelf: 'flex-end' }
+            legendStyle = { alignSelf: 'flex-end', height: legendContentHeight - lineHeight }
         } else {
             // Place legends horizontally
             legendStyle = {
