@@ -1,10 +1,10 @@
 import { 
     SimpleTextGraph,
     PieGraph,
+    VariationTextGraph,
 } from './GraphsV2';
 
 import {
-    VariationTextGraph,
     LineGraph,
     MultiLineGraph,
     ChordGraph,
