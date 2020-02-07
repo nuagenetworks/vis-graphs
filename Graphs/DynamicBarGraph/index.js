@@ -180,26 +180,88 @@ class BarGraph extends XYGraph {
       this.customExtent[1] = this.customExtent[1] + Math.abs(difference);
 
     return this.customExtent
-}
+  }
+
+  setAxis(data) {
+
+    if (!data || !data.length)
+      return;
+
+    const {
+      xTickSizeInner,
+      xTickSizeOuter,
+      xTickFormat,
+      xTickGrid,
+      xTicks,
+      yTickFormat,
+      yTickGrid,
+      yTicks,
+      yTickSizeInner,
+      yTickSizeOuter,
+      xTicksLabel,
+      dateHistogram
+    } = this.getConfiguredProperties();
+
+    this.axis = {};
+
+    // X axis
+    this.axis.x = d3.axisBottom(this.getScale().x)
+      .tickSizeInner(xTickGrid ? -this.getAvailableHeight() : xTickSizeInner)
+      .tickSizeOuter(xTickSizeOuter);
+
+    if (xTicksLabel && typeof xTicksLabel === 'object') {
+      const externalTicksLable = {};
+      const xTicksLabelValue = data.map((barData) => {
+        if (!Object.keys(xTicksLabel).includes(barData.key.toString())) {
+          externalTicksLable[barData.key] = barData.key;
+        }
+        return barData.key;
+      });
+
+      const finalTikcLabel = { ...xTicksLabel, ...externalTicksLable }
+
+      this.axis.x
+        .tickValues(xTicksLabelValue)
+        .tickFormat(value => finalTikcLabel[value]);
+    } else if (xTickFormat) {
+      if (dateHistogram) {
+        this.axis.x.tickFormat(d3.timeFormat(xTickFormat));
+      } else {
+        this.axis.x.tickFormat(d3.format(xTickFormat));
+      }
+    }
+
+    if (xTicks) {
+      this.axis.x.ticks(xTicks);
+    }
+    
+    this.axis.y = d3.axisLeft(this.getScale().y)
+      .tickSizeInner(yTickGrid ? -this.getAvailableWidth() : yTickSizeInner)
+      .tickSizeOuter(yTickSizeOuter);
+
+    if (yTickFormat) {
+      this.axis.y.tickFormat(d3.format(yTickFormat));
+    } else if (yTickFormat === "") {
+      const yAxisTicks = this.getScale().y.ticks()
+        .filter(tick => Number.isInteger(tick));
+      this.axis.y
+        .tickValues(yAxisTicks)
+        .tickFormat(d3.format('d'));
+    }
+
+    if (yTicks) {
+      this.axis.y.ticks(yTicks);
+    }
+  }
 
   setScale(data) {
     const {
-      dateHistogram,
       padding
     } = this.getConfiguredProperties()
 
     this.scale = {}
     
-    if (dateHistogram) {
-
-      // Handle the case of a vertical date histogram.
-      this.scale.x = d3.scaleTime()
-        .domain(d3.extent(data, this.getDimensionFn()))
-
-        this.scale.y = d3.scaleLinear()
-        .domain(this.range(data))
-
-    } else if (this.isVertical()) {
+  if (this.isVertical()) {
 
       // Handle the case of a vertical bar chart.
       this.scale.x = d3.scaleBand()
@@ -318,14 +380,7 @@ class BarGraph extends XYGraph {
   }
 
   setBarWidth() {
-    const {
-      dateHistogram,
-      interval
-    } = this.getConfiguredProperties()
- 
-    if (dateHistogram) {
-      this.barWidth = barWidth(this.props.context.interval || interval, this.getScale().x)
-    } else if (this.isVertical()) {
+    if (this.isVertical()) {
       this.barWidth = this.getScale().x.bandwidth()
     }
   }
@@ -336,13 +391,11 @@ class BarGraph extends XYGraph {
 
   getBarDimensions(scale) {
 
-    const { dateHistogram } = this.getConfiguredProperties();
-
     return (
         this.isVertical() ? {
             x: d => scale.x(d.key),
             y: d => scale.y(d.y1 >= 0 ? d.y1 : d.y0),
-            width: !dateHistogram ? scale.x.bandwidth() : this.barWidth,
+            width: this.barWidth,
             height: d => d.y1 >= 0 ? scale.y(d.y0) - scale.y(d.y1) : scale.y(d.y1) - scale.y(d.y0),
             initialY: d => scale.y(0),
             initialHeight: 0,
