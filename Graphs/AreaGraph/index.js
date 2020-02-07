@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import React from 'react'
+import React from 'react';
 import isEqual from 'lodash/isEqual';
-import XYGraph from '../XYGraph'
-import ReactTooltip from 'react-tooltip'
+import XYGraph from '../XYGraph';
+import ReactTooltip from 'react-tooltip';
+import isEmpty from 'lodash/isEmpty';
 
 import { nest, nestStack, merge, sorter, pick } from "../../utils/helpers"
 
@@ -445,6 +446,7 @@ class AreaGraph extends XYGraph {
  
   // update data on props change or resizing
   updateElements() {
+    if (isEmpty(this.node)) return;
     const {
         data
     } = this.props  
