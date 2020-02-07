@@ -310,7 +310,7 @@ export default class AbstractGraph extends React.Component {
                 return a;
 
             return format(labelA.toString()).length > format(labelB.toString()).length ? a : b;
-        }));
+        }, 0));
 
         const longestLabel = lab ? lab.toString() : '';
         let labelSize = format(longestLabel).length
