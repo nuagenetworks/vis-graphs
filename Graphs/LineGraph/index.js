@@ -19,7 +19,7 @@ import moment from 'moment';
 import momentDuration from 'moment-duration-format';
 import isEqual from 'lodash/isEqual';
 import * as d3 from 'd3'
-
+import isEmpty from "lodash/isEmpty";
 import XYGraph from "../XYGraph";
 import { pick } from "../../utils/helpers";
 import { nest } from "../../utils/helpers/nest";
@@ -48,11 +48,16 @@ class LineGraph extends XYGraph {
         this.miniGraphXScale = 0;
         this.startIndex = 0;
         this.endIndex = 0;
+
+        this.state = {
+            configuredProperties: this.configuredProperties
+        }
     }
 
     shouldComponentUpdate(nextProps) {
-        return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY)) || 
-        !isEqual(this.props.configuration, nextProps.configuration)
+        return !isEqual(pick(this.props, ...FILTER_KEY), pick(nextProps, ...FILTER_KEY)) ||
+            !isEqual(this.props.configuration, nextProps.configuration) ||
+            !isEqual(this.configuredProperties, this.state.configuredProperties);
     } 
     
     componentDidUpdate(prevProps) {
@@ -66,6 +71,7 @@ class LineGraph extends XYGraph {
 
         if (!isEqual(prevProps.configuration.data, this.props.configuration.data)) {
             this.setConfiguredProperties(this.props, this.properties);
+            this.setState({configuredProperties: this.configuredProperties});
             this.setTooltip();
         }
 
@@ -156,6 +162,10 @@ class LineGraph extends XYGraph {
         if (!data || !data.length)
             return this.renderMessage('No data to visualize')
 
+        if (isEmpty(this.state.configuredProperties)) {
+            return null;
+        }
+
         const {
           chartHeightToPixel,
           chartWidthToPixel,
@@ -193,7 +203,7 @@ class LineGraph extends XYGraph {
           xTickFontSize,
           yTicksLabel,
           connected,
-        } = this.getConfiguredProperties();
+        } = this.state.configuredProperties;
 
         let finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
 
