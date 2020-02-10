@@ -7,9 +7,10 @@ import {
     AreaChart,
     Area,
 } from 'recharts';
+
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
-import customTooltip from '../Components/utils/CustomTooltip';
+import customTooltip from '../Components/utils/RechartsTooltip';
 import dataParser from '../utils/DataParser';
 import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
@@ -47,9 +48,11 @@ const AreaGraph = (props) => {
       data, 
       key: linesColumn, 
       xColumn, 
-      yColumn 
+      yColumn,
     });
+
     const legendHeight = (legend.separate * height) / 100;
+    
     const colors = scaleOrdinal(schemeCategory10).range();
 
     return (
@@ -62,7 +65,7 @@ const AreaGraph = (props) => {
               top: margin.top * 3,
               bottom: margin.top * 3,
               right: margin.right * 3,
-              left: margin.left * 3
+              left: margin.left * 3,
             }}
         >
             {
@@ -72,7 +75,7 @@ const AreaGraph = (props) => {
                 XAxisLabelConfig, 
                 xLabelRotateHeight, 
                 xTickFormat, 
-                dateHistogram
+                dateHistogram,
               })
             }
             {
