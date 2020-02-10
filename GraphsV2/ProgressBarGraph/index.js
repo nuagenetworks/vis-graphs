@@ -124,6 +124,8 @@ const LowerText = styled('div')({
     marginRight: ({ marginRight } = {}) => marginRight,
 });
 
+const Tooltip = styled('div')({});
+
 const ProgressBarGraph = (props) => {
     const [customTooltips, setCustomTooltips] = useState({});
 
@@ -136,7 +138,7 @@ const ProgressBarGraph = (props) => {
 
     useEffect(() => {
         setTooltip();
-    }, [])
+    }, [props.data, props.width, props.height])
 
     const setTooltip = () => {
         setCustomTooltips(customTooltip(properties));
@@ -202,10 +204,9 @@ const ProgressBarGraph = (props) => {
                                 direction={(display === PERCENTAGE) ? 'row' : 'column'}
                             >
                                 <InnerBarSection height={barHeight}>
-                                    <div>{customTooltips.toolTip}</div>
+                                    <Tooltip>{customTooltips.toolTip}</Tooltip>
                                     <svg style={{ width: barWidth, height: barHeight }}>
                                         <g>
-
                                             <rect
                                                 width={barWidth}
                                                 height={barHeight}
@@ -213,22 +214,24 @@ const ProgressBarGraph = (props) => {
                                                 {...customTooltip}
                                             />
                                             <rect
-                                                width={getWidth(
-                                                    barData,
-                                                    barWidth,
-                                                    maxData,
-                                                    usedData
-                                                )
+                                                width={
+                                                    getWidth(
+                                                        barData,
+                                                        barWidth,
+                                                        maxData,
+                                                        usedData
+                                                    )
                                                 }
                                                 height={barHeight}
-                                                fill={getColor({
-                                                    barData,
-                                                    barWidth,
-                                                    barColor,
-                                                    colorRange,
-                                                    maxData,
-                                                    usedData
-                                                })
+                                                fill={
+                                                    getColor({
+                                                        barData,
+                                                        barWidth,
+                                                        barColor,
+                                                        colorRange,
+                                                        maxData,
+                                                        usedData
+                                                    })
                                                 }
                                                 {...customTooltip}
                                             />
@@ -240,15 +243,16 @@ const ProgressBarGraph = (props) => {
                                     alignSelf={(display === PERCENTAGE) ? 'center' : 'flex-end'}
                                     marginRight={(sectionHeight === minSectionHeight) ? textWidth * 1.25 : margin.right}
                                 >
-                                    {getData({
-                                        barData,
-                                        maxData,
-                                        usedData,
-                                        display,
-                                        maxDataFormat,
-                                        defaultRange,
-                                        units
-                                    })
+                                    {
+                                        getData({
+                                            barData,
+                                            maxData,
+                                            usedData,
+                                            display,
+                                            maxDataFormat,
+                                            defaultRange,
+                                            units
+                                        })
                                     }
                                 </LowerText>
                             </BarSection>
