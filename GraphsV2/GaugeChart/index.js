@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { Cell, PieChart, Pie } from 'recharts';
+
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-
 import config from './default.config';
 import { numberToColorHsl } from '../utils/colorConvert';
 
