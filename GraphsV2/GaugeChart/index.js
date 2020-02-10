@@ -23,16 +23,21 @@ const GaugeChart = (props) => {
         gaugeTicks,
         fontSize,
     } = properties;
+    
     const RADIAN = Math.PI / 180;
+    
     const chartValue = originalData[0].value;
+    
     const chartData = [];
+    
     let gaugeTickValue = parseInt(parseInt(maxValue) / parseInt(gaugeTicks));
+    
     for (let i = parseInt(minValue) + gaugeTickValue; i <= parseInt(maxValue); i += gaugeTickValue) {
         chartData.push({
             name: i,
             value: gaugeTickValue,
             label: i,
-            color: numberToColorHsl(i)
+            color: numberToColorHsl(i),
         })
     }
 
@@ -43,19 +48,19 @@ const GaugeChart = (props) => {
     const arrowData = [
         { value: chartValue },
         { value: 0 },
-        { value: sumValues - chartValue }
+        { value: sumValues - chartValue },
     ];
 
     const pieProps = {
         startAngle: 180,
         endAngle: 0,
         cx: width / 2 - 5,
-        cy: width / 2 - 5
+        cy: width / 2 - 5,
     };
 
     const pieRadius = {
         innerRadius: width * 0.13,
-        outerRadius: width * 0.32
+        outerRadius: width * 0.32,
     };
 
     const Arrow = ({ cx, cy, midAngle, outerRadius }) => {
