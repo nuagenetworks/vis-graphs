@@ -111,6 +111,8 @@ const PortBox = styled('div')({
 
 const Icon = styled('div')({});
 
+const Tooltip = styled('div')({});
+
 const PortGraph = (props) => {
 
     let isMultipleRows = false;
@@ -119,7 +121,7 @@ const PortGraph = (props) => {
     useEffect(() => {
         initiate(props);
         setTooltip();
-    }, [])
+    }, [props.data, props.height, props.width, props.data2])
 
     const {
         data,
@@ -201,7 +203,6 @@ const PortGraph = (props) => {
     const portRowset = chunk(data, rowLimit);
 
     const getTooltipContent = ({ tooltipScript, tooltip, yTicksLabel, data2 }) => {
-        console.error("data2", hoveredDatum)
         if (hoveredDatum) {
             if (tooltipScript) {
                 const Scripts = require('@/scripts');
@@ -331,6 +332,56 @@ const PortGraph = (props) => {
         )
     }
 
+    const renderPort = ({
+        portRowset,
+        portAreaWidth,
+        topColumn,
+        rowCount,
+        borderRight,
+        portIcon,
+        defaultIconColor,
+        minPortFontSize,
+        maxPortFontSize,
+        portColor,
+        bottomColumn
+    }) => {
+        return (
+            portRowset.map((portRow, index) => {
+                return (
+                    <Item key={index}>
+                        {portRow.map((data, i) => {
+                            return (
+                                <PortBox
+                                    key={i}
+                                    minWidth={portAreaWidth}
+                                    onClick={openInfoBox(data)}
+                                >
+                                    {getPortAttribute(data, topColumn)}
+                                    <Icon
+                                        borderRight={(i % rowCount) < (rowCount - 1) ? borderRight : ''}
+                                    >
+                                        {getIcon(
+                                            {
+                                                data,
+                                                portIcon,
+                                                defaultIconColor,
+                                                minPortFontSize,
+                                                maxPortFontSize,
+                                                portColor,
+                                            }
+                                        )}
+                                    </Icon>
+                                    {getPortAttribute(data, bottomColumn)}
+                                </PortBox>
+                            )
+                        })
+                        }
+                    </Item>
+                )
+            })
+        )
+    }
+
     return (
         <Container
             width={width}
@@ -341,40 +392,24 @@ const PortGraph = (props) => {
                 justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
             >
                 {renderInfoBox({ data2, tooltipScript, properties })}
-                <div>{customTooltips.toolTip}</div>
-                {portRowset.map((portRow, index) => {
-                    return (
-                        <Item key={index}>
-                            {portRow.map((data, i) => {
-                                return (
-                                    <PortBox
-                                        key={i}
-                                        minWidth={portAreaWidth}
-                                        onClick={openInfoBox(data)}
-                                    >
-                                        {getPortAttribute(data, topColumn)}
-                                        <Icon
-                                            borderRight={(i % rowCount) < (rowCount - 1) ? borderRight : ''}
-                                        >
-                                            {getIcon(
-                                                {
-                                                    data,
-                                                    portIcon,
-                                                    defaultIconColor,
-                                                    minPortFontSize,
-                                                    maxPortFontSize,
-                                                    portColor,
-                                                }
-                                            )}
-                                        </Icon>
-                                        {getPortAttribute(data, bottomColumn)}
-                                    </PortBox>
-                                )
-                            })
-                            }
-                        </Item>
+                <Tooltip>{customTooltips.toolTip}</Tooltip>
+                {
+                    renderPort(
+                        {
+                            portRowset,
+                            portAreaWidth,
+                            topColumn,
+                            rowCount,
+                            borderRight,
+                            portIcon,
+                            defaultIconColor,
+                            minPortFontSize,
+                            maxPortFontSize,
+                            portColor,
+                            bottomColumn
+                        }
                     )
-                })}
+                }
             </IconContainer>
         </Container>
     );
