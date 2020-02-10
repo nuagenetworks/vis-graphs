@@ -123,7 +123,8 @@ class BarGraph extends XYGraph {
       otherOptions,
       stackSequence,
       xTicksLabel,
-      isSort
+      isSort,
+      dateHistogram
     } = this.getConfiguredProperties()
  
     if (this.isVertical()) {
@@ -143,7 +144,8 @@ class BarGraph extends XYGraph {
       stack: this.stack,
       otherOptions,
       stackSequence,
-      isSort
+      isSort,
+      dateHistogram
     });
   
     // check condition to apply brush on chart
