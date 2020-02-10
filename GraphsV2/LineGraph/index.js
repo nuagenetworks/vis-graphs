@@ -21,6 +21,7 @@ const LineGraph = (props) => {
         width,
         data,
     } = props;
+
     const {
         xLabel,
         yLabel,
@@ -42,13 +43,16 @@ const LineGraph = (props) => {
         data,
         key: linesColumn,
         xColumn,
-        yColumn
+        yColumn,
     });
 
     const [tooltipName, setToolTipKey] = useState(-1);
     sortByKey(parsedData, 'ts');
+    
     const legendHeight = (legend.separate * height) / 100;
+
     const colors = scaleOrdinal(schemeCategory10).range();
+    
     return (
         <LineChart
             width={width}
