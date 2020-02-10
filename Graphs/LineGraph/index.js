@@ -71,8 +71,8 @@ class LineGraph extends XYGraph {
 
         if (!isEqual(prevProps.configuration.data, this.props.configuration.data)) {
             this.setConfiguredProperties(this.props, this.properties);
-            this.setState({configuredProperties: this.configuredProperties});
             this.setTooltip();
+            this.setState({configuredProperties: this.configuredProperties});
         }
 
         this.updateElements(); 
