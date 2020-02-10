@@ -35,7 +35,6 @@ const handleMarkerClick = (props, e) => {
     if (data && Array.isArray(data) && data.length && onMarkClick) {
         onMarkClick(data[0]);
     }
-    return {};
 }
 
 const VariationTextGraph = (props) => {
@@ -74,29 +73,29 @@ const VariationTextGraph = (props) => {
         if (!settingValue)
             return;
 
-        setSettingColor(drawColors);
-
         if (settingValue.variation > 0) {
             setSettingColor(positiveColors);
-        }
-
-        if (settingValue.variation < 0) {
+        } else if (settingValue.variation < 0) {
             setSettingColor(negativeColors);
+        } else {
+            setSettingColor(drawColors);
         }
     }
 
     const computeValues = (data, target) => {
-        if (!data || !target)
+        if (!data || !target) {
             return;
+        }
 
-        let lastInfo = {},
-            previousInfo = {};
+        let lastInfo = {};
+        let previousInfo = {};
 
         data.forEach((d) => {
-            if (d[target.column] === target.value)
+            if (d[target.column] === target.value) {
                 lastInfo = d;
-            else
+            } else {
                 previousInfo = d;
+            }    
         })
 
         const lastValue = lastInfo[target.field];
@@ -123,16 +122,16 @@ const VariationTextGraph = (props) => {
         return x.toFixed(nb)
     }
 
-    const getFormattedValue = (x, target) => {
-        return (target.format) ? formattedValue(x, target.format) : numberWithCommas(x);
+    const getFormattedValue = (x, format) => {
+        return (format) ? formattedValue(x, format) : numberWithCommas(x);
     }
 
     const renderValues = (absolute, showVariation) => {
-        if (!settingValue)
+        if (!settingValue) {
             return;
-
-        const lastValue = getFormattedValue(settingValue.lastValue, target);
-        const previousValue = getFormattedValue(settingValue.previousValue, target);
+        }
+        const lastValue = getFormattedValue(settingValue.lastValue, target.format);
+        const previousValue = getFormattedValue(settingValue.previousValue, target.format);
         const info = !absolute ? lastValue : `${lastValue}/${previousValue}`;
 
         return (
