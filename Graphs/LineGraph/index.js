@@ -55,13 +55,18 @@ class LineGraph extends XYGraph {
         !isEqual(this.props.configuration, nextProps.configuration)
     } 
     
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         const {
             data
         } = this.props;
 
         if (!data || !data.length) {
             return
+        }
+
+        if (!isEqual(prevProps.configuration.data, this.props.configuration.data)) {
+            this.setConfiguredProperties(this.props, this.properties);
+            this.setTooltip();
         }
 
         this.updateElements(); 
