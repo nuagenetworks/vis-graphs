@@ -514,7 +514,7 @@ class GeoMap extends AbstractGraph {
         filters
     } = this.getConfiguredProperties()
 
-    if(searchBar === false)
+    if(searchBar === false || !this.props.googleMapsAPIKey)
        return
 
     return (

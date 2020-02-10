@@ -88,7 +88,7 @@ class PortGraph extends XYGraph {
     }
 
     // Get the color of the port icons based on the field's value set in configuration.
-    getIconColor(row) {
+    getIconColor = (row) => {
         const {
             portColor,
             defaultIconColor
@@ -296,13 +296,32 @@ class PortGraph extends XYGraph {
         if (!data.length) {
             return this.renderMessage('No data to visualize');
         }
+        const { legend } = this.getConfiguredProperties();
+        const legendData = legend && legend.getData ? evalExpression(legend.getData)(data) : data;
+        const legendGetColor = legend && legend.getColor ? evalExpression(legend.getColor) : this.getIconColor;
+        const legendGetLabel = legend && legend.getLabel ? evalExpression(legend.getLabel) : (d) => (d);
+        const isVertical = this.checkIsVerticalLegend();
+        const {
+            graphHeight,
+            graphWidth,
+        } = this.getGraphDimension(legendGetLabel, legendData);
+
+        const graphStyle = {
+            ...styles.container,
+            width: graphWidth,
+            height: graphHeight,
+            order:isVertical ? 2 : 1,
+        };
 
         return (
             <div className='port-graph'>
                 <div>{this.tooltip}</div>
-                <div style={{ width, height, ...styles.container }}>
-                    {this.renderColumns()}
-                    {this.renderGraph()}
+                <div style={{ height, width,  display: isVertical ? 'flex' : 'inline-grid'}}>
+                    {this.renderLegend(legendData, legend, legendGetColor, legendGetLabel, isVertical) }
+                    <div className='graphContainer' style={graphStyle}>
+                        {this.renderColumns()}
+                        {this.renderGraph()}
+                    </div>
                 </div>
             </div>
         )
