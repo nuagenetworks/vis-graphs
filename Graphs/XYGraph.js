@@ -10,9 +10,9 @@ import {
     axisBottom,
     axisLeft,
     scaleBand,
-    map
+    map,
+    timeFormat
 } from "d3";
-import * as d3 from "d3";
 
 export default class XYGraph extends AbstractGraph {
 
@@ -142,7 +142,7 @@ export default class XYGraph extends AbstractGraph {
                 .tickFormat(value => finalTikcLabel[value]);
         } else if(xTickFormat){
             if (dateHistogram) {
-                this.axis.x.tickFormat(d3.timeFormat(xTickFormat));
+                this.axis.x.tickFormat(timeFormat(xTickFormat));
             } else {
                 this.axis.x.tickFormat(format(xTickFormat));
             }
