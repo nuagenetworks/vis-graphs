@@ -322,9 +322,9 @@ class BarGraph extends XYGraph {
       dateHistogram,
       interval
     } = this.getConfiguredProperties()
-
+ 
     if (dateHistogram) {
-      this.barWidth = barWidth(interval, this.getScale().x)
+      this.barWidth = barWidth(this.props.context.interval || interval, this.getScale().x)
     } else if (this.isVertical()) {
       this.barWidth = this.getScale().x.bandwidth()
     }
