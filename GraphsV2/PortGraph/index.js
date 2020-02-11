@@ -81,14 +81,14 @@ const IconContainer = styled('div')({
     justifyContent: ({ justifyContent } = {}) => justifyContent,
 });
 
-const labelContainer = styled('div')({
+const LabelContainer = styled('div')({
     width: '100%',
     display: 'flex',
     flexWrap: 'wrap',
     fontSize: '.8em'
 });
 
-const labelItem = styled('div')({
+const LabelItem = styled('div')({
     width: '100%',
     display: 'flex',
     overflow: 'hidden',
@@ -118,9 +118,15 @@ const PortGraph = (props) => {
     let isMultipleRows = false;
     let hoveredDatum;
 
+    const [portAreaWidth, setStatePortAreaWidth] = useState(100);
+    const [rowCount, setStateRowCount] = useState(0);
+    const [openModal, setOpenModal] = useState(false);
+    const [infoBoxData, setInfoBoxData] = useState({});
+    const [customTooltips, setCustomTooltips] = useState({});
+
     useEffect(() => {
         initiate(props);
-        setTooltip();
+        setCustomTooltips(customTooltip(properties));
     }, [props.data, props.height, props.width, props.data2])
 
     const {
@@ -145,16 +151,6 @@ const PortGraph = (props) => {
         portColor,
         borderRight,
     } = properties;
-
-    const [portAreaWidth, setStatePortAreaWidth] = useState(100);
-    const [rowCount, setStateRowCount] = useState(0);
-    const [openModal, setOpenModal] = useState(false);
-    const [infoBoxData, setInfoBoxData] = useState({});
-    const [customTooltips, setCustomTooltips] = useState({});
-
-    const setTooltip = () => {
-        setCustomTooltips(customTooltip(properties));
-    }
 
     const checkMultipleRows = ({ data, rowLimit }) => {
         isMultipleRows = data.length > rowLimit;
@@ -293,12 +289,12 @@ const PortGraph = (props) => {
 
         return (
             columnData.map((rowData, idx) => (
-                <labelContainer>
-                    <labelItem order={idx + 1}
+                <LabelContainer>
+                    <LabelItem order={idx + 1}
                     >
                         {rowData}
-                    </labelItem>
-                </labelContainer>
+                    </LabelItem>
+                </LabelContainer>
             ))
         )
     }
@@ -386,6 +382,7 @@ const PortGraph = (props) => {
         <Container
             width={width}
             height={height}
+            data-test="port-graph"
         >
             {renderColumns({ data2, columns, rows })}
             <IconContainer
