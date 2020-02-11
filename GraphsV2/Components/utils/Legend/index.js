@@ -5,8 +5,9 @@ import {
     Legend as LegendComponent
 } from 'recharts';
 
-export default ({ legend, legendHeight, type, ...rest }) => {
+export default ({ legend, height, type, ...rest }) => {
     let Component = type ? customLegends[type] : StandardLegend;
+    const legendHeight = (legend.separate * height) / 100;
     if (legend && legend.show) {
         return (
             <LegendComponent
