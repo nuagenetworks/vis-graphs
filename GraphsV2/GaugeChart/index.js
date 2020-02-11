@@ -6,7 +6,7 @@ import { Cell, PieChart, Pie } from 'recharts';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import config from './default.config';
-import { numberToColorHsl } from '../utils/colorConvert';
+import colorConvert from 'color-convert';
 
 const GaugeChart = (props) => {
 
@@ -37,7 +37,10 @@ const GaugeChart = (props) => {
             name: i,
             value: gaugeTickValue,
             label: i,
-            color: numberToColorHsl(i),
+            color: ((code) => {
+              var rgb = colorConvert.hsl.rgb(code, 100, 50);
+              return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+            })(parseInt(maxValue) - i),
         })
     }
 
@@ -80,12 +83,12 @@ const GaugeChart = (props) => {
     };
 
     const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, label }) => {
-        const radius = outerRadius + 5;
+        const radius = outerRadius + 10;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
         return (
-            <text x={x} y={y} fill="black" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+            <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
                 {label}
             </text>
         );
