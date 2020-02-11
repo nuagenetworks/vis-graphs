@@ -6,6 +6,7 @@ import {
     Bar,
     Cell,
     Brush,
+    CartesianGrid
 } from 'recharts';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
@@ -13,7 +14,7 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-import customTooltip from '../Components/utils/CustomTooltip';
+import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import dataParser from '../utils/DataParser';
 import {
@@ -59,15 +60,17 @@ const BarGraph = (props) => {
         dimension = yColumn
     }
 
+    const isVertical = orientation === DEFAULT_BARGRAPH_ORIENTATION ? true : undefined;
+    const xAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined;
+    const yAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "category" : undefined;
     const stack = stackColumn || undefined;
-    const legendHeight = (legend.separate * height) / 100;
     const { parsedData, uniqueKeys: barKeys } = dataParser(
         {
             data,
             key: stack,
             xColumn,
             yColumn,
-            orientation
+            isVertical
         }
     );
 
@@ -78,14 +81,9 @@ const BarGraph = (props) => {
             data={parsedData}
             layout={orientation != DEFAULT_BARGRAPH_ORIENTATION ? "vertical" : 'horizontal'}
             cursor={onMarkClick ? "pointer" : ''}
-            margin={{
-                ...margin,
-                top: margin.top * 1.5,
-                bottom: margin.top * 3,
-                right: margin.right * 1.5,
-                left: margin.left * 1.5
-            }}
+            margin={margin}
         >
+            <CartesianGrid vertical={false} />
             {
                 xAxis({
                     xColumn,
@@ -94,7 +92,7 @@ const BarGraph = (props) => {
                     xLabelRotateHeight,
                     xTickFormat,
                     dateHistogram,
-                    orientation
+                    type: xAxisType,
                 })
             }
 
@@ -103,13 +101,13 @@ const BarGraph = (props) => {
                     yLabel,
                     YAxisLabelConfig,
                     yTickFormat,
-                    orientation,
+                    type: yAxisType,
                     yColumn
                 })
             }
 
             {
-                stack && renderLegend({ legend, legendHeight })
+                stack && renderLegend({ legend, height })
             }
 
             {
