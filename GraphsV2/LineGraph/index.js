@@ -13,6 +13,7 @@ import renderLegend from '../Components/utils/Legend';
 import dataParser from '../utils/DataParser';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
+import { sortAscendingOnKey } from '../utils/helper';
 
 const LineGraph = (props) => {
     const {
@@ -46,15 +47,14 @@ const LineGraph = (props) => {
         yColumn,
     });
 
-    const [tooltipName, setToolTipKey] = useState(-1);
-    sortByKey(parsedData, 'ts');
-    
-    const legendHeight = (legend.separate * height) / 100;
+    const [tooltipKey, setToolTipKey] = useState(-1);
+    sortAscendingOnKey(parsedData, 'ts');
 
     const colors = scaleOrdinal(schemeCategory10).range();
     
     return (
         <LineChart
+            test-data="line-graph"
             width={width}
             height={height}
             data={parsedData}
@@ -78,32 +78,32 @@ const LineGraph = (props) => {
             {
                 renderLegend({
                     legend,
-                    legendHeight,
+                    height,
                 })
             }
             {
-                customTooltip({ tooltip, tooltipName })
+                customTooltip({ tooltip, tooltipKey })
             }
             {
                 lineKeys.map((lineItem, index) => {
-                    const color = colors[index % 20];
+                    const color = colors[index % colors.length];
                     return (
-                        <Line connectNulls={zeroStart}
+                        <Line 
+                            connectNulls={zeroStart}
+                            key={`line-${index}`}
                             onMouseEnter={({ name }) => setToolTipKey(name)}
                             onMouseLeave={() => setToolTipKey(-1)}
-                            type="linear" name={lineItem} dataKey={lineItem} stroke={color} fill={color} />
+                            type="linear"
+                            name={lineItem}
+                            dataKey={lineItem}
+                            stroke={color}
+                            fill={color} 
+                        />
                     )
                 })
             }
         </LineChart>
     );
-}
-
-const sortByKey = (array, key) => {
-    return array.sort(function (first, second) {
-        var x = first[key]; var y = second[key];
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-    });
 }
 
 LineGraph.propTypes = {
