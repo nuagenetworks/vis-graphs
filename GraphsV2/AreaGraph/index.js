@@ -6,6 +6,7 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import {
     AreaChart,
     Area,
+    CartesianGrid,
 } from 'recharts';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -51,8 +52,6 @@ const AreaGraph = (props) => {
       yColumn,
     });
 
-    const legendHeight = (legend.separate * height) / 100;
-    
     const colors = scaleOrdinal(schemeCategory10).range();
 
     return (
@@ -60,14 +59,10 @@ const AreaGraph = (props) => {
             width={width}
             height={height}
             data={parsedData}
-            margin={{
-              ...margin, 
-              top: margin.top * 3,
-              bottom: margin.top * 3,
-              right: margin.right * 3,
-              left: margin.left * 3,
-            }}
+            test-data="area-graph"
+            margin={margin}
         >
+            <CartesianGrid vertical = {false}/>
             {
               xAxis({
                 xColumn, 
@@ -87,7 +82,7 @@ const AreaGraph = (props) => {
             {
               renderLegend({
                 legend,
-                legendHeight,
+                height,
               })
             }
             {
@@ -95,9 +90,17 @@ const AreaGraph = (props) => {
             }
             {
                 areaKeys.map((areaItem, index) => {
-                    const color = colors[index % 20];
+                    const color = colors[index % colors.length];
                     return (
-                      <Area type="monotone" name={areaItem} dataKey={areaItem} stackId={stacked ? "1" : index} stroke={color} fill={color} />
+                        <Area
+                            type="monotone"
+                            key={`area-${index}`} 
+                            name={areaItem} 
+                            dataKey={areaItem} 
+                            stackId={stacked ? areaKeys.length : index} 
+                            stroke={color} 
+                            fill={color} 
+                        />
                     )
                 })
             }
