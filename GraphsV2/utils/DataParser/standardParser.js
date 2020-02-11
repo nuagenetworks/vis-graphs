@@ -1,6 +1,5 @@
-import { DEFAULT_BARGRAPH_ORIENTATION } from '../../../constants';
 
-export default ({ data, key, xColumn, yColumn, orientation }) => {
+export default ({ data, key, xColumn, yColumn, isVertical }) => {
     const map = [];
     data.map((item) => {
         map.push({
@@ -10,7 +9,7 @@ export default ({ data, key, xColumn, yColumn, orientation }) => {
         });
     });
     return {
-        'uniqueKeys': DEFAULT_BARGRAPH_ORIENTATION === orientation ? ['yVal'] : ['xVal'],
+        'uniqueKeys': isVertical ? ['yVal'] : ['xVal'],
         'parsedData': map,
     }
 }

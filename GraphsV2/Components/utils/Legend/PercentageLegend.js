@@ -19,7 +19,7 @@ export default ({ payload: legends, legend, labelColumn }) => (
     <>
         {
             legends.map(({ color, payload }, index) => (
-                <Container key={`item-${index}`} legend={legend}>
+                <Container key={`legend-${index}`} legend={legend}>
                     <Item color={color}>
                         <svg height='0.8rem' width='0.9rem'>
                             <circle cx="7" cy="9" r="3.5" fill={color} />
