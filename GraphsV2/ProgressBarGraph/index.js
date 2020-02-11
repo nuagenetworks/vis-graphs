@@ -137,12 +137,8 @@ const ProgressBarGraph = (props) => {
     } = props;
 
     useEffect(() => {
-        setTooltip();
-    }, [props.data, props.width, props.height])
-
-    const setTooltip = () => {
         setCustomTooltips(customTooltip(properties));
-    }
+    }, [props.data, props.width, props.height]);
 
     const {
         margin,
@@ -187,6 +183,7 @@ const ProgressBarGraph = (props) => {
             fontSize={fontSize}
             width={availableWidth}
             height={height}
+            data-test="progress-graph"
         >
             {
                 data.map((barData, i) => {
@@ -197,7 +194,6 @@ const ProgressBarGraph = (props) => {
                             key={i}
                             height={sectionHeight}
                             width={availableWidth}
-
                         >
                             <UpperText fontSize={fontSize}> {barData[label]} </UpperText>
                             <BarSection
