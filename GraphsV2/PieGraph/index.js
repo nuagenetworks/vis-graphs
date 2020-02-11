@@ -4,9 +4,7 @@ import { compose } from 'redux';
 import {
     PieChart,
     Pie,
-    Cell,
-    Legend,
-    Tooltip
+    Cell
 } from 'recharts';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
@@ -17,7 +15,7 @@ import {
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-import customTooltip from '../Components/utils/CustomTooltip';
+import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import { filterEmptyData } from "../../utils/helpers";
 import { limit } from '../../utils/helpers/limit';
@@ -61,7 +59,6 @@ const PieGraph = (props) => {
     });
 
     const type = percentages ? LEGEND_PERCENTAGE : undefined;
-    const legendHeight = (legend.separate * height) / 100;
 
     return (
         <PieChart
@@ -71,7 +68,7 @@ const PieGraph = (props) => {
         >
            
             {   
-                renderLegend({ legend, legendHeight, labelColumn, type})        
+                renderLegend({ legend, height, labelColumn, type})        
             }
             {
                 customTooltip({ tooltip })
