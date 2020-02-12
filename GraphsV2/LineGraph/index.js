@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { compose } from 'redux';
 import { scaleOrdinal } from 'd3-scale';
 import { schemeCategory10 } from 'd3-scale-chromatic';
-import { LineChart, Line } from 'recharts';
+import { LineChart, Line, CartesianGrid } from 'recharts';
 
 import config from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -38,6 +38,7 @@ const LineGraph = (props) => {
         yTickFormat,
         linesColumn,
         zeroStart,
+        showDots,
     } = properties;
 
     const { parsedData, uniqueKeys: lineKeys } = dataParser({
@@ -59,6 +60,7 @@ const LineGraph = (props) => {
             height={height}
             data={parsedData}
             margin={margin}>
+            <CartesianGrid vertical={false} />
             {
                 xAxis({
                     xColumn,
@@ -93,11 +95,13 @@ const LineGraph = (props) => {
                             key={`line-${index}`}
                             onMouseEnter={({ name }) => setToolTipKey(name)}
                             onMouseLeave={() => setToolTipKey(-1)}
-                            type="linear"
                             name={lineItem}
                             dataKey={lineItem}
                             stroke={color}
                             fill={color} 
+                            isAnimationActive={false}
+                            activeDot={{r: 8}}
+                            dot={showDots}
                         />
                     )
                 })

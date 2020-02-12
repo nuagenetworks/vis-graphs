@@ -3,4 +3,5 @@ export default {
         show: false
     },
     zeroStart: false,
+    showDots: false,
 }
