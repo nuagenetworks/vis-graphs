@@ -8,8 +8,6 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from "./default.config";
 
-const d3 = { format };
-
 const Container = styled('div')({
     fontSize: ({ properties: { fontSize } } = {}) => fontSize,
     fontWeight: ({ properties: { fontWeight } } = {}) => fontWeight,
@@ -105,7 +103,7 @@ const VariationTextGraph = (props) => {
         return {
             lastValue,
             previousValue,
-            variation: variation !== 0 ? variation * 100 / previousValue : 0
+            variation: (variation !== 0 && previousValue !==0)  ? variation * 100 / previousValue : 0
         }
     }
 
@@ -113,8 +111,8 @@ const VariationTextGraph = (props) => {
         return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    const formattedValue = (x, format) => {
-        let formatter = d3.format(format);
+    const formattedValue = (x, valueFormat) => {
+        let formatter = format(valueFormat);
         return formatter(x);
     }
 
@@ -122,8 +120,8 @@ const VariationTextGraph = (props) => {
         return x.toFixed(nb)
     }
 
-    const getFormattedValue = (x, format) => {
-        return (format) ? formattedValue(x, format) : numberWithCommas(x);
+    const getFormattedValue = (x, valueFormat) => {
+        return (valueFormat) ? formattedValue(x, valueFormat) : numberWithCommas(x);
     }
 
     const renderValues = (absolute, showVariation) => {
