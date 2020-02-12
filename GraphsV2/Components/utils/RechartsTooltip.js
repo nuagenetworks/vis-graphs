@@ -47,7 +47,7 @@ const TooltipComponent = (props) => {
               return (
                 <Item>
                     {element.label || element.column} :
-                        {(columnFormatter(col['payload'][elementKey])) || col.name}
+                        { col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) || col.name}
                 </Item>
             )})}
         </Container>
