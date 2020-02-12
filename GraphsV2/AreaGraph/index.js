@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { scaleOrdinal } from 'd3-scale';
@@ -44,6 +44,8 @@ const AreaGraph = (props) => {
         stacked,
     } = properties;
 
+    const [tooltipKey, setToolTipKey] = useState(-1);
+
     // Formatting data for direct consumption by Area Graph
     const { parsedData, uniqueKeys: areaKeys } = dataParser({ 
       data, 
@@ -86,7 +88,7 @@ const AreaGraph = (props) => {
               })
             }
             {
-                customTooltip({ tooltip })
+                customTooltip({ tooltip, tooltipKey, yColumn })
             }
             {
                 areaKeys.map((areaItem, index) => {
@@ -97,6 +99,8 @@ const AreaGraph = (props) => {
                             key={`area-${index}`} 
                             name={areaItem} 
                             dataKey={areaItem} 
+                            onMouseEnter={({name}) => setToolTipKey(name)}
+                            onMouseLeave={() => setToolTipKey(-1)}
                             stackId={stacked ? areaKeys.length : index} 
                             stroke={color} 
                             fill={color} 
