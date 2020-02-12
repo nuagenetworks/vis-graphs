@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import {
@@ -60,6 +60,8 @@ const BarGraph = (props) => {
         dimension = yColumn
     }
 
+    const [tooltipKey, setToolTipKey] = useState(-1);
+
     const isVertical = orientation === DEFAULT_BARGRAPH_ORIENTATION ? true : undefined;
     const xAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined;
     const yAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "category" : undefined;
@@ -111,7 +113,7 @@ const BarGraph = (props) => {
             }
 
             {
-                customTooltip({ tooltip })
+                customTooltip({ tooltip, tooltipKey, yColumn })
             }
 
             {
@@ -132,6 +134,11 @@ const BarGraph = (props) => {
                             }}
                             fill={colors[index % 10]}
                             stackId={stack ? "1" : undefined}
+                            onMouseEnter={(props) => {
+                                const value = props.value;
+                                setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
+                            }}
+                            onMouseLeave={() => setToolTipKey(-1)}
                         >
                             {!stack && parsedData.map((item, index) => (
                                 <Cell
