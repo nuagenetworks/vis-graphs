@@ -178,6 +178,7 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
     } = getGraphDimension({
         height,
         width,
+        data,
         legend,
         legendArea,
     }, label, data);
