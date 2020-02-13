@@ -5,7 +5,7 @@ import GraphAxis from './GraphAxis';
 const AxisLabel = (props) => {
     return (
         <g style={{ textAnchor: 'middle', transform: 'translate(3%,40%)' }}>
-            <text style={{ transform: 'rotate(-90deg)' }}>{props.text}</text>
+            <text style={{ transform: 'rotate(-90deg)' }}  fill='#757575CB'>{props.text}</text>
         </g>
     )
 }
