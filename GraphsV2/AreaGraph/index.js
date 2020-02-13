@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
-import { scaleOrdinal } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
 import {
     AreaChart,
     Area,
@@ -42,6 +40,9 @@ const AreaGraph = (props) => {
         yTickFormat,
         linesColumn,
         stacked,
+        colors,
+        xLabelLimit,
+        yLabelLimit,
     } = properties;
 
     const [tooltipKey, setToolTipKey] = useState(-1);
@@ -54,8 +55,6 @@ const AreaGraph = (props) => {
       yColumn,
     });
 
-    const colors = scaleOrdinal(schemeCategory10).range();
-
     return (
         <AreaChart
             width={width}
@@ -64,7 +63,10 @@ const AreaGraph = (props) => {
             test-data="area-graph"
             margin={margin}
         >
-            <CartesianGrid vertical = {false}/>
+            <CartesianGrid
+                vertical = {false}
+                strokeOpacity={0.3}
+            />
             {
               xAxis({
                 xColumn, 
@@ -73,12 +75,14 @@ const AreaGraph = (props) => {
                 xLabelRotateHeight, 
                 xTickFormat, 
                 dateHistogram,
+                limit: xLabelLimit,
               })
             }
             {
               yAxis({
                 yLabel,
                 yTickFormat,
+                limit: yLabelLimit,
               })
             }
             {
