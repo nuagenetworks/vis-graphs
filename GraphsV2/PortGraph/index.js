@@ -14,6 +14,7 @@ import { config } from './default.config';
 import { getIconPath } from '../../utils/helpers';
 import InfoBox from "../../InfoBox";
 import customTooltip from '../utils/customTooltip';
+import { renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
 
 const getIconColor = (row, portColor, defaultIconColor) => {
 
@@ -70,10 +71,17 @@ const getPortAttribute = (row = {}, attribute) => {
 const Container = styled('div')({
     width: ({ width } = {}) => width,
     height: ({ height } = {}) => height,
+    display: ({ display } = {}) => display
+});
+
+const GraphContainer = styled('div')({
+    width: ({ width } = {}) => width,
+    height: ({ height } = {}) => height,
     display: 'flex',
     verticalAlign: 'middle',
     flexFlow: 'row wrap',
     overflow: 'auto',
+    order: ({ isVertical } = {}) => isVertical ? 2 : 1
 });
 
 const IconContainer = styled('div')({
@@ -150,6 +158,10 @@ const PortGraph = (props) => {
         defaultIconColor,
         portColor,
         borderRight,
+        legend,
+        legendArea,
+        circleToPixel,
+        fontColor
     } = properties;
 
     const checkMultipleRows = ({ data, rowLimit }) => {
@@ -378,36 +390,79 @@ const PortGraph = (props) => {
         )
     }
 
+    const legendData = legend && legend.getData ? evalExpression(legend.getData)(data) : data;
+    const legendGetColor = legend && legend.getColor ? evalExpression(legend.getColor) : getIconColor;
+    const legendGetLabel = legend && legend.getLabel ? evalExpression(legend.getLabel) : (d) => (d);
+    const isVertical = checkIsVerticalLegend({ legend });
+
+    const {
+        graphHeight,
+        graphWidth,
+    } = getGraphDimension(
+        {
+            height,
+            width,
+            data,
+            legendArea,
+            legend
+        },
+        legendGetLabel,
+        legendData
+    );
+
     return (
         <Container
-            width={width}
             height={height}
-            data-test="port-graph"
+            width={width}
+            display={isVertical ? 'flex' : 'inline-grid'}
         >
-            {renderColumns({ data2, columns, rows })}
-            <IconContainer
-                justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
+            {
+                renderLegend(
+                    {
+                        width,
+                        height,
+                        legendArea,
+                        fontColor,
+                        circleToPixel
+                    },
+                    legendData,
+                    legend,
+                    legendGetColor,
+                    legendGetLabel,
+                    isVertical
+                )
+            }
+            <GraphContainer
+                width={graphWidth}
+                height={graphHeight}
+                data-test="port-graph"
+                isVertical={isVertical}
             >
-                {renderInfoBox({ data2, tooltipScript, properties })}
-                <Tooltip>{customTooltips.toolTip}</Tooltip>
-                {
-                    renderPort(
-                        {
-                            portRowset,
-                            portAreaWidth,
-                            topColumn,
-                            rowCount,
-                            borderRight,
-                            portIcon,
-                            defaultIconColor,
-                            minPortFontSize,
-                            maxPortFontSize,
-                            portColor,
-                            bottomColumn
-                        }
-                    )
-                }
-            </IconContainer>
+                {renderColumns({ data2, columns, rows })}
+                <IconContainer
+                    justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
+                >
+                    {renderInfoBox({ data2, tooltipScript, properties })}
+                    <Tooltip>{customTooltips.toolTip}</Tooltip>
+                    {
+                        renderPort(
+                            {
+                                portRowset,
+                                portAreaWidth,
+                                topColumn,
+                                rowCount,
+                                borderRight,
+                                portIcon,
+                                defaultIconColor,
+                                minPortFontSize,
+                                maxPortFontSize,
+                                portColor,
+                                bottomColumn
+                            }
+                        )
+                    }
+                </IconContainer>
+            </GraphContainer>
         </Container>
     );
 }
