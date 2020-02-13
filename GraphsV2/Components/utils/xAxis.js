@@ -1,7 +1,7 @@
 import React from 'react';
 import { XAxis } from 'recharts';
 
-import { DEFAULT_BARGRAPH_ORIENTATION, X_AXIS_HEIGHT } from '../../../constants';
+import { X_AXIS_HEIGHT } from '../../../constants';
 import GraphAxis from './GraphAxis';
 
 export default ({
@@ -11,11 +11,12 @@ export default ({
     xLabelRotateHeight,
     xTickFormat,
     dateHistogram,
-    orientation
+    type,
+    limit
 }) => {
     return (
         <XAxis
-            type={ orientation && orientation != DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined}
+            type={type}
             dataKey={xColumn}
             interval={0}
             label={{ value: xLabel, ...XAxisLabelConfig }}
@@ -27,6 +28,7 @@ export default ({
                     dateHistogram={dateHistogram}
                     dy="15"
                     dx="-15"
+                    limit={limit}
                 />
             }
         />
