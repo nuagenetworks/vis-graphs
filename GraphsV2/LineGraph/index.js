@@ -1,8 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { compose } from 'redux';
-import { scaleOrdinal } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
 import { LineChart, Line, CartesianGrid } from 'recharts';
 
 import config from './default.config';
@@ -39,6 +37,9 @@ const LineGraph = (props) => {
         linesColumn,
         zeroStart,
         showDots,
+        colors,
+        xLabelLimit,
+        yLabelLimit,
     } = properties;
 
     const { parsedData, uniqueKeys: lineKeys } = dataParser({
@@ -51,8 +52,6 @@ const LineGraph = (props) => {
     const [tooltipKey, setToolTipKey] = useState(-1);
     sortAscendingOnKey(parsedData, 'ts');
 
-    const colors = scaleOrdinal(schemeCategory10).range();
-    
     return (
         <LineChart
             test-data="line-graph"
@@ -60,7 +59,10 @@ const LineGraph = (props) => {
             height={height}
             data={parsedData}
             margin={margin}>
-            <CartesianGrid vertical={false} />
+             <CartesianGrid
+                vertical = {false}
+                strokeOpacity={0.3}
+            />
             {
                 xAxis({
                     xColumn,
@@ -69,12 +71,14 @@ const LineGraph = (props) => {
                     xLabelRotateHeight,
                     xTickFormat,
                     dateHistogram,
+                    limit: xLabelLimit,
                 })
             }
             {
                 yAxis({
                     yLabel,
                     yTickFormat,
+                    limit: yLabelLimit,
                 })
             }
             {

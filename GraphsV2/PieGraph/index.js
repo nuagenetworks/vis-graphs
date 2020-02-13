@@ -6,8 +6,6 @@ import {
     Pie,
     Cell
 } from 'recharts';
-import { scaleOrdinal } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
 
 import { 
     LEGEND_PERCENTAGE
@@ -19,8 +17,6 @@ import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import { filterEmptyData } from "../../utils/helpers";
 import { limit } from '../../utils/helpers/limit';
-
-const colors = scaleOrdinal(schemeCategory10).range();
 
 const PieGraph = (props) => {
     const {
@@ -40,7 +36,8 @@ const PieGraph = (props) => {
         sliceColumn,
         legend,
         tooltip,
-        percentages
+        percentages,
+        colors
     } = properties;
 
     const settings = {

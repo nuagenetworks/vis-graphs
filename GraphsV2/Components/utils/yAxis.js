@@ -5,7 +5,7 @@ import GraphAxis from './GraphAxis';
 const AxisLabel = (props) => {
     return (
         <g style={{ textAnchor: 'middle', transform: 'translate(3%,40%)' }}>
-            <text style={{ transform: 'rotate(-90deg)' }}>{props.text}</text>
+            <text style={{ transform: 'rotate(-90deg)' }}  fill='#757575CB'>{props.text}</text>
         </g>
     )
 }
@@ -15,6 +15,7 @@ export default ({
     yTickFormat,
     type,
     yColumn,
+    limit,
 }) => {
     return (
         <YAxis
@@ -24,6 +25,7 @@ export default ({
                 <GraphAxis
                     tickFormat={yTickFormat}
                     dy="5"
+                    limit={limit}
                 />
             }
             label={<AxisLabel text={yLabel} />}
