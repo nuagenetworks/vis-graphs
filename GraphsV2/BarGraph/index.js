@@ -47,7 +47,9 @@ const BarGraph = (props) => {
         yTickFormat,
         xTickFormat,
         dateHistogram,
-        colors
+        colors,
+        xLabelLimit,
+        yLabelLimit,
     } = properties;
 
     let dimension;
@@ -92,6 +94,7 @@ const BarGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     type: xAxisType,
+                    limit: xLabelLimit,
                 })
             }
 
@@ -101,7 +104,8 @@ const BarGraph = (props) => {
                     YAxisLabelConfig,
                     yTickFormat,
                     type: yAxisType,
-                    yColumn
+                    yColumn,
+                    limit: yLabelLimit,
                 })
             }
 
