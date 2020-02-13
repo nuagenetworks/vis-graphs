@@ -11,7 +11,8 @@ export default ({
     xLabelRotateHeight,
     xTickFormat,
     dateHistogram,
-    type
+    type,
+    limit
 }) => {
     return (
         <XAxis
@@ -27,6 +28,7 @@ export default ({
                     dateHistogram={dateHistogram}
                     dy="15"
                     dx="-15"
+                    limit={limit}
                 />
             }
         />

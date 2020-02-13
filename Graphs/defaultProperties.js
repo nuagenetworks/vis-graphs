@@ -64,6 +64,19 @@ export default {
         theme.palette.redLightColor,
     ],
     colors: [
+        '#8949D5', //material ui new colors
+        '#C777F6',
+        '#76CBC1',
+        '#5FB7FA',
+        '#FFB673',
+        '#FFD047',
+        '#FEA7E8',
+        '#86C9FB',
+        '#48BBAD',
+        '#76CBC1',
+        '#FC89E2',
+        '#F8B13D',
+        '#355DA1',
         theme.palette.blueColor,
         theme.palette.pinkColor,
         theme.palette.orangeColor,
@@ -95,5 +108,6 @@ export default {
         position: "insideBottom",
         dy: 10, 
         dx: -10,
+        fill: '#757575CB',
     },
 }
