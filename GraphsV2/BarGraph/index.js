@@ -8,8 +8,6 @@ import {
     Brush,
     CartesianGrid
 } from 'recharts';
-import { scaleOrdinal } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
 
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -22,8 +20,6 @@ import {
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-
-const colors = scaleOrdinal(schemeCategory10).range();
 
 const BarGraph = (props) => {
     const {
@@ -51,6 +47,7 @@ const BarGraph = (props) => {
         yTickFormat,
         xTickFormat,
         dateHistogram,
+        colors
     } = properties;
 
     let dimension;
