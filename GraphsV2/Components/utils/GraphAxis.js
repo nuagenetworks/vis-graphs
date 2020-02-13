@@ -29,7 +29,7 @@ const GraphAxis = (props) => {
 
     return (
         <g transform={`translate(${x},${y})`}>
-            <text x={0} y={0} dx={dx} dy={dy} textAnchor={textAnchor} fill="#666" transform={`rotate(${rotation})`}>{parsedData}</text>
+            <text x={0} y={0} dx={dx} dy={dy} textAnchor={textAnchor} fill="#757575CB" transform={`rotate(${rotation})`}>{parsedData}</text>
         </g>
     );
 }
