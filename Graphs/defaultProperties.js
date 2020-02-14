@@ -65,11 +65,11 @@ export default {
     ],
     colors: [
         '#8949D5', //material ui new colors
-        '#C777F6',
         '#76CBC1',
         '#5FB7FA',
         '#FFB673',
         '#FFD047',
+        '#C777F6',
         '#FEA7E8',
         '#86C9FB',
         '#48BBAD',

@@ -209,3 +209,25 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
         );
     })
 }
+
+export const scaleColor = (props, data, defaultColumn, setGraphColor) => {
+
+    const {
+        colors,
+        otherColors,
+        colorColumn,
+        isCustomColor,
+    } = props;
+
+    if (!colorColumn && !defaultColumn)
+        return;
+
+    const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys();
+    let colorList = [...colors, ...otherColors];
+    
+    if (setGraphColor && !isCustomColor) {
+        colorList = setGraphColor(domainData, colorList);
+    } 
+
+    return colorList;
+}
