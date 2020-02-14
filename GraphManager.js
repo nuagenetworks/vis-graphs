@@ -1,3 +1,6 @@
+import * as graphs from './Graphs/';
+import * as v2Graphs from './GraphsV2';
+
 /*
 Stores all graphs.
 */
