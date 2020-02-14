@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import {
@@ -20,15 +20,37 @@ import {
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
+import { scaleColor } from '../utils/helper';
 
 const BarGraph = (props) => {
+    const [tooltipKey, setToolTipKey] = useState(-1);
+    const [startIndex, setStartIndex] = useState(0);
+    const [endIndex, setEndIndex] = useState(2);
+
+    let timerId = 0;
+
+    const updateBrush = (pos) => {
+        if (timerId !== 0) {
+            clearTimeout(timerId)
+        }
+        timerId = setTimeout(() => {
+            setStartIndex(pos.startIndex)
+            setEndIndex(pos.endIndex)
+        }, 500)
+    }
+
     const {
         data,
         height,
         width,
         properties,
-        onMarkClick
+        onMarkClick,
+        setGraphColor,
     } = props;
+
+    let {
+        XAxisLabelConfig,
+    } = properties;
 
     const {
         xColumn,
@@ -38,7 +60,6 @@ const BarGraph = (props) => {
         stackColumn,
         orientation,
         otherOptions,
-        XAxisLabelConfig,
         xLabel,
         xLabelRotateHeight,
         margin,
@@ -50,6 +71,10 @@ const BarGraph = (props) => {
         colors,
         xLabelLimit,
         yLabelLimit,
+        brush,
+        isCustomColor,
+        colorColumn,
+        otherColors
     } = properties;
 
     let dimension;
@@ -59,12 +84,20 @@ const BarGraph = (props) => {
         dimension = yColumn
     }
 
-    const [tooltipKey, setToolTipKey] = useState(-1);
-
     const isVertical = orientation === DEFAULT_BARGRAPH_ORIENTATION ? true : undefined;
-    const xAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "number" : undefined;
-    const yAxisType = orientation !== DEFAULT_BARGRAPH_ORIENTATION ? "category" : undefined;
+    const xAxisType = !isVertical ? "number" : undefined;
+    const yAxisType = !isVertical ? "category" : undefined;
     const stack = stackColumn || undefined;
+    const column = stackColumn || dimension;
+    const isBrush = brush && !stack && brush < data.length;
+
+    const barColors = scaleColor({
+        colors,
+        otherColors,
+        colorColumn,
+        isCustomColor,
+    }, data, column, setGraphColor);
+
     const { parsedData, uniqueKeys: barKeys } = dataParser(
         {
             data,
@@ -75,16 +108,22 @@ const BarGraph = (props) => {
         }
     );
 
+    XAxisLabelConfig = {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 }
+
     return (
         <BarChart
             width={width}
             height={height}
             data={parsedData}
-            layout={orientation != DEFAULT_BARGRAPH_ORIENTATION ? "vertical" : 'horizontal'}
+            layout={!isVertical ? "vertical" : 'horizontal'}
             cursor={onMarkClick ? "pointer" : ''}
             margin={margin}
         >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid
+                vertical={isVertical ? false : true}
+                horizontal={isVertical ? true : false}
+                opacity='0.3'
+            />
             {
                 xAxis({
                     xColumn,
@@ -110,7 +149,7 @@ const BarGraph = (props) => {
             }
 
             {
-                stack && renderLegend({ legend, height })
+                renderLegend({ legend, height })
             }
 
             {
@@ -133,18 +172,17 @@ const BarGraph = (props) => {
                                         : ''
                                 )
                             }}
-                            fill={colors[index % 10]}
+                            fill={barColors[index % 20]}
                             stackId={stack ? "1" : undefined}
                             onMouseEnter={(props) => {
                                 const value = props.value;
                                 setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
                             }}
-                            onMouseLeave={() => setToolTipKey(-1)}
                         >
                             {!stack && parsedData.map((item, index) => (
                                 <Cell
                                     key={`cell-${index}`}
-                                    fill={colors[index % 10]}
+                                    fill={barColors[(index + startIndex) % 20]}
                                     name={item}
                                 />
                             )
@@ -153,6 +191,15 @@ const BarGraph = (props) => {
                     )
                 })
 
+            }
+            {
+                isBrush &&
+                <Brush
+                    onChange={(e) => updateBrush(e)}
+                    startIndex={startIndex}
+                    endIndex={endIndex}
+                    height={20}
+                />
             }
         </BarChart>
     );

@@ -15,6 +15,7 @@ export default ({
     yTickFormat,
     type,
     yColumn,
+    limit,
 }) => {
     return (
         <YAxis
@@ -24,6 +25,7 @@ export default ({
                 <GraphAxis
                     tickFormat={yTickFormat}
                     dy="5"
+                    limit={limit}
                 />
             }
             label={<AxisLabel text={yLabel} />}

@@ -8,13 +8,14 @@ const GraphAxis = (props) => {
         payload,
         dateHistogram,
         tickFormat,
+        limit,
     } = props;
-    
+
     let {
-      rotation,
-      textAnchor,
-      dx,
-      dy,
+        rotation,
+        textAnchor,
+        dx,
+        dy,
     } = props;
     rotation = rotation || "0";
     textAnchor = textAnchor || "end";
@@ -22,14 +23,26 @@ const GraphAxis = (props) => {
     dy = dy || 0;
 
     const parsedData = Formatter({
-      dateHistogram,
-      value: payload.value,
-      tickFormat
+        dateHistogram,
+        value: payload.value,
+        tickFormat
     })
 
     return (
         <g transform={`translate(${x},${y})`}>
-            <text x={0} y={0} dx={dx} dy={dy} textAnchor={textAnchor} fill="#757575CB" transform={`rotate(${rotation})`}>{parsedData}</text>
+            <text
+                x={0}
+                y={0}
+                dx={dx}
+                dy={dy}
+                textAnchor={textAnchor}
+                fill="#757575CB"
+                transform={`rotate(${rotation})`}
+            >
+                {
+                    (parsedData.length > limit) ? `${parsedData.substr(0, limit)}...` : parsedData
+                }
+            </text>
         </g>
     );
 }

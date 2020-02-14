@@ -48,13 +48,10 @@ export default {
     brushArea: 20, // // in percentage
     otherColors: [
         theme.palette.bluePaleColor,
-        theme.palette.orangeLightColor,
         theme.palette.blueLightColor,
         theme.palette.pinkLightColor,
         theme.palette.blackLightColor,
         theme.palette.greenLightColor,
-        theme.palette.greyLightDarkColor,
-        theme.palette.peach,
         theme.palette.aquaLightColor,
         theme.palette.windowBodyColor,
         theme.palette.orangeBlindColor,
@@ -65,11 +62,11 @@ export default {
     ],
     colors: [
         '#8949D5', //material ui new colors
-        '#C777F6',
         '#76CBC1',
         '#5FB7FA',
         '#FFB673',
         '#FFD047',
+        '#C777F6',
         '#FEA7E8',
         '#86C9FB',
         '#48BBAD',
