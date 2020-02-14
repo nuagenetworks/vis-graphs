@@ -1,13 +1,15 @@
 import React from 'react';
-import * as customLegends from './export';
-import StandardLegend from './StandardLegend';
 import {
     Legend as LegendComponent
 } from 'recharts';
 
+import { LEGEND_SEPARATE } from '../../../../constants';
+import * as customLegends from './export';
+import StandardLegend from './StandardLegend';
+
 export default ({ legend, height, type, ...rest }) => {
     let Component = type ? customLegends[type] : StandardLegend;
-    const legendHeight = (legend.separate * height) / 100;
+    const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
     if (legend && legend.show) {
         return (
             <LegendComponent
