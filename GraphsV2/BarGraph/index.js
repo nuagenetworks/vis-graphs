@@ -108,7 +108,7 @@ const BarGraph = (props) => {
         }
     );
 
-    XAxisLabelConfig = {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 }
+    XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
 
     return (
         <BarChart
