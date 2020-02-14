@@ -1,6 +1,8 @@
 import React from 'react';
 import { styled } from '@material-ui/core/styles';
 import { Tooltip } from 'recharts';
+import isEmpty from 'lodash/isEmpty';
+import columnAccessor from '../../../utils/columnAccessor';
 
 const Container = styled('div')({
     marginLeft: '0.5rem',
@@ -11,11 +13,11 @@ const Item = styled('p')({
     color: 'white',
 });
 
-export default ({ tooltip, tooltipName }) => {
-    if (tooltip && tooltipName != -1) {
+export default ({ tooltip, tooltipKey, yColumn }) => {
+    if (!isEmpty(tooltip) && tooltipKey !== -1) {
         return (<Tooltip
             content={
-                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipName} />
+                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} />
             }
             wrapperStyle={{ backgroundColor: "black" }}
         />)
@@ -23,25 +25,29 @@ export default ({ tooltip, tooltipName }) => {
 }
 
 const TooltipComponent = (props) => {
-    const { tooltip, payload, tooltipKey } = props;
+    const { tooltip, payload, tooltipKey, yColumn } = props;
     return (
         <Container>
-            {tooltip && payload && payload.length && tooltip.map((element, index) => {
+            {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
               let col;
-              let elementKey = element.column || element.label;
+              const elementKey = element.column || element.label;
               if(tooltipKey) {
                   col = payload.find(k => k['name'] === tooltipKey);
                   if(col && !col.payload[elementKey]) {
                     col.payload[elementKey] = tooltipKey;
                   }
+                  if(col && yColumn && col.payload[yColumn]) {
+                    col.payload[yColumn] = col.value;
+                  }
               }
               if(!col) {
                 col = payload[0];
               }
+              let columnFormatter = columnAccessor(element);
               return (
-                <Item className="label">
+                <Item>
                     {element.label || element.column} :
-                        {(col['payload'][elementKey]) || col.name}
+                        { col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) || col.name}
                 </Item>
             )})}
         </Container>

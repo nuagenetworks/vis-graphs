@@ -1,48 +1,10 @@
-import { 
-    SimpleTextGraph,
-    PieGraph,
-    ProgressBarGraph,
-} from './GraphsV2';
-
-import {
-    VariationTextGraph,
-    LineGraph,
-    MultiLineGraph,
-    ChordGraph,
-    GaugeGraph,
-    HeatmapGraph,
-    AreaGraph,
-    DynamicBarGraph,
-    Table,
-    GeoMap,
-    MultiColumnStatusTextGraph,
-    TreeGraph,
-    PortGraph,
-    BarGraph,
-} from './Graphs/';
+import * as graphs from './Graphs/';
+import * as v2Graphs from './GraphsV2';
 
 /*
-    Stores all graphs.
+Stores all graphs.
 */
-let registry = {
-    Table,
-    SimpleTextGraph,
-    BarGraph,
-    LineGraph,
-    MultiLineGraph,
-    PieGraph,
-    ChordGraph,
-    GaugeGraph,
-    VariationTextGraph,
-    HeatmapGraph,
-    AreaGraph,
-    DynamicBarGraph,
-    GeoMap,
-    MultiColumnStatusTextGraph,
-    TreeGraph,
-    PortGraph,
-    ProgressBarGraph,
-};
+const registry = { ...graphs, ...v2Graphs };
 
 /*
     Registers a new graph for a given name
