@@ -101,7 +101,6 @@ const Item = styled('div')({
 const UpperText = styled('div')({
     fontSize: ({ fontSize } = {}) => fontSize,
     order: 1,
-    marginBottom: '-2px',
 });
 
 const BarSection = styled('div')({
@@ -122,6 +121,7 @@ const LowerText = styled('div')({
     flex: 'auto',
     alignSelf: ({ alignSelf } = {}) => alignSelf,
     marginRight: ({ marginRight } = {}) => marginRight,
+    marginTop: '0.4rem'
 });
 
 const Tooltip = styled('div')({});
@@ -155,6 +155,7 @@ const ProgressBarGraph = (props) => {
         maxDataFormat,
         defaultRange,
         fontSize,
+        maxSectionHeight
     } = properties;
 
     const availableWidth = width - (margin.left + margin.right);
@@ -167,7 +168,12 @@ const ProgressBarGraph = (props) => {
     }
 
     let sectionHeight = height / (data.length + 1);
-    const barHeight = (display === PERCENTAGE) ? (sectionHeight * 0.60) : sectionHeight * 0.50;
+
+    if(sectionHeight > maxSectionHeight) {
+        sectionHeight = maxSectionHeight;
+    }
+
+    const barHeight = (display === PERCENTAGE) ? (sectionHeight * 0.50) : sectionHeight * 0.45;
 
     let textWidth;
     if (sectionHeight < minSectionHeight) {
