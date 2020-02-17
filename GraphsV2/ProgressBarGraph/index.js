@@ -101,6 +101,7 @@ const Item = styled('div')({
 const UpperText = styled('div')({
     fontSize: ({ fontSize } = {}) => fontSize,
     order: 1,
+    marginBottom: '0.2rem'
 });
 
 const BarSection = styled('div')({
