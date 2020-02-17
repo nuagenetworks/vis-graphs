@@ -193,7 +193,7 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
                         cx={legend.circleSize}
                         cy={legend.circleSize}
                         r={legend.circleSize}
-                        fill={getColor(props, d)}
+                        fill={getColor(d)}
                     />
                     <text
                         style={{ fontSize: legend.labelFontSize }}
