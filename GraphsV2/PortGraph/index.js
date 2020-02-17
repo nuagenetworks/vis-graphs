@@ -16,35 +16,6 @@ import InfoBox from "../../InfoBox";
 import customTooltip from '../utils/customTooltip';
 import { renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
 
-const getIconColor = (row, portColor, defaultIconColor) => {
-
-    const { getColor } = portColor || {};
-    // if there is a getColor function then use that function otherwise use criteria
-    if (getColor) {
-        try {
-            const getColorFunction = evalExpression(getColor);
-            if (getColorFunction) {
-                return getColorFunction(row);
-            }
-        }
-        catch (e) {
-            console.error(`Failed to evaluate getColor function`, e);
-        }
-    }
-    if (portColor && typeof portColor === 'object' && portColor.field) {
-        let color = portColor.defaultColor || defaultIconColor;
-        portColor.criteria.forEach(d => {
-            if (d.value === objectPath.get(row, portColor.field)) {
-                color = d.color;
-            }
-        });
-
-        return color;
-    }
-
-    return defaultIconColor;
-}
-
 const getColumns = (columns, data) => (
     columns.map(column => {
         const accessor = columnAccessor(column);
@@ -164,6 +135,35 @@ const PortGraph = (props) => {
         fontColor
     } = properties;
 
+    const getIconColor = (row) => {
+
+        const { getColor } = portColor || {};
+        // if there is a getColor function then use that function otherwise use criteria
+        if (getColor) {
+            try {
+                const getColorFunction = evalExpression(getColor);
+                if (getColorFunction) {
+                    return getColorFunction(row);
+                }
+            }
+            catch (e) {
+                console.error(`Failed to evaluate getColor function`, e);
+            }
+        }
+        if (portColor && typeof portColor === 'object' && portColor.field) {
+            let color = portColor.defaultColor || defaultIconColor;
+            portColor.criteria.forEach(d => {
+                if (d.value === objectPath.get(row, portColor.field)) {
+                    color = d.color;
+                }
+            });
+    
+            return color;
+        }
+    
+        return defaultIconColor;
+    }
+
     const checkMultipleRows = ({ data, rowLimit }) => {
         isMultipleRows = data.length > rowLimit;
     }
@@ -179,7 +179,7 @@ const PortGraph = (props) => {
         setStateRowCount(isMultipleRows ? rowLimit : data.length);
     }
 
-    const renderInfoBox = ({ data2, tooltipScript, properties }) => {
+    const renderInfoBox = () => {
         if (!tooltipScript) {
             return;
         }
@@ -289,7 +289,7 @@ const PortGraph = (props) => {
         return font > maxPortFontSize ? maxPortFontSize : (font < minPortFontSize ? minPortFontSize : font);
     }
 
-    const renderColumns = ({ data2, columns, rows }) => {
+    const renderColumns = () => {
 
         let columnData = [];
         if (Array.isArray(rows) && rows.length && data2.length) {
@@ -312,14 +312,7 @@ const PortGraph = (props) => {
     }
 
     // icon to show port status
-    const getIcon = ({
-        data,
-        portIcon,
-        defaultIconColor,
-        minPortFontSize,
-        maxPortFontSize,
-        portColor
-    }) => {
+    const getIcon = (data) => {
         const fontSize = calculatePortFontSize({ minPortFontSize, maxPortFontSize });
         const { IconSvg, viewBox } = getIconPath(portIcon, data, true);
         const customTooltip = !isEmpty(customTooltips) ? customTooltips.tooltipProps(data) : {};
@@ -335,24 +328,12 @@ const PortGraph = (props) => {
                 viewBox={viewBox}
                 {...customTooltip}
             >
-                <IconSvg color={getIconColor(data, portColor, defaultIconColor)} />
+                <IconSvg color={getIconColor(data)} />
             </svg>
         )
     }
 
-    const renderPort = ({
-        portRowset,
-        portAreaWidth,
-        topColumn,
-        rowCount,
-        borderRight,
-        portIcon,
-        defaultIconColor,
-        minPortFontSize,
-        maxPortFontSize,
-        portColor,
-        bottomColumn
-    }) => {
+    const renderPort = () => {
         return (
             portRowset.map((portRow, index) => {
                 return (
@@ -368,16 +349,7 @@ const PortGraph = (props) => {
                                     <Icon
                                         borderRight={(i % rowCount) < (rowCount - 1) ? borderRight : ''}
                                     >
-                                        {getIcon(
-                                            {
-                                                data,
-                                                portIcon,
-                                                defaultIconColor,
-                                                minPortFontSize,
-                                                maxPortFontSize,
-                                                portColor,
-                                            }
-                                        )}
+                                        {getIcon(data)}
                                     </Icon>
                                     {getPortAttribute(data, bottomColumn)}
                                 </PortBox>
@@ -438,29 +410,13 @@ const PortGraph = (props) => {
                 data-test="port-graph"
                 isVertical={isVertical}
             >
-                {renderColumns({ data2, columns, rows })}
+                {renderColumns()}
                 <IconContainer
                     justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
                 >
-                    {renderInfoBox({ data2, tooltipScript, properties })}
+                    {renderInfoBox()}
                     <Tooltip>{customTooltips.toolTip}</Tooltip>
-                    {
-                        renderPort(
-                            {
-                                portRowset,
-                                portAreaWidth,
-                                topColumn,
-                                rowCount,
-                                borderRight,
-                                portIcon,
-                                defaultIconColor,
-                                minPortFontSize,
-                                maxPortFontSize,
-                                portColor,
-                                bottomColumn
-                            }
-                        )
-                    }
+                    {renderPort()}
                 </IconContainer>
             </GraphContainer>
         </Container>
