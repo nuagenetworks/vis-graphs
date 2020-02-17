@@ -74,7 +74,6 @@ export const getGraphDimension = (props, label, filterData = null) => {
         legendArea,
         legend
     } = props;
-
     let dimensions = {
         graphWidth: width,
         graphHeight: height,
@@ -113,7 +112,6 @@ export const getGraphDimension = (props, label, filterData = null) => {
             labelWidth: labelTextWidth,
         }
     }
-
     return dimensions;
 }
 
@@ -231,3 +229,121 @@ export const scaleColor = (props, data, defaultColumn, setGraphColor) => {
 
     return colorList;
 }
+
+export const renderMessage = (props) => {
+    const {
+        data,
+        message,
+        id
+    } = props;
+    const messageClass = data && data.classes && data.classes.messageClass;
+
+    return (
+        <div id={`${id}-message`} className={messageClass ? messageClass : "center-text"}>
+            {message}
+        </div>
+    )
+}
+
+export const longestLabelLength = (data, label, formatter) => {
+
+    if (!label)
+        label = (d) => d;
+
+    let format = (d) => d;
+
+    if (formatter)
+        format = d3.format(formatter);
+
+    const lab = label(data.reduce((a, b) => {
+        let labelA = label(a);
+        let labelB = label(b);
+
+        if (!labelA)
+            return b;
+
+        if (!labelB)
+            return a;
+
+        return format(labelA.toString()).length > format(labelB.toString()).length ? a : b;
+    }));
+
+    const longestLabel = lab ? lab.toString() : '';
+    let labelSize = format(longestLabel).length;
+
+    return labelSize > 8 ? labelSize : labelSize + 2;
+}
+
+export const tooltipContent = ({ tooltip, accessors, yTicksLabel, hoveredDatum }) => {
+  if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+      yTicksLabel = {};
+  }
+
+  if (!Array.isArray(tooltip)) {
+      return null;
+  }
+
+  return (
+      /* Display each tooltip column as "label : value". */
+      tooltip.map(({ column, label }, i) => {
+          let data = accessors[i](hoveredDatum)
+
+          return (data !== null && data !== 'undefined') ?
+              (<div key={column}>
+                  <strong>
+                      {/* Use label if present, fall back to column name. */}
+                      {label || column}
+                  </strong> : <span>
+                      {/* Apply number and date formatting to the value. */}
+                      {yTicksLabel[data] || data}
+                  </span>
+              </div>
+              ) : null
+      })
+
+  )
+}
+
+export const wrapTextByWidth = (text, { xLabelRotate, xLabelLimit }) => {
+
+  text.each(function () {
+      const text = d3.select(this);
+      const words = text.text();
+      const tspan = text.text(null)
+          .append("tspan")
+          .attr("x", -2)
+          .attr("y", text.attr("y"))
+          .attr("dy", parseFloat(text.attr("dy")) + "em")
+          .text(words);
+
+      if (xLabelRotate) {
+          text.attr("transform", "rotate(-50)")
+              .attr("dy", ".15em")
+              .style("text-anchor", "end")
+      }
+
+      if (words.length > xLabelLimit) {
+          text.style('cursor', 'pointer')
+              .append('title').text(words);
+
+          tspan.text(words.substr(0, xLabelLimit) + '...');
+      }
+  });
+}
+
+export const wrapD3Text = (text, width) => {
+  text.each(function () {
+      var text = d3.select(this);
+      var words = text.text(),
+
+          y = text.attr("y"),
+          dy = parseFloat(text.attr("dy")),
+          tspan = text.text(null).append("tspan").attr("x", -3).attr("y", y).attr("dy", dy + "em");
+      tspan.text(words);
+
+      if (words.length > width) {
+          text.style('cursor', 'pointer').append('title').text(words)
+          tspan.text(words.substr(0, width) + '...')
+      }
+  });
+};
