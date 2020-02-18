@@ -56,7 +56,6 @@ const HeatmapGraph = (props) => {
         legendColumn,
         fontColor,
         circleToPixel,
-        orientation,
         configuration,
         context,
         selectedData,
@@ -220,17 +219,18 @@ const HeatmapGraph = (props) => {
                         [yColumn]: d.key,
                         [legendColumn]: 'Empty',
                         [xColumn]: parseInt(list.key, 10)
-                    })
+                    });
                 }
             })
         })
 
         cellColumnsData = d3.nest()
             .key((d) => legendColumn ? d[legendColumn] : "Cell")
-            .entries(filterDataTemp)
+            .entries(filterDataTemp);
 
-        if (filterDataTemp.length)
+        if (filterDataTemp.length) {
             isBrushable(nestedYData);
+        }
 
         if (!isEqual(filterDataTemp, filterData)) {
             filterData = filterDataTemp;

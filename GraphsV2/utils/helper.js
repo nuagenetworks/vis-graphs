@@ -18,11 +18,11 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
         circleToPixel,
     } = props;
 
-    if (!legend.show)
+    if (!legend.show) {
         return;
+    }
 
     const dataUnique = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-
     const {
         labelWidth,
         legendWidth,
@@ -191,7 +191,7 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
                         cx={legend.circleSize}
                         cy={legend.circleSize}
                         r={legend.circleSize}
-                        fill={getColor(props, d)}
+                        fill={getColor(d)}
                     />
                     <text
                         style={{ fontSize: legend.labelFontSize }}
