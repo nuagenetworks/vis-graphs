@@ -39,8 +39,8 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
-        display: checkIsVerticalLegend({ legend }) ? 'grid' : 'inline-block',
-        order: checkIsVerticalLegend({ legend }) ? 1 : 2,
+        display: checkIsVerticalLegend(legend) ? 'grid' : 'inline-block',
+        order: checkIsVerticalLegend(legend) ? 1 : 2,
     }
 
     let legendStyle = {};
@@ -121,7 +121,7 @@ export const getLegendArea = (props, data, dimension, label) => {
         legendArea,
     } = props;
 
-    const highestLabel = getLongestLabel({ legend }, data, label);
+    const highestLabel = getLongestLabel(legend, data, label);
 
     if (highestLabel > dimension * legendArea) {
         return dimension * legendArea;
@@ -130,11 +130,7 @@ export const getLegendArea = (props, data, dimension, label) => {
     return highestLabel;
 }
 
-export const getLongestLabel = (props, data, label) => {
-    const {
-        legend,
-    } = props;
-
+export const getLongestLabel = (legend, data, label) => {
     if (!label) {
         label = (d) => d;
     }
@@ -154,13 +150,7 @@ export const labelSize = (label, LabelFont = 10) => {
     return dimension.width;
 }
 
-export const checkIsVerticalLegend = (props) => {
-    const {
-        legend
-    } = props;
-
-    return legend.show && legend.orientation === 'vertical';
-}
+export const checkIsVerticalLegend = (legend) => legend.show && legend.orientation === 'vertical';
 
 export const getLegendContent = (props, data, legend, getColor, label) => {
     const {

@@ -21,24 +21,20 @@ import {
     wrapD3Text,
 } from "../utils/helper";
 
-let filterData = [];
-let nestedXData = [];
-let nestedYData = [];
-let cellColumnsData = [];
-let leftMargin = 0;
-let yLabelWidth = 0;
-let format = 0;
-let node = "";
-let availableMinWidth = 0;
-let minMarginLeft = 0;
-let bandScale = {};
-let boxSize = "";
-let scale = {};
-let brushing = 0;
-let brush = false;
+    let filterData = [];
+    let nestedXData = [];
+    let nestedYData = [];
+    let cellColumnsData = [];
+
+    let scale = {};
+    let boxSize = {};
+    let bandScale = {};
+    let brush = false;
+    let leftMargin = 0;
+    let node = "";
+    let availableMinWidth = 0;
 
 const HeatmapGraph = (props) => {
-
     const {
         data,
         width,
@@ -53,23 +49,11 @@ const HeatmapGraph = (props) => {
         margin,
         legend,
         legendArea,
-        legendColumn,
         fontColor,
         circleToPixel,
-        configuration,
-        context,
-        selectedData,
-        stroke,
-        colorColumn,
-        colors,
-        emptyBoxColor,
         chartHeightToPixel,
         xLabel,
-        chartWidthToPixel,
-        xLabelRotate,
-        xLabelRotateHeight,
-        brushArea,
-    } = properties;  
+    } = properties;
 
     const [graphId] = useState(new Date().valueOf());
     const [availableHeight, setAvailableGraphHeight] = useState(0);
@@ -80,6 +64,8 @@ const HeatmapGraph = (props) => {
     const [axis, setGraphAxis] = useState({});
     const [customTooltips, setCustomTooltips] = useState({});
     const [hoveredDatum, setHoveredDataum] = useState(null);
+    const [minMarginLeft, setMinMarginLeft] = useState(0);
+    const [yLabelWidth, setGraphYLabelWidth] = useState(0);
 
     useEffect(() => {
         initiate();
@@ -90,13 +76,11 @@ const HeatmapGraph = (props) => {
 
 
     const initiate = () => {
-
         parseData();
         setDimensions(getFilterData(), yColumn, (d) => d["key"], getCellColumnData());
         configureAxis();
     }
 
-    // configure
     const configureAxis = () => {
         const data = getFilterData();
         setBandScale(data);
@@ -106,7 +90,12 @@ const HeatmapGraph = (props) => {
     }
 
     const setTitlePositions = () => {
-      setGraphTitlePosition(({
+        const {
+            xLabelRotate,
+            xLabelRotateHeight,
+            chartWidthToPixel,
+        } = properties;
+        setGraphTitlePosition(({
             x: {
                 left: getLeftMargin() + availableWidth / 2,
                 top: margin.top + availableHeight + chartHeightToPixel + getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
@@ -119,7 +108,6 @@ const HeatmapGraph = (props) => {
     }
 
     const setBandScale = (data) => {
-
         bandScale.x = d3.scaleBand().domain(d3.map(data, getXLabelFn()).keys().sort());
         bandScale.x.rangeRound([0, availableWidth]);
 
@@ -150,6 +138,7 @@ const HeatmapGraph = (props) => {
 
         setYlabelWidth(data || props.data, column);
         setLeftMargin();
+
         setAvailableWidth(graphWidth);
         setAvailableHeight(graphHeight);
     }
@@ -164,18 +153,25 @@ const HeatmapGraph = (props) => {
     }
 
     const setAvailableWidth = (width) => {
+        const {
+            brushArea
+        } = properties;
         let availableWidthT = width - (margin.left + margin.right + getYlabelWidth());
 
         if (isBrush()) {
             availableWidthT = availableWidthT * (100 - brushArea) / 100
             availableMinWidth = width - (availableWidthT + getLeftMargin() + margin.left + margin.right);
             availableMinWidth = availableMinWidth > 10 ? availableMinWidth : 10;
-            minMarginLeft = availableWidthT + getLeftMargin() + margin.left;
+            setMinMarginLeft(availableWidthT + getLeftMargin() + margin.left);
         }
         setAvailableGraphWidth(availableWidthT);
     }
 
     const parseData = () => {
+        const {
+            legendColumn,
+        } = properties;
+
         nestedXData = dataNest({
             data,
             key: xColumn,
@@ -188,7 +184,7 @@ const HeatmapGraph = (props) => {
             sortColumn: yColumn
         })
 
-        let filterDataTemp = [];
+        let filteringData = [];
 
         nestedYData.forEach((item, i) => {
             if (!item.key || typeof item.key === 'object' || item.key === 'null' || item.key === 'undefined') {
@@ -213,9 +209,9 @@ const HeatmapGraph = (props) => {
                     && d.values[index][yColumn] !== 'undefined'
                     && typeof d.values[index][yColumn] !== 'object'
                 ) {
-                    filterDataTemp.push(d.values[index])
+                    filteringData.push(d.values[index])
                 } else {
-                    filterDataTemp.push({
+                    filteringData.push({
                         [yColumn]: d.key,
                         [legendColumn]: 'Empty',
                         [xColumn]: parseInt(list.key, 10)
@@ -226,14 +222,14 @@ const HeatmapGraph = (props) => {
 
         cellColumnsData = d3.nest()
             .key((d) => legendColumn ? d[legendColumn] : "Cell")
-            .entries(filterDataTemp);
+            .entries(filteringData);
 
-        if (filterDataTemp.length) {
+        if (filteringData.length) {
             isBrushable(nestedYData);
         }
 
-        if (!isEqual(filterDataTemp, filterData)) {
-            filterData = filterDataTemp;
+        if (!isEqual(filteringData, filterData)) {
+            filterData = filteringData;
         }
     }
 
@@ -335,7 +331,7 @@ const HeatmapGraph = (props) => {
         setGraphAxis(axist);
     }
 
-    const getGraph = () =>  getSVG().select('.graph-container');
+    const getGraph = () => getSVG().select('.graph-container');
 
     const getMinGraph = () => getSVG().select('.mini-graph-container');
 
@@ -349,7 +345,7 @@ const HeatmapGraph = (props) => {
             .append('rect')
     }
 
-    // update data on props change or resizing
+    // Update data on props change or resizing.
     const updateElements = () => {
 
         if (isEmpty(node)) return;
@@ -398,17 +394,13 @@ const HeatmapGraph = (props) => {
 
         drawGraph({
             scale: getScale(),
-            brush: false,
             svg,
         })
     }
 
     const setAxisTitles = () => {
         const {
-            xColumn,
-            xLabel,
             xLabelSize,
-            yColumn,
             yLabel,
         } = properties;
 
@@ -442,7 +434,7 @@ const HeatmapGraph = (props) => {
 
         if (!colorColumn && !defaultColumn) {
             return;
-        } 
+        }
 
         const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys().sort();
         const colors = Object.assign({}, mapColors, heatmapColor || {}, mappedColors || {});
@@ -483,18 +475,25 @@ const HeatmapGraph = (props) => {
             if (yTickFormat === undefined || yTickFormat === null) {
                 return d[yColumn];
             }
-            const formatter = format(yTickFormat);
+            const formatter = d3.format(yTickFormat);
 
             return formatter(d[yColumn]);
         };
 
         const labelLength = longestLabelLength(data, yLabelFn);
-        yLabelWidth = (labelLength > yLabelLimit ? yLabelLimit + appendCharLength : labelLength) * chartWidthToPixel;
+        setGraphYLabelWidth((labelLength > yLabelLimit ? yLabelLimit + appendCharLength : labelLength) * chartWidthToPixel);
 
     }
 
     const getColor = () => {
-        
+        const {
+            legendColumn,
+            emptyBoxColor,
+            colors,
+            stroke,
+            colorColumn,
+        } = properties;
+
         const colorScale = getMappedScaleColor(getFilterData(), legendColumn);
 
         return (d) => {
@@ -516,6 +515,11 @@ const HeatmapGraph = (props) => {
     }
 
     const getOpacity = (d) => {
+        const {
+            configuration,
+            context,
+            selectedData,
+        } = properties;
         if (selectedData) {
             return selectedData[xColumn] === d[xColumn] && selectedData[yColumn] === d[yColumn] ? "1" : "0.5";
         }
@@ -532,7 +536,6 @@ const HeatmapGraph = (props) => {
 
     const drawGraph = ({
         scale,
-        brush = false,
         svg
     }) => {
 
@@ -542,14 +545,11 @@ const HeatmapGraph = (props) => {
 
         const {
             stroke,
-            yColumn,
-            xColumn,
             xAlign,
         } = properties;
 
         const box = getBoxSize()
 
-        // draw heatmap cell
         const cells = svg.select('.heatmap')
             .selectAll('.heatmap-cell')
             .data(getFilterData(), d => d[xColumn] + d[yColumn]);
@@ -576,13 +576,11 @@ const HeatmapGraph = (props) => {
             .on('click', d => onMarkClick ? onMarkClick(d) : '')
             .on('mousemove', d => {
                 setHoveredDataum(d);
-            
+
             })
             .on('mouseleave', d => {
                 setHoveredDataum(null);
             });
-
-        // Remove all remaining nodes        
         cells.exit().remove();
     }
 
@@ -593,12 +591,8 @@ const HeatmapGraph = (props) => {
     const isBrush = () => brush;
 
     const configureMinGraph = () => {
-
         const {
-            margin,
             brush,
-            xColumn,
-            yColumn,
             xAlign,
             stroke,
             brushColor,
@@ -616,7 +610,7 @@ const HeatmapGraph = (props) => {
             .rangeRound([availableHeight, 0])
             .domain([0, availableHeight]);
 
-        // set scale for mini heatmap graph
+        // Set scale for mini heatmap graph
         minScale.y = d3.scaleBand()
             .domain(scale.y.domain());
 
@@ -624,7 +618,7 @@ const HeatmapGraph = (props) => {
 
         range = [0, (availableHeight / getNestedYData().length) * brush];
 
-        brushing = d3.brushY()
+        let brushing = d3.brushY()
             .extent([[0, 0], [getAvailableMinWidth(), availableHeight]])
             .on("brush end", () => {
                 const scale = getScale(),
@@ -651,12 +645,12 @@ const HeatmapGraph = (props) => {
             .call(brushing)
             .call(brushing.move, range);
 
-        // removes handle to resize the brush
+        // Removes handle to resize the brush
         svg.selectAll('.brush>.handle').remove();
-        // removes crosshair cursor
+        // Removes crosshair cursor
         svg.selectAll('.brush>.overlay').remove();
 
-        // draw min heatmap cells
+        // Draw min heatmap cells
         const cells = svg.select('.min-heatmap')
             .selectAll('.heatmap-cell')
             .data(scale.y.domain());
@@ -680,15 +674,15 @@ const HeatmapGraph = (props) => {
         // Remove all remaining nodes
         cells.exit().remove();
     }
-    
+
     setLeftMargin();
 
     const graphStyle = {
         width: graphWidth,
         height: graphHeight,
-        order: checkIsVerticalLegend({ legend }) ? 2 : 1,
+        order: checkIsVerticalLegend(legend) ? 2 : 1,
     };
-    
+
     if (!data || !data.length || !getFilterData().length)
         return renderMessage({
             id,
@@ -700,8 +694,8 @@ const HeatmapGraph = (props) => {
 
     return (
         <div className='heatmap-graph'>
-            <Tooltip> {customTooltips.tooltipWrapper(hoveredDatum)} </Tooltip>
-            <div style={{ height, width, display: checkIsVerticalLegend({ legend }) ? 'flex' : 'inline-grid' }}>
+            <Tooltip> {customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)} </Tooltip>
+            <div style={{ height, width, display: checkIsVerticalLegend(legend) ? 'flex' : 'inline-grid' }}>
                 {renderLegend({
                     height,
                     width,
@@ -709,7 +703,7 @@ const HeatmapGraph = (props) => {
                     legendArea,
                     fontColor,
                     circleToPixel,
-                }, getCellColumnData(), legend, getColor(), (d) => d["key"], checkIsVerticalLegend({ legend }))}
+                }, getCellColumnData(), legend, getColor(), (d) => d["key"], checkIsVerticalLegend(legend))}
                 <div className='graphContainer' style={graphStyle}>
                     <svg width={graphWidth} height={graphHeight}>
                         <g ref={ref => node = ref}>
