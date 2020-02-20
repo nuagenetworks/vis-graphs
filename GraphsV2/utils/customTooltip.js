@@ -5,7 +5,7 @@ import columnAccessor from "../../utils/columnAccessor";
 
 export default (properties) => {
 
-    let getTooltipContent, tooltipProps, toolTip, hoveredDatum, tooltipId;
+    let getTooltipContent;
 
     const setTooltipAccessor = (tooltip, yTicksLabel) => {
         if (!tooltip) {
@@ -13,20 +13,16 @@ export default (properties) => {
         }
 
         // This function is invoked to produce the content of a tooltip.
-        getTooltipContent = () => {
+        getTooltipContent = (d) => {
             // The value of this.hoveredDatum should be set by subclasses
             // on mouseEnter and mouseMove of visual marks
             // to the data entry corresponding to the hovered mark.
 
-            if (hoveredDatum) {
-                return tooltipContent({ tooltip, accessors: tooltip.map(columnAccessor), yTicksLabel });
-            } 
-            
-            return;
+            return (d) ? tooltipContent({ tooltip, accessors: tooltip.map(columnAccessor), yTicksLabel, d }) : '';
         }
     }
 
-    const tooltipContent = ({ tooltip, accessors, yTicksLabel }) => {
+    const tooltipContent = ({ tooltip, accessors, yTicksLabel, d }) => {
 
         if (!yTicksLabel || typeof yTicksLabel !== 'object') {
             yTicksLabel = {};
@@ -39,7 +35,7 @@ export default (properties) => {
         return (
             /* Display each tooltip column as "label : value". */
             tooltip.map(({ column, label }, i) => {
-                const data = accessors[i](hoveredDatum)
+                const data = accessors[i](d)
 
                 return (data !== null && data !== 'undefined') ?
                     (<div key={column}>
@@ -51,53 +47,31 @@ export default (properties) => {
                             {yTicksLabel[data] || data}
                         </span>
                     </div>
-                    ) : null
+                    ) : null;
             })
-
         )
     }
 
-    const handleShowEvent = () => { }
+    const { tooltip, yTicksLabel, id } = properties;
 
-    const handleHideEvent = () => { }
+    const tooltipWrapper = (data) => (<ReactTooltip
+        id={id}
+        place="top"
+        type="dark"
+        effect="float"
+        getContent={[() => getTooltipContent(data), 200]}
+        delayUpdate={200}
+    />)
 
     // Provide tooltips for subclasses.
-    const { tooltip, yTicksLabel } = properties;
     if (tooltip) {
-
         setTooltipAccessor(tooltip, yTicksLabel);
-
-        tooltipId = `tooltip-${new Date().valueOf()}`;
-
         // This JSX object can be used by subclasses to enable tooltips.
-        toolTip = (
-            <ReactTooltip
-                id={tooltipId}
-                place="top"
-                type="dark"
-                effect="float"
-                getContent={[() => getTooltipContent(hoveredDatum), 200]}
-                afterHide={() => handleHideEvent()}
-                afterShow={() => handleShowEvent()}
-                delayUpdate={200}
-            />
-        );
-
-        // Subclasses can enable tooltips on their marks
-        // by spreading over the return value from this function
-        // when invoked with the mark's data element `d` like this:
-        // data.map((d) => <rect { ...this.tooltipProps(d) } />
-        tooltipProps = (d) => ({
-            "data-tip": true,
-            "data-for": tooltipId,
-            "onMouseEnter": () => hoveredDatum = d,
-            "onMouseMove": () => hoveredDatum = d
-        });
+        tooltipWrapper(null);
 
     } else {
         getTooltipContent = () => null
-        tooltipProps = () => null
     }
 
-    return { getTooltipContent, tooltipProps, toolTip }
+    return { tooltipWrapper }
 }
