@@ -17,8 +17,20 @@ export default (properties) => {
             // The value of this.hoveredDatum should be set by subclasses
             // on mouseEnter and mouseMove of visual marks
             // to the data entry corresponding to the hovered mark.
-
-            return (d) ? tooltipContent({ tooltip, accessors: tooltip.map(columnAccessor), yTicksLabel, d }) : '';
+            if(d && !d.isChord) {
+                return (d) ? tooltipContent({ tooltip, accessors: tooltip.map(columnAccessor), yTicksLabel, d }) : '';
+            } else {
+                if(d && d.destination) {
+                    const { accessor, label } = (
+                        (tooltip && tooltip.length === 1)
+                        ? { accessor: columnAccessor(tooltip[0]), label: tooltip[0].label }
+                        : { accessor: (d) => d.value, label: undefined }
+                    );
+                    return chordTooltipContent(d, accessor, label)
+                } else {
+                    return <div>Hover over a chord to see flow details.</div>;
+                }
+            }
         }
     }
 
@@ -53,6 +65,31 @@ export default (properties) => {
     }
 
     const { tooltip, yTicksLabel, id } = properties;
+
+    const chordTooltipContent = (data, accessor, label) => {
+        const {
+            source,
+            destination,
+            sourceValue,
+            destinationValue,
+            isBidirectionalTooltip
+        } = data;
+
+        return (
+            <React.Fragment>
+                {renderTooltipContent(destination, source, sourceValue, accessor, label)}
+                {isBidirectionalTooltip && renderTooltipContent(source, destination, destinationValue, accessor, label)}
+            </React.Fragment>
+        );
+    }
+
+    const renderTooltipContent = (from, to, value, accessor, label) => (
+        <div>
+            <strong>{`${from} to ${to}:`}</strong>
+            <span> {accessor({value})}</span>
+            {label ? <span> {label}</span>:null}
+        </div>
+    );
 
     const tooltipWrapper = (data) => (<ReactTooltip
         id={id}
