@@ -70,10 +70,8 @@ const HeatmapGraph = (props) => {
     useEffect(() => {
         initiate();
         elementGenerator();
-        updateElements();
         setCustomTooltips(customTooltip(properties));
     }, [props.data, props.height, props.width, props.context]);
-
 
     const initiate = () => {
         parseData();
@@ -359,7 +357,7 @@ const HeatmapGraph = (props) => {
         } = properties;
 
         const svg = getGraph();
-
+        if(!svg) {return;}
         svg.select(`#clip${graphId}`)
             .select("rect")
             .attr("x", -getYlabelWidth())
@@ -421,7 +419,7 @@ const HeatmapGraph = (props) => {
                 .text(yLabel === true ? yColumn : yLabel);
         }
     }
-    const getSVG = () => d3.select(node);
+    const getSVG = () => node && d3.select(node) || null;
 
     const getMappedScaleColor = (data, defaultColumn) => {
         const {
@@ -689,6 +687,8 @@ const HeatmapGraph = (props) => {
             message: 'No data to visualize',
             data,
         });
+
+    updateElements();
 
     const Tooltip = styled('div')({});
 
