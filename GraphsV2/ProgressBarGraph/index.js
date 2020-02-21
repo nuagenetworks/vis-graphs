@@ -129,6 +129,7 @@ const Tooltip = styled('div')({});
 
 const ProgressBarGraph = (props) => {
     const [customTooltips, setCustomTooltips] = useState({});
+    const [hoveredDatum, setHoveredDataum] = useState(null);
 
     const {
         data,
@@ -140,6 +141,12 @@ const ProgressBarGraph = (props) => {
     useEffect(() => {
         setCustomTooltips(customTooltip(properties));
     }, [props.data, props.width, props.height]);
+
+    const setHoveredData = (barData) => {
+        if(barData) {
+            setHoveredDataum(barData);
+        }
+    }
 
     const {
         margin,
@@ -156,7 +163,8 @@ const ProgressBarGraph = (props) => {
         maxDataFormat,
         defaultRange,
         fontSize,
-        maxSectionHeight
+        maxSectionHeight,
+        id
     } = properties;
 
     const availableWidth = width - (margin.left + margin.right);
@@ -192,10 +200,9 @@ const ProgressBarGraph = (props) => {
             height={height}
             data-test="progress-graph"
         >
+        <Tooltip>{customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)}</Tooltip>
             {
                 data.map((barData, i) => {
-                    const customTooltip = !isEmpty(customTooltips) ? customTooltips.tooltipProps(barData) : {};
-
                     return (
                         <Item
                             key={i}
@@ -207,14 +214,16 @@ const ProgressBarGraph = (props) => {
                                 direction={(display === PERCENTAGE) ? 'row' : 'column'}
                             >
                                 <InnerBarSection height={barHeight}>
-                                    <Tooltip>{customTooltips.toolTip}</Tooltip>
                                     <svg style={{ width: barWidth, height: barHeight }}>
                                         <g>
                                             <rect
                                                 width={barWidth}
                                                 height={barHeight}
                                                 fill={backgroundColor}
-                                                {...customTooltip}
+                                                data-tip
+                                                data-for={id}
+                                                onMouseOver={() => setHoveredData(barData)}
+                                                onMouseLeave={setHoveredData(null)}
                                             />
                                             <rect
                                                 width={
@@ -236,7 +245,10 @@ const ProgressBarGraph = (props) => {
                                                         usedData
                                                     })
                                                 }
-                                                {...customTooltip}
+                                                data-tip
+                                                data-for={id}
+                                                onMouseOver={() => setHoveredData(barData)}
+                                                onMouseLeave={setHoveredData(null)}
                                             />
                                         </g>
                                     </svg>
