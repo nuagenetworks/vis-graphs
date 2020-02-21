@@ -17,10 +17,10 @@ export default (properties) => {
             // The value of this.hoveredDatum should be set by subclasses
             // on mouseEnter and mouseMove of visual marks
             // to the data entry corresponding to the hovered mark.
-            if(!d.isChord) {
+            if(d && !d.isChord) {
                 return (d) ? tooltipContent({ tooltip, accessors: tooltip.map(columnAccessor), yTicksLabel, d }) : '';
             } else {
-                if(d.destination) {
+                if(d && d.destination) {
                     const { accessor, label } = (
                         (tooltip && tooltip.length === 1)
                         ? { accessor: columnAccessor(tooltip[0]), label: tooltip[0].label }
