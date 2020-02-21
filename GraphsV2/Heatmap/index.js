@@ -96,7 +96,7 @@ const HeatmapGraph = (props) => {
         setGraphTitlePosition(({
             x: {
                 left: getLeftMargin() + availableWidth / 2,
-                top: margin.top + availableHeight + chartHeightToPixel + getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
+                top: availableHeight + chartHeightToPixel + getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
             },
             y: {
                 left: margin.left + chartWidthToPixel,
@@ -142,7 +142,7 @@ const HeatmapGraph = (props) => {
     }
 
     const setAvailableHeight = (height) => {
-        let availableHeightT = height - (margin.top + margin.bottom + chartHeightToPixel + getXAxisHeight())
+        let availableHeightT = height - (chartHeightToPixel + getXAxisHeight())
 
         if (isBrush()) {
             availableHeightT = availableHeightT * 0.75;
@@ -672,8 +672,6 @@ const HeatmapGraph = (props) => {
         // Remove all remaining nodes
         cells.exit().remove();
     }
-
-    setLeftMargin();
 
     const graphStyle = {
         width: graphWidth,
