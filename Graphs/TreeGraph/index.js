@@ -174,7 +174,7 @@ class TreeGraph extends AbstractGraph {
             links = this.treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach((d) => { d.y = d.depth * 280 });
+        nodes.forEach((d) => { d.y = d.depth * 200 });
 
         this.updateNodes(source, nodes);
         this.updateLinks(source, links);
@@ -492,12 +492,6 @@ class TreeGraph extends AbstractGraph {
 
         if (showOnlyImg) {
             nodeEnter
-                .append("image")
-                .attr("xlink:href", (d) => {
-                    const contextName = this.changeContextBasedOnSelection(d.data.contextName, 'template');
-                    let img = this.fetchImage(d.data.data, contextName);
-                    return img
-                })
                 .attr("width", 25)
                 .attr("height", 25)
                 .on("mouseover", (d) => this.showToolTip (tooltip, d, true))
@@ -507,7 +501,7 @@ class TreeGraph extends AbstractGraph {
                 .attr("x", 28)
                 .attr("dy", "18px")
                 .text(function (d) {
-                    return d.data.name && d.data.name.length > 20 ? `${d.data.name.substring(0,20)}...` : d.data.name;
+                    return d.data.name && d.data.name.length > 23 ? `${d.data.name.substring(0,23)}...` : d.data.name;
                 })
                 .style("fill-opacity", 1);
         } else {
@@ -526,18 +520,12 @@ class TreeGraph extends AbstractGraph {
                 .attr("id", (d) => `node-${d.id}`)
                 .attr('x', rectNode.textMargin)
                 .attr('y', rectNode.textMargin + 12)
-                .attr('width', () => {
-                    return (rectNode.width - rectNode.textMargin * 2) < 0 ? 0 :
-                        (rectNode.width - rectNode.textMargin * 2)
-                })
-                .attr('height', () => {
-                    return (rectNode.height - rectNode.textMargin * 2) < 0 ? 0 :
-                        (rectNode.height - rectNode.textMargin * 2)
-                })
+                .attr('width', this.rectWidth)
+                .attr('height', this.rectHeight)
                 .html((d) => {
                     return this.renderRectNode(d);
                 })
-                .on("mouseover", (d) => this.showToolTip (tooltip, d, (d.data.name && d.data.name.length > 10) || (d.data.description && d.data.name.description > 25)))
+                .on("mouseover", (d) => this.showToolTip (tooltip, d, (d.data.name && d.data.name.length > 23) || (d.data.description && d.data.name.description > 24)))
                 .on("mouseout", (d) => this.hideToolTip (tooltip, d))
         }
         // UPDATE
@@ -580,13 +568,15 @@ class TreeGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const {
-            renderNode
+            renderNode,
+            store,
+            ...rest
         } = this.props;
 
         if (!isFunction(renderNode)) return '<div/>';
 
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        return renderNode({data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, ...rectNode});
+        return renderNode({data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, store, ...rectNode, onItemRender: () => (rest)});
     }
 
     fetchImage =(apiData, contextName) => {
