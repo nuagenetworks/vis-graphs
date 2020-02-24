@@ -36,6 +36,7 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
     }, label, dataUnique);
 
     const legendContainerStyle = {
+        marginTop:'1rem',
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
@@ -82,7 +83,7 @@ export const getGraphDimension = (props, label, filterData = null) => {
         labelWidth: 0,
     }
 
-    if (!legend.show || data.length <= 1) {
+    if (!legend.show || data.length < 1) {
         return dimensions;
     }
 
