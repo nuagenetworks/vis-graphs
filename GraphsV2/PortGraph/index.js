@@ -4,7 +4,6 @@ import { compose } from 'redux';
 import evalExpression from 'eval-expression';
 import objectPath from 'object-path';
 import chunk from 'lodash/chunk';
-import isEmpty from 'lodash/isEmpty';
 import { styled } from '@material-ui/core/styles';
 
 import columnAccessor from '../../utils/columnAccessor';
@@ -15,6 +14,8 @@ import { getIconPath } from '../../utils/helpers';
 import InfoBox from "../../InfoBox";
 import customTooltip from '../utils/customTooltip';
 import { renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
+
+const MAX_LABEL_LENGTH = 8;
 
 const getColumns = (columns, data) => (
     columns.map(column => {
@@ -36,7 +37,10 @@ const getColumns = (columns, data) => (
 
 // get port name
 const getPortAttribute = (row = {}, attribute) => {
-    return objectPath.get(row, attribute) || '';
+    const label =  objectPath.get(row, attribute);
+
+    return label ? ((label.length > MAX_LABEL_LENGTH) ? 
+    label.substr(0, MAX_LABEL_LENGTH) + '...' : label ) : '';
 }
 
 const Container = styled('div')({
@@ -51,7 +55,7 @@ const GraphContainer = styled('div')({
     display: 'flex',
     verticalAlign: 'middle',
     flexFlow: 'row wrap',
-    overflow: 'auto',
+    overflowY: 'auto',
     order: ({ isVertical } = {}) => isVertical ? 2 : 1
 });
 
@@ -79,7 +83,8 @@ const LabelItem = styled('div')({
 const Item = styled('div')({
     display: 'flex',
     flexFlow: 'row nowrap',
-    marginTop: '10px'
+    marginTop: '10px',
+    marginLeft: '0.6rem',
 });
 
 const PortBox = styled('div')({
@@ -88,20 +93,28 @@ const PortBox = styled('div')({
     minWidth: ({ minWidth }) => minWidth,
 });
 
-const Icon = styled('div')({});
+const Icon = styled('div')({
+    borderRight: ({ borderRight } = { }) => borderRight,
+    margin: '0.5rem',
+    background: ({ background } = { }) => background,
+});
+
+const UpperText = styled('div')({
+    marginLeft: '0.20rem',
+})
 
 const Tooltip = styled('div')({});
 
 const PortGraph = (props) => {
 
     let isMultipleRows = false;
-    let hoveredDatum;
 
     const [portAreaWidth, setStatePortAreaWidth] = useState(100);
     const [rowCount, setStateRowCount] = useState(0);
     const [openModal, setOpenModal] = useState(false);
     const [infoBoxData, setInfoBoxData] = useState({});
     const [customTooltips, setCustomTooltips] = useState({});
+    const [hoveredDatum, setHoveredDatum] = useState(null);
 
     useEffect(() => {
         initiate(props);
@@ -132,7 +145,9 @@ const PortGraph = (props) => {
         legend,
         legendArea,
         circleToPixel,
-        fontColor
+        fontColor,
+        id,
+        background,
     } = properties;
 
     const getIconColor = (row) => {
@@ -169,7 +184,7 @@ const PortGraph = (props) => {
     }
 
     const setPortAreaWidth = ({ data, width, rowLimit, minPortWidth }) => {
-        const portWidth = width / (isMultipleRows ? rowLimit : data.length);
+        const portWidth = (width * 0.95) / (isMultipleRows ? rowLimit : data.length);
 
         setStatePortAreaWidth(portWidth < minPortWidth ? minPortWidth : portWidth);
     }
@@ -315,18 +330,16 @@ const PortGraph = (props) => {
     const getIcon = (data) => {
         const fontSize = calculatePortFontSize({ minPortFontSize, maxPortFontSize });
         const { IconSvg, viewBox } = getIconPath(portIcon, data, true);
-        const customTooltip = !isEmpty(customTooltips) ? customTooltips.tooltipProps(data) : {};
 
         return (
             <svg
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', marginTop: '0.6rem' }}
                 data-tip={true}
-                data-for={`tooltip-${new Date().valueOf()}`}
-                onMouseMove={() => hoveredDatum = data}
+                data-for={id}
+                onMouseMove={() => setHoveredDatum(data)}
                 width={fontSize}
                 height={fontSize}
                 viewBox={viewBox}
-                {...customTooltip}
             >
                 <IconSvg color={getIconColor(data)} />
             </svg>
@@ -345,9 +358,10 @@ const PortGraph = (props) => {
                                     minWidth={portAreaWidth}
                                     onClick={openInfoBox(data)}
                                 >
-                                    {getPortAttribute(data, topColumn)}
+                                    <UpperText>{getPortAttribute(data, topColumn)}</UpperText>
                                     <Icon
                                         borderRight={(i % rowCount) < (rowCount - 1) ? borderRight : ''}
+                                        background={background}
                                     >
                                         {getIcon(data)}
                                     </Icon>
@@ -365,8 +379,8 @@ const PortGraph = (props) => {
     const legendData = legend && legend.getData ? evalExpression(legend.getData)(data) : data;
     const legendGetColor = legend && legend.getColor ? evalExpression(legend.getColor) : getIconColor;
     const legendGetLabel = legend && legend.getLabel ? evalExpression(legend.getLabel) : (d) => (d);
-    const isVertical = checkIsVerticalLegend({ legend });
-
+    const isVertical = checkIsVerticalLegend(legend);
+    
     const {
         graphHeight,
         graphWidth,
@@ -388,6 +402,7 @@ const PortGraph = (props) => {
             width={width}
             display={isVertical ? 'flex' : 'inline-grid'}
         >
+            <Tooltip> {customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)} </Tooltip>
             {
                 renderLegend(
                     {
@@ -415,7 +430,6 @@ const PortGraph = (props) => {
                     justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
                 >
                     {renderInfoBox()}
-                    <Tooltip>{customTooltips.toolTip}</Tooltip>
                     {renderPort()}
                 </IconContainer>
             </GraphContainer>
