@@ -189,7 +189,7 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
                         fill={fontColor}
                         alignmentBaseline="baseline"
                         x={legend.circleSize * 2 + legend.labelOffset}
-                        y={legend.circleSize + 3}
+                        y={legend.circleSize + 2 + legend.labelOffset}
                     >
                         {label(d)}
                     </text>
