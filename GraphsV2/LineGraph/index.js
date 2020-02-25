@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { compose } from 'redux';
-import { LineChart, Line, CartesianGrid } from 'recharts';
+import { LineChart, Line, CartesianGrid, Brush } from 'recharts';
 
 import config from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -9,9 +9,11 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import dataParser from '../utils/DataParser';
+import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey } from '../utils/helper';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT } from '../../constants';
 
 const LineGraph = (props) => {
     const {
@@ -28,7 +30,6 @@ const LineGraph = (props) => {
         yColumn,
         tooltip,
         legend,
-        XAxisLabelConfig,
         margin,
         xLabelRotateHeight,
         dateHistogram,
@@ -40,6 +41,11 @@ const LineGraph = (props) => {
         colors,
         xLabelLimit,
         yLabelLimit,
+        brushEnabled,
+    } = properties;
+
+    let {
+      XAxisLabelConfig
     } = properties;
 
     const { parsedData, uniqueKeys: lineKeys } = dataParser({
@@ -48,6 +54,8 @@ const LineGraph = (props) => {
         xColumn,
         yColumn,
     });
+
+    XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;
 
     const [tooltipKey, setToolTipKey] = useState(-1);
     sortAscendingOnKey(parsedData, 'ts');
@@ -63,6 +71,22 @@ const LineGraph = (props) => {
                 vertical = {false}
                 strokeOpacity={0.3}
             />
+            {
+              brushEnabled && (
+                <Brush 
+                    data={parsedData}
+                    dataKey={xColumn}
+                    height={BRUSH_HEIGHT}
+                    tickFormatter = {
+                        (tickData) => (Formatter({
+                            dateHistogram,
+                            value: tickData,
+                            tickFormat:xTickFormat
+                        }))
+                    }
+                    y={height - ( BRUSH_HEIGHT + XLABEL_HEIGHT) }
+                />)
+            }
             {
                 xAxis({
                     xColumn,
