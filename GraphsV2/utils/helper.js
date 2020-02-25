@@ -36,7 +36,7 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
     }, label, dataUnique);
 
     const legendContainerStyle = {
-        marginTop:'1rem',
+        marginTop:'0.6rem',
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
