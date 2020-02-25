@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import {
@@ -17,6 +17,7 @@ import renderLegend from '../Components/utils/Legend';
 import dataParser from '../utils/DataParser';
 import {
     DEFAULT_BARGRAPH_ORIENTATION,
+    BRUSH_HEIGHT,
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
@@ -198,7 +199,7 @@ const BarGraph = (props) => {
                     onChange={(e) => updateBrush(e)}
                     startIndex={startIndex}
                     endIndex={endIndex}
-                    height={20}
+                    height={BRUSH_HEIGHT}
                 />
             }
         </BarChart>
