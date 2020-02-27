@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { format } from "d3";
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
-import isEmpty from 'lodash/isEmpty';
 import { styled } from '@material-ui/core/styles';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -80,6 +79,56 @@ const getColor = ({
     return barColor;
 }
 
+const getDimensions = ({
+    data,
+    width,
+    margin,
+    maxData,
+    usedData,
+    display,
+    maxDataFormat,
+    defaultRange,
+    units,
+    height,
+    maxSectionHeight,
+    minSectionHeight,
+    chartWidthToPixel
+}) => {
+    const availableWidth = width - (margin.left + margin.right);
+    let barWidth = availableWidth;
+    if (display === PERCENTAGE) {
+        const labelWidth = longestLabelLength(data,
+            (barData) => getData({ barData, maxData, usedData, display, maxDataFormat, defaultRange, units }))
+            * chartWidthToPixel;
+        barWidth = availableWidth - labelWidth * 1.30;
+    }
+
+    let sectionHeight = height / (data.length + 1);
+
+    if (sectionHeight > maxSectionHeight) {
+        sectionHeight = maxSectionHeight;
+    }
+
+    const barHeight = (display === PERCENTAGE) ? (sectionHeight * 0.50) : sectionHeight * 0.45;
+
+    let textWidth;
+    if (sectionHeight < minSectionHeight) {
+        sectionHeight = minSectionHeight;
+        if (display !== PERCENTAGE) {
+            textWidth = longestLabelLength(data);
+            barWidth = availableWidth - textWidth;
+        }
+    }
+
+    return {
+        barHeight,
+        barWidth,
+        availableWidth,
+        sectionHeight,
+        textWidth,
+    }
+}
+
 const Container = styled('div')({
     fontSize: ({ fontSize } = {}) => fontSize,
     width: ({ width } = {}) => width,
@@ -127,6 +176,8 @@ const LowerText = styled('div')({
 
 const Tooltip = styled('div')({});
 
+let dimension = {};
+
 const ProgressBarGraph = (props) => {
     const [customTooltips, setCustomTooltips] = useState({});
     const [hoveredDatum, setHoveredDataum] = useState(null);
@@ -137,16 +188,6 @@ const ProgressBarGraph = (props) => {
         height,
         properties
     } = props;
-
-    useEffect(() => {
-        setCustomTooltips(customTooltip(properties));
-    }, [props.data, props.width, props.height]);
-
-    const setHoveredData = (barData) => {
-        if(barData) {
-            setHoveredDataum(barData);
-        }
-    }
 
     const {
         margin,
@@ -167,31 +208,40 @@ const ProgressBarGraph = (props) => {
         id
     } = properties;
 
-    const availableWidth = width - (margin.left + margin.right);
-    let barWidth = availableWidth;
-    if (display === PERCENTAGE) {
-        const labelWidth = longestLabelLength(data,
-            (barData) => getData({ barData, maxData, usedData, display, maxDataFormat, defaultRange, units }))
-            * chartWidthToPixel;
-        barWidth = availableWidth - labelWidth * 1.30;
-    }
+    useEffect(() => {
+        setCustomTooltips(customTooltip(properties));
+        dimension = getDimensions(
+            {
+                data,
+                width,
+                margin,
+                maxData,
+                usedData,
+                display,
+                maxDataFormat,
+                defaultRange,
+                units,
+                height,
+                maxSectionHeight,
+                minSectionHeight,
+                chartWidthToPixel
+            }
+        );
+    }, [props.data, props.width, props.height]);
 
-    let sectionHeight = height / (data.length + 1);
-
-    if(sectionHeight > maxSectionHeight) {
-        sectionHeight = maxSectionHeight;
-    }
-
-    const barHeight = (display === PERCENTAGE) ? (sectionHeight * 0.50) : sectionHeight * 0.45;
-
-    let textWidth;
-    if (sectionHeight < minSectionHeight) {
-        sectionHeight = minSectionHeight;
-        if (display !== PERCENTAGE) {
-            textWidth = longestLabelLength(data);
-            barWidth = availableWidth - textWidth;
+    const setHoveredData = (barData) => {
+        if (barData) {
+            setHoveredDataum(barData);
         }
     }
+
+    const {
+        barHeight,
+        barWidth,
+        availableWidth,
+        sectionHeight,
+        textWidth,
+    } = dimension;
 
     return (
         <Container
@@ -200,7 +250,7 @@ const ProgressBarGraph = (props) => {
             height={height}
             data-test="progress-graph"
         >
-        <Tooltip>{customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)}</Tooltip>
+            <Tooltip>{customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)}</Tooltip>
             {
                 data.map((barData, i) => {
                     return (
