@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+import { format } from 'd3';
 
 export default (props) => {
     const {
@@ -6,5 +6,5 @@ export default (props) => {
         tickFormat,
     } = props;
 
-    return tickFormat ? d3.format(tickFormat)(value) : value;
+    return tickFormat ? format(tickFormat)(value) : value;
 }
