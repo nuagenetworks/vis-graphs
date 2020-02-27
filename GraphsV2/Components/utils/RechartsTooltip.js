@@ -45,7 +45,9 @@ const TooltipComponent = (props) => {
               }
               let columnFormatter = columnAccessor(element);
               return (
-                <Item>
+                <Item
+                    key={`tooltip-${index}`}
+                >
                     {element.label || element.column} :
                         { col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) || col.name}
                 </Item>

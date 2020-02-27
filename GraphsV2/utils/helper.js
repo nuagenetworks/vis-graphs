@@ -36,7 +36,7 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
     }, label, dataUnique);
 
     const legendContainerStyle = {
-        marginTop:'1rem',
+        marginTop:'0.6rem',
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
@@ -234,65 +234,6 @@ export const renderMessage = (props) => {
             {message}
         </div>
     )
-}
-
-export const longestLabelLength = (data, label, formatter) => {
-
-    if (!label)
-        label = (d) => d;
-
-    let format = (d) => d;
-
-    if (formatter)
-        format = d3.format(formatter);
-
-    const lab = label(data.reduce((a, b) => {
-        let labelA = label(a);
-        let labelB = label(b);
-
-        if (!labelA)
-            return b;
-
-        if (!labelB)
-            return a;
-
-        return format(labelA.toString()).length > format(labelB.toString()).length ? a : b;
-    }));
-
-    const longestLabel = lab ? lab.toString() : '';
-    let labelSize = format(longestLabel).length;
-
-    return labelSize > 8 ? labelSize : labelSize + 2;
-}
-
-export const tooltipContent = ({ tooltip, accessors, yTicksLabel, hoveredDatum }) => {
-  if (!yTicksLabel || typeof yTicksLabel !== 'object') {
-      yTicksLabel = {};
-  }
-
-  if (!Array.isArray(tooltip)) {
-      return null;
-  }
-
-  return (
-      /* Display each tooltip column as "label : value". */
-      tooltip.map(({ column, label }, i) => {
-          let data = accessors[i](hoveredDatum)
-
-          return (data !== null && data !== 'undefined') ?
-              (<div key={column}>
-                  <strong>
-                      {/* Use label if present, fall back to column name. */}
-                      {label || column}
-                  </strong> : <span>
-                      {/* Apply number and date formatting to the value. */}
-                      {yTicksLabel[data] || data}
-                  </span>
-              </div>
-              ) : null
-      })
-
-  )
 }
 
 export const wrapTextByWidth = (text, { xLabelRotate, xLabelLimit }) => {
