@@ -35,6 +35,79 @@ const handleMarkerClick = (props, e) => {
     }
 }
 
+const computeValues = (data, target) => {
+    if (!data || !target) {
+        return;
+    }
+
+    let lastInfo = {};
+    let previousInfo = {};
+
+    data.forEach((d) => {
+        if (d[target.column] === target.value) {
+            lastInfo = d;
+        } else {
+            previousInfo = d;
+        }
+    })
+
+    const lastValue = lastInfo[target.field];
+    const previousValue = previousInfo[target.field];
+    const variation = lastValue - previousValue;
+
+    return {
+        lastValue,
+        previousValue,
+        variation: (variation !== 0 && previousValue !== 0) ? variation * 100 / previousValue : 0
+    }
+}
+
+const numberWithCommas = (x) => {
+    return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+const formattedValue = (x, valueFormat) => {
+    let formatter = format(valueFormat);
+    return formatter(x);
+}
+
+const decimals = (x, nb = 2) => {
+    return x.toFixed(nb)
+}
+
+const getFormattedValue = (x, valueFormat) => {
+    return (valueFormat) ? formattedValue(x, valueFormat) : numberWithCommas(x);
+}
+
+const renderValues = ({
+    absolute,
+    showVariation,
+    settingValue,
+    target,
+    settingColor
+}) => {
+    if (!settingValue) {
+        return;
+    }
+    const lastValue = getFormattedValue(settingValue.lastValue, target.format);
+    const previousValue = getFormattedValue(settingValue.previousValue, target.format);
+    const info = !absolute ? lastValue : `${lastValue}/${previousValue}`;
+
+    return (
+        <React.Fragment>
+            <Label>
+                {info || info === 0 ? info : 'NaN'}
+            </Label>
+            {showVariation &&
+                <Label paddingLeft='0.25rem' color={settingColor ? settingColor : null} >
+                    {`(${decimals(settingValue.variation)}%)`}
+                </Label>
+            }
+        </React.Fragment>
+    );
+}
+
+
 const VariationTextGraph = (props) => {
     const [settingValue, setSettingValue] = useState(null);
     const [settingColor, setSettingColor] = useState(null);
@@ -80,79 +153,21 @@ const VariationTextGraph = (props) => {
         }
     }
 
-    const computeValues = (data, target) => {
-        if (!data || !target) {
-            return;
-        }
-
-        let lastInfo = {};
-        let previousInfo = {};
-
-        data.forEach((d) => {
-            if (d[target.column] === target.value) {
-                lastInfo = d;
-            } else {
-                previousInfo = d;
-            }    
-        })
-
-        const lastValue = lastInfo[target.field];
-        const previousValue = previousInfo[target.field];
-        const variation = lastValue - previousValue;
-
-        return {
-            lastValue,
-            previousValue,
-            variation: (variation !== 0 && previousValue !==0)  ? variation * 100 / previousValue : 0
-        }
-    }
-
-    const numberWithCommas = (x) => {
-        return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    const formattedValue = (x, valueFormat) => {
-        let formatter = format(valueFormat);
-        return formatter(x);
-    }
-
-    const decimals = (x, nb = 2) => {
-        return x.toFixed(nb)
-    }
-
-    const getFormattedValue = (x, valueFormat) => {
-        return (valueFormat) ? formattedValue(x, valueFormat) : numberWithCommas(x);
-    }
-
-    const renderValues = (absolute, showVariation) => {
-        if (!settingValue) {
-            return;
-        }
-        const lastValue = getFormattedValue(settingValue.lastValue, target.format);
-        const previousValue = getFormattedValue(settingValue.previousValue, target.format);
-        const info = !absolute ? lastValue : `${lastValue}/${previousValue}`;
-
-        return (
-            <>
-                <Label>
-                    {info || info === 0 ? info : 'NaN'}
-                </Label>
-                {showVariation &&
-                    <Label paddingLeft='0.25rem' color={settingColor ? settingColor : null} >
-                        {`(${decimals(settingValue.variation)}%)`}
-                    </Label>
-                }
-            </>
-        );
-    }
-
     return (
         <Container
             onClick={(event) => handleMarkerClick(props, event)}
             properties={properties}
         >
             <Item>
-                {renderValues(absolute, showVariation)}
+                {renderValues(
+                    {
+                        absolute,
+                        showVariation,
+                        settingValue,
+                        target,
+                        settingColor
+                    }
+                )}
             </Item>
         </Container>
     );
