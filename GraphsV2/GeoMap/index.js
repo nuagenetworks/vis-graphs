@@ -50,6 +50,11 @@ const Data = styled('small')({
   marginLeft: '10px'
 });
 
+// call on marker click
+const handleMarkerClick = (data, onMarkClick) => {
+  return onMarkClick ? onMarkClick(data) : "";
+}
+
 const GeoMap = (props) => {
 
   const [stateData, setStateData] = useState([]);
@@ -194,11 +199,6 @@ const GeoMap = (props) => {
     )
   }
 
-  // call on marker click
-  const handleMarkerClick = (data) => {
-    return onMarkClick ? onMarkClick(data) : "";
-  }
-
   // draw markers on map
   const renderMarkersIfNeeded = () => {
     return stateData.filter(d => {
@@ -216,7 +216,7 @@ const GeoMap = (props) => {
 
   const drawMarker = ({ data, position, labelOrigin = null }) => {
     const iconData = getIconPath(markerIcon, data);
-    
+
     return (
       <Marker
         noRedraw={false}
@@ -227,7 +227,7 @@ const GeoMap = (props) => {
         }}
         key={data[idColumn]}
         position={position}
-        onClick={() => handleMarkerClick(data)}
+        onClick={() => handleMarkerClick(data, onMarkClick)}
         onMouseOver={() => toggleInfoWindow(data, position)}
         onMouseOut={() => toggleInfoWindow()}
         icon={{
@@ -402,8 +402,8 @@ const GeoMap = (props) => {
 
           // if any source or destintion point not found in bound, then find lat lng in data
           if (!sourceMarker && destMarker) {
-            const source = stateData.find(d => d[idColumn] === line[links.sourceColumn])
-            
+            const source = stateData.find(d => d[idColumn] === line[links.sourceColumn]);
+
             if (source) {
               sourceMarker = {
                 lat: source[latitudeColumn],
@@ -497,9 +497,9 @@ const GeoMap = (props) => {
   let mapHeight = height;
 
   const currentCenter = {
-      lat: Number(process.env.REACT_APP_GOOGLE_MAP_LAT),
-      lng: Number(process.env.REACT_APP_GOOGLE_MAP_LNG),
-    }
+    lat: Number(process.env.REACT_APP_GOOGLE_MAP_LAT),
+    lng: Number(process.env.REACT_APP_GOOGLE_MAP_LNG),
+  }
 
   const defaultLatLng = defaultCenter ? defaultCenter : currentCenter;
 
@@ -544,11 +544,10 @@ const GeoMap = (props) => {
             {renderInfowindow()}
           </GoogleMapsWrapper>
           :
-          <WrongApikEey>
+          (<WrongApikEey>
             Google Maps API Key has not been configured! Please configure the key through Nuage VSD Dashboard
-                </WrongApikEey>
+                </WrongApikEey>)
       }
-
     </React.Fragment>
   )
 }
