@@ -8,8 +8,7 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { PERCENTAGE } from '../../constants';
-import longestLabelLength from '../utils/longestLabelLength';
-import customTooltip from '../utils/customTooltip';
+import { longestLabelLength, customTooltip}  from '../utils/helper';
 
 const getWidth = (
     barData,
