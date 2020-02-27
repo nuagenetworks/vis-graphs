@@ -161,6 +161,7 @@ const BarGraph = (props) => {
                 barKeys.map((item, index) => {
                     return (
                         <Bar
+                            key={`barGraph-${index}`}
                             dataKey={item}
                             onClick={(d) => {
                                 if (stack) {
