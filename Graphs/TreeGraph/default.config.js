@@ -43,7 +43,6 @@ export const properties = {
         },
         width: 180,
         height: 45,
-        textMargin: 5,
     },
     margin: {
         top: -80,

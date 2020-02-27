@@ -518,8 +518,6 @@ class TreeGraph extends AbstractGraph {
             
             nodeEnter.append('foreignObject')
                 .attr("id", (d) => `node-${d.id}`)
-                .attr('x', rectNode.textMargin)
-                .attr('y', rectNode.textMargin + 12)
                 .attr('width', this.rectWidth)
                 .attr('height', this.rectHeight)
                 .html((d) => {
