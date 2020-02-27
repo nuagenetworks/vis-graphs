@@ -8,7 +8,7 @@ import * as customLegends from './export';
 import StandardLegend from './StandardLegend';
 
 export default ({ legend, height, type, ...rest }) => {
-    let Component = type ? customLegends[type] : StandardLegend;
+    let Component = type ? customLegends[type] || StandardLegend : StandardLegend;
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
     if (legend && legend.show) {
         return (
