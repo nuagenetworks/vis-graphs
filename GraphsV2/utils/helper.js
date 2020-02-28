@@ -1,6 +1,9 @@
 import React from "react";
 import max from 'lodash/max';
 import * as d3 from "d3";
+import ReactTooltip from "react-tooltip";
+
+import columnAccessor from "../../utils/columnAccessor";
 
 export const sortAscendingOnKey = (array, key) => {
     return array.sort(function (first, second) {
@@ -18,11 +21,11 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
         circleToPixel,
     } = props;
 
-    if (!legend.show)
+    if (!legend.show) {
         return;
+    }
 
     const dataUnique = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-
     const {
         labelWidth,
         legendWidth,
@@ -36,11 +39,12 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
     }, label, dataUnique);
 
     const legendContainerStyle = {
+        marginTop:'0.6rem',
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
-        display: checkIsVerticalLegend({ legend }) ? 'grid' : 'inline-block',
-        order: checkIsVerticalLegend({ legend }) ? 1 : 2,
+        display: checkIsVerticalLegend(legend) ? 'grid' : 'inline-block',
+        order: checkIsVerticalLegend(legend) ? 1 : 2,
     }
 
     let legendStyle = {};
@@ -74,7 +78,6 @@ export const getGraphDimension = (props, label, filterData = null) => {
         legendArea,
         legend
     } = props;
-
     let dimensions = {
         graphWidth: width,
         graphHeight: height,
@@ -83,7 +86,7 @@ export const getGraphDimension = (props, label, filterData = null) => {
         labelWidth: 0,
     }
 
-    if (!legend.show || data.length <= 1) {
+    if (!legend.show || data.length < 1) {
         return dimensions;
     }
 
@@ -113,7 +116,6 @@ export const getGraphDimension = (props, label, filterData = null) => {
             labelWidth: labelTextWidth,
         }
     }
-
     return dimensions;
 }
 
@@ -123,7 +125,7 @@ export const getLegendArea = (props, data, dimension, label) => {
         legendArea,
     } = props;
 
-    const highestLabel = getLongestLabel({ legend }, data, label);
+    const highestLabel = getLongestLabel(legend, data, label);
 
     if (highestLabel > dimension * legendArea) {
         return dimension * legendArea;
@@ -132,11 +134,7 @@ export const getLegendArea = (props, data, dimension, label) => {
     return highestLabel;
 }
 
-export const getLongestLabel = (props, data, label) => {
-    const {
-        legend,
-    } = props;
-
+export const getLongestLabel = (legend, data, label) => {
     if (!label) {
         label = (d) => d;
     }
@@ -156,13 +154,7 @@ export const labelSize = (label, LabelFont = 10) => {
     return dimension.width;
 }
 
-export const checkIsVerticalLegend = (props) => {
-    const {
-        legend
-    } = props;
-
-    return legend.show && legend.orientation === 'vertical';
-}
+export const checkIsVerticalLegend = (legend) => legend.show && legend.orientation === 'vertical';
 
 export const getLegendContent = (props, data, legend, getColor, label) => {
     const {
@@ -193,14 +185,14 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
                         cx={legend.circleSize}
                         cy={legend.circleSize}
                         r={legend.circleSize}
-                        fill={getColor(props, d)}
+                        fill={getColor(d)}
                     />
                     <text
                         style={{ fontSize: legend.labelFontSize }}
                         fill={fontColor}
                         alignmentBaseline="baseline"
                         x={legend.circleSize * 2 + legend.labelOffset}
-                        y={legend.circleSize + 3}
+                        y={legend.circleSize + 2 + legend.labelOffset}
                     >
                         {label(d)}
                     </text>
@@ -209,3 +201,191 @@ export const getLegendContent = (props, data, legend, getColor, label) => {
         );
     })
 }
+
+export const scaleColor = (props, data, defaultColumn, setGraphColor) => {
+
+    const {
+        colors,
+        otherColors,
+        colorColumn,
+        isCustomColor,
+    } = props;
+
+    if (!colorColumn && !defaultColumn)
+        return;
+
+    const domainData = d3.map(data, (d) => d[colorColumn || defaultColumn]).keys();
+    let colorList = [...colors, ...otherColors];
+    
+    if (setGraphColor && !isCustomColor) {
+        colorList = setGraphColor(domainData, colorList);
+    } 
+
+    return colorList;
+}
+
+export const renderMessage = (props) => {
+    const {
+        data,
+        message,
+        id
+    } = props;
+    const messageClass = data && data.classes && data.classes.messageClass;
+
+    return (
+        <div id={`${id}-message`} className={messageClass ? messageClass : "center-text"}>
+            {message}
+        </div>
+    )
+}
+
+export const longestLabelLength = (data, label, formatter) => {
+
+    // Basic function if none provided
+    if (!label)
+        label = (d) => d;
+
+    let format = (d) => d;
+
+    if (formatter)
+        format = format(formatter);
+
+    // Extract the longest legend according to the label function
+    const lab = label(data.reduce((a, b) => {
+        let labelA = label(a);
+        let labelB = label(b);
+
+        if (!labelA)
+            return b;
+
+        if (!labelB)
+            return a;
+
+        return format(labelA.toString()).length > format(labelB.toString()).length ? a : b;
+    }));
+
+    const longestLabel = lab ? lab.toString() : '';
+    let labelSize = format(longestLabel).length
+
+    // and return its length + 2 to ensure we have enough space
+    return labelSize > 8 ? labelSize : labelSize + 2;
+}
+
+export const customTooltip = (properties) => {
+    let getTooltipContent;
+
+    const { tooltip, id } = properties;
+
+    let { yTicksLabel } = properties;
+
+    const setTooltipAccessor = () => {
+        if (!tooltip) {
+            return;
+        }
+
+        // This function is invoked to produce the content of a tooltip.
+        getTooltipContent = (d) => {
+            // The value of this.hoveredDatum should be set by subclasses
+            // on mouseEnter and mouseMove of visual marks
+            // to the data entry corresponding to the hovered mark.
+            return d ? tooltipContent(d) : '';
+        }
+    }
+
+    const tooltipContent = (d) => {
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
+
+        if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+            yTicksLabel = {};
+        }
+
+        const accessors = tooltip.map(columnAccessor);
+
+        return (
+            /* Display each tooltip column as "label : value". */
+            tooltip.map(({ column, label }, i) => {
+                const data = accessors[i](d)
+
+                return (data !== null && data !== 'undefined') ?
+                    (
+                        <div key={column}>
+                            <strong>
+                                {/* Use label if present, fall back to column name. */}
+                                {label || column}
+                            </strong> : <span>
+                                {/* Apply number and date formatting to the value. */}
+                                {yTicksLabel[data] || data}
+                            </span>
+                        </div>
+                    ) : null;
+            })
+        )
+    }
+
+    const tooltipWrapper = (data) => (<ReactTooltip
+        id={id}
+        place="top"
+        type="dark"
+        effect="float"
+        getContent={[() => getTooltipContent(data), 200]}
+        delayUpdate={200}
+    />)
+
+    // Provide tooltips for subclasses.
+    if (tooltip) {
+        setTooltipAccessor(tooltip, yTicksLabel);
+        // This JSX object can be used by subclasses to enable tooltips.
+        tooltipWrapper(null);
+
+    } else {
+        getTooltipContent = () => null
+    }
+
+    return { tooltipWrapper }
+} 
+
+export const wrapTextByWidth = (text, { xLabelRotate, xLabelLimit }) => {
+
+  text.each(function () {
+      const text = d3.select(this);
+      const words = text.text();
+      const tspan = text.text(null)
+          .append("tspan")
+          .attr("x", -2)
+          .attr("y", text.attr("y"))
+          .attr("dy", parseFloat(text.attr("dy")) + "em")
+          .text(words);
+
+      if (xLabelRotate) {
+          text.attr("transform", "rotate(-50)")
+              .attr("dy", ".15em")
+              .style("text-anchor", "end")
+      }
+
+      if (words.length > xLabelLimit) {
+          text.style('cursor', 'pointer')
+              .append('title').text(words);
+
+          tspan.text(words.substr(0, xLabelLimit) + '...');
+      }
+  });
+}
+
+export const wrapD3Text = (text, width) => {
+  text.each(function () {
+      var text = d3.select(this);
+      var words = text.text(),
+
+          y = text.attr("y"),
+          dy = parseFloat(text.attr("dy")),
+          tspan = text.text(null).append("tspan").attr("x", -3).attr("y", y).attr("dy", dy + "em");
+      tspan.text(words);
+
+      if (words.length > width) {
+          text.style('cursor', 'pointer').append('title').text(words)
+          tspan.text(words.substr(0, width) + '...')
+      }
+  });
+};
