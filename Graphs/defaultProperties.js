@@ -48,13 +48,10 @@ export default {
     brushArea: 20, // // in percentage
     otherColors: [
         theme.palette.bluePaleColor,
-        theme.palette.orangeLightColor,
         theme.palette.blueLightColor,
         theme.palette.pinkLightColor,
         theme.palette.blackLightColor,
         theme.palette.greenLightColor,
-        theme.palette.greyLightDarkColor,
-        theme.palette.peach,
         theme.palette.aquaLightColor,
         theme.palette.windowBodyColor,
         theme.palette.orangeBlindColor,
