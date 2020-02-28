@@ -12,8 +12,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { getIconPath } from '../../utils/helpers';
 import InfoBox from "../../InfoBox";
-import customTooltip from '../utils/customTooltip';
-import { renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
+import { customTooltip, renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
 
 const MAX_LABEL_LENGTH = 8;
 
@@ -37,10 +36,10 @@ const getColumns = (columns, data) => (
 
 // get port name
 const getPortAttribute = (row = {}, attribute) => {
-    const label =  objectPath.get(row, attribute);
+    const label = objectPath.get(row, attribute);
 
-    return label ? ((label.length > MAX_LABEL_LENGTH) ? 
-    label.substr(0, MAX_LABEL_LENGTH) + '...' : label ) : '';
+    return label ? ((label.length > MAX_LABEL_LENGTH) ?
+        label.substr(0, MAX_LABEL_LENGTH) + '...' : label) : '';
 }
 
 const Container = styled('div')({
@@ -83,7 +82,6 @@ const LabelItem = styled('div')({
 const Item = styled('div')({
     display: 'flex',
     flexFlow: 'row nowrap',
-    marginTop: '10px',
     marginLeft: '0.6rem',
 });
 
@@ -94,13 +92,14 @@ const PortBox = styled('div')({
 });
 
 const Icon = styled('div')({
-    borderRight: ({ borderRight } = { }) => borderRight,
+    borderRight: ({ borderRight } = {}) => borderRight,
     margin: '0.5rem',
-    background: ({ background } = { }) => background,
+    background: ({ background } = {}) => background,
 });
 
 const UpperText = styled('div')({
-    marginLeft: '0.20rem',
+    marginRight: '1rem',
+    fontSize: '0.70rem',
 })
 
 const Tooltip = styled('div')({});
@@ -133,8 +132,6 @@ const PortGraph = (props) => {
         topColumn,
         bottomColumn,
         rowLimit,
-        minPortFontSize,
-        maxPortFontSize,
         columns,
         rows,
         tooltipScript,
@@ -147,7 +144,9 @@ const PortGraph = (props) => {
         circleToPixel,
         fontColor,
         id,
-        background,
+        removeUpperColumnName,
+        removeLowerColumnName,
+        portIconSize
     } = properties;
 
     const getIconColor = (row) => {
@@ -172,10 +171,10 @@ const PortGraph = (props) => {
                     color = d.color;
                 }
             });
-    
+
             return color;
         }
-    
+
         return defaultIconColor;
     }
 
@@ -297,13 +296,6 @@ const PortGraph = (props) => {
         )
     }
 
-    // calculate the font size of port icon.
-    const calculatePortFontSize = ({ minPortFontSize, maxPortFontSize }) => {
-        const font = portAreaWidth * 0.4;
-
-        return font > maxPortFontSize ? maxPortFontSize : (font < minPortFontSize ? minPortFontSize : font);
-    }
-
     const renderColumns = () => {
 
         let columnData = [];
@@ -328,17 +320,16 @@ const PortGraph = (props) => {
 
     // icon to show port status
     const getIcon = (data) => {
-        const fontSize = calculatePortFontSize({ minPortFontSize, maxPortFontSize });
         const { IconSvg, viewBox } = getIconPath(portIcon, data, true);
 
         return (
             <svg
-                style={{ cursor: 'pointer', marginTop: '0.6rem' }}
+                style={{ cursor: 'pointer', marginTop: '0.5rem', marginRight: '1rem' }}
                 data-tip={true}
                 data-for={id}
                 onMouseMove={() => setHoveredDatum(data)}
-                width={fontSize}
-                height={fontSize}
+                width={portIconSize}
+                height={portIconSize}
                 viewBox={viewBox}
             >
                 <IconSvg color={getIconColor(data)} />
@@ -358,14 +349,14 @@ const PortGraph = (props) => {
                                     minWidth={portAreaWidth}
                                     onClick={openInfoBox(data)}
                                 >
-                                    <UpperText>{getPortAttribute(data, topColumn)}</UpperText>
+                                    {!removeUpperColumnName && topColumn && <UpperText>{getPortAttribute(data, topColumn)}</UpperText>}
+                                    {!removeUpperColumnName && !topColumn && <UpperText>{`Port ${index ? ((index * rowLimit) + i + 1) : i + 1}`}</UpperText>}
                                     <Icon
                                         borderRight={(i % rowCount) < (rowCount - 1) ? borderRight : ''}
-                                        background={background}
                                     >
                                         {getIcon(data)}
                                     </Icon>
-                                    {getPortAttribute(data, bottomColumn)}
+                                    {!removeLowerColumnName && bottomColumn && getPortAttribute(data, bottomColumn)}
                                 </PortBox>
                             )
                         })
@@ -380,7 +371,7 @@ const PortGraph = (props) => {
     const legendGetColor = legend && legend.getColor ? evalExpression(legend.getColor) : getIconColor;
     const legendGetLabel = legend && legend.getLabel ? evalExpression(legend.getLabel) : (d) => (d);
     const isVertical = checkIsVerticalLegend(legend);
-    
+
     const {
         graphHeight,
         graphWidth,

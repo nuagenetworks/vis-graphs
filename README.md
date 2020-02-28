@@ -812,9 +812,11 @@ Note: icon must be a key exists in svgIcons object in helpers/icons.js
 
 __defaultIconColor__ (string) default color of the port icon. Default is gray .
 
-__minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (px).
+__portIconSize__ (number) size of port icon size. Default is 18.
 
-__maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
+__removeUpperColumnName__ (boolean) remove column text on top of Port. Default is false.
+
+__removeLowerCloumnName__ (boolean) remove column text on bottom of the Port. Default is false.
 
 __minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
 
