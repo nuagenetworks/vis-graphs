@@ -134,7 +134,6 @@ const getFilterData = (data, chordSourceColumn, chordDestinationColumn) => {
     return data.filter(d => d[chordSourceColumn] && d[chordDestinationColumn]);
 }
 
-let filterChordData = [];
 let matrix = [];
 
 const ChordGraph = (props) => {
@@ -182,7 +181,7 @@ const ChordGraph = (props) => {
     }, [props.data, props.width, props.height]);
 
     const parseData = (data) => {
-        filterChordData = getFilterData(data, chordSourceColumn, chordDestinationColumn);
+        const filterChordData = getFilterData(data, chordSourceColumn, chordDestinationColumn);
         
         if (!isEqual(filterChordData, filterData)) {
             matrix = generateMatrix({
