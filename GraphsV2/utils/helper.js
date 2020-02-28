@@ -1,6 +1,9 @@
 import React from "react";
 import max from 'lodash/max';
 import * as d3 from "d3";
+import ReactTooltip from "react-tooltip";
+
+import columnAccessor from "../../utils/columnAccessor";
 
 export const sortAscendingOnKey = (array, key) => {
     return array.sort(function (first, second) {
@@ -36,7 +39,7 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
     }, label, dataUnique);
 
     const legendContainerStyle = {
-        marginTop:'1rem',
+        marginTop:'0.6rem',
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
@@ -238,14 +241,16 @@ export const renderMessage = (props) => {
 
 export const longestLabelLength = (data, label, formatter) => {
 
+    // Basic function if none provided
     if (!label)
         label = (d) => d;
 
     let format = (d) => d;
 
     if (formatter)
-        format = d3.format(formatter);
+        format = format(formatter);
 
+    // Extract the longest legend according to the label function
     const lab = label(data.reduce((a, b) => {
         let labelA = label(a);
         let labelB = label(b);
@@ -260,40 +265,86 @@ export const longestLabelLength = (data, label, formatter) => {
     }));
 
     const longestLabel = lab ? lab.toString() : '';
-    let labelSize = format(longestLabel).length;
+    let labelSize = format(longestLabel).length
 
+    // and return its length + 2 to ensure we have enough space
     return labelSize > 8 ? labelSize : labelSize + 2;
 }
 
-export const tooltipContent = ({ tooltip, accessors, yTicksLabel, hoveredDatum }) => {
-  if (!yTicksLabel || typeof yTicksLabel !== 'object') {
-      yTicksLabel = {};
-  }
+export const customTooltip = (properties) => {
+    let getTooltipContent;
 
-  if (!Array.isArray(tooltip)) {
-      return null;
-  }
+    const { tooltip, id } = properties;
 
-  return (
-      /* Display each tooltip column as "label : value". */
-      tooltip.map(({ column, label }, i) => {
-          let data = accessors[i](hoveredDatum)
+    let { yTicksLabel } = properties;
 
-          return (data !== null && data !== 'undefined') ?
-              (<div key={column}>
-                  <strong>
-                      {/* Use label if present, fall back to column name. */}
-                      {label || column}
-                  </strong> : <span>
-                      {/* Apply number and date formatting to the value. */}
-                      {yTicksLabel[data] || data}
-                  </span>
-              </div>
-              ) : null
-      })
+    const setTooltipAccessor = () => {
+        if (!tooltip) {
+            return;
+        }
 
-  )
-}
+        // This function is invoked to produce the content of a tooltip.
+        getTooltipContent = (d) => {
+            // The value of this.hoveredDatum should be set by subclasses
+            // on mouseEnter and mouseMove of visual marks
+            // to the data entry corresponding to the hovered mark.
+            return d ? tooltipContent(d) : '';
+        }
+    }
+
+    const tooltipContent = (d) => {
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
+
+        if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+            yTicksLabel = {};
+        }
+
+        const accessors = tooltip.map(columnAccessor);
+
+        return (
+            /* Display each tooltip column as "label : value". */
+            tooltip.map(({ column, label }, i) => {
+                const data = accessors[i](d)
+
+                return (data !== null && data !== 'undefined') ?
+                    (
+                        <div key={column}>
+                            <strong>
+                                {/* Use label if present, fall back to column name. */}
+                                {label || column}
+                            </strong> : <span>
+                                {/* Apply number and date formatting to the value. */}
+                                {yTicksLabel[data] || data}
+                            </span>
+                        </div>
+                    ) : null;
+            })
+        )
+    }
+
+    const tooltipWrapper = (data) => (<ReactTooltip
+        id={id}
+        place="top"
+        type="dark"
+        effect="float"
+        getContent={[() => getTooltipContent(data), 200]}
+        delayUpdate={200}
+    />)
+
+    // Provide tooltips for subclasses.
+    if (tooltip) {
+        setTooltipAccessor(tooltip, yTicksLabel);
+        // This JSX object can be used by subclasses to enable tooltips.
+        tooltipWrapper(null);
+
+    } else {
+        getTooltipContent = () => null
+    }
+
+    return { tooltipWrapper }
+} 
 
 export const wrapTextByWidth = (text, { xLabelRotate, xLabelLimit }) => {
 
