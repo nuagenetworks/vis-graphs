@@ -6,3 +6,4 @@ export const PERCENTAGE = 'percentage';
 export const LEGEND_SEPARATE = 20;
 export const BRUSH_HEIGHT = 20;
 export const XLABEL_HEIGHT = 20;
+export const RADIAN = Math.PI / 180;
