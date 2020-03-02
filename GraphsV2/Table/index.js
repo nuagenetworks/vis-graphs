@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react'
 import { compose } from 'redux';
-import CopyToClipboard from 'react-copy-to-clipboard'
-import { Tooltip } from 'react-lightweight-tooltip'
-import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash'
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { Tooltip } from 'react-lightweight-tooltip';
+import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
@@ -14,11 +13,11 @@ import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
-import columnAccessor from "../../utils/columnAccessor"
-import { toolTipStyle, lastColToolTipStyle, firstColToolTipStyle } from './tooltipStyle'
-import "./style.css"
-import style from './style'
-import { properties } from "./default.config"
+import columnAccessor from "../../utils/columnAccessor";
+import { toolTipStyle, lastColToolTipStyle, firstColToolTipStyle } from './tooltipStyle';
+import "./style.css";
+import style from './style';
+import { properties } from "./default.config";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
@@ -27,15 +26,16 @@ import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 let displayColumns = [];
-let originalData = []
-let filterData = []
-let sortOrder = {}
+let originalData = [];
+let filterData = [];
+let sortOrder = {};
 let container = "";
 let currentPage = 1;
 let unformattedData = {};
 let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = {};
+
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -116,7 +116,7 @@ const Table = (props) => {
     const [infoBoxData, setInfoBoxData] = useState({});
     const [infoBoxScript, setInfoBoxScript] = useState({});
 
-    const getGraphProperties = () => {
+    const getGraphProperties = (props) => {
         const {
             data,
             scrollData,
@@ -148,22 +148,23 @@ const Table = (props) => {
             selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
             selectedRows = selectedRows[requestId];
             if (!objectPath.has(scrollData, 'pageSize')) {
-                updateTableStatus({ pageSize }, props.updateScroll)
+                updateTableStatus({ pageSize }, props.updateScroll);
             }
         }
 
         const {
-            matchingRowColumn
+            matchingRowColumn,
         } = properties;
 
         const columns = getColumns();
 
-        if (!columns.length)
+        if (!columns.length) {
             return;
+        }
 
-        filterData = []
-        unformattedData = {}
-        const columnNameList = []
+        filterData = [];
+        unformattedData = {};
+        const columnNameList = [];
 
         columns.forEach(d => {
             columnNameList.push(d.column);
@@ -172,7 +173,7 @@ const Table = (props) => {
         props.data.forEach((d, i) => {
             const random = Math.floor(new Date().valueOf() * Math.random());
             const data = {
-                'row_id': random
+                'row_id': random,
             };
 
             for (let key in columns) {
@@ -184,42 +185,39 @@ const Table = (props) => {
                     data[columnData.column] = accessor(d);
 
                     if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
-                        data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d)
+                        data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
                     }
 
                     if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
-                        data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d)
+                        data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
                     }
                 }
             }
 
-            filterData.push(data)
+            filterData.push(data);
             unformattedData[random] = d;
         })
-        originalData = filterData
+        originalData = filterData;
 
-        /*
-         * On data change, resetting the paging and filtered data to 1 and false respectively.
-         */
         resetFilters((currentPage || 1), selectedRows);
         updateData();
     }
 
     const {
-        size
+        size,
     } = getGraphProperties(props);
-    
+
     const isScrollExpired = () => {
         const {
-            expiration
+            expiration,
         } = getGraphProperties();
 
-        return scroll && expiration && expiration <= Date.now()
+        return scroll && expiration && expiration <= Date.now();
     }
 
     const isScrollDataExists = (page) => {
         const {
-            data
+            data,
         } = props;
 
         const {
@@ -232,20 +230,20 @@ const Table = (props) => {
 
     const decrementFontSize = () => (setFontSize(fontSize - 1));
 
-    const checkFontsize = () => (container && container.querySelector('table').clientWidth > container.clientWidth ? fontSize >= style.defaultFontsize : decrementFontSize())
+    const checkFontsize = () => (container && container.querySelector('table').clientWidth > container.clientWidth ? fontSize >= style.defaultFontsize : decrementFontSize());
 
     const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
         if (isSuccess) {
             if (expression) {
                 const {
-                    searchString
+                    searchString,
                 } = getGraphProperties();
 
-                const search = labelToField(expandExpression(expression), getColumns())
+                const search = labelToField(expandExpression(expression), getColumns());
                 filterData = data;
 
                 if (!searchText || searchString !== searchText) {
-                    updateTableStatus({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH }, props.updateScroll)
+                    updateTableStatus({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH }, props.updateScroll);
                 }
             } else {
                 filterData = data;
@@ -261,7 +259,7 @@ const Table = (props) => {
         } = getGraphProperties();
 
         const offset = pageSize * (currentPage - 1);
-        
+
         setData(scroll ? filterData.slice(0, offset + pageSize) : filterData);
         setSelectedState(selectedRows[currentPage] || []);
     }
@@ -273,7 +271,7 @@ const Table = (props) => {
             removedColumns,
         } = getGraphProperties();
 
-        const columns = getColumns()
+        const columns = getColumns();
         let headerData = [];
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
@@ -299,7 +297,7 @@ const Table = (props) => {
                     headerColumn.options = {
                         display: displayColumn,
                         sortDirection: isEmptyData(initialSort) ? sortOrder.order : initialSort.order,
-                        sort: true
+                        sort: true,
                     }
                 }
 
@@ -307,7 +305,7 @@ const Table = (props) => {
             }
         }
 
-        return headerData
+        return headerData;
     }
 
     const getTableData = (columns) => {
@@ -320,8 +318,9 @@ const Table = (props) => {
             removedColumns,
         } = getGraphProperties();
 
-        if (!columns)
+        if (!columns) {
             return [];
+        }
 
         const keyColumns = getColumns();
         const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
@@ -343,7 +342,7 @@ const Table = (props) => {
                     let columnData = originalData;
 
                     if (columnObj.totalCharacters) {
-                        columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d)
+                        columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d);
                     }
 
                     if ((columnData || columnData === 0) && columnObj.tooltip) {
@@ -371,7 +370,7 @@ const Table = (props) => {
                     }
 
                     if (highlight && highlight.includes(columnObj.column) && originalData) {
-                        highlighter = true
+                        highlighter = true;
                     }
 
                     if (columnObj.colors && columnObj.colors[originalData]) {
@@ -412,18 +411,19 @@ const Table = (props) => {
                 }
             }
 
-            if (highlighter)
+            if (highlighter) {
                 Object.keys(data).map(key => {
                     return data[key] = <div style={{ background: highlightColor || '', height: style.row.height, padding: "10px 0" }}>
                         {data[key]}</div>
                 })
+            }
             return data;
         })
     }
 
     const handleColumnViewChange = (changedColumn, action) => {
         const {
-            removedColumns: removedColumnsProps
+            removedColumns: removedColumnsProps,
         } = getGraphProperties();
 
         if (action === 'remove') {
@@ -441,7 +441,7 @@ const Table = (props) => {
         if (scroll) {
             updateTableStatus({
                 pageSize: numberOfRows,
-                event: events.PAGING
+                event: events.PAGING,
             }, props.updateScroll);
         }
         pageSize = numberOfRows;
@@ -459,7 +459,7 @@ const Table = (props) => {
             sort: { column: column, order: colOrder },
             currentPage: 1,
             selectedRow: {},
-            event: events.SORTING
+            event: events.SORTING,
         }, props.updateScroll)
     }
 
@@ -492,10 +492,8 @@ const Table = (props) => {
                 setShowConfirmationPopup(true);
                 return;
             }
-
-            ++currentPage
+            ++currentPage;
         } else {
-
             --currentPage;
         }
 
@@ -517,12 +515,12 @@ const Table = (props) => {
 
         const {
             multiSelectable,
-            matchingRowColumn
+            matchingRowColumn,
         } = properties;
 
         if (!multiSelectable) {
-            handleClick(...selectedRowsCurr)
-            selectedRows = {}
+            handleClick(...selectedRowsCurr);
+            selectedRows = {};
             // updateScrollNow = true;
         }
 
@@ -535,19 +533,19 @@ const Table = (props) => {
             if (selectedData.length > 1) {
                 rows = selectedData;
             } else {
-                let row = selectedData.length ? selectedData[0] : {}
+                let row = selectedData.length ? selectedData[0] : {};
                 if (matchingRowColumn && row) {
-                    const value = objectPath.get(row, matchingRowColumn)
+                    const value = objectPath.get(row, matchingRowColumn);
                     matchingRows = props.data.filter((d) => {
-                        const matchingRowValue = objectPath.get(d, matchingRowColumn)
-                        return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue
+                        const matchingRowValue = objectPath.get(d, matchingRowColumn);
+                        return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue;
                     });
                 }
-                rows = row
+                rows = row;
             }
             onSelect({ rows, matchingRows });
         }
-        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
+        // const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
 
         // if (updateScrollNow) {
         //     updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
@@ -559,23 +557,23 @@ const Table = (props) => {
     const getMenu = () => {
         const {
             menu,
-            multiMenu
+            multiMenu,
         } = properties;
 
         if (multiMenu && getSelectedRows().length > 1) {
-            return multiMenu
+            return multiMenu;
         }
 
         return menu || false;
     }
 
     const handleContextMenu = (event) => {
-        const menu = getMenu()
+        const menu = getMenu();
 
         if (!menu) {
             return false;
         }
-        event.preventDefault()
+        event.preventDefault();
         const { clientX: x, clientY: y } = event;
         setContextMenu({ x, y });
         return true;
@@ -589,12 +587,14 @@ const Table = (props) => {
     const closeContextMenu = () => {
         document.body.removeEventListener('click', handleCloseContextMenu);
         const node = document.getElementById('contextMenu');
-        if (node) node.remove();
+        if (node) {
+            node.remove();
+        }
     }
 
     const openContextMenu = () => {
         const { x, y } = contextMenu;
-        const menu = getMenu()
+        const menu = getMenu();
 
         closeContextMenu();
         document.body.addEventListener('click', handleCloseContextMenu);
@@ -604,18 +604,17 @@ const Table = (props) => {
         node.id = 'contextMenu';
         node.style = `top: ${y}px; left: ${x}px; z-index: 100000;`;
 
-        const { goTo, context, configuration: { id } } = properties;
+        const { goTo, context, id } = properties;
         context.id = id;
 
         menu.forEach((item) => {
             const { text, rootpath, params } = item;
-            const pathname = `${process.env.PUBLIC_URL}/${rootpath}`
+            const pathname = `${process.env.PUBLIC_URL}/${rootpath}`;
             const li = document.createElement('li');
             li.textContent = text;
             const queryParams = (params && Object.getOwnPropertyNames(params).length > 0) ?
                 Object.assign({}, context, params) : Object.assign({}, context);
             li.onclick = (e) => {
-                // dispatch a push to the menu link
                 goTo && goTo(pathname, queryParams);
             };
             node.append(li);
@@ -625,14 +624,14 @@ const Table = (props) => {
 
     const getSelectedRows = () => {
         const {
-            pageSize
+            pageSize,
         } = getGraphProperties();
 
         let selected = [];
         for (let page in selectedRows) {
             if (selectedRows.hasOwnProperty(page)) {
                 selectedRows[page].forEach((index) => {
-                    selected.push(props.data[(page - 1) * pageSize + index])
+                    selected.push(props.data[(page - 1) * pageSize + index]);
                 })
             }
         }
@@ -641,7 +640,7 @@ const Table = (props) => {
 
     const renderSearchBarIfNeeded = (headerData) => {
         const {
-            searchString
+            searchString,
         } = getGraphProperties();
         const {
             searchBar,
@@ -677,11 +676,11 @@ const Table = (props) => {
 
     const removeHighlighter = (data = []) => {
         const {
-            highlight
+            highlight,
         } = properties;
 
         if (!data.length)
-            return data
+            return data;
 
         if (highlight) {
             selected.forEach((key) => {
@@ -689,13 +688,13 @@ const Table = (props) => {
                     for (let i in data[key]) {
                         if (data[key].hasOwnProperty(i)) {
                             if (data[key][i].props.style)
-                                data[key][i].props.style.background = ''
+                                data[key][i].props.style.background = '';
                         }
                     }
                 }
             })
         }
-        return data
+        return data;
     }
 
     const resetScrollData = () => {
@@ -721,7 +720,7 @@ const Table = (props) => {
         infoBoxRow,
         infoBoxColumn,
         infoBoxData,
-        infoBoxScript
+        infoBoxScript,
     }) => {
         setShowInfoBox(true);
         setInfoBoxRow(infoBoxRow);
@@ -734,7 +733,7 @@ const Table = (props) => {
 
     const renderInfoBox = () => {
         const {
-            Script
+            Script,
         } = props;
 
         return (
@@ -788,7 +787,7 @@ const Table = (props) => {
         const {
             searchBar,
             selectColumnOption,
-            filterOptions
+            filterOptions,
         } = properties;
 
         let heightMargin = showFooter ? 40 : 0;
@@ -801,7 +800,7 @@ const Table = (props) => {
 
     const getInitialSort = () => {
         const {
-            sort
+            sort,
         } = getGraphProperties();
 
         let initialSort = {};
@@ -840,9 +839,9 @@ const Table = (props) => {
                     event: events.REMOVED_COLUMNS
                 }, props.updateScroll);
             }
-            
+
             const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-            
+
             if (!objectPath.has(scrollData, 'selectedRow') && !isEmpty(selectedRows)) {
                 updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
             }
@@ -851,7 +850,6 @@ const Table = (props) => {
 
     let tableData = getTableData(getColumns());
     tableData = removeHighlighter(tableData);
-
     const tableCurrentPage = currentPage - 1;
     const initialSort = getInitialSort();
     const headerData = getHeaderData(initialSort);
@@ -911,18 +909,18 @@ const Table = (props) => {
     const muiTableStyle = {
         MUIDataTableSelectCell: {
             root: {
-                display: showCheckboxes ? '' : 'none'
-            }
+                display: showCheckboxes ? '' : 'none',
+            },
         },
         MUIDataTableBody: {
             emptyTitle: {
-                maxWidth: width
-            }
+                maxWidth: width,
+            },
         },
         MUIDataTable: {
             responsiveScroll: {
                 height: (height - heightMargin),
-            }
+            },
         },
         MUIDataTableToolbar: {
             actions: {
@@ -937,14 +935,14 @@ const Table = (props) => {
         },
         MUIDataTableToolbarSelect: {
             root: {
-                display: "none"
-            }
+                display: "none",
+            },
         },
         MuiTableCell: {
             root: {
                 padding: "10px 40px 10px 15px",
-                fontSize: "10px"
-            }
+                fontSize: "10px",
+            },
         }
     }
     const theme = createMuiTheme({
@@ -975,7 +973,6 @@ const Table = (props) => {
 }
 
 Table.propTypes = {
-    configuration: PropTypes.object,
     data: PropTypes.arrayOf(PropTypes.object),
 };
 
