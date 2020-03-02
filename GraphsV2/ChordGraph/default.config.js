@@ -1,0 +1,18 @@
+export const config = {
+    padAngle: 0.07,
+    bidirectionalTooltip: true,
+    componentId: 1,
+    outerRadius: null,
+    innerRadius: null,
+    sortGroups: null,
+    sortChords: null,
+    labelColors: ['#000000'],
+    disableHover: false,
+    disableGroupHover: false,
+    disableRibbonHover: false,
+    strokeWidth: 1,
+    resizeWithWindow: false,
+    blurOnHover: false,
+    ribbonOpacity: '0.67',
+    ribbonHoverOpacity: '0.2',
+}
