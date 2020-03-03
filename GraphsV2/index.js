@@ -1,6 +1,8 @@
 export { default as SimpleTextGraph } from './SimpleTextGraph';
 export { default as PieGraph } from './PieGraph';
 export { default as Table } from './Table'; 
+export { default as AreaGraph } from './AreaGraph';
+export { default as LineGraph } from './LineGraph';
 export { default as GeoMap } from './GeoMap';
 export { default as ChordGraph } from './ChordGraph';
 export { default as BarGraph } from './BarGraph';
