@@ -35,7 +35,7 @@ let unformattedData = {};
 let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = {};
-
+let pageSize = 500;
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -84,6 +84,24 @@ const resetFilters = (page = 1, selectedRow = {}) => {
     selectedRows = selectedRow;
 }
 
+const getGraphProperties = (props) => {
+  const {
+      data,
+      scrollData,
+      size,
+  } = props;
+
+  return {
+      searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
+      sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
+      size: size || data.length,
+      pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
+      currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
+      expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+      removedColumns: objectPath.has(scrollData, `removedColumns_${removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${removedColumnsKey}`) : uniq(removedColumns),
+  }
+}
+
 const Table = (props) => {
     const {
         width,
@@ -101,7 +119,7 @@ const Table = (props) => {
     } = properties;
 
     let multiSelectable = true;
-    const pageSize = limit || 500;
+    pageSize = limit || pageSize;
     let scroll = props.scroll;
     let updateScrollNow = false;
 
@@ -115,24 +133,6 @@ const Table = (props) => {
     const [infoBoxColumn, setInfoBoxColumn] = useState({});
     const [infoBoxData, setInfoBoxData] = useState({});
     const [infoBoxScript, setInfoBoxScript] = useState({});
-
-    const getGraphProperties = (props) => {
-        const {
-            data,
-            scrollData,
-            size,
-        } = props;
-
-        return {
-            searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
-            sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
-            size: size || data.length,
-            pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
-            currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
-            expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-            removedColumns: objectPath.has(scrollData, `removedColumns_${removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${removedColumnsKey}`) : uniq(removedColumns),
-        }
-    }
 
     const initiate = (props) => {
         const {
@@ -210,7 +210,7 @@ const Table = (props) => {
     const isScrollExpired = () => {
         const {
             expiration,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         return scroll && expiration && expiration <= Date.now();
     }
@@ -222,7 +222,7 @@ const Table = (props) => {
 
         const {
             pageSize,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         let startIndex = (page - 1) * pageSize;
         return startIndex < data.length;
@@ -237,7 +237,7 @@ const Table = (props) => {
             if (expression) {
                 const {
                     searchString,
-                } = getGraphProperties();
+                } = getGraphProperties(props);
 
                 const search = labelToField(expandExpression(expression), getColumns());
                 filterData = data;
@@ -256,7 +256,7 @@ const Table = (props) => {
     const updateData = () => {
         const {
             pageSize,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         const offset = pageSize * (currentPage - 1);
 
@@ -269,7 +269,7 @@ const Table = (props) => {
     const getHeaderData = (initialSort) => {
         const {
             removedColumns,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         const columns = getColumns();
         let headerData = [];
@@ -316,7 +316,7 @@ const Table = (props) => {
 
         const {
             removedColumns,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         if (!columns) {
             return [];
@@ -424,7 +424,7 @@ const Table = (props) => {
     const handleColumnViewChange = (changedColumn, action) => {
         const {
             removedColumns: removedColumnsProps,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         if (action === 'remove') {
             displayColumns = uniq([...displayColumns, ...removedColumnsProps, changedColumn]);
@@ -448,7 +448,7 @@ const Table = (props) => {
     }
 
     const handleScrollSorting = (column) => {
-        const { sort } = getGraphProperties();
+        const { sort } = getGraphProperties(props);
 
         let colOrder = 'asc';
         if (sort && sort.column === column) {
@@ -625,7 +625,7 @@ const Table = (props) => {
     const getSelectedRows = () => {
         const {
             pageSize,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         let selected = [];
         for (let page in selectedRows) {
@@ -641,7 +641,7 @@ const Table = (props) => {
     const renderSearchBarIfNeeded = (headerData) => {
         const {
             searchString,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
         const {
             searchBar,
             searchText,
@@ -801,7 +801,7 @@ const Table = (props) => {
     const getInitialSort = () => {
         const {
             sort,
-        } = getGraphProperties();
+        } = getGraphProperties(props);
 
         let initialSort = {};
         if (sort && sort.column && sort.order) {
