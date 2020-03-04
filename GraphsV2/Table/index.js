@@ -121,7 +121,6 @@ const Table = (props) => {
     let multiSelectable = true;
     pageSize = limit || pageSize;
     let scroll = props.scroll;
-    let updateScrollNow = false;
 
     const [selected, setSelectedState] = useState([]);
     const [data, setData] = useState([]);
@@ -521,7 +520,6 @@ const Table = (props) => {
         if (!multiSelectable) {
             handleClick(...selectedRowsCurr);
             selectedRows = {};
-            // updateScrollNow = true;
         }
 
         selectedRows[currentPage] = selectedRowsCurr.slice();
@@ -545,13 +543,6 @@ const Table = (props) => {
             }
             onSelect({ rows, matchingRows });
         }
-        // const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
-
-        // if (updateScrollNow) {
-        //     updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
-        // }
-        // updateScrollNow = true;
-
     }
 
     const getMenu = () => {
@@ -906,6 +897,7 @@ const Table = (props) => {
             },
         },
     };
+
     const muiTableStyle = {
         MUIDataTableSelectCell: {
             root: {
@@ -943,8 +935,12 @@ const Table = (props) => {
                 padding: "10px 40px 10px 15px",
                 fontSize: "10px",
             },
-        }
+            head: {
+                backgroundColor : "#FAFAFA !important",
+            }
+        },
     }
+
     const theme = createMuiTheme({
         overrides: { ...style.muiStyling, ...muiTableStyle }
     });
