@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { Cell, PieChart, Pie } from 'recharts';
+import { styled } from '@material-ui/core/styles';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
@@ -9,30 +10,15 @@ import config from './default.config';
 import colorConvert from 'color-convert';
 import { RADIAN } from '../../constants';
 
-const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, label }) => {
-    const radius = outerRadius + 10;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-        <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
-            {label}
-        </text>
-    );
-};
-
-const Arrow = ({ cx, cy, midAngle, outerRadius, width, fontSize, chartValue }) => {
+const Arrow = ({ cx, cy, midAngle, outerRadius, width, fontSize }) => {
     const sin = Math.sin(-RADIAN * midAngle);
     const cos = Math.cos(-RADIAN * midAngle);
     const mx = cx + (outerRadius + width * 0.03) * cos;
     const my = cy + (outerRadius + width * 0.03) * sin;
     return (
         <g>
-            <text x={cx + 15} y={cy + 20} style={{ fontSize: fontSize }} fill="black" textAnchor={mx > cx ? 'start' : 'end'} dominantBaseline="central">
-                {parseInt(chartValue)}%
-          </text>
-            <circle cx={cx} cy={cy} r={width * 0.05} fill="#666" stroke="none" />
-            <path d={`M${cx},${cy}L${mx},${my}`} strokeWidth="6" stroke="#666" fill="none" strokeLinecap="round" />
+            <circle cx={cx} cy={cy} r={width * 0.04} fill="#666" stroke="none" />
+            <path d={`M${cx},${cy}L${mx},${my}`} strokeWidth="4" stroke="#666" fill="none" strokeLinecap="round" />
         </g>
     );
 };
@@ -43,6 +29,11 @@ let sumValues = [];
 let arrowData = [];
 let pieProps = {};
 let pieRadius = {};
+
+const Label = styled('div')({
+    fontSize: '1em',
+    margin: '10px 0 0 10px',
+});
 
 const GaugeChart = (props) => {
 
@@ -93,46 +84,49 @@ const GaugeChart = (props) => {
         pieProps = {
             startAngle: 180,
             endAngle: 0,
-            cx: width / 2 - 5,
-            cy: width / 2 - 5,
+            cx: width * .60,
+            cy: width * .50,
         };
 
         pieRadius = {
-            innerRadius: width * 0.13,
+            innerRadius: width * 0.25,
             outerRadius: width * 0.32,
         };
 
     }, [props.data, props.height, props.width]);
 
     return (
-        <PieChart width={width} height={height} >
-            <Pie
-                data={chartData}
-                fill="#8884d8"
-                {...pieRadius}
-                {...pieProps}
-                stroke="none"
-                label={renderCustomizedLabel}
-                labelLine={false}
-                isAnimationActive={false}
-            >
-                {
-                    chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={chartData[index].color} />
-                    ))
-                }
-            </Pie>
-            <Pie
-                stroke="none"
-                activeIndex={1}
-                activeShape={(props) => (Arrow({ ...props, width, chartValue, fontSize }))}
-                data={arrowData}
-                outerRadius={pieRadius.innerRadius}
-                fill="none"
-                {...pieProps}
-                label
-            />
-        </PieChart>
+        <React.Fragment>
+            <Label>
+                {parseInt(chartValue)}%
+            </Label>
+            <PieChart width={width} height={height} >
+                <Pie
+                    data={chartData}
+                    fill="#8884d8"
+                    {...pieRadius}
+                    {...pieProps}
+                    stroke="none"
+                    labelLine={false}
+                >
+                    {
+                        chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={chartData[index].color} />
+                        ))
+                    }
+                </Pie>
+                <Pie
+                    stroke="none"
+                    activeIndex={1}
+                    activeShape={(props) => (Arrow({ ...props, width, fontSize }))}
+                    data={arrowData}
+                    outerRadius={pieRadius.innerRadius}
+                    fill="none"
+                    {...pieProps}
+                    label
+                />
+            </PieChart>
+        </React.Fragment>
     );
 };
 
