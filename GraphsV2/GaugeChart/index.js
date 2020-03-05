@@ -8,20 +8,33 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import config from './default.config';
 import colorConvert from 'color-convert';
-import { RADIAN } from '../../constants';
 
-const Arrow = ({ cx, cy, midAngle, outerRadius, width, fontSize }) => {
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const mx = cx + (outerRadius + width * 0.03) * cos;
-    const my = cy + (outerRadius + width * 0.03) * sin;
-    return (
-        <g>
-            <circle cx={cx} cy={cy} r={width * 0.04} fill="#666" stroke="none" />
-            <path d={`M${cx},${cy}L${mx},${my}`} strokeWidth="4" stroke="#666" fill="none" strokeLinecap="round" />
-        </g>
-    );
-};
+const renderNeedle = ({ cx, cy, outerRadius, chartValue }) => {
+    let x1 = cx,
+      y1 = cy - 2.5,
+      x2 = cx,
+      y2 = cy + 2.5,
+      x3 = cx + outerRadius * 0.95,
+      y3 = cy;
+
+    let needleAngle = parseInt((180 + chartValue));
+    return(  <g id="needle">
+          <polygon 
+              points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
+              stroke="#666" 
+              fill="#666" 
+              transform={`rotate(${needleAngle} ${cx} ${cy})`} 
+          />
+          <circle
+              stroke="#666"
+              fill="none"
+              cx={cx} 
+              cy={cy} 
+              r="2"
+              stroke="#666"
+          />
+      </g>);
+}
 
 let chartData = [];
 let gaugeTickValue = 0;
@@ -52,7 +65,6 @@ const GaugeChart = (props) => {
     } = properties;
 
     const chartValue = originalData[0].value;
-
 
     useEffect(() => {
         chartData = [];
@@ -118,7 +130,7 @@ const GaugeChart = (props) => {
                 <Pie
                     stroke="none"
                     activeIndex={1}
-                    activeShape={(props) => (Arrow({ ...props, width, fontSize }))}
+                    activeShape={(props) => (renderNeedle({ ...props, width, fontSize, chartValue}))}
                     data={arrowData}
                     outerRadius={pieRadius.innerRadius}
                     fill="none"
