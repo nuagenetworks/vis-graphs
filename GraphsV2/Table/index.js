@@ -36,6 +36,7 @@ let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = {};
 let pageSize = 500;
+
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -102,6 +103,96 @@ const getGraphProperties = (props) => {
   }
 }
 
+const getHeaderData = (props, initialSort) => {
+  const {
+      removedColumns,
+  } = getGraphProperties(props);
+
+  const columns = props.properties.columns || [];
+  let headerData = [];
+  for (let index in columns) {
+      if (columns.hasOwnProperty(index)) {
+          const columnRow = columns[index];
+          const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
+          const headerColumn = {
+              name: index,
+              label: columnRow.label || columnRow.column,
+              columnField: columnRow.column,
+              columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+              filter: columnRow.filter !== false,
+              type: columnRow.selection ? "selection" : "text",
+              style: {
+                  textIndent: '2px'
+              },
+              options: {
+                  display: displayColumn
+              }
+          };
+
+          if ((initialSort && initialSort.column === columnRow.column) ||
+              (sortOrder && sortOrder.column === columnRow.column)) {
+              headerColumn.options = {
+                  display: displayColumn,
+                  sortDirection: isEmptyData(initialSort) ? sortOrder.order : initialSort.order,
+                  sort: true,
+              }
+          }
+
+          headerData.push(headerColumn);
+      }
+  }
+
+  return headerData;
+}
+
+const getInitialSort = (props) => {
+  const {
+      sort,
+  } = getGraphProperties(props);
+
+  let initialSort = {};
+  if (sort && sort.column && sort.order) {
+      initialSort = { ...sort, column: sort.column }
+  }
+
+  return initialSort;
+}
+
+const getHeightMargin = (properties) => {
+  const {
+      searchBar,
+      selectColumnOption,
+      filterOptions,
+      showFooter,
+  } = properties;
+
+  let heightMargin = showFooter ? 40 : 0;
+  heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
+  heightMargin = filterOptions ? heightMargin : heightMargin + 10;
+  heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
+
+  return heightMargin;
+}
+
+const removeHighlighter = (data = [], highlight, selected) => {
+  if (!data.length)
+      return data;
+
+  if (highlight) {
+      selected.forEach((key) => {
+          if (highlight && data[key]) {
+              for (let i in data[key]) {
+                  if (data[key].hasOwnProperty(i)) {
+                      if (data[key][i].props.style)
+                          data[key][i].props.style.background = '';
+                  }
+              }
+          }
+      })
+  }
+  return data;
+}
+
 const Table = (props) => {
     const {
         width,
@@ -116,6 +207,7 @@ const Table = (props) => {
         selectColumnOption,
         searchBar,
         limit,
+        highlight,
     } = properties;
 
     let multiSelectable = true;
@@ -264,48 +356,6 @@ const Table = (props) => {
     }
 
     const getColumns = () => (properties.columns || []);
-
-    const getHeaderData = (initialSort) => {
-        const {
-            removedColumns,
-        } = getGraphProperties(props);
-
-        const columns = getColumns();
-        let headerData = [];
-        for (let index in columns) {
-            if (columns.hasOwnProperty(index)) {
-                const columnRow = columns[index];
-                const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
-                const headerColumn = {
-                    name: index,
-                    label: columnRow.label || columnRow.column,
-                    columnField: columnRow.column,
-                    columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
-                    filter: columnRow.filter !== false,
-                    type: columnRow.selection ? "selection" : "text",
-                    style: {
-                        textIndent: '2px'
-                    },
-                    options: {
-                        display: displayColumn
-                    }
-                };
-
-                if ((initialSort && initialSort.column === columnRow.column) ||
-                    (sortOrder && sortOrder.column === columnRow.column)) {
-                    headerColumn.options = {
-                        display: displayColumn,
-                        sortDirection: isEmptyData(initialSort) ? sortOrder.order : initialSort.order,
-                        sort: true,
-                    }
-                }
-
-                headerData.push(headerColumn);
-            }
-        }
-
-        return headerData;
-    }
 
     const getTableData = (columns) => {
         const {
@@ -665,29 +715,6 @@ const Table = (props) => {
         );
     }
 
-    const removeHighlighter = (data = []) => {
-        const {
-            highlight,
-        } = properties;
-
-        if (!data.length)
-            return data;
-
-        if (highlight) {
-            selected.forEach((key) => {
-                if (highlight && data[key]) {
-                    for (let i in data[key]) {
-                        if (data[key].hasOwnProperty(i)) {
-                            if (data[key][i].props.style)
-                                data[key][i].props.style.background = '';
-                        }
-                    }
-                }
-            })
-        }
-        return data;
-    }
-
     const resetScrollData = () => {
         const { disableRefresh } = properties;
 
@@ -774,34 +801,6 @@ const Table = (props) => {
         );
     }
 
-    const getHeightMargin = (showFooter) => {
-        const {
-            searchBar,
-            selectColumnOption,
-            filterOptions,
-        } = properties;
-
-        let heightMargin = showFooter ? 40 : 0;
-        heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
-        heightMargin = filterOptions ? heightMargin : heightMargin + 10;
-        heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
-
-        return heightMargin;
-    }
-
-    const getInitialSort = () => {
-        const {
-            sort,
-        } = getGraphProperties(props);
-
-        let initialSort = {};
-        if (sort && sort.column && sort.order) {
-            initialSort = { ...sort, column: sort.column }
-        }
-
-        return initialSort;
-    }
-
     useEffect(() => {
         initiate(props);
         checkFontsize();
@@ -840,15 +839,15 @@ const Table = (props) => {
     }, [props.data, props.width, props.height, props.context]);
 
     let tableData = getTableData(getColumns());
-    tableData = removeHighlighter(tableData);
+    tableData = removeHighlighter(tableData, highlight, selected);
     const tableCurrentPage = currentPage - 1;
-    const initialSort = getInitialSort();
-    const headerData = getHeaderData(initialSort);
+    const initialSort = getInitialSort(props);
+    const headerData = getHeaderData(props, initialSort);
     const totalRecords = scroll ? size : filterData.length;
     const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
     const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
     const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
-    const heightMargin = getHeightMargin(showFooter);
+    const heightMargin = getHeightMargin({...properties, showFooter});
     const options = {
         print: false,
         filter: false,
