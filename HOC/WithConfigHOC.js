@@ -1,12 +1,11 @@
 import React, { useContext } from 'react';
 import objectPath from 'object-path';
 
-import themeContext from '../../../App/themeContext';
 import defaultProperties from '../Graphs/defaultProperties';
 
 export default (config) => (WrappedComponent) => (props) => {
-    const { configuration, ...rest} = props;
-    const theme = useContext(themeContext);
+    const { configuration, themeProvider, ...rest} = props;
+    const theme = useContext(themeProvider);
     return (
         <WrappedComponent 
             {...rest}
