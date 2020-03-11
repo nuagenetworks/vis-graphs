@@ -14,8 +14,10 @@ export default (config) => (WrappedComponent) => (props) => {
                 id: configuration.id,
                 ...defaultProperties, // common default properties for all the graphs
                 ...config, // default properties of a given specific graph
+                ...theme,
                 ...configuration.data, // override & new properties of a given specific graph
-                isCustomColor: objectPath.has(configuration.data, 'colors') || false
+                isCustomColor: objectPath.has(configuration.data, 'colors') || false,
+
             }}
         />
     );
