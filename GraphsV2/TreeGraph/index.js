@@ -106,6 +106,81 @@ const parseTransformation = a => {
     return b;
 }
 
+const diagonal = d => {
+
+    // Creates a curved (diagonal) path from parent to the child nodes
+    let p0 = {
+        x: d.x + rectHeight / 2,
+        y: (d.y)
+    },
+        p3 = {
+            x: d.parent.x + rectHeight / 2,
+            y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
+        },
+        m = (p0.y + p3.y) / 2,
+        p = [p0, {
+            x: p0.x,
+            y: m
+        }, {
+                x: p3.x,
+                y: m
+            }, p3];
+    p = p.map(d => [d.y, d.x]);
+
+    return 'M' + p[0] + 'C' + p[1] + ' ' + p[2] + ' ' + p[3];
+}
+
+const normalArrow = (svg, linksSettings) => {
+    svg.append('svg:defs').append('marker')
+        .attr('id', 'normal-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 0)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .attr('fill', linksSettings.stroke.defaultColor)
+        .append('path')
+        .attr('d', 'M10,-5L0,0L10,5');
+}
+
+const coloredArrow = (svg, linksSettings) => {
+    svg.append('svg:defs').append('marker')
+        .attr('id', 'colored-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 0)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .attr('fill', linksSettings.stroke.selectedColor)
+        .append('path')
+        .attr('d', 'M10,-5L0,0L10,5');
+}
+
+const renderRectNode = (d, props, rectNode) => {
+    const {
+        renderNode,
+        store,
+        ...rest
+    } = props;
+
+    if (!isFunction(renderNode)) return '<div/>';
+
+    const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor;
+
+    return renderNode(
+        {
+            data: d.data,
+            textColor: rectColorText,
+            nodeId: `node-${d.id}`,
+            store,
+            ...rectNode,
+            onItemRender: () => (rest)
+        }
+    );
+}
+
 const TreeGraph = (props) => {
     const {
         data,
@@ -415,7 +490,7 @@ const TreeGraph = (props) => {
                 .attr('id', d => `node-${d.id}`)
                 .attr('width', rectWidth)
                 .attr('height', rectHeight)
-                .html(d => renderRectNode(d))
+                .html(d => renderRectNode(d, props, rectNode))
                 .on('mouseover', d => showToolTip(tooltip, d, (d.data.name && d.data.name.length > 23) || (d.data.description && d.data.name.description > 24), commonEN))
                 .on('mouseout', d => hideToolTip(tooltip, d));
         }
@@ -438,29 +513,6 @@ const TreeGraph = (props) => {
 
         nodeUpdate.select('rect')
             .style('fill', d => d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
-    }
-
-    const renderRectNode = d => {
-        const {
-            renderNode,
-            store,
-            ...rest
-        } = props;
-
-        if (!isFunction(renderNode)) return '<div/>';
-
-        const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor;
-
-        return renderNode(
-            {
-                data: d.data,
-                textColor: rectColorText,
-                nodeId: `node-${d.id}`,
-                store,
-                ...rectNode,
-                onItemRender: () => (rest)
-            }
-        );
     }
 
     const updateLinks = (source, links) => {
@@ -497,58 +549,6 @@ const TreeGraph = (props) => {
             .duration(duration)
             .attr('d', d => diagonal(d))
             .remove();
-    }
-
-    const normalArrow = (svg, linksSettings) => {
-        svg.append('svg:defs').append('marker')
-            .attr('id', 'normal-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .attr('fill', linksSettings.stroke.defaultColor)
-            .append('path')
-            .attr('d', 'M10,-5L0,0L10,5');
-    }
-
-    const coloredArrow = (svg, linksSettings) => {
-        svg.append('svg:defs').append('marker')
-            .attr('id', 'colored-arrow')
-            .attr('viewBox', '0 -5 10 10')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .attr('orient', 'auto')
-            .attr('fill', linksSettings.stroke.selectedColor)
-            .append('path')
-            .attr('d', 'M10,-5L0,0L10,5');
-    }
-
-    const diagonal = d => {
-
-        // Creates a curved (diagonal) path from parent to the child nodes
-        let p0 = {
-            x: d.x + rectHeight / 2,
-            y: (d.y)
-        },
-            p3 = {
-                x: d.parent.x + rectHeight / 2,
-                y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
-            },
-            m = (p0.y + p3.y) / 2,
-            p = [p0, {
-                x: p0.x,
-                y: m
-            }, {
-                    x: p3.x,
-                    y: m
-                }, p3];
-        p = p.map(d => [d.y, d.x]);
-
-        return 'M' + p[0] + 'C' + p[1] + ' ' + p[2] + ' ' + p[3];
     }
 
     const zoomed = () => {
