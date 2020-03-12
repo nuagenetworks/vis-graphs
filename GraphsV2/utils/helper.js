@@ -43,8 +43,8 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
         marginLeft: '5px',
         width: legendWidth,
         height: legendHeight,
-        display: checkIsVerticalLegend(legend) ? 'grid' : 'inline-block',
-        order: checkIsVerticalLegend(legend) ? 1 : 2,
+        display: isVertical ? 'grid' : 'inline-block',
+        order: isVertical ? 1 : 2,
     }
 
     let legendStyle = {};
