@@ -812,15 +812,17 @@ Note: icon must be a key exists in svgIcons object in helpers/icons.js
 
 __defaultIconColor__ (string) default color of the port icon. Default is gray .
 
-__portIconSize__ (number) size of port icon size. Default is 18.
+__minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (px).
 
-__removeUpperColumnName__ (boolean) remove column text on top of Port. Default is false.
+__maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
 
-__removeLowerCloumnName__ (boolean) remove column text on bottom of the Port. Default is false.
+__showUpperColumnName__ (boolean) show column text on the top of Port. Default is true.
+
+__showLowerCloumnName__ (boolean) show column text on the bottom of the Port. Default is true.
 
 __minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
 
-__rowLimit__ (number) show number of ports in each row. Default is 8.
+__rowLimit__ (number) show number of ports in each row. Default is 16.
 
 __tooltipScript__ (string) a custom Tooltip component to allow for more customization of the tooltip.
 The tooltip component must be available at: `@/scripts` and it will have available 2 props:
