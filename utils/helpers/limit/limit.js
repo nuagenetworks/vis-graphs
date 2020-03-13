@@ -12,6 +12,7 @@ import merge from "../merge"
 export default ({
     data,
     isSort,
+    dateHistogram,
     dimension = 'key',
     metric = 'total',
     order = 'DESC',
@@ -24,6 +25,10 @@ export default ({
     } = {}
   }) => {
 
+    if (dateHistogram) {
+      metric = 'key';
+      order = 'ASC';
+    }
     /**	
      * Sorting the array	
      */	

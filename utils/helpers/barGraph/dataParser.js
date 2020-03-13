@@ -9,7 +9,8 @@ export default ({
   stack,
   otherOptions,
   stackSequence = null,
-  isSort
+  isSort,
+  dateHistogram
     }) => {
       
   return nestStack({
@@ -36,7 +37,8 @@ export default ({
       }
         , otherOptions || {}
       ),
-      isSort
+      isSort,
+      dateHistogram
     }),
     stackColumn: metric
   })
