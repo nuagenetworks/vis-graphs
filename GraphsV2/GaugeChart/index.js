@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { Cell, PieChart, Pie } from 'recharts';
@@ -66,7 +66,7 @@ const GaugeChart = (props) => {
 
     const chartValue = originalData[0].value;
 
-    useEffect(() => {
+    React.useEffect(() => {
         chartData = [];
         
         gaugeTickValue = parseInt(parseInt(maxValue) / parseInt(gaugeTicks));
@@ -109,7 +109,7 @@ const GaugeChart = (props) => {
 
     return (
         <React.Fragment>
-            <Label>
+            <Label id="chart-value">
                 {parseInt(chartValue)}%
             </Label>
             <PieChart width={width} height={height} >
@@ -119,6 +119,7 @@ const GaugeChart = (props) => {
                     {...pieRadius}
                     {...pieProps}
                     stroke="none"
+                    className="gauge-sector-fill"
                     labelLine={false}
                 >
                     {
