@@ -865,7 +865,7 @@ const Table = (props) => {
         selectableRows: multiSelectable ? 'multiple' : 'single',
         onChangePage: handlePageClick,
         rowsSelected: selected,
-        onRowsSelect: handleRowSelection,
+        onRowsSelect: props.handleRowSelection ? props.handleRowSelection : handleRowSelection,
         selectableRowsOnClick: true,
         onColumnSortChange: handleSortOrderChange,
         onChangeRowsPerPage: handleRowsPerPageChange,
