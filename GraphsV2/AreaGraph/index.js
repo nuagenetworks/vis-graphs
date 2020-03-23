@@ -100,6 +100,7 @@ const AreaGraph = (props) => {
                     return (
                         <Area
                             type="monotone"
+                            className="area-fill"
                             key={`area-${index}`} 
                             name={areaItem} 
                             dataKey={areaItem} 
