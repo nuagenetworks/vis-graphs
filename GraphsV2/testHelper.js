@@ -1,9 +1,8 @@
 import fsmo from 'fs';
-import { format, timeFormat } from "d3";
+import { format, timeFormat } from 'd3';
 
 const d3 = { format, timeFormat };
 const cheerio = require('cheerio');
-
 
 export const readJSON = (JSONFile) => {
     try {
@@ -34,12 +33,12 @@ const readdirAsync = (path) => {
 export const getDataAndConfig = (graphName) => {
     return new Promise(async function (resolve, reject) {
         const dataFolder = __dirname + '/' + graphName + '/mock/data';
-        console.log("dataFolder", dataFolder);
+        console.log('dataFolder', dataFolder);
         const configFolder = __dirname + '/' + graphName + '/mock/configurations';
         let allFiles = await readdirAsync(configFolder);
         let config = [];
         allFiles.forEach(file => {
-            config[file.split(".")[0]] = readJSON(configFolder + '/' + file);
+            config[file.split('.')[0]] = readJSON(configFolder + '/' + file);
         });
         config['data'] = readJSON(dataFolder + '/data.json');
         resolve(config);
@@ -47,7 +46,7 @@ export const getDataAndConfig = (graphName) => {
 }
 
 export const getHtml = (component, tag) => {
-    if(tag === 'table') {
+    if (tag === 'table') {
         return cheerio.load(component.first(tag).html());
     }
     const cheerioData = cheerio.load(component.find(tag).html());
@@ -58,7 +57,7 @@ export const checkSvg = (component) => {
     const $ = getHtml(component, 'svg');
     const svgHeight = $('svg').attr('height');
     const svgWidth = $('svg').attr('width');
-    return svgHeight == "500" && svgWidth == "500";
+    return svgHeight == '500' && svgWidth == '500';
 }
 
 export const totalRows = ($) => {
@@ -74,26 +73,31 @@ export const totalColumn = ($) => {
 export const checkRowData = ($, rowNo) => {
     let table, value;
     table = $('table tbody tr').first();
-    if (rowNo == "second")
+    if (rowNo == 'second')
         table = table.next();
     value = table.find('td').map(
         function (i) {
-            if($(this).attr('data-testid'))
+            if ($(this).attr('data-testid'))
                 return $(this).text().trim();
         }
     ).get();
     return value;
 }
 
-export const checkBar = ($, length) => {
+export const checkBar = ($, length, type) => {
     let barData = new Object(), bar;
-    bar = $('.graph-bars').children().first().next().find('rect');
-    if (length == "second")
-        bar = $('.graph-bars').children().first().next().next().find('rect');
-    barData.height = parseFloat(bar.attr('height'));
-    barData.width = parseFloat(bar.attr('width'));
+    bar = $('.recharts-bar-rectangles .recharts-layer').children().first().find('path');
+    if (length === 'second') {
+        bar = $('.recharts-bar-rectangles .recharts-layer').children().first().next().find('path');
+    }
+    if (type === 'vertical') {
+        barData.width = parseFloat(bar.attr('width'));
+    } else {
+        barData.height = parseFloat(bar.attr('height'));
+        barData.y =  parseFloat(bar.attr('y'));
+    }
     barData.x = parseFloat(bar.attr('x'));
-    barData.y = parseFloat(bar.attr('y'));
+
     return barData;
 }
 
@@ -102,7 +106,7 @@ export const checkLine = ($, length) => {
     linePath = $('svg').find('g').get(1).firstChild.nextSibling.nextSibling.children;
     line = cheerio.load(linePath);
     d = line('path').attr('d');
-    if (length == "second")
+    if (length == 'second')
         d = line('path').next().attr('d');
     return d;
 }
