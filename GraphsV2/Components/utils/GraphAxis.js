@@ -29,7 +29,7 @@ const GraphAxis = (props) => {
     })
 
     return (
-        <g transform={`translate(${x},${y})`}>
+        <g transform={`translate(${x},${y})`} className="graph-axis">
             <text
                 x={0}
                 y={0}

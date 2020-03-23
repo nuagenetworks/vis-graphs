@@ -22,7 +22,7 @@ export default ({ payload: legends, labelColumn, legend }) => {
     }
 
     return (
-        <Container legend={legend}>
+        <Container legend="standard-legend">
             {
                 legends.map(({ color, payload, value, props: { fill, name: { xVal } = {}}={}} , index) => (
                     <Item key={`legend-${index}`} color={color || fill}>
