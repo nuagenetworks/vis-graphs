@@ -5,16 +5,19 @@ import {
     AreaChart,
     Area,
     CartesianGrid,
+    Brush,
 } from 'recharts';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
 import customTooltip from '../Components/utils/RechartsTooltip';
 import dataParser from '../utils/DataParser';
+import Formatter from '../utils/formatter';
 import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, LEGEND_SEPARATE } from '../../constants';
 
 const AreaGraph = (props) => {
 
@@ -43,9 +46,12 @@ const AreaGraph = (props) => {
         colors,
         xLabelLimit,
         yLabelLimit,
+        brushEnabled,
     } = properties;
 
     const [tooltipKey, setToolTipKey] = useState(-1);
+
+    const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
     // Formatting data for direct consumption by Area Graph
     const { parsedData, uniqueKeys: areaKeys } = dataParser({ 
@@ -67,6 +73,22 @@ const AreaGraph = (props) => {
                 vertical = {false}
                 strokeOpacity={0.3}
             />
+            {
+              brushEnabled && (
+                <Brush 
+                    data={parsedData}
+                    dataKey={xColumn}
+                    height={BRUSH_HEIGHT}
+                    tickFormatter = {
+                        (tickData) => (Formatter({
+                            dateHistogram,
+                            value: tickData,
+                            tickFormat:xTickFormat
+                        }))
+                    }
+                    y={ height - (BRUSH_HEIGHT + XLABEL_HEIGHT + legendHeight)}
+                />)
+            }
             {
               xAxis({
                 xColumn, 
