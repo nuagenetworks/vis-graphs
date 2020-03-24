@@ -1,0 +1,48 @@
+[
+    {
+        "name": "Port1",
+        "parentType": "nsgateway",
+        "permittedAction": null,
+        "physicalName": "port1",
+        "portType": "ACCESS",
+        "shuntPort": false,
+        "speed": "AUTONEGOTIATE",
+        "state": "Unknown",
+        "status": "INITIALIZED",
+        "templateID": null,
+        "type": "Access",
+        "useUserMnemonic": false,
+        "userMnemonic": null
+    },
+    {
+        "name": "Port2",
+        "parentType": "nsgateway",
+        "permittedAction": null,
+        "physicalName": "port2",
+        "portType": "NETWORK",
+        "shuntPort": false,
+        "speed": "AUTONEGOTIATE",
+        "state": "Unknown",
+        "status": "INITIALIZED",
+        "templateID": null,
+        "type": "Network",
+        "useUserMnemonic": false,
+        "userMnemonic": null
+    },
+    {
+        "name": "Wifi",
+        "parentType": "nsgateway",
+        "permittedAction": null,
+        "physicalName": "Wifi",
+        "portType": "WIFI",
+        "shuntPort": false,
+        "speed": "AUTONEGOTIATE",
+        "state": "Unknown",
+        "status": "INITIALIZED",
+        "templateID": null,
+        "type": "Wifi",
+        "useUserMnemonic": false,
+        "userMnemonic": null
+    }
+
+]

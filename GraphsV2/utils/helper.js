@@ -70,7 +70,7 @@ export const renderLegend = (props, data, legend, getColor, label, isVertical) =
 }
 
 
-export const getGraphDimension = (props, label, filterData = null) => {
+export const getGraphDimension = (props, label, filterData = null, isVertical) => {
     const {
         height,
         width,
@@ -98,7 +98,7 @@ export const getGraphDimension = (props, label, filterData = null) => {
     labelTextWidth = labelTextWidth + ((legend.circleSize || 4) * 5) + (legend.labelOffset || 10);
 
     // Compute the available space considering a legend
-    if (legend.orientation === 'vertical') {
+    if (isVertical) {
         dimensions = {
             ...dimensions,
             graphWidth: width - labelTextWidth,
