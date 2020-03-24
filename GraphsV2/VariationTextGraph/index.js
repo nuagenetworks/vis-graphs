@@ -23,7 +23,7 @@ const Item = styled('div')({
 });
 
 const Label = styled('span')({
-    paddingLeft: '0.25rem',
+    paddingLeft: ({ paddingLeft } = {}) => paddingLeft,
     color: ({ color } = {}) => color,
 });
 
@@ -99,7 +99,7 @@ const renderValues = ({
                 {info || info === 0 ? info : 'NaN'}
             </Label>
             {showVariation &&
-                <Label color={settingColor ? settingColor : null} >
+                <Label paddingLeft='0.25rem' color={settingColor ? settingColor : null} >
                     {`(${decimals(settingValue.variation)}%)`}
                 </Label>
             }
