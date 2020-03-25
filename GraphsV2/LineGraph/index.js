@@ -121,6 +121,7 @@ const LineGraph = (props) => {
                         <Line 
                             connectNulls={zeroStart}
                             key={`line-${index}`}
+                            className="line-graph-line"
                             onMouseEnter={({ name }) => setToolTipKey(name)}
                             onMouseLeave={() => setToolTipKey(-1)}
                             name={lineItem}
