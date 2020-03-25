@@ -12,7 +12,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { getIconPath } from '../../utils/helpers';
 import InfoBox from "../../InfoBox";
-import { customTooltip, renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
+import { customTooltip, renderLegend, getGraphDimension } from '../utils/helper';
 
 const MAX_LABEL_LENGTH = 8;
 
@@ -360,7 +360,7 @@ const PortGraph = (props) => {
         return (
             portRowset.map((portRow, index) => {
                 return (
-                    <Item key={index}>
+                    <Item className='PortGraph' key={index}>
                         {portRow.map((data, i) => {
                             return (
                                 <PortBox
@@ -399,7 +399,8 @@ const PortGraph = (props) => {
             legend
         },
         legendGetLabel,
-        legendData
+        legendData,
+        isVertical,
     );
 
     return (
