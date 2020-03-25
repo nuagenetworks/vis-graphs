@@ -19,7 +19,7 @@ describe("AreaGraph", () => {
   });
 
   describe("Simple", () => {
-    let simple, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
@@ -27,8 +27,7 @@ describe("AreaGraph", () => {
 
       mockUseEffect();
       document.body.appendChild(element);
-
-      simple = ReactDom.render(
+      ReactDom.render(
         <AreaGraph
           width={500}
           height={500}
@@ -80,7 +79,7 @@ describe("AreaGraph", () => {
   });
 
   describe("Simple with brush", () => {
-    let simpleWithBrush, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
@@ -88,8 +87,7 @@ describe("AreaGraph", () => {
 
       mockUseEffect();
       document.body.appendChild(element);
-
-      simpleWithBrush = ReactDom.render(
+      ReactDom.render(
         <AreaGraph
           width={500}
           height={500}
@@ -162,7 +160,7 @@ describe("AreaGraph", () => {
   });
 
   describe("Stacked", () => {
-    let stacked, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
@@ -170,8 +168,7 @@ describe("AreaGraph", () => {
 
       mockUseEffect();
       document.body.appendChild(element);
-
-      stacked = ReactDom.render(
+      ReactDom.render(
         <AreaGraph
           width={500}
           height={500}
@@ -223,7 +220,7 @@ describe("AreaGraph", () => {
   });
 
   describe("Null Data", () => {
-    let stacked, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
@@ -231,8 +228,7 @@ describe("AreaGraph", () => {
 
       mockUseEffect();
       document.body.appendChild(element);
-
-      stacked = ReactDom.render(
+      ReactDom.render(
         <AreaGraph
           width={500}
           height={500}

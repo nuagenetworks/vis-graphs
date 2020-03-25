@@ -1,10 +1,11 @@
 import React from 'react';
-const cheerio = require('cheerio');
 import ReactDom from 'react-dom';
 
 import { getDataAndConfig } from '../testHelper';
 import LineGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
+
+const cheerio = require('cheerio');
 
 describe('LineGraph', () => {
   let config
@@ -14,12 +15,12 @@ describe('LineGraph', () => {
   })
 
   describe("Multi Lines", () => {
-    let multiLine, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
       document.body.appendChild(element);
-      multiLine = ReactDom.render(
+      ReactDom.render(
         <LineGraph
           width={500}
           height={500}
@@ -64,12 +65,12 @@ describe('LineGraph', () => {
   });
 
   describe("Simple LineGraph", () => {
-    let simple, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
       document.body.appendChild(element);
-      simple = ReactDom.render(
+      ReactDom.render(
         <LineGraph
           width={500}
           height={500}
@@ -113,12 +114,12 @@ describe('LineGraph', () => {
   });
 
   describe("Simple LineGraph With Ycolumn ", () => {
-    let simpleYcolumn, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
       document.body.appendChild(element);
-      simpleYcolumn = ReactDom.render(
+      ReactDom.render(
         <LineGraph
           width={500}
           height={500}
@@ -163,12 +164,12 @@ describe('LineGraph', () => {
   });
 
   describe("Multi Line LineGraph With Ycolumn", () => {
-    let multilineYcolumn, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
       document.body.appendChild(element);
-      multilineYcolumn = ReactDom.render(
+      ReactDom.render(
         <LineGraph
           width={500}
           height={500}
@@ -213,12 +214,12 @@ describe('LineGraph', () => {
   });
 
   describe("Multi Lines", () => {
-    let multiLineBrush, $;
+    let $;
     const element = document.createElement("div");
 
     beforeAll((done) => {
       document.body.appendChild(element);
-      multiLineBrush = ReactDom.render(
+      ReactDom.render(
         <LineGraph
           width={500}
           height={500}
