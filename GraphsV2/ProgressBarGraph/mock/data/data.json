@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Gold",
+        "total": 300000,
+        "used": 168663
+    },
+    {
+        "name": "Silver",
+        "total": 26000,
+        "used": 18803
+    },
+    {
+        "name": "Platium",
+        "total": 3000,
+        "used": 1896
+    },
+    {
+        "name": "Bronze",
+        "total": 20000,
+        "used": 15000
+    },
+    {
+        "name": "Dimond",
+        "total": 2200000,
+        "used": 1896000
+    }
+]
