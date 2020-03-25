@@ -8,7 +8,7 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { PERCENTAGE } from '../../constants';
-import { longestLabelLength, customTooltip}  from '../utils/helper';
+import { longestLabelLength, customTooltip } from '../utils/helper';
 
 const getWidth = (
     barData,
@@ -243,88 +243,92 @@ const ProgressBarGraph = (props) => {
     } = dimension;
 
     return (
-        <Container
-            fontSize={fontSize}
-            width={availableWidth}
-            height={height}
-            data-test="progress-graph"
-        >
+        <React.Fragment>
             <Tooltip>{customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)}</Tooltip>
-            {
-                data.map((barData, i) => {
-                    return (
-                        <Item
-                            key={i}
-                            height={sectionHeight}
-                            width={availableWidth}
-                        >
-                            <UpperText fontSize={fontSize}> {barData[label]} </UpperText>
-                            <BarSection
-                                direction={(display === PERCENTAGE) ? 'row' : 'column'}
+
+            <Container
+                fontSize={fontSize}
+                width={availableWidth}
+                height={height}
+                data-test="progress-graph"
+                className='ProgressBarGraph'
+            >
+                {
+                    data.map((barData, i) => {
+                        return (
+                            <Item
+                                key={i}
+                                height={sectionHeight}
+                                width={availableWidth}
                             >
-                                <InnerBarSection height={barHeight}>
-                                    <svg style={{ width: barWidth, height: barHeight }}>
-                                        <g>
-                                            <rect
-                                                width={barWidth}
-                                                height={barHeight}
-                                                fill={backgroundColor}
-                                                data-tip
-                                                data-for={id}
-                                                onMouseOver={() => setHoveredData(barData)}
-                                                onMouseLeave={setHoveredData(null)}
-                                            />
-                                            <rect
-                                                width={
-                                                    getWidth(
-                                                        barData,
-                                                        barWidth,
-                                                        maxData,
-                                                        usedData
-                                                    )
-                                                }
-                                                height={barHeight}
-                                                fill={
-                                                    getColor({
-                                                        barData,
-                                                        barWidth,
-                                                        barColor,
-                                                        colorRange,
-                                                        maxData,
-                                                        usedData
-                                                    })
-                                                }
-                                                data-tip
-                                                data-for={id}
-                                                onMouseOver={() => setHoveredData(barData)}
-                                                onMouseLeave={setHoveredData(null)}
-                                            />
-                                        </g>
-                                    </svg>
-                                </InnerBarSection>
-                                <LowerText
-                                    fontSize={fontSize}
-                                    alignSelf={(display === PERCENTAGE) ? 'center' : 'flex-end'}
-                                    marginRight={(sectionHeight === minSectionHeight) ? textWidth * 1.25 : margin.right}
+                                <UpperText fontSize={fontSize}> {barData[label]} </UpperText>
+                                <BarSection
+                                    direction={(display === PERCENTAGE) ? 'row' : 'column'}
                                 >
-                                    {
-                                        getData({
-                                            barData,
-                                            maxData,
-                                            usedData,
-                                            display,
-                                            maxDataFormat,
-                                            defaultRange,
-                                            units
-                                        })
-                                    }
-                                </LowerText>
-                            </BarSection>
-                        </Item>
-                    );
-                })
-            }
-        </Container>
+                                    <InnerBarSection height={barHeight}>
+                                        <svg style={{ width: barWidth, height: barHeight }}>
+                                            <g>
+                                                <rect
+                                                    width={barWidth}
+                                                    height={barHeight}
+                                                    fill={backgroundColor}
+                                                    data-tip
+                                                    data-for={id}
+                                                    onMouseOver={() => setHoveredData(barData)}
+                                                    onMouseLeave={setHoveredData(null)}
+                                                />
+                                                <rect
+                                                    width={
+                                                        getWidth(
+                                                            barData,
+                                                            barWidth,
+                                                            maxData,
+                                                            usedData
+                                                        )
+                                                    }
+                                                    height={barHeight}
+                                                    fill={
+                                                        getColor({
+                                                            barData,
+                                                            barWidth,
+                                                            barColor,
+                                                            colorRange,
+                                                            maxData,
+                                                            usedData
+                                                        })
+                                                    }
+                                                    data-tip
+                                                    data-for={id}
+                                                    onMouseOver={() => setHoveredData(barData)}
+                                                    onMouseLeave={setHoveredData(null)}
+                                                />
+                                            </g>
+                                        </svg>
+                                    </InnerBarSection>
+                                    <LowerText
+                                        fontSize={fontSize}
+                                        alignSelf={(display === PERCENTAGE) ? 'center' : 'flex-end'}
+                                        marginRight={(sectionHeight === minSectionHeight) ? textWidth * 1.25 : margin.right}
+                                    >
+                                        {
+                                            getData({
+                                                barData,
+                                                maxData,
+                                                usedData,
+                                                display,
+                                                maxDataFormat,
+                                                defaultRange,
+                                                units
+                                            })
+                                        }
+                                    </LowerText>
+                                </BarSection>
+                            </Item>
+                        );
+                    })
+                }
+            </Container>
+        </React.Fragment>
     );
 }
 
