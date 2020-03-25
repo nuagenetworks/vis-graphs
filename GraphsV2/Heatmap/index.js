@@ -300,7 +300,7 @@ const HeatmapGraph = (props) => {
             data,
             legendArea,
             legend,
-        }, label, legendData);
+        }, label, legendData, checkIsVerticalLegend(legend));
 
         setGraphWidth(graphWidth);
         setGraphHeight(graphHeight);
