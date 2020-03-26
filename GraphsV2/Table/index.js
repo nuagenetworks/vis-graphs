@@ -36,6 +36,7 @@ let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = {};
 let pageSize = 500;
+let updateScrollNow = false;
 
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
@@ -593,6 +594,13 @@ const Table = (props) => {
             }
             onSelect({ rows, matchingRows });
         }
+
+        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
+
+        if (updateScrollNow) {
+            updateTableStatus({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }})
+        } 
+        updateScrollNow = true;
     }
 
     const getMenu = () => {
