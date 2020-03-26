@@ -1,0 +1,58 @@
+[
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559080000,
+    "doc_count": 2,
+    "dnsg": "ovs-4",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559200000,
+    "doc_count": 4,
+    "dnsg": "ovs-4",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559320000,
+    "doc_count": 4,
+    "dnsg": "ovs-1",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559440000,
+    "doc_count": 2,
+    "dnsg": "ovs-1",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559440000,
+    "doc_count": 2,
+    "dnsg": "ovs-2",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559560000,
+    "doc_count": 4,
+    "dnsg": "ovs-2",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559680000,
+    "doc_count": 4,
+    "dnsg": "ovs-3",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559800000,
+    "doc_count": 2,
+    "dnsg": "ovs-3",
+    "ReachabilityStatus": 1
+  }
+]

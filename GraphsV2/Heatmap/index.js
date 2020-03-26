@@ -686,14 +686,7 @@ const HeatmapGraph = (props) => {
         height: graphHeight,
         order: checkIsVerticalLegend(legend) ? 2 : 1,
     };
-
-    if (!data || !data.length || !getFilterData().length)
-        return renderMessage({
-            id,
-            message: 'No data to visualize',
-            data,
-        });
-
+    
     updateElements();
 
     const Tooltip = styled('div')({});
