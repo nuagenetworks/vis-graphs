@@ -34,9 +34,11 @@ let currentPage = 1;
 let unformattedData = {};
 let selectedRows = {};
 let removedColumns = {};
-let removedColumnsKey = {};
+let removedColumnsKey = '';
+let scroll = {};
 let pageSize = 500;
 let updateScrollNow = false;
+let firstRender = true;
 
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
@@ -95,12 +97,12 @@ const getGraphProperties = (props) => {
 
   return {
       searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
-      sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : null,
+      sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : sortOrder,
       size: size || data.length,
       pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
       currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
       expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-      removedColumns: objectPath.has(scrollData, `removedColumns_${removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${removedColumnsKey}`) : uniq(removedColumns),
+      removedColumns: objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns),
   }
 }
 
@@ -138,7 +140,6 @@ const getHeaderData = (props, initialSort) => {
                   sort: true,
               }
           }
-
           headerData.push(headerColumn);
       }
   }
@@ -213,7 +214,7 @@ const Table = (props) => {
 
     let multiSelectable = true;
     pageSize = limit || pageSize;
-    let scroll = props.scroll;
+    scroll = props.scroll;
 
     const [selected, setSelectedState] = useState([]);
     const [data, setData] = useState([]);
@@ -810,13 +811,31 @@ const Table = (props) => {
     }
 
     useEffect(() => {
-        initiate(props);
+        if(firstRender) {
+            firstRender = false;
+            let removedColumn = objectPath.has(props.scrollData, `removedColumn`) ? objectPath.get(props.scrollData, `removedColumn`) : uniq(removedColumns);
+            if (removedColumn.length <= 0) {
+                const columnsCurr = props.properties.columns || [];
+                const removeColumn = [];
+                columnsCurr.filter((col, key) => {
+                    if (col.display != undefined) {
+                        removeColumn.push("" + key);
+                    }
+                });
+                updateTableStatus({
+                    [`removedColumn`]: removeColumn,
+                    event: events.REMOVED_COLUMNS
+                }, props.updateScroll);
+            }
+        }
+        initiate(props); 
         checkFontsize();
         if (contextMenu) {
             openContextMenu();
         }
         return () => {
-            const columnsCurr = props.data.columns || [];
+            firstRender = true;
+            const columnsCurr = props.properties.columns || [];
             const { filterColumns, removedColumnsKey: removedColumnsKeyCurr } = getColumnByContext(columnsCurr, props.context);
             const removedColumnsCurr = getRemovedColumns(columnsCurr, filterColumns, props.selectedColumns);
 
@@ -829,11 +848,11 @@ const Table = (props) => {
                 scrollData,
             } = props;
 
-            let removedColumns = objectPath.has(scrollData, `removedColumns_${removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${removedColumnsKey}`) : uniq(removedColumns);
+            let removedColumns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
 
             if (!isEmpty(displayColumns) && !isEqual(removedColumns, displayColumns)) {
                 updateTableStatus({
-                    [`removedColumns_${removedColumnsKey}`]: displayColumns,
+                    [`removedColumn`]: displayColumns,
                     event: events.REMOVED_COLUMNS
                 }, props.updateScroll);
             }
@@ -844,7 +863,7 @@ const Table = (props) => {
                 updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
             }
         }
-    }, [props.data, props.width, props.height, props.context]);
+    }, [props.data, props.width, props.height]);
 
     let tableData = getTableData(getColumns());
     tableData = removeHighlighter(tableData, highlight, selected);
@@ -863,7 +882,7 @@ const Table = (props) => {
         search: false,
         sort: true,
         viewColumns: selectColumnOption || false,
-        responsive: "scrollMaxHeight",
+        responsive: "scroll",
         fixedHeaderOptions: {yAxis: fixedHeader},
         pagination: showFooter,
         rowsPerPage: pageSize,
@@ -951,7 +970,6 @@ const Table = (props) => {
     const theme = createMuiTheme({
         overrides: { ...style.muiStyling, ...muiTableStyle }
     });
-
     return (
         <MuiThemeProvider theme={theme}>
             <div ref={(input) => { container = input; }}
