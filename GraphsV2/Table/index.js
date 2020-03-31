@@ -289,7 +289,15 @@ const Table = (props) => {
 
             filterData.push(data);
             unformattedData[random] = d;
-        })
+        });
+        
+        if(!scroll) {
+          sortOrder = objectPath.has(scrollData, 'staticSort') ? objectPath.get(scrollData, 'staticSort') : {};
+          if(sortOrder && sortOrder.column && sortOrder.order) {
+            filterData = orderBy(filterData, [sortOrder.column], [sortOrder.order]);
+          }
+        }
+
         originalData = filterData;
 
         resetFilters((currentPage || 1), selectedRows);
@@ -525,7 +533,7 @@ const Table = (props) => {
         }
 
         filterData = orderBy(filterData, [column], [colOrder]);
-
+        updateTableStatus({'staticSort':{...sortOrder, column}}, props.updateScroll);
         resetFilters();
         updateData();
     }
@@ -599,7 +607,7 @@ const Table = (props) => {
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
 
         if (updateScrollNow) {
-            updateTableStatus({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }})
+            updateTableStatus({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }}, props.updateScroll)
         } 
         updateScrollNow = true;
     }
@@ -834,7 +842,6 @@ const Table = (props) => {
             openContextMenu();
         }
         return () => {
-            firstRender = true;
             const columnsCurr = props.properties.columns || [];
             const { filterColumns, removedColumnsKey: removedColumnsKeyCurr } = getColumnByContext(columnsCurr, props.context);
             const removedColumnsCurr = getRemovedColumns(columnsCurr, filterColumns, props.selectedColumns);
@@ -863,7 +870,7 @@ const Table = (props) => {
                 updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
             }
         }
-    }, [props.data, props.width, props.height]);
+    }, [props.data, props.width, props.height, props.context]);
 
     let tableData = getTableData(getColumns());
     tableData = removeHighlighter(tableData, highlight, selected);
