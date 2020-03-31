@@ -9,3 +9,4 @@ export { default as BarGraph } from './BarGraph';
 export { default as VariationTextGraph } from './VariationTextGraph';
 export { default as ProgressBarGraph } from './ProgressBarGraph';
 export { default as TreeGraph } from './TreeGraph';
+export { default as DynamicBarGraph } from './BarGraph';

@@ -12,7 +12,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { getIconPath } from '../../utils/helpers';
 import InfoBox from "../../InfoBox";
-import { customTooltip, renderLegend, getGraphDimension, checkIsVerticalLegend } from '../utils/helper';
+import { customTooltip, renderLegend, getGraphDimension } from '../utils/helper';
 
 const MAX_LABEL_LENGTH = 8;
 
@@ -110,7 +110,7 @@ const LowerText = styled('div')({
 const Svg = styled('svg')({
     cursor: 'pointer', 
     background: ({ background } = {}) => background, 
-    padding: '0.4rem',
+    padding: '0.5rem 0.5rem 0 0.5rem',
 });
 
 const Tooltip = styled('div')({});
@@ -119,7 +119,6 @@ const PortGraph = (props) => {
     let isMultipleRows = false;
 
     const [portAreaWidth, setStatePortAreaWidth] = useState(100);
-    const [rowCount, setStateRowCount] = useState(0);
     const [openModal, setOpenModal] = useState(false);
     const [infoBoxData, setInfoBoxData] = useState({});
     const [customTooltips, setCustomTooltips] = useState({});
@@ -200,11 +199,6 @@ const PortGraph = (props) => {
         setStatePortAreaWidth(portWidth < minPortWidth ? minPortWidth : portWidth);
     }
 
-    // calculate length of the row to show number of ports in each row.
-    const setRowCount = ({ data, rowLimit }) => {
-        setStateRowCount(isMultipleRows ? rowLimit : data.length);
-    }
-
     const renderInfoBox = () => {
         if (!tooltipScript) {
             return;
@@ -274,7 +268,6 @@ const PortGraph = (props) => {
 
         checkMultipleRows({ data, rowLimit });
         setPortAreaWidth({ data, width, rowLimit, minPortWidth });
-        setRowCount({ data, rowLimit });
         getTooltipContent({ tooltipScript, tooltip, yTicksLabel, data2 });
     }
 
@@ -360,7 +353,7 @@ const PortGraph = (props) => {
         return (
             portRowset.map((portRow, index) => {
                 return (
-                    <Item key={index}>
+                    <Item className='PortGraph' key={index}>
                         {portRow.map((data, i) => {
                             return (
                                 <PortBox
@@ -399,7 +392,8 @@ const PortGraph = (props) => {
             legend
         },
         legendGetLabel,
-        legendData
+        legendData,
+        isVertical,
     );
 
     return (
