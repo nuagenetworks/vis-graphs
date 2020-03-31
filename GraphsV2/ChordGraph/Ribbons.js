@@ -32,7 +32,7 @@ export default ({
 
                 const style = (blurOnHover ?
                     { fillOpacity: `${hidden ? ribbonBlurOpacity : ribbonOpacity}` } :
-                    { display: `${hidden ? 'none' : 'block'}`, fillOpacity: ribbonOpacity }
+                    { display: `${hidden ? 'none' : 'block'}`, fillOpacity: ribbonOpacity, cursor: 'pointer' }
                 )
                 return (
                     <path
