@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { compose } from 'redux';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-lightweight-tooltip';
-import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash';
+import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import objectPath from "object-path";
@@ -39,7 +39,7 @@ let scroll = {};
 let pageSize = 500;
 let updateScrollNow = false;
 let firstRender = true;
-
+const TIMEOUT = 1000;
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -605,12 +605,13 @@ const Table = (props) => {
         }
 
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-
-        if (updateScrollNow) {
-            updateTableStatus({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }}, props.updateScroll)
-        } 
-        updateScrollNow = true;
+        saveSelectedRow({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }}, props.updateScroll);
     }
+
+    const saveSelectedRow = debounce((tableData, updateScroll) => {
+      clearTimeout();
+      updateTableStatus(tableData, updateScroll);
+    }, TIMEOUT);
 
     const getMenu = () => {
         const {
@@ -826,7 +827,7 @@ const Table = (props) => {
                 const columnsCurr = props.properties.columns || [];
                 const removeColumn = [];
                 columnsCurr.filter((col, key) => {
-                    if (col.display != undefined) {
+                    if (col.display !== undefined) {
                         removeColumn.push("" + key);
                     }
                 });
