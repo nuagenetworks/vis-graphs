@@ -9,12 +9,7 @@ const cheerio = require('cheerio');
 
 describe('GaugeGraph', () => {
     let config;
-    let useEffect;
 
-    const mockUseEffect = () => {
-      useEffect.mockImplementationOnce(f => f());
-    };
-    
     beforeAll(async () => {
       config = await getDataAndConfig('GaugeChart');
     });
@@ -25,11 +20,7 @@ describe('GaugeGraph', () => {
       const element = document.createElement("div");
       
       beforeAll((done) => {
-        useEffect = jest.spyOn(React, "useEffect");
-        
-        mockUseEffect();
-        mockUseEffect();
-
+        jest.spyOn(React, "useEffect").mockImplementationOnce(f => f());
         document.body.appendChild(element);
         guageGraph = ReactDom.render(
           <GaugeGraph
