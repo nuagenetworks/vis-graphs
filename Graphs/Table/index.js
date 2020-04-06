@@ -38,7 +38,7 @@ class Table extends AbstractGraph {
         this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
         this.handleColumnViewChange  = this.handleColumnViewChange.bind(this);
         this.saveSelectedRow         = this.saveSelectedRow.bind(this);
-        
+
         /**
         */
         const { limit } = this.getConfiguredProperties();
@@ -52,6 +52,8 @@ class Table extends AbstractGraph {
         this.htmlData = {}
         this.sortOrder = {}
         this.displayColumns = [];
+        this.headerData = [];
+        this.tableData = [];
         this.updateScrollNow = false;
         this.state = {
             selected: [],
@@ -87,6 +89,9 @@ class Table extends AbstractGraph {
     componentDidMount() {
         this.initiate(this.props);
         this.checkFontsize();
+        this.headerData = this.getHeaderData(this.getInitialSort());
+        this.tableData = this.getTableData(this.getColumns(), this.filterData);
+        this.tableData = this.removeHighlighter(this.tableData);
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -123,8 +128,18 @@ class Table extends AbstractGraph {
         if (contextMenu) {
             this.openContextMenu();
         }
-    }
 
+        const headerData = this.getHeaderData(this.getInitialSort());
+        if (!isEqual(headerData, this.headerData)) {
+            this.headerData = headerData;
+        }
+
+        const tableData = this.getTableData(this.getColumns());
+        if (!isEqual(this.tableData, tableData) || this.tableData.length <= 0) {
+            this.tableData = tableData;
+            this.tableData = this.removeHighlighter(this.tableData);
+        }
+    }
     // removed columns on the basis of dynamic and display columns
     static getRemovedColumns(columns, filterColumns, selectedColumns) {
         let removedColumns = [];
@@ -402,7 +417,7 @@ class Table extends AbstractGraph {
         return headerData
     }
 
-    getTableData(columns) {
+    getTableData(columns, filterData = []) {
         const {
             highlight,
             highlightColor,
@@ -417,13 +432,14 @@ class Table extends AbstractGraph {
 
         const keyColumns = this.getColumns();
         const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
+        const dataParsing = filterData.length > 0 ? filterData : this.state.data;
 
         if(usedColumns.length){
             first(usedColumns).firstColStyle = firstColToolTipStyle;
             last(usedColumns).lastColStyle = lastColToolTipStyle;
         }
-        return this.state.data.map((d, j) => {
- 
+
+        return dataParsing.map((d, j) => {
 
             let data = {},
                 highlighter = false;
@@ -968,13 +984,7 @@ class Table extends AbstractGraph {
         } = this.getGraphProperties();
 
         const tableCurrentPage = this.currentPage - 1;
-        // overrite style of highlighted selected row
-        const initialSort = this.getInitialSort();//Todo
-        const headerData = this.getHeaderData(initialSort);
-        let tableData = this.getTableData(this.getColumns());
-        tableData = this.removeHighlighter(tableData);
         const totalRecords = scroll ? size : this.filterData.length;
-
         const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
         const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
@@ -1082,11 +1092,11 @@ class Table extends AbstractGraph {
                     { this.renderInfoBox() }
 
                     <div style={{ clear: "both" }}></div>
-                    {this.renderSearchBarIfNeeded(headerData)}
+                    {this.renderSearchBarIfNeeded(this.headerData)}
 
                     <MUIDataTable
-                        data={tableData}
-                        columns={headerData}
+                        data={this.tableData}
+                        columns={this.headerData}
                         options={options}
                     />
                 </div>
