@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
-import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash'
+import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -26,7 +26,7 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns', 'scrollData']
 const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox', 'showConfirmationPopup']
-
+const TIMEOUT = 1000;
 class Table extends AbstractGraph {
 
     constructor(props, context) {
@@ -37,7 +37,8 @@ class Table extends AbstractGraph {
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
         this.handleColumnViewChange  = this.handleColumnViewChange.bind(this);
-
+        this.saveSelectedRow         = this.saveSelectedRow.bind(this);
+        
         /**
         */
         const { limit } = this.getConfiguredProperties();
@@ -667,12 +668,12 @@ class Table extends AbstractGraph {
         }
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
 
-        if (this.updateScrollNow) {
-            this.updateTableStatus({ selectedRow: {...rowsInStore, [this.props.requestId] : this.selectedRows }})
-        } 
-        this.updateScrollNow = true;
-
+      this.saveSelectedRow({ selectedRow: {...rowsInStore, [this.props.requestId] : this.selectedRows }});
     }
+
+    saveSelectedRow = debounce((tableData) => {
+        this.updateTableStatus(tableData);
+    }, TIMEOUT);
 
     getMenu() {
         const {
