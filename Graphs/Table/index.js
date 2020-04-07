@@ -24,8 +24,8 @@ import InfoBox from "../../InfoBox";
 import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
-const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns', 'scrollData']
-const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox', 'showConfirmationPopup']
+const PROPS_FILTER_KEY = ['data', 'height', 'width', 'context', 'selectedColumns'];
+const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showInfoBox', 'showConfirmationPopup'];
 const TIMEOUT = 1000;
 class Table extends AbstractGraph {
 
