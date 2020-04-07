@@ -52,8 +52,6 @@ class Table extends AbstractGraph {
         this.htmlData = {}
         this.sortOrder = {}
         this.displayColumns = [];
-        this.headerData = [];
-        this.tableData = [];
         this.updateScrollNow = false;
         this.state = {
             selected: [],
@@ -66,6 +64,7 @@ class Table extends AbstractGraph {
             removedColumnsKey: 'default',
         }
         this.initiate(props);
+        this.headerData = this.getHeaderData(this.getInitialSort());
     }
 
     componentWillUnmount() {
@@ -89,9 +88,8 @@ class Table extends AbstractGraph {
     componentDidMount() {
         this.initiate(this.props);
         this.checkFontsize();
-        this.headerData = this.getHeaderData(this.getInitialSort());
         this.tableData = this.getTableData(this.getColumns(), this.filterData);
-        this.tableData = this.removeHighlighter(this.tableData);
+        this.tableData = this.removeHighlighter(this.tableData);  
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -129,16 +127,11 @@ class Table extends AbstractGraph {
             this.openContextMenu();
         }
 
-        const headerData = this.getHeaderData(this.getInitialSort());
-        if (!isEqual(headerData, this.headerData)) {
-            this.headerData = headerData;
-        }
-
-        const tableData = this.getTableData(this.getColumns());
-        if (!isEqual(this.tableData, tableData) || this.tableData.length <= 0) {
-            this.tableData = tableData;
-            this.tableData = this.removeHighlighter(this.tableData);
-        }
+        // const tableData = this.getTableData(this.getColumns());
+        // if (!isEqual(this.tableData, tableData) || this.tableData.length <= 0) {
+        //     this.tableData = tableData;
+        //     this.tableData = this.removeHighlighter(this.tableData);
+        // }
     }
     // removed columns on the basis of dynamic and display columns
     static getRemovedColumns(columns, filterColumns, selectedColumns) {
@@ -201,7 +194,7 @@ class Table extends AbstractGraph {
             pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : this.pageSize, // Calculate this from the config or (query in case of scroll)
             currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1, // Pass page as 1 for Normal Table and will be handled internally only.
             expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-            removedColumns: objectPath.has(scrollData, `removedColumns_${removedColumnsKey}`) ? objectPath.get(scrollData, `removedColumns_${removedColumnsKey}`) : uniq(removedColumns),
+            removedColumns: objectPath.has(scrollData, `removedColumns_`) ? objectPath.get(scrollData, `removedColumns_`) : uniq(removedColumns),
         }
     }
 
