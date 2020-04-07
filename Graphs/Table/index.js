@@ -75,13 +75,13 @@ class Table extends AbstractGraph {
         
         if (!isEmpty(this.displayColumns)) {
             this.updateTableStatus({
-                [`removedColumns_${this.state.removedColumnsKey}`]: this.displayColumns,
+                [`removedColumns_`]: this.displayColumns,
                 event: events.REMOVED_COLUMNS
             });
         }
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
         if(!objectPath.has(scrollData, 'selectedRow') && !isEmpty(this.selectedRows)) {
-            this.updateTableStatus({ selectedRow: {...rowsInStore, [this.props.requestId] : this.selectedRows } })
+            this.updateTableStatus({ selectedRow: {...rowsInStore, [requestId] : this.selectedRows } })
         } 
     }
 
@@ -107,10 +107,10 @@ class Table extends AbstractGraph {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-
+        
         return !isEqual(pick(this.props, ...PROPS_FILTER_KEY), pick(nextProps, ...PROPS_FILTER_KEY))
         || !isEqual(pick(this.state, ...STATE_FILTER_KEY), pick(nextState, ...STATE_FILTER_KEY))
-}
+    }
 
     componentDidUpdate(prevProps) {
         if(prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
@@ -127,11 +127,6 @@ class Table extends AbstractGraph {
             this.openContextMenu();
         }
 
-        // const tableData = this.getTableData(this.getColumns());
-        // if (!isEqual(this.tableData, tableData) || this.tableData.length <= 0) {
-        //     this.tableData = tableData;
-        //     this.tableData = this.removeHighlighter(this.tableData);
-        // }
     }
     // removed columns on the basis of dynamic and display columns
     static getRemovedColumns(columns, filterColumns, selectedColumns) {
