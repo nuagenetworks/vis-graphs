@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig } from '../testHelper';
+import { getDataAndConfig, mockUseEffect, clearAllMocks } from '../testHelper';
 
 import GaugeGraph from '.';
 
@@ -20,7 +20,7 @@ describe('GaugeGraph', () => {
       const element = document.createElement("div");
       
       beforeAll((done) => {
-        jest.spyOn(React, "useEffect").mockImplementationOnce(f => f());
+        mockUseEffect();
         document.body.appendChild(element);
         guageGraph = ReactDom.render(
           <GaugeGraph
@@ -40,6 +40,7 @@ describe('GaugeGraph', () => {
       
       afterAll(() => {
         document.body.removeChild(element);
+        clearAllMocks();
       });
   
       it("SVG Dimensions", () => {
