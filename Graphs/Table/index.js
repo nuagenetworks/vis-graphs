@@ -37,7 +37,6 @@ class Table extends AbstractGraph {
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
         this.handleColumnViewChange  = this.handleColumnViewChange.bind(this);
-        this.saveSelectedRow         = this.saveSelectedRow.bind(this);
 
         /**
         */
