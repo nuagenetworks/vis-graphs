@@ -2,7 +2,7 @@ import React from 'react';
 const cheerio = require('cheerio');
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig, mockUseEffect, clearAllMocks } from '../testHelper';
+import { getDataAndConfig, mockUseEffect, clearAllMocks, createElement, appendChildToElement, removeElement} from '../testHelper';
 import AreaGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
 
@@ -14,17 +14,18 @@ describe("AreaGraph", () => {
   });
 
   afterAll(() => {
+    removeElement(element);
     clearAllMocks();
   });
 
   describe("Simple", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -41,6 +42,7 @@ describe("AreaGraph", () => {
     });
 
     afterAll(() => {
+      removeElement(element);
       clearAllMocks();
     });
 
@@ -81,12 +83,12 @@ describe("AreaGraph", () => {
 
   describe("Simple with brush", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -103,6 +105,7 @@ describe("AreaGraph", () => {
     });
 
     afterAll(() => {
+      removeElement(element);
       clearAllMocks();
     });
 
@@ -164,12 +167,12 @@ describe("AreaGraph", () => {
 
   describe("Stacked", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -186,6 +189,7 @@ describe("AreaGraph", () => {
     });
 
     afterAll(() => {
+      removeElement(element);
       clearAllMocks();
     });
 
@@ -226,12 +230,12 @@ describe("AreaGraph", () => {
 
   describe("Null Data", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -248,6 +252,7 @@ describe("AreaGraph", () => {
     });
 
     afterAll(() => {
+      removeElement(element);
       clearAllMocks();
     });
 
