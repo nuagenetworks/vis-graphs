@@ -53,7 +53,7 @@ class Table extends AbstractGraph {
         this.displayColumns = [];
         this.updateScrollNow = false;
         this.state = {
-            selected: [],
+            selected: this.setSelectedRows(props) || [],
             data: [],
             fontSize: style.defaultFontsize,
             contextMenu: null,
@@ -64,6 +64,48 @@ class Table extends AbstractGraph {
         }
         this.initiate(props);
         this.headerData = this.getHeaderData(this.getInitialSort());
+        this.theme = this.getCustomStyle();
+        this.option =  {
+            print: false,
+            filter: false,
+            download: false,
+            search: false,
+            sort: true,
+            viewColumns: false,
+            responsive: "scroll",
+            selectableRows: 'single',
+            onChangePage: this.handlePageClick,
+            onRowsSelect: this.handleRowSelection,
+            selectableRowsOnClick: true,
+            onColumnSortChange: this.handleSortOrderChange,
+            onChangeRowsPerPage: this.handleRowsPerPageChange,
+            onColumnViewChange: this.handleColumnViewChange,
+            disableToolbarSelect: true,
+            textLabels: {
+                body: {
+                  noMatch: "No data to visualize",
+                  toolTip: "Sort",
+                },
+                pagination: {
+                  next: "Next Page",
+                  previous: "Previous Page",
+                  rowsPerPage: "Rows per page:",
+                  displayRows: "of",
+                },
+                toolbar: {
+                  viewColumns: "Select Column",
+                },
+                viewColumns: {
+                  title: "Select Column",
+                  titleAria: "Show/Hide Table Columns",
+                },
+                selectedRows: {
+                  text: "row(s) selected",  
+                  delete: "Delete",
+                  deleteAria: "Delete Selected Rows",
+                },
+            }
+        };
     }
 
     componentWillUnmount() {
@@ -85,10 +127,12 @@ class Table extends AbstractGraph {
     }
 
     componentDidMount() {
-        this.initiate(this.props);
+        this.updateData();
         this.checkFontsize();
         this.tableData = this.getTableData(this.getColumns(), this.filterData);
-        this.tableData = this.removeHighlighter(this.tableData);  
+        if(this.props.highlight) {
+            this.tableData = this.removeHighlighter(this.tableData);
+        }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -204,11 +248,20 @@ class Table extends AbstractGraph {
         return isEmpty(data);
     }
 
+    setSelectedRows = (props) => {
+      const {
+        scrollData,
+        requestId,
+    } = props;
+
+      const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
+      return selectedRows[requestId];
+    }
+
     initiate(props) {
         const {
             scroll,
             scrollData,
-            requestId,
         } = props;
 
         const {
@@ -216,8 +269,7 @@ class Table extends AbstractGraph {
         } = this.getGraphProperties(props);
 
         if(scroll) {
-            this.selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
-            this.selectedRows = this.selectedRows[requestId];
+            this.selectedRows = this.setSelectedRows(props);
             if (!objectPath.has(scrollData, 'pageSize')) {
                 this.updateTableStatus({ pageSize: this.pageSize })
             }
@@ -949,7 +1001,7 @@ class Table extends AbstractGraph {
         return initialSort;
     }
 
-    render() {
+    getCustomStyle = () => {
         const {
             scroll,
             width,
@@ -959,9 +1011,6 @@ class Table extends AbstractGraph {
         const {
             showCheckboxes,
             hidePagination,
-            fixedHeader,
-            multiSelectable,
-            selectColumnOption,
             searchBar,
         } = this.getConfiguredProperties();
 
@@ -970,62 +1019,11 @@ class Table extends AbstractGraph {
             size
         } = this.getGraphProperties();
 
-        const tableCurrentPage = this.currentPage - 1;
         const totalRecords = scroll ? size : this.filterData.length;
-        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
-        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
-        const options = {
-            print: false,
-            filter: false,
-            download: false,
-            search: false,
-            sort: true,
-            viewColumns: selectColumnOption || false,
-            responsive: "scroll",
-            fixedHeader: fixedHeader,
-            pagination: showFooter,
-            rowsPerPage: pageSize,
-            count: totalRecords,
-            page: tableCurrentPage,
-            rowsPerPageOptions: rowsPerPageOptions,
-            selectableRows: multiSelectable ? 'multiple' : 'single',
-            onChangePage: this.handlePageClick,
-            rowsSelected: this.state.selected,
-            onRowsSelect: this.handleRowSelection,
-            selectableRowsOnClick: true,
-            onColumnSortChange: this.handleSortOrderChange,
-            onChangeRowsPerPage: this.handleRowsPerPageChange,
-            onColumnViewChange: this.handleColumnViewChange,
-            disableToolbarSelect: true,
-            textLabels: {
-                body: {
-                  noMatch: "No data to visualize",
-                  toolTip: "Sort",
-                },
-                pagination: {
-                  next: "Next Page",
-                  previous: "Previous Page",
-                  rowsPerPage: "Rows per page:",
-                  displayRows: "of",
-                },
-                toolbar: {
-                  viewColumns: "Select Column",
-                },
-                viewColumns: {
-                  title: "Select Column",
-                  titleAria: "Show/Hide Table Columns",
-                },
-                selectedRows: {
-                  text: "row(s) selected",  
-                  delete: "Delete",
-                  deleteAria: "Delete Selected Rows",
-                },
-              },
-        };
-        
-        const muiTableStyle = {
+
+        const customStyle = {
             MUIDataTableSelectCell: {
                 root: {
                     display: showCheckboxes ? '' : 'none'
@@ -1058,18 +1056,56 @@ class Table extends AbstractGraph {
                 }
             },
             MuiTableCell: {
-              root: {
-                padding: "10px 40px 10px 15px",
-                fontSize: "10px"
-              }
-           }
+                root: {
+                    padding: "10px 40px 10px 15px",
+                    fontSize: "10px"
+                }
+            }
         }
-        const theme = createMuiTheme({
-                overrides: {...style.muiStyling, ...muiTableStyle}
-            });
+
+        return createMuiTheme({
+            overrides: {...style.muiStyling, ...customStyle}
+        });
+    }
+
+    render() {
+        const {
+            scroll,
+        } = this.props;
+
+        const {
+            hidePagination,
+            fixedHeader,
+            multiSelectable,
+            selectColumnOption,
+        } = this.getConfiguredProperties();
+
+        const {
+            pageSize,
+            size
+        } = this.getGraphProperties();
+
+        const tableCurrentPage = this.currentPage - 1;
+        const totalRecords = scroll ? size : this.filterData.length;
+        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
+        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
+        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
+
+        const options = {
+            ...this.option,
+            rowsSelected: this.state.selected,
+            viewColumns: selectColumnOption || false,
+            fixedHeader: fixedHeader,
+            pagination: showFooter,
+            rowsPerPage: pageSize,
+            count: totalRecords,
+            page: tableCurrentPage,
+            rowsPerPageOptions: rowsPerPageOptions,
+            selectableRows: multiSelectable ? 'multiple' : 'single',
+        };
 
         return (
-            <MuiThemeProvider theme={theme}>
+            <MuiThemeProvider theme={this.theme}>
                 <div ref={(input) => { this.container = input; }}
                    onContextMenu={this.handleContextMenu}
                 >
