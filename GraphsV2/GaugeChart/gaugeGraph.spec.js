@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig, mockUseEffect, clearAllMocks } from '../testHelper';
+import { getDataAndConfig, mockUseEffect, clearAllMocks, createElement, appendChildToElement, removeElement } from '../testHelper';
 
 import GaugeGraph from '.';
 
@@ -17,11 +17,11 @@ describe('GaugeGraph', () => {
     describe('Initial Configurations', () => {
       let guageGraph, $;
   
-      const element = document.createElement("div");
+      const element = createElement();
       
       beforeAll((done) => {
         mockUseEffect();
-        document.body.appendChild(element);
+        appendChildToElement(element);
         guageGraph = ReactDom.render(
           <GaugeGraph
             width={500}
@@ -39,7 +39,7 @@ describe('GaugeGraph', () => {
       });
       
       afterAll(() => {
-        document.body.removeChild(element);
+        removeElement(element);
         clearAllMocks();
       });
   
