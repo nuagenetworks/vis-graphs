@@ -415,10 +415,16 @@ class Table extends AbstractGraph {
 
     // filter and formatting columns for table header
     getHeaderData(initialSort) {
-        const {
+        let {
             removedColumns,
         } = this.getGraphProperties();
-        
+
+        if(removedColumns.length <= 0) {
+            const { context, selectedColumns, configuration } = this.props;
+            const { filterColumns } = Table.getColumnByContext(configuration.data.columns || [], context);        
+            removedColumns = Table.getRemovedColumns(configuration.data.columns || [], filterColumns, selectedColumns);
+        }
+
         const columns = this.getColumns()
         let headerData = [];
         for (let index in columns) {
@@ -1058,7 +1064,7 @@ class Table extends AbstractGraph {
             MuiTableCell: {
                 root: {
                     padding: "10px 40px 10px 15px",
-                    fontSize: "10px"
+                    fontSize: "10px",
                 }
             }
         }
