@@ -64,7 +64,6 @@ class Table extends AbstractGraph {
         }
         this.initiate(props);
         this.headerData = this.getHeaderData(this.getInitialSort());
-        this.theme = this.getCustomStyle();
         this.option =  {
             print: false,
             filter: false,
@@ -1007,7 +1006,7 @@ class Table extends AbstractGraph {
         return initialSort;
     }
 
-    getCustomStyle = () => {
+    render() {
         const {
             scroll,
             width,
@@ -1017,6 +1016,9 @@ class Table extends AbstractGraph {
         const {
             showCheckboxes,
             hidePagination,
+            fixedHeader,
+            multiSelectable,
+            selectColumnOption,
             searchBar,
         } = this.getConfiguredProperties();
 
@@ -1025,11 +1027,27 @@ class Table extends AbstractGraph {
             size
         } = this.getGraphProperties();
 
+        const tableCurrentPage = this.currentPage - 1;
         const totalRecords = scroll ? size : this.filterData.length;
+        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
+        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
         const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
         const heightMargin = this.getHeightMargin(showFooter);
 
-        const customStyle = {
+        const options = {
+            ...this.option,
+            rowsSelected: this.state.selected,
+            viewColumns: selectColumnOption || false,
+            fixedHeader: fixedHeader,
+            pagination: showFooter,
+            rowsPerPage: pageSize,
+            count: totalRecords,
+            page: tableCurrentPage,
+            rowsPerPageOptions: rowsPerPageOptions,
+            selectableRows: multiSelectable ? 'multiple' : 'single',
+        };
+
+        const muiTableStyle = {
             MUIDataTableSelectCell: {
                 root: {
                     display: showCheckboxes ? '' : 'none'
@@ -1063,55 +1081,23 @@ class Table extends AbstractGraph {
             },
             MuiTableCell: {
                 root: {
-                    padding: "10px 40px 10px 15px",
-                    fontSize: "10px",
+                    padding: "10px 20px 10px 15px",
+                    fontSize: this.state.fontSize,
                 }
-            }
+            },
+            MUIDataTableHeadCell: {
+                toolButton: {
+                    whiteSpace: 'nowrap',
+                }
+            },
         }
 
-        return createMuiTheme({
-            overrides: {...style.muiStyling, ...customStyle}
+        const theme = createMuiTheme({
+            overrides: {...style.muiStyling, ...muiTableStyle}
         });
-    }
-
-    render() {
-        const {
-            scroll,
-        } = this.props;
-
-        const {
-            hidePagination,
-            fixedHeader,
-            multiSelectable,
-            selectColumnOption,
-        } = this.getConfiguredProperties();
-
-        const {
-            pageSize,
-            size
-        } = this.getGraphProperties();
-
-        const tableCurrentPage = this.currentPage - 1;
-        const totalRecords = scroll ? size : this.filterData.length;
-        const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
-        const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
-        const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
-
-        const options = {
-            ...this.option,
-            rowsSelected: this.state.selected,
-            viewColumns: selectColumnOption || false,
-            fixedHeader: fixedHeader,
-            pagination: showFooter,
-            rowsPerPage: pageSize,
-            count: totalRecords,
-            page: tableCurrentPage,
-            rowsPerPageOptions: rowsPerPageOptions,
-            selectableRows: multiSelectable ? 'multiple' : 'single',
-        };
 
         return (
-            <MuiThemeProvider theme={this.theme}>
+            <MuiThemeProvider theme={theme}>
                 <div ref={(input) => { this.container = input; }}
                    onContextMenu={this.handleContextMenu}
                 >
