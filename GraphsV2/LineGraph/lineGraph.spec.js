@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig } from '../testHelper';
+import { getDataAndConfig, createElement, appendChildToElement, removeElement } from '../testHelper';
 import LineGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
 
@@ -16,10 +16,10 @@ describe('LineGraph', () => {
 
   describe("Multi Lines", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <LineGraph
           width={500}
@@ -33,6 +33,10 @@ describe('LineGraph', () => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
     });
 
     it("SVG Dimensions", () => {
@@ -66,10 +70,10 @@ describe('LineGraph', () => {
 
   describe("Simple LineGraph", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <LineGraph
           width={500}
@@ -83,6 +87,10 @@ describe('LineGraph', () => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
     });
 
     it("SVG Dimensions", () => {
@@ -115,10 +123,10 @@ describe('LineGraph', () => {
 
   describe("Simple LineGraph With Ycolumn ", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <LineGraph
           width={500}
@@ -132,6 +140,10 @@ describe('LineGraph', () => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
     });
 
     it("SVG Dimensions", () => {
@@ -165,10 +177,10 @@ describe('LineGraph', () => {
 
   describe("Multi Line LineGraph With Ycolumn", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <LineGraph
           width={500}
@@ -182,6 +194,10 @@ describe('LineGraph', () => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
     });
 
     it("SVG Dimensions", () => {
@@ -215,10 +231,10 @@ describe('LineGraph', () => {
 
   describe("Multi Lines", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <LineGraph
           width={500}
@@ -234,6 +250,10 @@ describe('LineGraph', () => {
       }, 3000);
     });
 
+    afterAll(() => {
+      removeElement(element);
+    });
+    
     it("SVG Dimensions", () => {
       const height = $('svg').attr('height');
       const width = $('svg').attr('width');

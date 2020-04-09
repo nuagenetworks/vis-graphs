@@ -2,31 +2,30 @@ import React from 'react';
 const cheerio = require('cheerio');
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig } from '../testHelper';
+import { getDataAndConfig, mockUseEffect, clearAllMocks, createElement, appendChildToElement, removeElement} from '../testHelper';
 import AreaGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
 
 describe("AreaGraph", () => {
   let config;
-  let useEffect;
-
-  const mockUseEffect = () => {
-    useEffect.mockImplementationOnce(f => f());
-  };
 
   beforeAll(async () => {
     config = await getDataAndConfig('AreaGraph');
   });
 
+  afterAll(() => {
+    removeElement(element);
+    clearAllMocks();
+  });
+
   describe("Simple", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      useEffect = jest.spyOn(React, "useEffect");
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -36,11 +35,15 @@ describe("AreaGraph", () => {
         </AreaGraph>,
         element
       );
-      mockUseEffect();
       setTimeout(() => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
+      clearAllMocks();
     });
 
     it("SVG Dimensions", () => {
@@ -80,13 +83,12 @@ describe("AreaGraph", () => {
 
   describe("Simple with brush", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      useEffect = jest.spyOn(React, "useEffect");
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -96,11 +98,15 @@ describe("AreaGraph", () => {
         </AreaGraph>,
         element
       );
-      mockUseEffect();
       setTimeout(() => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
+      clearAllMocks();
     });
 
     it("SVG Dimensions", () => {
@@ -161,13 +167,12 @@ describe("AreaGraph", () => {
 
   describe("Stacked", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      useEffect = jest.spyOn(React, "useEffect");
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -177,11 +182,15 @@ describe("AreaGraph", () => {
         </AreaGraph>,
         element
       );
-      mockUseEffect();
       setTimeout(() => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
+      clearAllMocks();
     });
 
     it("SVG Dimensions", () => {
@@ -221,13 +230,12 @@ describe("AreaGraph", () => {
 
   describe("Null Data", () => {
     let $;
-    const element = document.createElement("div");
+    const element = createElement();
 
     beforeAll((done) => {
-      useEffect = jest.spyOn(React, "useEffect");
 
       mockUseEffect();
-      document.body.appendChild(element);
+      appendChildToElement(element);
       ReactDom.render(
         <AreaGraph
           width={500}
@@ -237,11 +245,15 @@ describe("AreaGraph", () => {
         </AreaGraph>,
         element
       );
-      mockUseEffect();
       setTimeout(() => {
         done();
         $ = cheerio.load(element.innerHTML);
       }, 3000);
+    });
+
+    afterAll(() => {
+      removeElement(element);
+      clearAllMocks();
     });
 
     it("SVG Dimensions", () => {
