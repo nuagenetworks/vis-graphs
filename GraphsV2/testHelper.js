@@ -1,5 +1,6 @@
 import fsmo from 'fs';
-import { format, timeFormat } from 'd3';
+import { format, timeFormat } from "d3";
+import React from 'react';
 
 const d3 = { format, timeFormat };
 const cheerio = require('cheerio');
@@ -116,3 +117,13 @@ export const checkTime = (date) => {
     const formatter = d3.timeFormat(timeFormat);
     return formatter(new Date(date))
 }
+
+export const mockUseEffect = () => jest.spyOn(React, "useEffect").mockImplementationOnce(f => f())
+
+export const clearAllMocks = () => jest.clearAllMocks();
+
+export const createElement = () => document.createElement('div');
+
+export const appendChildToElement = (element) => document.body.appendChild(element);
+
+export const removeElement = (element) => document.body.removeChild(element);
