@@ -1,0 +1,19 @@
+{
+    "data": {
+        "titlePosition": "top",
+        "title": "testing",
+        "target": {
+            "column": "timezones",
+            "value": "1503120370000",
+            "field": "value"
+        }
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/medalsPerCountry",
+            "params": {
+                "app": "value"
+            }
+        }
+    ]
+}
