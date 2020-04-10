@@ -1,0 +1,86 @@
+{
+  "id": "nsg-port-details",
+  "title": "NSG and Port Details",
+  "graph": "PortGraph",
+  "description": "Quick View of NSG info and port details",
+  "author": "Natalia Balus",
+  "creationDate": "12/20/2018",
+  "data": {
+    "fontSize": ".5em",
+    "topColumn": "physicalName",
+    "minPortFontSize": 10,
+    "maxPortFontSize": 30,
+    "bottomColumn": "type",
+    "columns": [
+      {
+        "column": "model",
+        "label": "Model"
+      },
+      {
+        "column": "serialNumber",
+        "label": "Serial Number"
+      },
+      {
+        "column": "softwareVersion",
+        "label": "Software Version"
+      },
+      {
+        "column": "vrsUptime",
+        "label": "Uptime"
+      },
+      {
+        "column": "location",
+        "label": "Location"
+      }
+    ],
+    "portColor": {
+      "defaultColor": "#B5B5B5",
+      "field": "state",
+      "criteria": [
+        {
+          "value": "UP",
+          "color": "#62AC00"
+        },
+        {
+          "value": "DOWN",
+          "color": "#D9070A"
+        }
+      ],
+      "getColor": "({state, type, uplinkconnections}) => { if (!state) return '#B5B5B5'; switch(state) { case 'DOWN': return '#D9070A'; case 'UP': return type === 'Network' || type === 'LTE' ? Array.isArray(uplinkconnections) && uplinkconnections[0] && uplinkconnections[0].auxiliaryLink ? '#FF9C45' : '#5A83DE' : '#62AC00'; default: return '#B5B5B5'}}"
+    },
+    "portIcon": {
+      "getIcon": "({type}) => { if (type === 'Network' || type === 'Access' ) return 'default'; return type; }"
+    },
+    "tooltip": [
+      {
+        "column": "physicalName",
+        "label": "Port"
+      },
+      {
+        "column": "description",
+        "label": "Description"
+      },
+      {
+        "column": "state",
+        "label": "Status"
+      },
+      {
+        "column": "VLANRange",
+        "label": "VLAN Range"
+      }
+    ],
+    "tooltipScript": "PortTooltip",
+    "circleToPixel": 4,
+    "legend": {
+      "show": true,
+      "orientation": "vertical",
+      "circleSize": 5,
+      "labelOffset": 4,
+      "getLabel": "({state, type, uplinkconnections}) => { if (!state) return 'Port Not Configured'; switch(state) { case 'DOWN': return 'Port Down'; case 'UP': return type === 'Network' || type === 'LTE' ? Array.isArray(uplinkconnections) && uplinkconnections[0] && uplinkconnections[0].auxiliaryLink ? 'Aux Uplink' : 'Uplink Up' : 'Access Port Up'; default: return 'Port Not Configured'}}"
+    }
+  },
+  "query": {
+    "data": "aar-nsg-port-details",
+    "data2": "aar-nsg-details"
+  }
+}
