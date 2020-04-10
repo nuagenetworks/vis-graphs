@@ -29,17 +29,14 @@ const STATE_FILTER_KEY = ['selected', 'data', 'fontSize', 'contextMenu', 'showIn
 const TIMEOUT = 1000;
 class Table extends AbstractGraph {
 
-    constructor(props, context) {
+    constructor(props) {
         super(props, properties)
         this.handleSortOrderChange   = this.handleSortOrderChange.bind(this)
         this.handleSearch            = this.handleSearch.bind(this)
         this.handleRowSelection      = this.handleRowSelection.bind(this)
         this.handleContextMenu       = this.handleContextMenu.bind(this)
         this.onInfoBoxCloseHandler   = this.onInfoBoxCloseHandler.bind(this);
-        this.handleColumnViewChange  = this.handleColumnViewChange.bind(this);
 
-        /**
-        */
         const { limit } = this.getConfiguredProperties();
         this.pageSize =  limit || 500;
         this.searchText = '';
@@ -126,11 +123,13 @@ class Table extends AbstractGraph {
     }
 
     componentDidMount() {
+        const { highlight } = this.getConfiguredProperties();
+
         this.updateData();
         this.checkFontsize();
         this.tableData = this.getTableData(this.getColumns(), this.filterData);
-        if(this.props.highlight) {
-            this.tableData = this.removeHighlighter(this.tableData);
+        if(highlight) {
+            this.tableData = this.removeHighlighter(this.tableData, highlight);
         }
     }
 
@@ -193,7 +192,7 @@ class Table extends AbstractGraph {
     static getColumnByContext(columns, context) {
         const filterColumns = [];
         let removedColumnsKey = '';
-        columns.forEach((d, index) => {
+        columns.forEach((d) => {
             if (d.displayOption) {
                 for (let key in d.displayOption) {
                     if (context.hasOwnProperty(key)) {
@@ -219,7 +218,6 @@ class Table extends AbstractGraph {
         } = props;
 
         const {
-            removedColumnsKey,
             removedColumns
         } = this.state;
 
@@ -587,7 +585,7 @@ class Table extends AbstractGraph {
         })
     }
 
-    handleColumnViewChange(changedColumn, action) {
+    handleColumnViewChange = debounce((changedColumn, action) => {
         const {
             removedColumns
         } = this.getGraphProperties();
@@ -601,7 +599,7 @@ class Table extends AbstractGraph {
             }
             this.displayColumns = [...removedColumns];
         }
-    }
+    }, TIMEOUT);
 
     handleRowsPerPageChange = (numberOfRows) => {
         if (this.scroll) {
@@ -667,7 +665,6 @@ class Table extends AbstractGraph {
 
             ++this.currentPage
         } else {
-
             --this.currentPage;
         }
 
@@ -856,26 +853,22 @@ class Table extends AbstractGraph {
         );
     }
 
-    removeHighlighter(data = []) {
-        const {
-            highlight
-        } = this.getConfiguredProperties();
-
-        if(!data.length)
+    removeHighlighter(data = [], highlight) {
+        if(!data.length) {
             return data
+        }
 
-        if(highlight) {
-            this.state.selected.forEach( (key) => {
-                if(highlight && data[key]) {
-                    for (let i in data[key]) {
-                        if (data[key].hasOwnProperty(i)) {
-                            if(data[key][i].props.style)
-                                data[key][i].props.style.background = ''
-                        }
+        this.state.selected.forEach( (key) => {
+            if(highlight && data[key]) {
+                for (let i in data[key]) {
+                    if (data[key].hasOwnProperty(i)) {
+                        if(data[key][i].props.style)
+                            data[key][i].props.style.background = ''
                     }
                 }
-            })
-        }
+            }
+        });
+
         return data
     }
 
