@@ -125,6 +125,14 @@ class Table extends AbstractGraph {
     componentDidMount() {
         const { highlight } = this.getConfiguredProperties();
 
+        const {
+            data
+        } = this.props;
+        
+        if (isEmpty(data)) {
+            return;
+        }
+
         this.updateData();
         this.checkFontsize();
         this.tableData = this.getTableData(this.getColumns(), this.filterData);
@@ -154,6 +162,14 @@ class Table extends AbstractGraph {
     }
 
     componentDidUpdate(prevProps) {
+        const {
+            data
+        } = this.props;
+        
+        if (isEmpty(data)) {
+            return;
+        }
+
         if(prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
             this.setState({ fontSize: style.defaultFontsize});
         }
@@ -412,6 +428,15 @@ class Table extends AbstractGraph {
 
     // filter and formatting columns for table header
     getHeaderData(initialSort) {
+        const { ESColumns } = this.props;
+        let columnKeys = new Map();
+
+        if(ESColumns) {
+            ESColumns.forEach(item => {
+                columnKeys.set(item.key, true);
+            });
+        }
+
         let {
             removedColumns,
         } = this.getGraphProperties();
@@ -439,19 +464,18 @@ class Table extends AbstractGraph {
                         textIndent: '2px'
                     },
                     options: {
-                        display: displayColumn
+                        display: displayColumn,
+                        sort: columnKeys.get(columnRow.column),
                     }
                 };
-
                 if((initialSort && initialSort.column === columnRow.column) ||
                 (this.sortOrder && this.sortOrder.column === columnRow.column)){
                     headerColumn.options = {
                         display: displayColumn,
                         sortDirection: this.isEmptyData(initialSort) ? this.sortOrder.order : initialSort.order,
-                        sort: true
+                        sort: columnKeys.get(columnRow.column),
                     }
                 }
-
                 headerData.push(headerColumn);
             }
         }
@@ -591,13 +615,19 @@ class Table extends AbstractGraph {
         } = this.getGraphProperties();
 
         if (action === 'remove') {
-            this.displayColumns = uniq([...this.displayColumns, ...removedColumns, changedColumn]);
+            this.displayColumns = this.displayColumns.length === 0 ? 
+            uniq([...this.displayColumns, ...removedColumns, changedColumn]) :
+            uniq([...this.displayColumns, changedColumn]);
         } else {
-            const removedIndex = removedColumns.indexOf(changedColumn);
-            if (removedIndex > -1 && !isEmpty(removedColumns)) {
-                removedColumns.splice(removedIndex, 1);
+            const mergedColumns = this.displayColumns.length === 0 ? 
+            uniq([...this.displayColumns, ...removedColumns]) : this.displayColumns;
+
+            const mergedIndex = mergedColumns.indexOf(changedColumn);
+            if (mergedIndex > -1 && !isEmpty(mergedColumns)) {
+                mergedColumns.splice(mergedIndex, 1);
             }
-            this.displayColumns = [...removedColumns];
+
+            this.displayColumns = [...mergedColumns];
         }
     }, TIMEOUT);
 
@@ -1004,6 +1034,7 @@ class Table extends AbstractGraph {
             scroll,
             width,
             height,
+            data,
         } = this.props;
 
         const {
@@ -1019,6 +1050,10 @@ class Table extends AbstractGraph {
             pageSize,
             size
         } = this.getGraphProperties();
+        
+        if (isEmpty(data)) {
+            return this.renderMessage('No data to visualize');
+        }
 
         const tableCurrentPage = this.currentPage - 1;
         const totalRecords = scroll ? size : this.filterData.length;
@@ -1079,9 +1114,9 @@ class Table extends AbstractGraph {
                 }
             },
             MUIDataTableHeadCell: {
-                toolButton: {
-                    whiteSpace: 'nowrap',
-                }
+                root: {
+                    whiteSpace: 'nowrap',   
+                } 
             },
         }
 
