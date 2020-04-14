@@ -177,6 +177,11 @@ class Table extends AbstractGraph {
         if((!isEqual(prevProps.data, this.props.data) || !isEqual(prevProps.scrollData, this.props.scrollData))) {
             this.initiate(this.props);
         }
+        
+        if (!this.tableData) {
+            this.updateData();
+            this.tableData = this.getTableData(this.getColumns(), this.filterData);
+        }
 
         this.checkFontsize();
         const { contextMenu } = this.state;
