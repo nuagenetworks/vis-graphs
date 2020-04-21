@@ -46,7 +46,10 @@ const tableStyle = {
         MuiTableRow: {
             root: {
                 '&$selected': {
-                    backgroundColor: '#d9d9d9'
+                    backgroundColor: '#d9d9d9',
+                    '&$hover': {
+                      backgroundColor: '#d9d9d9',
+                    }
                 }
             },
             footer: {
