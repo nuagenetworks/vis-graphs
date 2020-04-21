@@ -5,7 +5,7 @@ import {Tooltip} from 'react-lightweight-tooltip'
 import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-
+import hash from 'object-hash';
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
@@ -509,7 +509,7 @@ class Table extends AbstractGraph {
         }
 
         const parsedData =  tableData.map((d, j) => {
-            const dataKey = JSON.stringify(d);
+            const dataKey = hash(d);
 
             if(this.dataMap.has(dataKey)) {
                 return this.dataMap.get(dataKey);
