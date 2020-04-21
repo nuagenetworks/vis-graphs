@@ -174,7 +174,7 @@ class TreeGraph extends AbstractGraph {
             links = this.treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach((d) => { d.y = d.depth * 200 });
+        nodes.forEach((d) => { d.y = d.depth * 250 });
 
         this.updateNodes(source, nodes);
         this.updateLinks(source, links);
@@ -618,6 +618,8 @@ class TreeGraph extends AbstractGraph {
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
+        const highlight = linkUpdate.filter(d => d.data.clicked);
+        highlight.raise();
 
         linkUpdate.style("stroke", (d) => {
             return d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
@@ -673,14 +675,14 @@ class TreeGraph extends AbstractGraph {
 
     diagonal = (d) => {
 
-        // Creates a curved (diagonal) path from parent to the child nodes
+        // Creates a Line (diagonal) path from parent to the child nodes
         var p0 = {
                 x: d.x + this.rectHeight / 2,
                 y: (d.y)
             },
             p3 = {
                 x: d.parent.x + this.rectHeight / 2 ,
-                y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
+                y: d.parent.y + 180
             },
             m = (p0.y + p3.y) / 2,
             p = [p0, {
@@ -694,7 +696,7 @@ class TreeGraph extends AbstractGraph {
             return [d.y, d.x];
         });
 
-        return 'M' + p[0] + 'C' + p[1] + ' ' + p[2] + ' ' + p[3];
+        return 'M' + p[0] + 'L' + p[1] + ' ' + p[2] + ' ' + p[3];
 
     }
 
