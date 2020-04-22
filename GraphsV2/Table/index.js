@@ -37,7 +37,6 @@ let removedColumns = {};
 let removedColumnsKey = '';
 let scroll = {};
 let pageSize = 500;
-let firstRender = true;
 let headerData = {};
 const TIMEOUT = 1000;
 let dataMap = new Map();
@@ -284,9 +283,6 @@ const initiate = (props) => {
         filterData.push(data);
         unformattedData[random] = d;
     });
-
-    console.error("selectedRows",selectedRows);
-
     resetFilters((currentPage || 1), selectedRows);
 }
 
@@ -881,23 +877,6 @@ const Table = (props) => {
     }
 
     useEffect(() => {
-        if (firstRender) {
-            firstRender = false;
-            let removedColumn = objectPath.has(props.scrollData, `removedColumn`) ? objectPath.get(props.scrollData, `removedColumn`) : uniq(removedColumns);
-            if (removedColumn.length <= 0) {
-                const columnsCurr = props.properties.columns || [];
-                const removeColumn = [];
-                columnsCurr.filter((col, key) => {
-                    if (col.display !== undefined) {
-                        removeColumn.push("" + key);
-                    }
-                });
-                updateTableStatus({
-                    [`removedColumn`]: removeColumn,
-                    event: events.REMOVED_COLUMNS
-                }, props.updateScroll);
-            }
-        }
         initiate(props);
         updateData();
         checkFontsize();
