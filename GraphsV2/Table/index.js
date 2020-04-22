@@ -7,6 +7,7 @@ import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import objectPath from "object-path";
+import hash from 'object-hash';
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
@@ -26,7 +27,6 @@ import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 let displayColumns = [];
-let originalData = [];
 let filterData = [];
 let sortOrder = {};
 let container = "";
@@ -37,9 +37,11 @@ let removedColumns = {};
 let removedColumnsKey = '';
 let scroll = {};
 let pageSize = 500;
-let updateScrollNow = false;
 let firstRender = true;
+let headerData = {};
 const TIMEOUT = 1000;
+let dataMap = new Map();
+
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -81,118 +83,132 @@ const getColumnByContext = (columns, context) => {
 
 const updateTableStatus = (param = {}, updateScroll) => (updateScroll && updateScroll(param));
 
-const isEmptyData = (data) => (isEmpty(data));
-
 const resetFilters = (page = 1, selectedRow = {}) => {
     currentPage = page;
     selectedRows = selectedRow;
 }
 
 const getGraphProperties = (props) => {
-  const {
-      data,
-      scrollData,
-      size,
-  } = props;
+    const {
+        data,
+        scrollData,
+        size,
+    } = props;
 
-  return {
-      searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
-      sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : sortOrder,
-      size: size || data.length,
-      pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
-      currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
-      expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-      removedColumns: objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns),
-  }
+    return {
+        searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
+        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : sortOrder,
+        size: size || data.length,
+        pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
+        currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
+        expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+        removedColumns: objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns),
+    }
 }
 
 const getHeaderData = (props, initialSort) => {
-  const {
-      removedColumns,
-  } = getGraphProperties(props);
+    const { ESColumns } = props;
+    let columnKeys = new Map();
 
-  const columns = props.properties.columns || [];
-  let headerData = [];
-  for (let index in columns) {
-      if (columns.hasOwnProperty(index)) {
-          const columnRow = columns[index];
-          const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
-          const headerColumn = {
-              name: index,
-              label: columnRow.label || columnRow.column,
-              columnField: columnRow.column,
-              columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
-              filter: columnRow.filter !== false,
-              type: columnRow.selection ? "selection" : "text",
-              style: {
-                  textIndent: '2px'
-              },
-              options: {
-                  display: displayColumn
-              }
-          };
+    if (ESColumns) {
+        ESColumns.forEach(item => {
+            columnKeys.set(item.key, true);
+        });
+    }
 
-          if ((initialSort && initialSort.column === columnRow.column) ||
-              (sortOrder && sortOrder.column === columnRow.column)) {
-              headerColumn.options = {
-                  display: displayColumn,
-                  sortDirection: isEmptyData(initialSort) ? sortOrder.order : initialSort.order,
-                  sort: true,
-              }
-          }
-          headerData.push(headerColumn);
-      }
-  }
+    let {
+        removedColumns,
+    } = getGraphProperties(props);
 
-  return headerData;
+    if (removedColumns.length <= 0) {
+        const { context, selectedColumns, } = props;
+        const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
+        removedColumns = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
+    }
+
+    const columns = props.properties.columns || [];
+    let headerData = [];
+    for (let index in columns) {
+        if (columns.hasOwnProperty(index)) {
+            const columnRow = columns[index];
+            const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
+            const headerColumn = {
+                name: index,
+                label: columnRow.label || columnRow.column,
+                columnField: columnRow.column,
+                columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+                filter: columnRow.filter !== false,
+                type: columnRow.selection ? "selection" : "text",
+                style: {
+                    textIndent: '2px'
+                },
+                options: {
+                    display: displayColumn,
+                    sort: !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true,
+                }
+            };
+
+            if ((initialSort && initialSort.column === columnRow.column) ||
+                (sortOrder && sortOrder.column === columnRow.column)) {
+                headerColumn.options = {
+                    display: displayColumn,
+                    sortDirection: isEmpty(initialSort) ? sortOrder.order : initialSort.order,
+                    sort: !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true,
+                }
+            }
+            headerData.push(headerColumn);
+        }
+    }
+
+    return headerData;
 }
 
 const getInitialSort = (props) => {
-  const {
-      sort,
-  } = getGraphProperties(props);
+    const {
+        sort,
+    } = getGraphProperties(props);
 
-  let initialSort = {};
-  if (sort && sort.column && sort.order) {
-      initialSort = { ...sort, column: sort.column }
-  }
+    let initialSort = {};
+    if (sort && sort.column && sort.order) {
+        initialSort = { ...sort, column: sort.column }
+    }
 
-  return initialSort;
+    return initialSort;
 }
 
 const getHeightMargin = (properties) => {
-  const {
-      searchBar,
-      selectColumnOption,
-      filterOptions,
-      showFooter,
-  } = properties;
+    const {
+        searchBar,
+        selectColumnOption,
+        filterOptions,
+        showFooter,
+    } = properties;
 
-  let heightMargin = showFooter ? 40 : 0;
-  heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
-  heightMargin = filterOptions ? heightMargin : heightMargin + 10;
-  heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
+    let heightMargin = showFooter ? 40 : 0;
+    heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
+    heightMargin = filterOptions ? heightMargin : heightMargin + 10;
+    heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
 
-  return heightMargin;
+    return heightMargin;
 }
 
 const removeHighlighter = (data = [], highlight, selected) => {
-  if (!data.length)
-      return data;
+    if (!data.length)
+        return data;
 
-  if (highlight) {
-      selected.forEach((key) => {
-          if (highlight && data[key]) {
-              for (let i in data[key]) {
-                  if (data[key].hasOwnProperty(i)) {
-                      if (data[key][i].props.style)
-                          data[key][i].props.style.background = '';
-                  }
-              }
-          }
-      })
-  }
-  return data;
+    if (highlight) {
+        selected.forEach((key) => {
+            if (highlight && data[key]) {
+                for (let i in data[key]) {
+                    if (data[key].hasOwnProperty(i)) {
+                        if (data[key][i].props.style)
+                            data[key][i].props.style.background = '';
+                    }
+                }
+            }
+        })
+    }
+    return data;
 }
 
 const Table = (props) => {
@@ -217,6 +233,7 @@ const Table = (props) => {
     scroll = props.scroll;
 
     const [selected, setSelectedState] = useState([]);
+    const [tableData, setTableData] = useState([]);
     const [data, setData] = useState([]);
     const [fontSize, setFontSize] = useState(style.defaultFontsize);
     const [contextMenu, setContextMenu] = useState(null);
@@ -227,19 +244,28 @@ const Table = (props) => {
     const [infoBoxData, setInfoBoxData] = useState({});
     const [infoBoxScript, setInfoBoxScript] = useState({});
 
+    const setSelectedRows = (props) => {
+        const {
+            scrollData,
+            requestId,
+        } = props;
+
+        const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
+        return selectedRows[requestId];
+    }
+
     const initiate = (props) => {
         const {
             scroll,
             scrollData,
-            requestId,
         } = props;
+
         const {
             currentPage,
         } = getGraphProperties(props);
 
         if (scroll) {
-            selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
-            selectedRows = selectedRows[requestId];
+            selectedRows = setSelectedRows(props);
             if (!objectPath.has(scrollData, 'pageSize')) {
                 updateTableStatus({ pageSize }, props.updateScroll);
             }
@@ -290,18 +316,8 @@ const Table = (props) => {
             filterData.push(data);
             unformattedData[random] = d;
         });
-        
-        if(!scroll) {
-          sortOrder = objectPath.has(scrollData, 'staticSort') ? objectPath.get(scrollData, 'staticSort') : {};
-          if(sortOrder && sortOrder.column && sortOrder.order) {
-            filterData = orderBy(filterData, [sortOrder.column], [sortOrder.order]);
-          }
-        }
-
-        originalData = filterData;
 
         resetFilters((currentPage || 1), selectedRows);
-        updateData();
     }
 
     const {
@@ -356,18 +372,19 @@ const Table = (props) => {
 
     const updateData = () => {
         const {
-            pageSize,
-        } = getGraphProperties(props);
+            data,
+            selected,
+            tableData,
+        } = getData();
 
-        const offset = pageSize * (currentPage - 1);
-
-        setData(scroll ? filterData.slice(0, offset + pageSize) : filterData);
-        setSelectedState(selectedRows[currentPage] || []);
+        setSelectedState(selected);
+        setTableData(tableData);
+        setData(data);
     }
 
     const getColumns = () => (properties.columns || []);
 
-    const getTableData = (columns) => {
+    const getTableData = (columns, tableData) => {
         const {
             highlight,
             highlightColor,
@@ -389,7 +406,14 @@ const Table = (props) => {
             last(usedColumns).lastColStyle = lastColToolTipStyle;
         }
 
-        return data.map((d, j) => {
+        const parsedData = tableData.map((d, j) => {
+
+            const dataKey = hash(d);
+
+            if (dataMap.has(dataKey)) {
+                return dataMap.get(dataKey);
+            }
+
             let data = {},
                 highlighter = false;
 
@@ -476,23 +500,31 @@ const Table = (props) => {
                         {data[key]}</div>
                 })
             }
-            return data;
+            dataMap.set(dataKey, data);
+            return data
         })
+
+        return parsedData;
     }
 
     const handleColumnViewChange = (changedColumn, action) => {
         const {
-            removedColumns: removedColumnsProps,
+            removedColumns
         } = getGraphProperties(props);
 
         if (action === 'remove') {
-            displayColumns = uniq([...displayColumns, ...removedColumnsProps, changedColumn]);
+            displayColumns = displayColumns.length === 0 ?
+                uniq([...displayColumns, ...removedColumns, changedColumn]) :
+                uniq([...displayColumns, changedColumn]);
         } else {
-            const removedIndex = removedColumnsProps.indexOf(changedColumn);
-            if (removedIndex > -1 && !isEmpty(removedColumnsProps)) {
-                removedColumnsProps.splice(removedIndex, 1);
+            const mergedColumns = displayColumns.length === 0 ?
+                uniq([...displayColumns, ...removedColumns]) : displayColumns;
+
+            const mergedIndex = mergedColumns.indexOf(changedColumn);
+            if (mergedIndex > -1 && !isEmpty(mergedColumns)) {
+                mergedColumns.splice(mergedIndex, 1);
             }
-            displayColumns = [...removedColumnsProps];
+            displayColumns = [...mergedColumns];
         }
     }
 
@@ -522,6 +554,32 @@ const Table = (props) => {
         }, props.updateScroll)
     }
 
+    const getData = () => {
+        const {
+            scrollData
+        } = props;
+
+        const {
+            highlight
+        } = props.properties;
+
+        const pageSize = objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize;
+
+        const offset = pageSize * (currentPage - 1);
+        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
+        let tableData = getTableData(getColumns(), data);
+
+        if (highlight) {
+            tableData = removeHighlighter(tableData, highlight);
+        }
+
+        return {
+            data,
+            selected: selectedRows[currentPage] || [],
+            tableData,
+        }
+    }
+
     const handleStaticSorting = (column) => {
         let colOrder = 'asc';
         if (sortOrder && sortOrder.column === column) {
@@ -533,8 +591,9 @@ const Table = (props) => {
         }
 
         filterData = orderBy(filterData, [column], [colOrder]);
-        updateTableStatus({'staticSort':{...sortOrder, column}}, props.updateScroll);
+
         resetFilters();
+        headerData = getHeaderData(props, getInitialSort(props));
         updateData();
     }
 
@@ -605,12 +664,12 @@ const Table = (props) => {
         }
 
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-        saveSelectedRow({ selectedRow: {...rowsInStore, [props.requestId] : selectedRows }}, props.updateScroll);
+        saveSelectedRow({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll);
     }
 
     const saveSelectedRow = debounce((tableData, updateScroll) => {
-      clearTimeout();
-      updateTableStatus(tableData, updateScroll);
+        clearTimeout();
+        updateTableStatus(tableData, updateScroll);
     }, TIMEOUT);
 
     const getMenu = () => {
@@ -718,9 +777,9 @@ const Table = (props) => {
 
         const search = searchString !== null ? searchString : searchText,
             filteroption = headerData.filter(d => d.options.display === 'true');
-        return ((filteroption.length || (originalData.length === 0)) &&
+        return ((filteroption.length || (filterData.length === 0)) &&
             <SearchBar
-                data={originalData}
+                data={filterData}
                 searchText={search}
                 options={filteroption}
                 handleSearch={handleSearch}
@@ -819,8 +878,9 @@ const Table = (props) => {
         );
     }
 
+
     useEffect(() => {
-        if(firstRender) {
+        if (firstRender) {
             firstRender = false;
             let removedColumn = objectPath.has(props.scrollData, `removedColumn`) ? objectPath.get(props.scrollData, `removedColumn`) : uniq(removedColumns);
             if (removedColumn.length <= 0) {
@@ -837,7 +897,8 @@ const Table = (props) => {
                 }, props.updateScroll);
             }
         }
-        initiate(props); 
+        initiate(props);
+        updateData();
         checkFontsize();
         if (contextMenu) {
             openContextMenu();
@@ -873,16 +934,13 @@ const Table = (props) => {
         }
     }, [props.data, props.width, props.height, props.context]);
 
-    let tableData = getTableData(getColumns());
-    tableData = removeHighlighter(tableData, highlight, selected);
     const tableCurrentPage = currentPage - 1;
-    const initialSort = getInitialSort(props);
-    const headerData = getHeaderData(props, initialSort);
+    headerData = getHeaderData(props, getInitialSort(props));
     const totalRecords = scroll ? size : filterData.length;
     const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
     const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
     const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
-    const heightMargin = getHeightMargin({...properties, showFooter});
+    const heightMargin = getHeightMargin({ ...properties, showFooter });
     const options = {
         print: false,
         filter: false,
@@ -891,7 +949,7 @@ const Table = (props) => {
         sort: true,
         viewColumns: selectColumnOption || false,
         responsive: "scroll",
-        fixedHeaderOptions: {yAxis: fixedHeader},
+        fixedHeaderOptions: { yAxis: fixedHeader },
         pagination: showFooter,
         rowsPerPage: pageSize,
         count: totalRecords,
@@ -966,11 +1024,16 @@ const Table = (props) => {
         },
         MuiTableCell: {
             root: {
-                padding: "10px 40px 10px 15px",
-                fontSize: "10px",
+                padding: "10px 20px 10px 15px",
+                fontSize,
             },
             head: {
-                backgroundColor : "#FAFAFA !important",
+                backgroundColor: "#FAFAFA !important",
+            }
+        },
+        MUIDataTableHeadCell: {
+            root: {
+                whiteSpace: 'nowrap',
             }
         },
     }
