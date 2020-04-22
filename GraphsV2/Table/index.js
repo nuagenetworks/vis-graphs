@@ -132,6 +132,7 @@ const getHeaderData = (props, initialSort) => {
         if (columns.hasOwnProperty(index)) {
             const columnRow = columns[index];
             const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
+            const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
             const headerColumn = {
                 name: index,
                 label: columnRow.label || columnRow.column,
@@ -144,7 +145,7 @@ const getHeaderData = (props, initialSort) => {
                 },
                 options: {
                     display: displayColumn,
-                    sort: !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true,
+                    sort,
                 }
             };
 
@@ -153,7 +154,7 @@ const getHeaderData = (props, initialSort) => {
                 headerColumn.options = {
                     display: displayColumn,
                     sortDirection: isEmpty(initialSort) ? sortOrder.order : initialSort.order,
-                    sort: !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true,
+                    sort,
                 }
             }
             headerData.push(headerColumn);
@@ -211,6 +212,123 @@ const removeHighlighter = (data = [], highlight, selected) => {
     return data;
 }
 
+const setSelectedRows = (props) => {
+    const {
+        scrollData,
+        requestId,
+    } = props;
+
+    const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
+    return selectedRows[requestId];
+}
+
+const initiate = (props) => {
+    const {
+        scroll,
+        scrollData,
+    } = props;
+
+    const {
+        currentPage,
+    } = getGraphProperties(props);
+
+    if (scroll) {
+        selectedRows = setSelectedRows(props);
+        if (!objectPath.has(scrollData, 'pageSize')) {
+            updateTableStatus({ pageSize }, props.updateScroll);
+        }
+    }
+
+    const {
+        matchingRowColumn,
+    } = properties;
+
+    const columns = getColumns(props);
+
+    if (!columns.length) {
+        return;
+    }
+
+    filterData = [];
+    unformattedData = {};
+    const columnNameList = [];
+
+    columns.forEach(d => {
+        columnNameList.push(d.column);
+    });
+
+    props.data.forEach((d, i) => {
+        const random = Math.floor(new Date().valueOf() * Math.random());
+        const data = {
+            'row_id': random,
+        };
+
+        for (let key in columns) {
+            if (columns.hasOwnProperty(key)) {
+                const columnData = { ...columns[key] };
+                delete columnData.totalCharacters;
+
+                const accessor = columnAccessor(columnData);
+                data[columnData.column] = accessor(d);
+
+                if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                    data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
+                }
+
+                if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                    data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
+                }
+            }
+        }
+
+        filterData.push(data);
+        unformattedData[random] = d;
+    });
+
+    console.error("selectedRows",selectedRows);
+
+    resetFilters((currentPage || 1), selectedRows);
+}
+
+const getColumns = (props) => (props.properties.columns || []);
+
+const isScrollExpired = (props) => {
+    const {
+        expiration,
+    } = getGraphProperties(props);
+
+    return scroll && expiration && expiration <= Date.now();
+}
+
+const isScrollDataExists = (page, props) => {
+    const {
+        data,
+    } = props;
+
+    const {
+        pageSize,
+    } = getGraphProperties(props);
+
+    let startIndex = (page - 1) * pageSize;
+    return startIndex < data.length;
+}
+
+const getSelectedRows = (props) => {
+    const {
+        pageSize,
+    } = getGraphProperties(props);
+
+    let selected = [];
+    for (let page in selectedRows) {
+        if (selectedRows.hasOwnProperty(page)) {
+            selectedRows[page].forEach((index) => {
+                selected.push(props.data[(page - 1) * pageSize + index]);
+            })
+        }
+    }
+    return selected;
+}
+
 const Table = (props) => {
     const {
         width,
@@ -225,7 +343,6 @@ const Table = (props) => {
         selectColumnOption,
         searchBar,
         limit,
-        highlight,
     } = properties;
 
     let multiSelectable = true;
@@ -244,106 +361,9 @@ const Table = (props) => {
     const [infoBoxData, setInfoBoxData] = useState({});
     const [infoBoxScript, setInfoBoxScript] = useState({});
 
-    const setSelectedRows = (props) => {
-        const {
-            scrollData,
-            requestId,
-        } = props;
-
-        const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
-        return selectedRows[requestId];
-    }
-
-    const initiate = (props) => {
-        const {
-            scroll,
-            scrollData,
-        } = props;
-
-        const {
-            currentPage,
-        } = getGraphProperties(props);
-
-        if (scroll) {
-            selectedRows = setSelectedRows(props);
-            if (!objectPath.has(scrollData, 'pageSize')) {
-                updateTableStatus({ pageSize }, props.updateScroll);
-            }
-        }
-
-        const {
-            matchingRowColumn,
-        } = properties;
-
-        const columns = getColumns();
-
-        if (!columns.length) {
-            return;
-        }
-
-        filterData = [];
-        unformattedData = {};
-        const columnNameList = [];
-
-        columns.forEach(d => {
-            columnNameList.push(d.column);
-        });
-
-        props.data.forEach((d, i) => {
-            const random = Math.floor(new Date().valueOf() * Math.random());
-            const data = {
-                'row_id': random,
-            };
-
-            for (let key in columns) {
-                if (columns.hasOwnProperty(key)) {
-                    const columnData = { ...columns[key] };
-                    delete columnData.totalCharacters;
-
-                    const accessor = columnAccessor(columnData);
-                    data[columnData.column] = accessor(d);
-
-                    if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
-                        data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
-                    }
-
-                    if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
-                        data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
-                    }
-                }
-            }
-
-            filterData.push(data);
-            unformattedData[random] = d;
-        });
-
-        resetFilters((currentPage || 1), selectedRows);
-    }
-
     const {
         size,
     } = getGraphProperties(props);
-
-    const isScrollExpired = () => {
-        const {
-            expiration,
-        } = getGraphProperties(props);
-
-        return scroll && expiration && expiration <= Date.now();
-    }
-
-    const isScrollDataExists = (page) => {
-        const {
-            data,
-        } = props;
-
-        const {
-            pageSize,
-        } = getGraphProperties(props);
-
-        let startIndex = (page - 1) * pageSize;
-        return startIndex < data.length;
-    }
 
     const decrementFontSize = () => (setFontSize(fontSize - 1));
 
@@ -356,7 +376,7 @@ const Table = (props) => {
                     searchString,
                 } = getGraphProperties(props);
 
-                const search = labelToField(expandExpression(expression), getColumns());
+                const search = labelToField(expandExpression(expression), getColumns(props));
                 filterData = data;
 
                 if (!searchText || searchString !== searchText) {
@@ -382,8 +402,6 @@ const Table = (props) => {
         setData(data);
     }
 
-    const getColumns = () => (properties.columns || []);
-
     const getTableData = (columns, tableData) => {
         const {
             highlight,
@@ -398,7 +416,7 @@ const Table = (props) => {
             return [];
         }
 
-        const keyColumns = getColumns();
+        const keyColumns = getColumns(props);
         const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
 
         if (usedColumns.length) {
@@ -567,7 +585,7 @@ const Table = (props) => {
 
         const offset = pageSize * (currentPage - 1);
         const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
-        let tableData = getTableData(getColumns(), data);
+        let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
             tableData = removeHighlighter(tableData, highlight);
@@ -598,7 +616,7 @@ const Table = (props) => {
     }
 
     const handleSortOrderChange = (column, order) => {
-        const columnList = getColumns();
+        const columnList = getColumns(props);
         const columnData = columnList[column];
 
         scroll ? handleScrollSorting(columnData.column) : handleStaticSorting(columnData.column)
@@ -606,7 +624,7 @@ const Table = (props) => {
 
     const handlePageClick = (page) => {
         if (page > currentPage - 1) {
-            if (isScrollExpired() && !isScrollDataExists(currentPage + 1)) {
+            if (isScrollExpired(props) && !isScrollDataExists(currentPage + 1, props)) {
                 setShowConfirmationPopup(true);
                 return;
             }
@@ -646,7 +664,7 @@ const Table = (props) => {
         if (onSelect) {
             let matchingRows = [];
             let rows = {};
-            const selectedData = getSelectedRows();
+            const selectedData = getSelectedRows(props);
             if (selectedData.length > 1) {
                 rows = selectedData;
             } else {
@@ -678,7 +696,7 @@ const Table = (props) => {
             multiMenu,
         } = properties;
 
-        if (multiMenu && getSelectedRows().length > 1) {
+        if (multiMenu && getSelectedRows(props).length > 1) {
             return multiMenu;
         }
 
@@ -738,22 +756,6 @@ const Table = (props) => {
             node.append(li);
         });
         document.body.append(node);
-    }
-
-    const getSelectedRows = () => {
-        const {
-            pageSize,
-        } = getGraphProperties(props);
-
-        let selected = [];
-        for (let page in selectedRows) {
-            if (selectedRows.hasOwnProperty(page)) {
-                selectedRows[page].forEach((index) => {
-                    selected.push(props.data[(page - 1) * pageSize + index]);
-                })
-            }
-        }
-        return selected;
     }
 
     const renderSearchBarIfNeeded = (headerData) => {
@@ -878,7 +880,6 @@ const Table = (props) => {
         );
     }
 
-
     useEffect(() => {
         if (firstRender) {
             firstRender = false;
@@ -931,6 +932,9 @@ const Table = (props) => {
             if (!objectPath.has(scrollData, 'selectedRow') && !isEmpty(selectedRows)) {
                 updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
             }
+            
+            selectedRows = {};
+            removedColumns = {};
         }
     }, [props.data, props.width, props.height, props.context]);
 
