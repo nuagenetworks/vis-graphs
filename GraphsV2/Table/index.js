@@ -41,6 +41,59 @@ let headerData = {};
 const TIMEOUT = 1000;
 let dataMap = new Map();
 
+const useStyles  = (props) => ({
+  MUIDataTableSelectCell: {
+      root: {
+          display: props.showCheckboxes ? '' : 'none',
+      },
+  },
+  MUIDataTableBody: {
+      emptyTitle: {
+          maxWidth: props.width,
+      },
+  },
+  MUIDataTable: {
+      responsiveScroll: {
+          height: (props.height - props.heightMargin),
+      },
+  },
+  MUIDataTableToolbar: {
+      actions: {
+          marginTop: props.searchBar || props.searchBar === undefined ? '-90px' : '0px',
+          marginRight: props.searchBar || props.searchBar === undefined ? '-10px' : '0px',
+      }
+  },
+  MuiPaper: {
+      elevation4: {
+          boxShadow: (props.searchBar || props.searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
+      }
+  },
+  MUIDataTableToolbarSelect: {
+      root: {
+          display: "none",
+      },
+  },
+  MuiTableCell: {
+      root: {
+          padding: "10px 20px 10px 15px",
+          fontSize: props.fontSize,
+      },
+      head: {
+          backgroundColor: "#FAFAFA !important",
+      }
+  },
+  MUIDataTableHeadCell: {
+      root: {
+          whiteSpace: 'nowrap',
+      }
+  },
+  MUIDataTableBodyCell: {
+      root: {
+        whiteSpace: 'nowrap',
+      }
+  }
+});
+
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
     columns.forEach((d, index) => {
@@ -480,7 +533,7 @@ const Table = (props) => {
                         columnData = (
                             <React.Fragment>
                                 {columnData}
-                                <span style={{ padding: "0px 5px" }} onClick={(e) => {
+                                <span style={{ padding: "0px 5px" }} className="showInfoBox" onClick={(e) => {
                                     e.stopPropagation();
                                     openInfoBox({
                                         infoBoxRow: d,
@@ -496,10 +549,8 @@ const Table = (props) => {
                     }
 
                     if (columnData || columnData === 0) {
-                        data[key] = typeof (columnData) === "boolean" ? columnData.toString().toUpperCase() :
-                            (typeof originalData === 'object') ? null : columnData;
-
-                        data[key] = <div className="wrapper-data"> {data[key]} </div>;
+                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() :
+                            (typeof originalData === "object") ? React.isValidElement(originalData) ? columnData : null : columnData;
 
                         if (columnObj.fontColor) {
                             data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
@@ -576,15 +627,14 @@ const Table = (props) => {
         const {
             highlight
         } = props.properties;
+        const pageSizes = objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize;
 
-        const pageSize = objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize;
-
-        const offset = pageSize * (currentPage - 1);
-        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
+        const offset = pageSizes * (currentPage - 1);
+        const data = scroll ? filterData.slice(0, offset + pageSizes) : filterData;
         let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
-            tableData = removeHighlighter(tableData, highlight);
+            tableData = removeHighlighter(tableData, highlight, selected);
         }
 
         return {
@@ -736,7 +786,7 @@ const Table = (props) => {
         node.id = 'contextMenu';
         node.style = `top: ${y}px; left: ${x}px; z-index: 100000;`;
 
-        const { goTo, context, id } = properties;
+        const { goTo, context, id } = props;
         context.id = id;
 
         menu.forEach((item) => {
@@ -876,46 +926,51 @@ const Table = (props) => {
         );
     }
 
+    const cleanup = () => {
+        const columnsCurr = props.properties.columns || [];
+        const { filterColumns, removedColumnsKey: removedColumnsKeyCurr } = getColumnByContext(columnsCurr, props.context);
+        const removedColumnsCurr = getRemovedColumns(columnsCurr, filterColumns, props.selectedColumns);
+
+        if (removedColumnsKeyCurr !== removedColumnsKey || !isEqual(removedColumnsCurr, removedColumns)) {
+            removedColumns = removedColumnsCurr;
+            removedColumnsKey = removedColumnsKeyCurr;
+        }
+
+        const {
+            scrollData,
+        } = props;
+
+        let removedColumns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+
+        if (!isEmpty(displayColumns) && !isEqual(removedColumns, displayColumns)) {
+            updateTableStatus({
+                [`removedColumn`]: displayColumns,
+                event: events.REMOVED_COLUMNS
+            }, props.updateScroll);
+        }
+
+        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
+
+        if (!objectPath.has(scrollData, 'selectedRow') && !isEmpty(selectedRows)) {
+            updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
+        }
+
+        selectedRows = {};
+        removedColumns = {};
+    }
+
+
     useEffect(() => {
         initiate(props);
         updateData();
         checkFontsize();
-        if (contextMenu) {
+        if(contextMenu) {
             openContextMenu();
         }
         return () => {
-            const columnsCurr = props.properties.columns || [];
-            const { filterColumns, removedColumnsKey: removedColumnsKeyCurr } = getColumnByContext(columnsCurr, props.context);
-            const removedColumnsCurr = getRemovedColumns(columnsCurr, filterColumns, props.selectedColumns);
-
-            if (removedColumnsKeyCurr !== removedColumnsKey || !isEqual(removedColumnsCurr, removedColumns)) {
-                removedColumns = removedColumnsCurr;
-                removedColumnsKey = removedColumnsKeyCurr;
-            }
-
-            const {
-                scrollData,
-            } = props;
-
-            let removedColumns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
-
-            if (!isEmpty(displayColumns) && !isEqual(removedColumns, displayColumns)) {
-                updateTableStatus({
-                    [`removedColumn`]: displayColumns,
-                    event: events.REMOVED_COLUMNS
-                }, props.updateScroll);
-            }
-
-            const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-
-            if (!objectPath.has(scrollData, 'selectedRow') && !isEmpty(selectedRows)) {
-                updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
-            }
-            
-            selectedRows = {};
-            removedColumns = {};
+          cleanup();
         }
-    }, [props.data, props.width, props.height, props.context]);
+    }, [props.data, props.width, props.height, props.context, contextMenu]);
 
     const tableCurrentPage = currentPage - 1;
     headerData = getHeaderData(props, getInitialSort(props));
@@ -973,61 +1028,14 @@ const Table = (props) => {
         },
     };
 
-    const muiTableStyle = {
-        MUIDataTableSelectCell: {
-            root: {
-                display: showCheckboxes ? '' : 'none',
-            },
-        },
-        MUIDataTableBody: {
-            emptyTitle: {
-                maxWidth: width,
-            },
-        },
-        MUIDataTable: {
-            responsiveScroll: {
-                height: (height - heightMargin),
-            },
-        },
-        MUIDataTableToolbar: {
-            actions: {
-                marginTop: searchBar || searchBar === undefined ? '-90px' : '0px',
-                marginRight: searchBar || searchBar === undefined ? '-10px' : '0px',
-            }
-        },
-        MuiPaper: {
-            elevation4: {
-                boxShadow: (searchBar || searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
-            }
-        },
-        MUIDataTableToolbarSelect: {
-            root: {
-                display: "none",
-            },
-        },
-        MuiTableCell: {
-            root: {
-                padding: "10px 20px 10px 15px",
-                fontSize,
-            },
-            head: {
-                backgroundColor: "#FAFAFA !important",
-            }
-        },
-        MUIDataTableHeadCell: {
-            root: {
-                whiteSpace: 'nowrap',
-            }
-        },
-    }
-
     const theme = createMuiTheme({
-        overrides: { ...style.muiStyling, ...muiTableStyle }
+        overrides: { ...style.muiStyling, ...useStyles({showCheckboxes, width, height, heightMargin, searchBar, fontSize}) }
     });
+
     return (
         <MuiThemeProvider theme={theme}>
             <div ref={(input) => { container = input; }}
-                onContextMenu={handleContextMenu}
+                onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
                 {resetScrollData()}
 

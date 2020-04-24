@@ -794,4 +794,107 @@ describe('TableGraph', () => {
         });
     });
 
+    describe("Show Info Box", () => {
+      let pagination, $, page, paginationTable;
+      beforeAll(async () => {
+          pagination = mount(
+              <Table
+                  width={500}
+                  height={500}
+                  configuration={config.showInfoBox}
+                  data={config.data}>
+              </Table>
+          );
+          $ = getHtml(pagination, 'table');
+          page = cheerio.load(pagination.html());
+          paginationTable = page('table').last();
+      });
+
+      it("Total Column", () => {
+          const noOfColumns = totalColumn($);
+          expect(noOfColumns).toBe(5);
+      });
+
+      it("Column Names", () => {
+          var columnList = config.pagination.data.columns
+          var columns = Object.keys(columnList).map(function (key) {
+              return columnList[key].column;
+          });
+          const tableColumns = $('table thead th').map(
+              function (i) {
+                  if($(this).text() != "")
+                      return $(this).text();
+              }
+          ).get();
+          expect(tableColumns).toEqual(columns);
+      });
+
+      it("First Row Data", () => {
+          const value = checkRowData($);
+          const date = checkTime(15008863469);
+          const firstRow = [
+              date,
+              "Testing",
+              "200.54545454545456",
+              "2422791762"
+          ];
+          expect(value).toEqual(firstRow);
+      });
+
+      it("Second Row Data", () => {
+          const value = checkRowData($, "second");
+          const date = checkTime(25008863469);
+          const secondRow = [
+              date,
+              "Developing",
+              "300.54545454545456",
+              "2422791762"
+          ];
+          expect(value).toEqual(secondRow);
+      });
+
+      it("Total Rows", () => {
+          const noOfRows = totalRows($);
+          expect(noOfRows).toBe(100);
+      });
+
+      it('Show Info Box Button', () => {
+        const isButtonExist = $('.showInfoBox');
+        expect(isButtonExist).toBeTruthy();
+      })
+    });
+
+    describe("Context Event", () => {
+      let table;
+      const handleContextMenu = jest.fn();
+      const element = document.createElement("div");
+      beforeAll((done) => {
+          document.body.appendChild(element);
+          table = ReactDOM.render(
+              <Table
+                  width={500}
+                  height={500}
+                  configuration={config.contextMenu}
+                  data={config.data}
+                  handleContextMenu={handleContextMenu}
+              />,
+              element
+          )
+          setTimeout(() => {
+              done();
+          }, 1000);
+      });
+
+      afterAll(() => {
+          document.body.removeChild(element);
+      });
+
+      it("Click On Table", (done) => {
+          element.querySelector('td').dispatchEvent(new MouseEvent('contextmenu', {bubbles: true}));
+          setTimeout(() => {
+              done();
+              expect(handleContextMenu).toHaveBeenCalled();
+          }, 1000);
+      });
+  });
 })

@@ -1,0 +1,21 @@
+{
+    "data": {
+        "columns": [
+            { "column": "Timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
+            { "column": "Application", "label": "Application" },
+            { "column": "MEMORY", "label": "MEMORY" },
+            { "column": "Value", "label": "Value" }
+        ],
+        "menu": [
+          { "text": "Create Virtual Firewall Rule...", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/new", "params": { "operation": "add"} },
+          { "text": "Add to Virtual Firewall Rule...", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/update", "params": { "operation": "update"}},
+          { "text": "Add VPorts to PGs...", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/associate", "params": { "operation": "associate"} },
+          { "text": "View ACL Rule...", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/aclrule" },
+          { "text": "View Firewall Rule...", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/vrfrule" }
+        ],
+        "multiMenu": [
+            { "text": "Add Source VPorts to PGs", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/associate", "params": { "operation": "associate", "direction": "ingress"} },
+            { "text": "Add Destination VPorts to PGs", "rootpath": "enterprises/enterprise/{{enterpriseID}}/networks/domains/domain/{{domainID}}/analytics/vss-domain/vssDomainFlowExplorer/associate", "params": { "operation": "associate", "direction": "egress"} }
+        ]
+    }
+}
