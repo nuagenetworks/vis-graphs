@@ -407,6 +407,14 @@ class Table extends AbstractGraph {
 
     // filter and formatting columns for table header
     getHeaderData(width) {
+        const { ESColumns } = this.props;
+        let columnKeys = new Map();
+
+         if(ESColumns) {
+            ESColumns.forEach(item => {
+                columnKeys.set(item.key, true);
+            });
+        }
 
         const {
             headerPadding
@@ -433,7 +441,7 @@ class Table extends AbstractGraph {
                     headerData.push({
                         key: index,
                         label: columnRow.label || columnRow.column,
-                        sortable: columnRow.sort !== false,
+                        sortable: !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true,
                         columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                         columnField: index,
                         filter: columnRow.filter !== false,
