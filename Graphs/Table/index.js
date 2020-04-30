@@ -1066,10 +1066,6 @@ class Table extends AbstractGraph {
             pageSize,
             size
         } = this.getGraphProperties();
-        
-        if (isEmpty(data)) {
-            return this.renderMessage('No data to visualize');
-        }
 
         const tableCurrentPage = this.currentPage - 1;
         const totalRecords = scroll ? size : this.filterData.length;
