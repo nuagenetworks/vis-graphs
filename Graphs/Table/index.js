@@ -288,7 +288,7 @@ class Table extends AbstractGraph {
         });
 
         props.data.forEach( (d, i) => {
-            const random = this.generateRandom();
+            const random = hash(d);
             const data = {
                 'row_id': random
             };
@@ -509,10 +509,9 @@ class Table extends AbstractGraph {
         }
 
         const parsedData =  tableData.map((d, j) => {
-            const dataKey = hash(d);
 
-            if(this.dataMap.has(dataKey)) {
-                return this.dataMap.get(dataKey);
+            if(this.dataMap.has(d.row_id)) {
+                return this.dataMap.get(d.row_id);
             }
 
             let data = {},
@@ -613,7 +612,7 @@ class Table extends AbstractGraph {
                         {data[key]}</div>
                 })
 
-            this.dataMap.set(dataKey, data);
+            this.dataMap.set(d.row_id, data);
             return data
         });
 
