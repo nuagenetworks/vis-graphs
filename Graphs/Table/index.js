@@ -64,7 +64,7 @@ class Table extends AbstractGraph {
             search: false,
             sort: true,
             viewColumns: false,
-            responsive: "scroll",
+            responsive: "scrollMaxHeight",
             selectableRows: 'single',
             onChangePage: this.handlePageClick,
             onRowsSelect: this.handleRowSelection,
@@ -1077,7 +1077,7 @@ class Table extends AbstractGraph {
             ...this.option,
             rowsSelected: this.state.selected,
             viewColumns: selectColumnOption || false,
-            fixedHeader: fixedHeader,
+            fixedHeaderOptions: { xAxis: false, yAxis: fixedHeader },
             pagination: showFooter,
             rowsPerPage: pageSize,
             count: totalRecords,
@@ -1098,7 +1098,7 @@ class Table extends AbstractGraph {
                 }
             },
             MUIDataTable: {
-                responsiveScroll: {
+                responsiveScrollMaxHeight: {
                     height: (height - heightMargin),
                 }
             },
