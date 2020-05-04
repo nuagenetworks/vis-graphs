@@ -5,11 +5,11 @@ import {Tooltip} from 'react-lightweight-tooltip'
 import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import hash from 'object-hash';
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
+import uuid from 'lodash/uniqueId';
 
 import AbstractGraph from "../AbstractGraph"
 import columnAccessor from "../../utils/columnAccessor"
@@ -288,7 +288,7 @@ class Table extends AbstractGraph {
         });
 
         props.data.forEach( (d, i) => {
-            const random = hash(d);
+            const random = uuid();
             const data = {
                 'row_id': random
             };
@@ -507,6 +507,8 @@ class Table extends AbstractGraph {
             first(usedColumns).firstColStyle = firstColToolTipStyle;
             last(usedColumns).lastColStyle = lastColToolTipStyle;
         }
+
+        console.error("tableDta",tableData);
 
         const parsedData =  tableData.map((d, j) => {
 
