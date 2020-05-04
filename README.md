@@ -48,8 +48,7 @@ The use of the graphs module is to provide a module to quickly shows your data i
     "react-csv": "1.0.8",
     "react-copy-to-clipboard": "^4.3.1",
     "react-modal": "^3.5.1",
-    "eval-expression": "^1.0.0",
-    "object-hash": "^2.0.3"
+    "eval-expression": "^1.0.0"
 ```
 ## Usage examples
   - Make sure your current project must be a valid git project, if not then run the below command
