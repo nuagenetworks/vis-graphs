@@ -508,8 +508,6 @@ class Table extends AbstractGraph {
             last(usedColumns).lastColStyle = lastColToolTipStyle;
         }
 
-        console.error("tableDta",tableData);
-
         const parsedData =  tableData.map((d, j) => {
 
             if(this.dataMap.has(d.row_id)) {
