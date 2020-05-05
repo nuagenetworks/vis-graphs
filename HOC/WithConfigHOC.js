@@ -17,7 +17,7 @@ export default (config) => (WrappedComponent) => (props) => {
                 ...graphThemeConfig,
                 ...configuration.data, // override & new properties of a given specific graph
                 isCustomColor: objectPath.has(configuration.data, 'colors') || false,
-
+                multiMenu: props.configuration.multiMenu, menu: props.configuration.menu,
             }}
         />
     );

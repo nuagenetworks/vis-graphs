@@ -1,0 +1,34 @@
+{
+    "data": {
+        "xColumn": "Application",
+        "xLabel": "Application",
+        "yColumn": "value",
+        "yLabel": "Total Bytes",
+        "yTicks": 5,
+        "yTickFormat": ".2s",
+        "otherOptions": {
+            "label": "Others",
+            "limit": 5,
+            "type": "number"
+        },       
+        "colors": [
+            "#7da3f7",
+            "#b3d645",
+            "#fec26a",
+            "#e78ac3",
+            "#f79e99"
+        ],
+        "tooltip": [
+            { "column": "Application", "label": "Application" },
+            { "column": "value", "format": ",.2s"}
+        ]
+    },
+    "listeners": [
+        {
+            "redirect": "/dashboards/medalsPerCountry",
+            "params": {
+                "app": "value"
+            }
+        }
+    ]
+}
