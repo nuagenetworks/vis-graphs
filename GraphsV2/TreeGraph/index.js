@@ -108,14 +108,14 @@ const parseTransformation = a => {
 
 const diagonal = d => {
 
-    // Creates a curved (diagonal) path from parent to the child nodes
+// Creates a Line (diagonal) path from parent to the child nodes
     let p0 = {
         x: d.x + rectHeight / 2,
         y: (d.y)
     },
         p3 = {
             x: d.parent.x + rectHeight / 2,
-            y: d.parent.y - 0 // -12, so the end arrows are just before the rect node
+            y: d.parent.y + 180 // -12, so the end arrows are just before the rect node
         },
         m = (p0.y + p3.y) / 2,
         p = [p0, {
@@ -127,7 +127,7 @@ const diagonal = d => {
             }, p3];
     p = p.map(d => [d.y, d.x]);
 
-    return 'M' + p[0] + 'C' + p[1] + ' ' + p[2] + ' ' + p[3];
+    return 'M' + p[0] + 'L' + p[1] + ' ' + p[2] + ' ' + p[3];
 }
 
 const normalArrow = (svg, linksSettings) => {
@@ -281,7 +281,7 @@ const TreeGraph = (props) => {
         const links = treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach(d => { d.y = d.depth * 200 });
+        nodes.forEach(d => { d.y = d.depth * 250 });
 
         updateNodes(source, nodes);
         updateLinks(source, links);
@@ -478,10 +478,10 @@ const TreeGraph = (props) => {
                 .style('fill-opacity', 1);
         } else {
             nodeEnter.append('g').append('rect')
-                .attr('rx', 30)
-                .attr('ry', 30)
-                .attr('width', rectWidth - 20)
-                .attr('height', rectHeight + 10)
+                .attr('rx', 0)
+                .attr('ry', 0)
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
                 .attr('stroke', d => d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor)
                 .attr('stroke-width', rectNode.stroke.width)
                 .attr('class', 'node-rect')
@@ -534,6 +534,8 @@ const TreeGraph = (props) => {
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
+        const highlight = linkUpdate.filter(d => d.data.clicked);
+        highlight.raise();
 
         linkUpdate.style('stroke', d => {
             return d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
