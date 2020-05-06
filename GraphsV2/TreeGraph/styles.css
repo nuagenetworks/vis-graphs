@@ -1,0 +1,68 @@
+.node {
+    cursor: pointer;
+}
+
+.svgWidth {
+	width:100%
+}
+/* svg { width:100% } */
+
+.node circle {
+    fill: #fff;
+    stroke: #5a83de;
+    stroke-width: 2px;
+}
+
+.node text {
+    font: 12px sans-serif;
+}
+
+.node-rect {
+	
+}
+
+.node-rect-closed {
+	stroke-width: 1px;
+	stroke: #7977FF
+}
+
+.link {
+	fill: none;
+	stroke: lightsteelblue;
+	stroke-width: 2px;
+}
+
+.linkselected {
+	fill: none;
+	stroke: tomato;
+	stroke-width: 2px;
+}
+
+.normalArrow {
+	fill: lightsteelblue;
+	stroke-width: 1px;
+}
+
+.coloredArrow {
+	fill: tomato;
+	stroke-width: 1px;
+}
+
+.link text {
+	font: 7px sans-serif;
+	fill: #CC0000;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+	pointer-events: none;
+	max-width: 200px;
+	height: auto;
+	z-index: 1;
+}
