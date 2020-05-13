@@ -148,8 +148,8 @@ const LeafletGraph = (props) => {
         position={position}
         icon={iconPerson}
         onClick={() => handleMarkerClick(data, onMarkClick)}
-        onMouseOver={tooltip ? () => toggleInfoWindow(data, position) : ''}
-        onMouseOut={tooltip ? () => toggleInfoWindow() : ''}
+        onMouseOver={tooltip ? () => toggleInfoWindow(data, position) : undefined}
+        onMouseOut={tooltip ? () => toggleInfoWindow() : undefined}
       >
         {renderInfowindow()}
       </Marker>
