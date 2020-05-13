@@ -871,3 +871,10 @@ __colorRange__ (array) define the criteria to show the color of each bar on the 
             }
         ]
 ```
+
+## *LeafletGraph*
+Display a cluster markers on map to show data
+
+>[See sample configuration and data file](https://github.com/nuagenetworks/vis-graphs/tree/master/sample/leafletGraph)
+
+![leafletgraph]([![Screenshot from Gyazo](https://gyazo.com/b21df8a6bf9f06c7f1fec020231b0536/raw)](https://gyazo.com/b21df8a6bf9f06c7f1fec020231b0536))

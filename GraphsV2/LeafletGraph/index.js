@@ -13,9 +13,7 @@ import SearchBar from "../../SearchBar";
 import { getIconPath } from '../../utils/helpers';
 import { config } from './default.config';
 import { styled } from '@material-ui/core/styles';
-
-//let markers = new Map();
-let timerId = null;
+import './styles.css';
 
 const InfoContainer = styled('div')({
   display: 'table'
@@ -51,10 +49,6 @@ const LeafletGraph = (props) => {
 
   useEffect(() => {
     initiate(props);
-
-    return () => {
-      clearTimeout(timerId);
-    }
   }, [props.data]);
 
   const {
@@ -64,7 +58,7 @@ const LeafletGraph = (props) => {
     onMarkClick,
   } = props;
 
-  let { 
+  let {
     height,
   } = props;
 
@@ -74,16 +68,10 @@ const LeafletGraph = (props) => {
     minZoom,
     latitudeColumn,
     longitudeColumn,
-    localityColumn,
-    nameColumn,
-    criticalAlarmColumn,
-    majorAlarmColumn,
-    minorAlarmColumn,
-    bootstrapStatusColumn,
-    NSGVersionColumn,
     idColumn,
     markerIcon,
     filters,
+    tooltip,
   } = properties;
 
   const initiate = (props) => {
@@ -100,12 +88,12 @@ const LeafletGraph = (props) => {
   }
 
   const displayNSGInfo = (data) => {
-    const displayInfo = info => {
+    const displayInfo = (info, data) => {
       return info.map((row, i) => (
-        <InfoBox key={i}>
+      <InfoBox key={i}>
           <Label>{row.label}</Label>
           <Data>&nbsp;</Data>
-          <Data>{row.text}</Data>
+          <Data>{data[row.column] || 'None'}</Data>
         </InfoBox>
       ))
     }
@@ -113,15 +101,7 @@ const LeafletGraph = (props) => {
     return (
       <InfoContainer className={'geoGraph'}>
         {
-          displayInfo([
-            { label: 'NSG', text: data[nameColumn] },
-            { label: 'Address', text: data[localityColumn] },
-            { label: 'Bootstrap Status', text: data[bootstrapStatusColumn] || 'No status found' },
-            { label: 'NSG Version', text: data[NSGVersionColumn] || 'No version found' },
-            { label: 'Critical Alarms', text: data[criticalAlarmColumn] || 'None' },
-            { label: 'Major Alarms', text: data[majorAlarmColumn] || 'None' },
-            { label: 'Minor Alarms', text: data[minorAlarmColumn] || 'None' }
-          ])
+          displayInfo(tooltip, data)
         }
       </InfoContainer>
     )
@@ -133,7 +113,7 @@ const LeafletGraph = (props) => {
 
     return (
       data && (
-        <Tooltip >
+        <Tooltip>
           {displayNSGInfo(data)}
         </Tooltip>
       )
@@ -168,8 +148,8 @@ const LeafletGraph = (props) => {
         position={position}
         icon={iconPerson}
         onClick={() => handleMarkerClick(data, onMarkClick)}
-        onMouseOver={() => toggleInfoWindow(data, position)}
-        onMouseOut={() => toggleInfoWindow()}
+        onMouseOver={tooltip ? () => toggleInfoWindow(data, position) : ''}
+        onMouseOut={tooltip ? () => toggleInfoWindow() : ''}
       >
         {renderInfowindow()}
       </Marker>
@@ -197,9 +177,23 @@ const LeafletGraph = (props) => {
     );
   }
 
+  const createClusterCustomIcon = (clusters) => {
+    const count = clusters.getChildCount();
+
+    return L.divIcon({
+      html:
+        `<div>
+              <img src='/icons/GREY.png'>
+                <span class="markerClusterLabel">${count}</span>
+              </img>
+          </div>`,
+      className: 'markerCluster',
+    });
+  }
+
   const currentCenter = [
-    Number(process.env.REACT_APP_GOOGLE_MAP_LAT),
-    Number(process.env.REACT_APP_GOOGLE_MAP_LNG),
+    Number(process.env.REACT_APP_MAP_LAT),
+    Number(process.env.REACT_APP_MAP_LNG),
   ]
 
   if (searchBar !== false) {
@@ -221,7 +215,10 @@ const LeafletGraph = (props) => {
             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MarkerClusterer>
+          <MarkerClusterer
+            iconCreateFunction={createClusterCustomIcon}
+            showCoverageOnHover={false}
+          >
             {renderMarkersIfNeeded()}
           </MarkerClusterer>
         </Map>
