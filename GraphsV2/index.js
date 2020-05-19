@@ -6,6 +6,7 @@ export { default as HeatmapGraph } from './Heatmap';
 export { default as PortGraph } from './PortGraph';
 export { default as AreaGraph } from './AreaGraph';
 export { default as LineGraph } from './LineGraph';
+export { default as MultiLineGraph } from './LineGraph';
 export { default as GeoMap } from './GeoMap';
 export { default as ChordGraph } from './ChordGraph';
 export { default as BarGraph } from './BarGraph';
