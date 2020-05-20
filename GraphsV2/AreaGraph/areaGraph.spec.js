@@ -1,21 +1,17 @@
 import React from 'react';
-const cheerio = require('cheerio');
 import ReactDom from 'react-dom';
 
 import { getDataAndConfig, mockUseEffect, clearAllMocks, createElement, appendChildToElement, removeElement} from '../testHelper';
 import AreaGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
 
+const cheerio = require('cheerio');
+
 describe("AreaGraph", () => {
   let config;
 
   beforeAll(async () => {
     config = await getDataAndConfig('AreaGraph');
-  });
-
-  afterAll(() => {
-    removeElement(element);
-    clearAllMocks();
   });
 
   describe("Simple", () => {
