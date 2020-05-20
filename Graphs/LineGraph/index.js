@@ -5,21 +5,20 @@ import {
     axisLeft,
     extent,
     format,
-    line,
     scaleLinear,
     scaleTime,
     select,
-    brushX,
     voronoi,
     merge,
-    event,
     timeFormat
 } from "d3";
 import moment from 'moment';
 import momentDuration from 'moment-duration-format';
 import isEqual from 'lodash/isEqual';
 import * as d3 from 'd3'
-import isEmpty from "lodash/isEmpty";
+import isEmpty from 'lodash/isEmpty';
+import ReactTooltip from 'react-tooltip';
+
 import XYGraph from "../XYGraph";
 import { pick } from "../../utils/helpers";
 import { nest } from "../../utils/helpers/nest";
@@ -76,6 +75,8 @@ class LineGraph extends XYGraph {
         }
 
         this.updateElements(); 
+
+        ReactTooltip.rebuild();
     }
 
     componentDidMount() {
@@ -571,7 +572,6 @@ class LineGraph extends XYGraph {
         
         return (
             <div className="line-graph">
-                <div>{this.tooltip}</div>
                 <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
                     {this.renderLegend(filterDatas, legend, getColor, label, this.checkIsVerticalLegend())}
                     <div className='graphContainer' style={ graphStyle }>
@@ -676,6 +676,7 @@ class LineGraph extends XYGraph {
                         </svg>
                     </div>
                 </div> 
+                <div>{this.tooltip}</div>
             </div>       
         );
     }
