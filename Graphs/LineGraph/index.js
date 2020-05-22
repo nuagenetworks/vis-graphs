@@ -490,7 +490,7 @@ class LineGraph extends XYGraph {
 
         const tooltipOverlay = voronoi()
             .x( d => xScale(d[xColumn]))
-            .y( d => yScale(d[this.yValue]))
+            .y(availableHeight)
             .extent([[-leftMargin, -margin.top], [availableWidth + margin.right, availableHeight + margin.bottom]])
             .polygons(filterDatas)
 
