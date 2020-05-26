@@ -5,11 +5,11 @@ import {Tooltip} from 'react-lightweight-tooltip'
 import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash'
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import hash from 'object-hash';
 import objectPath from "object-path";
 import IconButton from 'material-ui/IconButton';
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
+import uuid from 'lodash/uniqueId';
 
 import AbstractGraph from "../AbstractGraph"
 import columnAccessor from "../../utils/columnAccessor"
@@ -64,7 +64,7 @@ class Table extends AbstractGraph {
             search: false,
             sort: true,
             viewColumns: false,
-            responsive: "scroll",
+            responsive: "scrollMaxHeight",
             selectableRows: 'single',
             onChangePage: this.handlePageClick,
             onRowsSelect: this.handleRowSelection,
@@ -288,7 +288,7 @@ class Table extends AbstractGraph {
         });
 
         props.data.forEach( (d, i) => {
-            const random = this.generateRandom();
+            const random = uuid();
             const data = {
                 'row_id': random
             };
@@ -509,10 +509,9 @@ class Table extends AbstractGraph {
         }
 
         const parsedData =  tableData.map((d, j) => {
-            const dataKey = hash(d);
 
-            if(this.dataMap.has(dataKey)) {
-                return this.dataMap.get(dataKey);
+            if(this.dataMap.has(d.row_id)) {
+                return this.dataMap.get(d.row_id);
             }
 
             let data = {},
@@ -613,7 +612,7 @@ class Table extends AbstractGraph {
                         {data[key]}</div>
                 })
 
-            this.dataMap.set(dataKey, data);
+            this.dataMap.set(d.row_id, data);
             return data
         });
 
@@ -1066,10 +1065,6 @@ class Table extends AbstractGraph {
             pageSize,
             size
         } = this.getGraphProperties();
-        
-        if (isEmpty(data)) {
-            return this.renderMessage('No data to visualize');
-        }
 
         const tableCurrentPage = this.currentPage - 1;
         const totalRecords = scroll ? size : this.filterData.length;
@@ -1082,7 +1077,7 @@ class Table extends AbstractGraph {
             ...this.option,
             rowsSelected: this.state.selected,
             viewColumns: selectColumnOption || false,
-            fixedHeader: fixedHeader,
+            fixedHeaderOptions: { xAxis: false, yAxis: fixedHeader },
             pagination: showFooter,
             rowsPerPage: pageSize,
             count: totalRecords,
@@ -1103,7 +1098,7 @@ class Table extends AbstractGraph {
                 }
             },
             MUIDataTable: {
-                responsiveScroll: {
+                responsiveScrollMaxHeight: {
                     height: (height - heightMargin),
                 }
             },
