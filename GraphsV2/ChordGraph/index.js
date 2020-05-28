@@ -134,13 +134,12 @@ const getFilterData = (data, chordSourceColumn, chordDestinationColumn) => {
     return data.filter(d => d[chordSourceColumn] && d[chordDestinationColumn]);
 }
 
-let matrix = [];
-
 const ChordGraph = (props) => {
 
     const [stateHoverPersist, setStateHoverPersist] = useState(false);
     const [stateMouseOverGroup, setStateMouseOverGroup] = useState(null);
     const [stateMouseOverRibbon, setStateMouseOverRibbon] = useState(null);
+    const [matrix, setMatrix] = useState([]);
     const [filterData, setFilterData] = useState([]);
     const [hoverData, setHoverData] = useState({ isChord: true });
 
@@ -184,12 +183,12 @@ const ChordGraph = (props) => {
         const filterChordData = getFilterData(data, chordSourceColumn, chordDestinationColumn);
         
         if (!isEqual(filterChordData, filterData)) {
-            matrix = generateMatrix({
+            setMatrix(generateMatrix({
                 data: filterChordData, 
                 chordWeightColumn, 
                 chordSourceColumn,
                 chordDestinationColumn
-            });
+            }));
             setFilterData(filterChordData);
         }
     }

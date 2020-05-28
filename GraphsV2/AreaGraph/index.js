@@ -10,7 +10,7 @@ import {
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValiddataHOC from '../../HOC/WithValidationHOC';
-import customTooltip from '../Components/utils/RechartsTooltip';
+import customTooltip from '../Components/utils/AreaTooltip';
 import dataParser from '../utils/DataParser';
 import Formatter from '../utils/formatter';
 import renderLegend from '../Components/utils/Legend';
@@ -54,11 +54,11 @@ const AreaGraph = (props) => {
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
     // Formatting data for direct consumption by Area Graph
-    const { parsedData, uniqueKeys: areaKeys } = dataParser({ 
-      data, 
-      key: linesColumn, 
-      xColumn, 
-      yColumn,
+    const { parsedData, uniqueKeys: areaKeys } = dataParser({
+        data,
+        key: linesColumn,
+        xColumn,
+        yColumn,
     });
 
     return (
@@ -70,51 +70,51 @@ const AreaGraph = (props) => {
             margin={margin}
         >
             <CartesianGrid
-                vertical = {false}
+                vertical={false}
                 strokeOpacity={0.3}
             />
             {
-              brushEnabled && (
-                <Brush 
-                    data={parsedData}
-                    dataKey={xColumn}
-                    height={BRUSH_HEIGHT}
-                    tickFormatter = {
-                        (tickData) => (Formatter({
-                            dateHistogram,
-                            value: tickData,
-                            tickFormat:xTickFormat
-                        }))
-                    }
-                    y={ height - (BRUSH_HEIGHT + XLABEL_HEIGHT + legendHeight)}
-                />)
+                brushEnabled && (
+                    <Brush
+                        data={parsedData}
+                        dataKey={xColumn}
+                        height={BRUSH_HEIGHT}
+                        tickFormatter={
+                            (tickData) => (Formatter({
+                                dateHistogram,
+                                value: tickData,
+                                tickFormat: xTickFormat
+                            }))
+                        }
+                        y={height - (BRUSH_HEIGHT + XLABEL_HEIGHT + legendHeight)}
+                    />)
             }
             {
-              xAxis({
-                xColumn, 
-                xLabel, 
-                XAxisLabelConfig, 
-                xLabelRotateHeight, 
-                xTickFormat, 
-                dateHistogram,
-                limit: xLabelLimit,
-              })
+                xAxis({
+                    xColumn,
+                    xLabel,
+                    XAxisLabelConfig,
+                    xLabelRotateHeight,
+                    xTickFormat,
+                    dateHistogram,
+                    limit: xLabelLimit,
+                })
             }
             {
-              yAxis({
-                yLabel,
-                yTickFormat,
-                limit: yLabelLimit,
-              })
+                yAxis({
+                    yLabel,
+                    yTickFormat,
+                    limit: yLabelLimit,
+                })
             }
             {
-              renderLegend({
-                legend,
-                height,
-              })
+                renderLegend({
+                    legend,
+                    height,
+                })
             }
             {
-                customTooltip({ tooltip, tooltipKey, yColumn })
+                customTooltip({ tooltip, yColumn, linesColumn, xColumn })
             }
             {
                 areaKeys.map((areaItem, index) => {
@@ -123,14 +123,14 @@ const AreaGraph = (props) => {
                         <Area
                             type="monotone"
                             className="area-fill"
-                            key={`area-${index}`} 
-                            name={areaItem} 
-                            dataKey={areaItem} 
-                            onMouseEnter={({name}) => setToolTipKey(name)}
+                            key={`area-${index}`}
+                            name={areaItem}
+                            dataKey={areaItem}
+                            onMouseEnter={({ name }) => setToolTipKey(name)}
                             onMouseLeave={() => setToolTipKey(-1)}
-                            stackId={stacked ? areaKeys.length : index} 
-                            stroke={color} 
-                            fill={color} 
+                            stackId={stacked ? areaKeys.length : index}
+                            stroke={color}
+                            fill={color}
                         />
                     )
                 })

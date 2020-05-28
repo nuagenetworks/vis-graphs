@@ -40,6 +40,12 @@ const BarGraph = (props) => {
         }, 500)
     }
 
+    const onDrag = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    }
+
     const {
         data,
         height,
@@ -112,98 +118,100 @@ const BarGraph = (props) => {
     XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
 
     return (
-        <BarChart
-            width={width}
-            height={height}
-            data={parsedData}
-            layout={!isVertical ? "vertical" : 'horizontal'}
-            cursor={onMarkClick ? "pointer" : ''}
-            margin={margin}
-        >
-            <CartesianGrid
-                vertical={isVertical ? false : true}
-                horizontal={isVertical ? true : false}
-                opacity='0.3'
-            />
-            {
-                xAxis({
-                    xColumn,
-                    xLabel,
-                    XAxisLabelConfig,
-                    xLabelRotateHeight,
-                    xTickFormat,
-                    dateHistogram,
-                    type: xAxisType,
-                    limit: xLabelLimit,
-                })
-            }
-
-            {
-                yAxis({
-                    yLabel,
-                    YAxisLabelConfig,
-                    yTickFormat,
-                    type: yAxisType,
-                    yColumn,
-                    limit: yLabelLimit,
-                })
-            }
-
-            {
-                renderLegend({ legend, height })
-            }
-
-            {
-                customTooltip({ tooltip, tooltipKey, yColumn })
-            }
-
-            {
-                barKeys.map((item, index) => {
-                    return (
-                        <Bar
-                            key={`barGraph-${index}`}
-                            dataKey={item}
-                            onClick={(d) => {
-                                if (stack) {
-                                    const value = d.value;
-                                    d[stackColumn] = Object.keys(d).find(k => d[k] === (value[1] - value[0]));
-                                }
-                                return (
-                                    onMarkClick && (!otherOptions || d[dimension] !== otherOptions.label)
-                                        ? onMarkClick(d)
-                                        : ''
-                                )
-                            }}
-                            fill={barColors[index % 20]}
-                            stackId={stack ? "1" : undefined}
-                            onMouseEnter={(props) => {
-                                const value = props.value;
-                                setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
-                            }}
-                        >
-                            {!stack && parsedData.map((item, index) => (
-                                <Cell
-                                    key={`cell-${index}`}
-                                    fill={barColors[(index + startIndex) % 20]}
-                                    name={item}
-                                />
-                            )
-                            )}
-                        </Bar>
-                    )
-                })
-
-            }
-            {
-                isBrush &&
-                <Brush
-                    onChange={(e) => updateBrush(e)}
-                    startIndex={startIndex}
-                    endIndex={endIndex}
-                    height={BRUSH_HEIGHT}
+        <div onMouseDown={onDrag}>
+            <BarChart
+                width={width}
+                height={height}
+                data={parsedData}
+                layout={!isVertical ? "vertical" : 'horizontal'}
+                cursor={onMarkClick ? "pointer" : ''}
+                margin={margin}
+            >
+                <CartesianGrid
+                    vertical={isVertical ? false : true}
+                    horizontal={isVertical ? true : false}
+                    opacity='0.3'
                 />
-            }
-        </BarChart>
+                {
+                    xAxis({
+                        xColumn,
+                        xLabel,
+                        XAxisLabelConfig,
+                        xLabelRotateHeight,
+                        xTickFormat,
+                        dateHistogram,
+                        type: xAxisType,
+                        limit: xLabelLimit,
+                    })
+                }
+
+                {
+                    yAxis({
+                        yLabel,
+                        YAxisLabelConfig,
+                        yTickFormat,
+                        type: yAxisType,
+                        yColumn,
+                        limit: yLabelLimit,
+                    })
+                }
+
+                {
+                    renderLegend({ legend, height })
+                }
+
+                {
+                    customTooltip({ tooltip, tooltipKey, yColumn })
+                }
+
+                {
+                    barKeys.map((item, index) => {
+                        return (
+                            <Bar
+                                key={`barGraph-${index}`}
+                                dataKey={item}
+                                onClick={(d) => {
+                                    if (stack) {
+                                        const value = d.value;
+                                        d[stackColumn] = Object.keys(d).find(k => d[k] === (value[1] - value[0]));
+                                    }
+                                    return (
+                                        onMarkClick && (!otherOptions || d[dimension] !== otherOptions.label)
+                                            ? onMarkClick(d)
+                                            : ''
+                                    )
+                                }}
+                                fill={barColors[index % 20]}
+                                stackId={stack ? "1" : undefined}
+                                onMouseEnter={(props) => {
+                                    const value = props.value;
+                                    setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
+                                }}
+                            >
+                                {!stack && parsedData.map((item, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={barColors[(index + startIndex) % 20]}
+                                        name={item}
+                                    />
+                                )
+                                )}
+                            </Bar>
+                        )
+                    })
+
+                }
+                {
+                    isBrush &&
+                    <Brush
+                        onChange={updateBrush}
+                        startIndex={startIndex}
+                        endIndex={endIndex}
+                        height={BRUSH_HEIGHT}
+                    />
+                }
+            </BarChart>
+        </div>
     );
 }
 

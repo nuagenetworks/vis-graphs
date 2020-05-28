@@ -149,7 +149,7 @@ const getGraphProperties = (props) => {
 
     return {
         searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
-        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : sortOrder,
+        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
         size: size || data.length,
         pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
         currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
@@ -158,7 +158,7 @@ const getGraphProperties = (props) => {
     }
 }
 
-const getHeaderData = (props, initialSort) => {
+const getHeaderData = (props, initialSort, stateSortOrder) => {
     const { ESColumns } = props;
     let columnKeys = new Map();
 
@@ -202,10 +202,10 @@ const getHeaderData = (props, initialSort) => {
             };
 
             if ((initialSort && initialSort.column === columnRow.column) ||
-                (sortOrder && sortOrder.column === columnRow.column)) {
+                (stateSortOrder && stateSortOrder.column === columnRow.column)) {
                 headerColumn.options = {
                     display: displayColumn,
-                    sortDirection: isEmpty(initialSort) ? sortOrder.order : initialSort.order,
+                    sortDirection: isEmpty(initialSort) ? stateSortOrder.order : initialSort.order,
                     sort,
                 }
             }
@@ -214,19 +214,6 @@ const getHeaderData = (props, initialSort) => {
     }
 
     return headerData;
-}
-
-const getInitialSort = (props) => {
-    const {
-        sort,
-    } = getGraphProperties(props);
-
-    let initialSort = {};
-    if (sort && sort.column && sort.order) {
-        initialSort = { ...sort, column: sort.column }
-    }
-
-    return initialSort;
 }
 
 const getHeightMargin = (properties) => {
@@ -272,71 +259,6 @@ const setSelectedRows = (props) => {
 
     const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
     return selectedRows[requestId];
-}
-
-const initiate = (props) => {
-    const {
-        scroll,
-        scrollData,
-    } = props;
-
-    const {
-        currentPage,
-    } = getGraphProperties(props);
-
-    if (scroll) {
-        selectedRows = setSelectedRows(props);
-        if (!objectPath.has(scrollData, 'pageSize')) {
-            updateTableStatus({ pageSize }, props.updateScroll);
-        }
-    }
-
-    const {
-        matchingRowColumn,
-    } = properties;
-
-    const columns = getColumns(props);
-
-    if (!columns.length) {
-        return;
-    }
-
-    filterData = [];
-    unformattedData = {};
-    const columnNameList = [];
-
-    columns.forEach(d => {
-        columnNameList.push(d.column);
-    });
-
-    props.data.forEach((d, i) => {
-        const random = Math.floor(new Date().valueOf() * Math.random());
-        const data = {
-            'row_id': random,
-        };
-
-        for (let key in columns) {
-            if (columns.hasOwnProperty(key)) {
-                const columnData = { ...columns[key] };
-                delete columnData.totalCharacters;
-
-                const accessor = columnAccessor(columnData);
-                data[columnData.column] = accessor(d);
-
-                if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
-                    data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
-                }
-
-                if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
-                    data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
-                }
-            }
-        }
-
-        filterData.push(data);
-        unformattedData[random] = d;
-    });
-    resetFilters((currentPage || 1), selectedRows);
 }
 
 const getColumns = (props) => (props.properties.columns || []);
@@ -409,6 +331,10 @@ const Table = (props) => {
     const [infoBoxColumn, setInfoBoxColumn] = useState({});
     const [infoBoxData, setInfoBoxData] = useState({});
     const [infoBoxScript, setInfoBoxScript] = useState({});
+    const [originalData, setOriginalData] = useState([]);
+    const [stateData, setStateData] = useState([]);
+    const [stateSortOrder, setStateSortOrder] = useState({});
+    const [initialSort, setInitialSort] = useState({});
 
     const {
         size,
@@ -416,8 +342,8 @@ const Table = (props) => {
 
     const decrementFontSize = () => (setFontSize(fontSize - 1));
 
-    const checkFontsize = () => (container && container.querySelector('table').clientWidth > container.clientWidth ? fontSize >= style.defaultFontsize : decrementFontSize());
-
+    const checkFontsize = () => (container && container.querySelector('table').clientWidth > container.clientWidth && fontSize >= style.defaultFontsize ? decrementFontSize() : fontSize);
+    
     const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
         if (isSuccess) {
             if (expression) {
@@ -427,24 +353,109 @@ const Table = (props) => {
 
                 const search = labelToField(expandExpression(expression), getColumns(props));
                 filterData = data;
+                setStateData(filterData);
+                resetFilters();
+                updateData(true);
 
                 if (!searchText || searchString !== searchText) {
                     updateTableStatus({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH }, props.updateScroll);
                 }
             } else {
                 filterData = data;
-                updateData();
+                setStateData(filterData);
                 resetFilters();
+                updateData(true);
             }
         }
     }
 
-    const updateData = () => {
+    const initiate = (props) => {
+        const {
+            scroll,
+            scrollData,
+        } = props;
+    
+        const {
+            currentPage,
+        } = getGraphProperties(props);
+    
+        if (scroll) {
+            selectedRows = setSelectedRows(props);
+            if (!objectPath.has(scrollData, 'pageSize')) {
+                updateTableStatus({ pageSize }, props.updateScroll);
+            }
+        }
+    
+        const {
+            matchingRowColumn,
+        } = properties;
+    
+        const columns = getColumns(props);
+    
+        if (!columns.length) {
+            return;
+        }
+    
+        filterData = [];
+        unformattedData = {};
+        const columnNameList = [];
+    
+        columns.forEach(d => {
+            columnNameList.push(d.column);
+        });
+    
+        props.data.forEach((d, i) => {
+            const random = Math.floor(new Date().valueOf() * Math.random());
+            const data = {
+                'row_id': random,
+            };
+    
+            for (let key in columns) {
+                if (columns.hasOwnProperty(key)) {
+                    const columnData = { ...columns[key] };
+                    delete columnData.totalCharacters;
+    
+                    const accessor = columnAccessor(columnData);
+                    data[columnData.column] = accessor(d);
+    
+                    if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                        data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
+                    }
+    
+                    if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                        data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
+                    }
+                }
+            }
+    
+            filterData.push(data);
+            unformattedData[random] = d;
+        });
+        setStateData(filterData);
+        setOriginalData(filterData);
+        resetFilters((currentPage || 1), selectedRows);
+    }
+
+    const getInitialSort = (props, sortOrder) => {
+        const {
+            sort,
+        } = getGraphProperties(props);
+    
+        if (sort && sort.column && sort.order && !isEqual(initialSort, sort)) {
+            setInitialSort({ ...sort, column: sort.column });
+        } else if (!isEmpty(sortOrder)) {
+            setInitialSort(sortOrder);
+        }
+    
+        return initialSort;
+    }
+
+    const updateData = (isSearch = false) => {
         const {
             data,
             selected,
             tableData,
-        } = getData();
+        } = getData(isSearch);
 
         setSelectedState(selected);
         setTableData(tableData);
@@ -619,7 +630,7 @@ const Table = (props) => {
         }, props.updateScroll)
     }
 
-    const getData = () => {
+    const getData = (isSearch) => {
         const {
             scrollData
         } = props;
@@ -629,6 +640,8 @@ const Table = (props) => {
         } = props.properties;
         const pageSizes = objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize;
 
+        filterData = !isSearch && !isEmpty(stateData) ? stateData : filterData;
+        
         const offset = pageSizes * (currentPage - 1);
         const data = scroll ? filterData.slice(0, offset + pageSizes) : filterData;
         let tableData = getTableData(getColumns(props), data);
@@ -646,18 +659,23 @@ const Table = (props) => {
 
     const handleStaticSorting = (column) => {
         let colOrder = 'asc';
+        sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : sortOrder;
         if (sortOrder && sortOrder.column === column) {
             colOrder = sortOrder.order === 'desc' ? 'asc' : 'desc';
             sortOrder.order = colOrder;
+            setStateSortOrder(sortOrder);
         } else {
             sortOrder.order = colOrder;
             sortOrder.column = column;
+            setStateSortOrder(sortOrder);
         }
 
+        filterData = !isEmpty(stateData) ? stateData : filterData;
         filterData = orderBy(filterData, [column], [colOrder]);
+        setStateData(filterData);
 
         resetFilters();
-        headerData = getHeaderData(props, getInitialSort(props));
+        headerData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder);
         updateData();
     }
 
@@ -825,9 +843,9 @@ const Table = (props) => {
 
         const search = searchString !== null ? searchString : searchText,
             filteroption = headerData.filter(d => d.options.display === 'true');
-        return ((filteroption.length || (filterData.length === 0)) &&
+        return ((filteroption.length || (originalData.length === 0)) &&
             <SearchBar
-                data={filterData}
+                data={originalData}
                 searchText={search}
                 options={filteroption}
                 handleSearch={handleSearch}
@@ -940,9 +958,9 @@ const Table = (props) => {
             scrollData,
         } = props;
 
-        let removedColumns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+        let removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
 
-        if (!isEmpty(displayColumns) && !isEqual(removedColumns, displayColumns)) {
+        if (!isEmpty(displayColumns) && !isEqual(removedColumn, displayColumns)) {
             updateTableStatus({
                 [`removedColumn`]: displayColumns,
                 event: events.REMOVED_COLUMNS
@@ -957,9 +975,10 @@ const Table = (props) => {
 
         selectedRows = {};
         removedColumns = {};
+        currentPage = 1;
     }
 
-
+    
     useEffect(() => {
         initiate(props);
         updateData();
