@@ -30,13 +30,11 @@ let displayColumns = [];
 let filterData = [];
 let sortOrder = {};
 let container = "";
-let currentPage = 1;
 let unformattedData = {};
 let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = '';
 let scroll = {};
-let pageSize = 500;
 let headerData = {};
 const TIMEOUT = 1000;
 let dataMap = new Map();
@@ -135,8 +133,7 @@ const getColumnByContext = (columns, context) => {
 
 const updateTableStatus = (param = {}, updateScroll) => (updateScroll && updateScroll(param));
 
-const resetFilters = (page = 1, selectedRow = {}) => {
-    currentPage = page;
+const resetFilters = (selectedRow = {}) => {
     selectedRows = selectedRow;
 }
 
@@ -151,7 +148,7 @@ const getGraphProperties = (props) => {
         searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
         sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
         size: size || data.length,
-        pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize,
+        pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : properties.limit || 100,
         currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
         expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
         removedColumns: objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns),
@@ -313,11 +310,9 @@ const Table = (props) => {
         fixedHeader,
         selectColumnOption,
         searchBar,
-        limit,
     } = properties;
 
     let multiSelectable = true;
-    pageSize = limit || pageSize;
     scroll = props.scroll;
 
     const [selected, setSelectedState] = useState([]);
@@ -338,6 +333,8 @@ const Table = (props) => {
 
     const {
         size,
+        pageSize,
+        currentPage,
     } = getGraphProperties(props);
 
     const decrementFontSize = () => (setFontSize(fontSize - 1));
@@ -376,7 +373,7 @@ const Table = (props) => {
         } = props;
     
         const {
-            currentPage,
+            pageSize
         } = getGraphProperties(props);
     
         if (scroll) {
@@ -433,7 +430,7 @@ const Table = (props) => {
         });
         setStateData(filterData);
         setOriginalData(filterData);
-        resetFilters((currentPage || 1), selectedRows);
+        resetFilters(selectedRows);
     }
 
     const getInitialSort = (props, sortOrder) => {
@@ -611,7 +608,6 @@ const Table = (props) => {
                 event: events.PAGING,
             }, props.updateScroll);
         }
-        pageSize = numberOfRows;
     }
 
     const handleScrollSorting = (column) => {
@@ -631,19 +627,20 @@ const Table = (props) => {
     }
 
     const getData = (isSearch) => {
-        const {
-            scrollData
-        } = props;
-
+        
         const {
             highlight
         } = props.properties;
-        const pageSizes = objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : pageSize;
 
         filterData = !isSearch && !isEmpty(stateData) ? stateData : filterData;
         
-        const offset = pageSizes * (currentPage - 1);
-        const data = scroll ? filterData.slice(0, offset + pageSizes) : filterData;
+        const {
+            pageSize,
+            currentPage
+        } = getGraphProperties(props);
+
+        const offset = pageSize * (currentPage - 1);
+        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
         let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
@@ -687,17 +684,23 @@ const Table = (props) => {
     }
 
     const handlePageClick = (page) => {
+        const {
+            currentPage
+        } = getGraphProperties(props);
+
+        let pageNo;
+
         if (page > currentPage - 1) {
             if (isScrollExpired(props) && !isScrollDataExists(currentPage + 1, props)) {
                 setShowConfirmationPopup(true);
                 return;
             }
-            ++currentPage;
+            pageNo = currentPage + 1;
         } else {
-            --currentPage;
+            pageNo = currentPage - 1;
         }
 
-        scroll ? updateTableStatus({ currentPage: currentPage, event: events.PAGING }, props.updateScroll) : updateData();
+        scroll ? updateTableStatus({ currentPage: pageNo, event: events.PAGING }, props.updateScroll) : updateData();
     }
 
     const handleClick = (key) => {
@@ -706,6 +709,10 @@ const Table = (props) => {
     }
 
     const handleRowSelection = (currentSelectedRow, allRows) => {
+        const {
+            currentPage
+        } = getGraphProperties(props);
+
         let selectedRowsCurr = [];
         allRows.forEach(x => {
             if (!selectedRowsCurr.includes(x.dataIndex)) {
@@ -975,10 +982,8 @@ const Table = (props) => {
 
         selectedRows = {};
         removedColumns = {};
-        currentPage = 1;
     }
-
-    
+ 
     useEffect(() => {
         initiate(props);
         updateData();
