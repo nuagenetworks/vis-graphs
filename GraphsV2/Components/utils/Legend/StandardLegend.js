@@ -17,8 +17,12 @@ const Item = styled('div')({
 });
 
 export default ({ payload: legends, labelColumn, legend }) => {
+    if (legends && legends[0].value === undefined) {
+        return false;
+    }
+
     if (legends.length === 1 && legends[0].payload && legends[0].payload.stackId === undefined) {
-        legends = legends[0].payload.children;
+        legends = legends[0].payload.children || [legends[0]];
     }
 
     return (

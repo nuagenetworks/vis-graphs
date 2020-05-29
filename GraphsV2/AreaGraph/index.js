@@ -49,8 +49,6 @@ const AreaGraph = (props) => {
         brushEnabled,
     } = properties;
 
-    const [tooltipKey, setToolTipKey] = useState(-1);
-
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
     // Formatting data for direct consumption by Area Graph
@@ -126,8 +124,6 @@ const AreaGraph = (props) => {
                             key={`area-${index}`}
                             name={areaItem}
                             dataKey={areaItem}
-                            onMouseEnter={({ name }) => setToolTipKey(name)}
-                            onMouseLeave={() => setToolTipKey(-1)}
                             stackId={stacked ? areaKeys.length : index}
                             stroke={color}
                             fill={color}

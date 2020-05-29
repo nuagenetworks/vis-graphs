@@ -34,7 +34,6 @@ let unformattedData = {};
 let selectedRows = {};
 let removedColumns = {};
 let removedColumnsKey = '';
-let scroll = {};
 let headerData = {};
 const TIMEOUT = 1000;
 let dataMap = new Map();
@@ -265,7 +264,7 @@ const isScrollExpired = (props) => {
         expiration,
     } = getGraphProperties(props);
 
-    return scroll && expiration && expiration <= Date.now();
+    return props.scroll && expiration && expiration <= Date.now();
 }
 
 const isScrollDataExists = (page, props) => {
@@ -302,6 +301,7 @@ const Table = (props) => {
         width,
         height,
         properties,
+        scroll,
     } = props;
 
     const {
@@ -313,7 +313,6 @@ const Table = (props) => {
     } = properties;
 
     let multiSelectable = true;
-    scroll = props.scroll;
 
     const [selected, setSelectedState] = useState([]);
     const [tableData, setTableData] = useState([]);
