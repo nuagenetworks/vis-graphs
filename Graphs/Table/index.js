@@ -219,10 +219,11 @@ class Table extends AbstractGraph {
             size,
         } = props;
 
-        const {
-            removedColumns = [],
+        let {
+            removedColumns,
         } = this.state;
 
+        removedColumns = this.displayColumns ? this.displayColumns : removedColumns;
         // Total, per page, current page must be set and only applicable for Table component only.
         return {
             searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
@@ -450,6 +451,8 @@ class Table extends AbstractGraph {
             const { filterColumns } = Table.getColumnByContext(configuration.data.columns || [], context);        
             removedColumns = Table.getRemovedColumns(configuration.data.columns || [], filterColumns, selectedColumns);
         }
+
+        this.displayColumns = removedColumns;
 
         const columns = this.getColumns()
         let headerData = [];
@@ -710,6 +713,8 @@ class Table extends AbstractGraph {
         }
 
         this.scroll ? this.updateTableStatus({ currentPage: this.currentPage, event: events.PAGING }) : this.updateData();
+        this.headerData = this.getHeaderData(this.getInitialSort());
+        this.updateData();
     }
 
     handleClick(key) {
