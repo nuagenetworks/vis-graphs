@@ -714,7 +714,6 @@ class Table extends AbstractGraph {
 
         this.scroll ? this.updateTableStatus({ currentPage: this.currentPage, event: events.PAGING }) : this.updateData();
         this.headerData = this.getHeaderData(this.getInitialSort());
-        this.updateData();
     }
 
     handleClick(key) {
