@@ -21,6 +21,8 @@ export default ({
         <YAxis
             type={type}
             dataKey={type ? yColumn : undefined}
+            axisLine={{ stroke: '#E9ECF0' }}
+            tickLine={false}
             tick={
                 <GraphAxis
                     tickFormat={yTickFormat}

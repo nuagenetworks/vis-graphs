@@ -21,6 +21,8 @@ export default ({
             interval={0}
             label={{ value: xLabel, ...XAxisLabelConfig }}
             height={X_AXIS_HEIGHT}
+            axisLine={{ stroke: '#E9ECF0' }}
+            tickLine={false}
             tick={
                 <GraphAxis
                     rotation={xLabelRotateHeight * -1}
