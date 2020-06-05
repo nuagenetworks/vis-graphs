@@ -13,7 +13,7 @@ export default ({ legend, height, type, ...rest }) => {
     if (legend && legend.show) {
         return (
             <LegendComponent
-                wrapperStyle={{ overflowY: 'auto', height: legendHeight, bottom: 5 }}
+                wrapperStyle={{ overflowY: 'auto', maxHeight: legendHeight, bottom: 5 }}
                 content={(props) => (
                     <Component {...props} legend={legend} {...rest} />
                 )}
