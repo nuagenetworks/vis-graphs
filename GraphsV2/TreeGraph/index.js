@@ -162,6 +162,7 @@ const renderRectNode = (d, props, rectNode) => {
     const {
         renderNode,
         store,
+        theme,
         ...rest
     } = props;
 
@@ -170,7 +171,7 @@ const renderRectNode = (d, props, rectNode) => {
     const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor;
 
     return renderNode(
-        {
+        {   theme,
             data: d.data,
             textColor: rectColorText,
             nodeId: `node-${d.id}`,

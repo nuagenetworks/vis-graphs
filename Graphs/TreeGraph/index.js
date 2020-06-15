@@ -568,13 +568,14 @@ class TreeGraph extends AbstractGraph {
         const {
             renderNode,
             store,
+            theme,
             ...rest
         } = this.props;
 
         if (!isFunction(renderNode)) return '<div/>';
 
         const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        return renderNode({data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, store, ...rectNode, onItemRender: () => (rest)});
+        return renderNode({theme, data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, store, ...rectNode, onItemRender: () => (rest)});
     }
 
     fetchImage =(apiData, contextName) => {
