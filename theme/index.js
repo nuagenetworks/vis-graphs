@@ -1,5 +1,5 @@
 import lightMuiTheme from "material-ui/styles/baseThemes/lightBaseTheme";
-import getMuiTheme from "material-ui/styles/getMuiTheme";
+import { createMuiTheme } from '@material-ui/core/styles';
 
 const customTheme = {
     // Custom borders
@@ -71,8 +71,8 @@ const customTheme = {
     regentBlue: "#a6cee3",
 }
 
-export const lightTheme = getMuiTheme(lightMuiTheme, {
-    fontFamily: "Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif",
+export const lightTheme = createMuiTheme(lightMuiTheme, {
+    fontFamily: "NokiaPureText-Light",
     spacing: {
         iconSize: 24,
         desktopGutter: 12,
