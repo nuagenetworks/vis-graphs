@@ -26,17 +26,11 @@ import InfoBox from "../../InfoBox";
 import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
-let displayColumns = [];
+let displayColumn = [];
 let filterData = [];
-let sortOrder = {};
 let container = "";
-let unformattedData = {};
 let selectedRows = {};
-let removedColumns = {};
-let removedColumnsKey = '';
-let headerData = {};
 const TIMEOUT = 1000;
-let dataMap = new Map();
 
 const useStyles  = (props) => ({
   MUIDataTableSelectCell: {
@@ -150,11 +144,10 @@ const getGraphProperties = (props) => {
         pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : properties.limit || 100,
         currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
         expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-        removedColumns: objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns),
     }
 }
 
-const getHeaderData = (props, initialSort, stateSortOrder) => {
+const getHeaderData = (props, initialSort, stateSortOrder, removedColumns) => {
     const { ESColumns } = props;
     let columnKeys = new Map();
 
@@ -162,16 +155,6 @@ const getHeaderData = (props, initialSort, stateSortOrder) => {
         ESColumns.forEach(item => {
             columnKeys.set(item.key, true);
         });
-    }
-
-    let {
-        removedColumns,
-    } = getGraphProperties(props);
-
-    if (removedColumns.length <= 0) {
-        const { context, selectedColumns, } = props;
-        const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
-        removedColumns = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
     }
 
     const columns = props.properties.columns || [];
@@ -302,6 +285,9 @@ const Table = (props) => {
         height,
         properties,
         scroll,
+        scrollData,
+        context, 
+        selectedColumns,
     } = props;
 
     const {
@@ -329,6 +315,19 @@ const Table = (props) => {
     const [stateData, setStateData] = useState([]);
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [initialSort, setInitialSort] = useState({});
+    const [headerData, setHeaderData] = useState({});
+    const [displayColumns, setDisplayColumns] = useState([]);
+    const [removedColumns, setRemovedColumn] = useState([]);
+    const [dataMap, setDataMap] = useState(new Map());
+    const [unformattedData, setUnformattedData] = useState({});
+
+    const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
+    const removedColumn = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
+    const columns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumn);
+    
+    if(!isEqual(removedColumns, columns)) {
+        setRemovedColumn(columns);
+    }
 
     const {
         size,
@@ -393,7 +392,6 @@ const Table = (props) => {
         }
     
         filterData = [];
-        unformattedData = {};
         const columnNameList = [];
     
         columns.forEach(d => {
@@ -425,7 +423,7 @@ const Table = (props) => {
             }
     
             filterData.push(data);
-            unformattedData[random] = d;
+            setUnformattedData({[random] : d});
         });
         setStateData(filterData);
         setOriginalData(filterData);
@@ -463,10 +461,6 @@ const Table = (props) => {
             highlight,
             highlightColor,
         } = properties;
-
-        const {
-            removedColumns,
-        } = getGraphProperties(props);
 
         if (!columns) {
             return [];
@@ -572,7 +566,7 @@ const Table = (props) => {
                         {data[key]}</div>
                 })
             }
-            dataMap.set(dataKey, data);
+            setDataMap(dataMap.set(dataKey, data));
             return data
         })
 
@@ -580,12 +574,10 @@ const Table = (props) => {
     }
 
     const handleColumnViewChange = (changedColumn, action) => {
-        const {
-            removedColumns
-        } = getGraphProperties(props);
+        let latestDisplayColumns = [];
 
         if (action === 'remove') {
-            displayColumns = displayColumns.length === 0 ?
+            latestDisplayColumns = displayColumns.length === 0 ?
                 uniq([...displayColumns, ...removedColumns, changedColumn]) :
                 uniq([...displayColumns, changedColumn]);
         } else {
@@ -596,7 +588,15 @@ const Table = (props) => {
             if (mergedIndex > -1 && !isEmpty(mergedColumns)) {
                 mergedColumns.splice(mergedIndex, 1);
             }
-            displayColumns = [...mergedColumns];
+            latestDisplayColumns = [...mergedColumns];
+        }
+        if(!isEqual(displayColumns,latestDisplayColumns)) {
+            setDisplayColumns(latestDisplayColumns);
+            displayColumn = latestDisplayColumns;
+            const newHeaderData = getHeaderData(props, getInitialSort(props), null, latestDisplayColumns);
+            if(!isEqual(headerData, newHeaderData)) {
+                setHeaderData(newHeaderData);
+            }
         }
     }
 
@@ -655,7 +655,7 @@ const Table = (props) => {
 
     const handleStaticSorting = (column) => {
         let colOrder = 'asc';
-        sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : sortOrder;
+        const sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : {};
         if (sortOrder && sortOrder.column === column) {
             colOrder = sortOrder.order === 'desc' ? 'asc' : 'desc';
             sortOrder.order = colOrder;
@@ -671,7 +671,10 @@ const Table = (props) => {
         setStateData(filterData);
 
         resetFilters();
-        headerData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder);
+        const newHeaderData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder, !isEmpty(displayColumns) ? displayColumns : removedColumns);
+        if(!isEqual(headerData, newHeaderData)) {
+            setHeaderData(newHeaderData);
+        }
         updateData();
     }
 
@@ -700,6 +703,11 @@ const Table = (props) => {
         }
 
         scroll ? updateTableStatus({ currentPage: pageNo, event: events.PAGING }, props.updateScroll) : updateData();
+        
+        const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
+        if(!isEqual(headerData, newHeaderData)) {
+            setHeaderData(newHeaderData);
+        }
     }
 
     const handleClick = (key) => {
@@ -829,6 +837,11 @@ const Table = (props) => {
     }
 
     const renderSearchBarIfNeeded = (headerData) => {
+
+        if(isEmpty(headerData)) {
+            return;
+        }
+
         const {
             searchString,
         } = getGraphProperties(props);
@@ -951,24 +964,13 @@ const Table = (props) => {
     }
 
     const cleanup = () => {
-        const columnsCurr = props.properties.columns || [];
-        const { filterColumns, removedColumnsKey: removedColumnsKeyCurr } = getColumnByContext(columnsCurr, props.context);
-        const removedColumnsCurr = getRemovedColumns(columnsCurr, filterColumns, props.selectedColumns);
-
-        if (removedColumnsKeyCurr !== removedColumnsKey || !isEqual(removedColumnsCurr, removedColumns)) {
-            removedColumns = removedColumnsCurr;
-            removedColumnsKey = removedColumnsKeyCurr;
-        }
-
         const {
             scrollData,
         } = props;
 
-        let removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
-
-        if (!isEmpty(displayColumns) && !isEqual(removedColumn, displayColumns)) {
+        if (!isEmpty(displayColumn)) {
             updateTableStatus({
-                [`removedColumn`]: displayColumns,
+                [`removedColumn`]: displayColumn,
                 event: events.REMOVED_COLUMNS
             }, props.updateScroll);
         }
@@ -980,7 +982,7 @@ const Table = (props) => {
         }
 
         selectedRows = {};
-        removedColumns = {};
+        filterData = [];
     }
  
     useEffect(() => {
@@ -990,13 +992,19 @@ const Table = (props) => {
         if(contextMenu) {
             openContextMenu();
         }
+    }, [props.data, props.scrollData]);
+
+    useEffect(() => {
         return () => {
-          cleanup();
+            cleanup();
         }
-    }, [props.data, props.width, props.height, props.context, contextMenu]);
+    }, []);
 
     const tableCurrentPage = currentPage - 1;
-    headerData = getHeaderData(props, getInitialSort(props));
+    const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
+    if(!isEqual(headerData, newHeaderData)) {
+        setHeaderData(newHeaderData);
+    }
     const totalRecords = scroll ? size : filterData.length;
     const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
     const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
