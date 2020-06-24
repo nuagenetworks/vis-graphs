@@ -600,15 +600,6 @@ const Table = (props) => {
         }
     }
 
-    const handleRowsPerPageChange = (numberOfRows) => {
-        if (scroll) {
-            updateTableStatus({
-                pageSize: numberOfRows,
-                event: events.PAGING,
-            }, props.updateScroll);
-        }
-    }
-
     const handleScrollSorting = (column) => {
         const { sort } = getGraphProperties(props);
 
@@ -1006,8 +997,6 @@ const Table = (props) => {
         setHeaderData(newHeaderData);
     }
     const totalRecords = scroll ? size : filterData.length;
-    const rowsPerPageSizes = uniq([10, 15, 20, 100, pageSize]);
-    const rowsPerPageOptions = rowsPerPageSizes.filter(rowsPerPageSize => rowsPerPageSize < totalRecords);
     const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
     const heightMargin = getHeightMargin({ ...properties, showFooter });
     const options = {
@@ -1023,14 +1012,13 @@ const Table = (props) => {
         rowsPerPage: pageSize,
         count: totalRecords,
         page: tableCurrentPage,
-        rowsPerPageOptions: rowsPerPageOptions,
+        rowsPerPageOptions: [],
         selectableRows: multiSelectable ? 'multiple' : 'single',
         onChangePage: handlePageClick,
         rowsSelected: selected,
         onRowsSelect: props.handleRowSelection ? props.handleRowSelection : handleRowSelection,
         selectableRowsOnClick: true,
         onColumnSortChange: handleSortOrderChange,
-        onChangeRowsPerPage: handleRowsPerPageChange,
         onColumnViewChange: handleColumnViewChange,
         disableToolbarSelect: true,
         textLabels: {
