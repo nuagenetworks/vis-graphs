@@ -279,6 +279,19 @@ const getSelectedRows = (props) => {
     return selected;
 }
 
+const getMenu = (props) => {
+    const {
+        menu,
+        multiMenu,
+    } = props.properties;
+
+    if (multiMenu && getSelectedRows(props).length > 1) {
+        return multiMenu;
+    }
+
+    return menu || false;
+}
+
 const Table = (props) => {
     const {
         width,
@@ -304,7 +317,6 @@ const Table = (props) => {
     const [tableData, setTableData] = useState([]);
     const [data, setData] = useState([]);
     const [fontSize, setFontSize] = useState(style.defaultFontsize);
-    const [contextMenu, setContextMenu] = useState(null);
     const [showInfoBox, setShowInfoBox] = useState(false);
     const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
     const [infoBoxRow, setInfoBoxRow] = useState({});
@@ -759,33 +771,19 @@ const Table = (props) => {
         updateTableStatus(tableData, updateScroll);
     }, TIMEOUT);
 
-    const getMenu = () => {
-        const {
-            menu,
-            multiMenu,
-        } = properties;
-
-        if (multiMenu && getSelectedRows(props).length > 1) {
-            return multiMenu;
-        }
-
-        return menu || false;
-    }
-
     const handleContextMenu = (event) => {
-        const menu = getMenu();
+        const menu = getMenu(props);
 
         if (!menu) {
             return false;
         }
         event.preventDefault();
         const { clientX: x, clientY: y } = event;
-        setContextMenu({ x, y });
+        openContextMenu({ x, y });
         return true;
     }
 
     const handleCloseContextMenu = () => {
-        setContextMenu({ contextMenu: null });
         closeContextMenu();
     }
 
@@ -797,9 +795,9 @@ const Table = (props) => {
         }
     }
 
-    const openContextMenu = () => {
+    const openContextMenu = (contextMenu) => {
         const { x, y } = contextMenu;
-        const menu = getMenu();
+        const menu = getMenu(props);
 
         closeContextMenu();
         document.body.addEventListener('click', handleCloseContextMenu);
@@ -980,9 +978,6 @@ const Table = (props) => {
         initiate(props);
         updateData();
         checkFontsize();
-        if(contextMenu) {
-            openContextMenu();
-        }
     }, [props.data, props.scrollData]);
 
     useEffect(() => {
