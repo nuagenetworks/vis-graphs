@@ -27,6 +27,10 @@ const PieGraph = (props) => {
         onMarkClick
     } = props;
 
+    if (!originalData || !originalData.length) {
+        return this.renderMessage("No data to visualize");
+    }
+
     const {
         otherOptions,
         labelColumn,
@@ -37,7 +41,8 @@ const PieGraph = (props) => {
         legend,
         tooltip,
         percentages,
-        colors
+        colors,
+        mappedColors,
     } = properties;
 
     const settings = {
@@ -86,7 +91,7 @@ const PieGraph = (props) => {
             >
                 {
                     data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index]} />
+                        <Cell key={`cell-${index}`} fill={mappedColors ? mappedColors[entry[labelColumn]] : colors[index]} />
                     ))
                 }
             </Pie>

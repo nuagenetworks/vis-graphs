@@ -1,9 +1,13 @@
 import PropTypes from 'prop-types';
 import React from "react";
-
+import { styled } from '@material-ui/core/styles';
+ 
 import "../style.css";
-
 import SimpleTextGraph from "../SimpleTextGraph";
+
+const Container = styled('div')({
+    marginBottom: '5px',
+});
 
 /*
     This graphs displays color coded statuses based on multi-column data
@@ -78,9 +82,9 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
         }
         const { inline } = this.getConfiguredProperties();
         return (
-            <div className={inline ? 'inline-alarms' : ''}>
+            <Container className={inline ? 'inline-alarms' : ''} >
                 {this.renderColumns({targetedColumns, ...rest})}
-            </div>
+            </Container>
         )
     }
 }
