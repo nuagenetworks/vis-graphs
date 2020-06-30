@@ -46,6 +46,7 @@ let pieRadius = {};
 const Label = styled('div')({
     fontSize: '1em',
     margin: '10px 0 0 10px',
+    height: '10px',
 });
 
 const GaugeChart = (props) => {
@@ -96,7 +97,7 @@ const GaugeChart = (props) => {
         pieProps = {
             startAngle: 180,
             endAngle: 0,
-            cx: width * .60,
+            cx: width * .50,
             cy: width * .50,
         };
 
@@ -112,7 +113,7 @@ const GaugeChart = (props) => {
             <Label id="chart-value">
                 {parseInt(chartValue)}%
             </Label>
-            <PieChart width={width} height={height} >
+            <PieChart width={width} height={height- 22} >
                 <Pie
                     data={chartData}
                     fill="#8884d8"

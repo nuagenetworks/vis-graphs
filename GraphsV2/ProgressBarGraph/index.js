@@ -39,7 +39,7 @@ const getData = ({
     barData[maxData] = barData[maxData] ? format(maxDataFormat)(barData[maxData]) : undefined;
     const dataUnits = barData['unit'] || units ? ` ${barData['unit'] || units}` : '';
 
-    return barData[maxData] ? `${barData[usedData]}${dataUnits}/ ${barData[maxData]}${dataUnits}` : `${barData[usedData]}${dataUnits}/ ${defaultRange}${dataUnits}`;
+    return barData[maxData] ? `${parseInt(barData[usedData])}${dataUnits}/ ${parseInt(barData[maxData])}${dataUnits}` : `${parseInt(barData[usedData])}${dataUnits}/ ${parseInt(defaultRange)}${dataUnits}`;
 }
 
 const getPercentage = ({

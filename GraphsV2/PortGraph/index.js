@@ -336,7 +336,6 @@ const PortGraph = (props) => {
         const { IconSvg, viewBox } = getIconPath(portIcon, data, true);
         return (
             <Svg
-                background={background}
                 data-tip={true}
                 data-for={id}
                 onMouseMove={() => setHoveredDatum(data)}
