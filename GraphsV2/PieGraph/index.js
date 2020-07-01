@@ -15,7 +15,8 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
-import { filterEmptyData } from "../../utils/helpers";
+import { filterEmptyData } from '../../utils/helpers';
+import { renderMessage } from '../utils/helper';
 import { limit } from '../../utils/helpers/limit';
 
 const PieGraph = (props) => {
@@ -26,10 +27,6 @@ const PieGraph = (props) => {
         properties,
         onMarkClick
     } = props;
-
-    if (!originalData || !originalData.length) {
-        return this.renderMessage("No data to visualize");
-    }
 
     const {
         otherOptions,
@@ -43,6 +40,7 @@ const PieGraph = (props) => {
         percentages,
         colors,
         mappedColors,
+        id,
     } = properties;
 
     const settings = {
@@ -59,6 +57,10 @@ const PieGraph = (props) => {
         }),
         ...settings
     });
+
+    if (!data || !data.length) {
+        return renderMessage("No data to visualize", id);
+    }
 
     const type = percentages ? LEGEND_PERCENTAGE : undefined;
 
