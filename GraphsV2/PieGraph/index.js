@@ -28,6 +28,10 @@ const PieGraph = (props) => {
         onMarkClick
     } = props;
 
+    if (!originalData || !originalData.length) {
+        return this.renderMessage("No data to visualize");
+    }
+
     const {
         otherOptions,
         labelColumn,
