@@ -45,6 +45,7 @@ const PieGraph = (props) => {
         colors,
         mappedColors,
         id,
+        classes,
     } = properties;
 
     const settings = {
@@ -63,7 +64,7 @@ const PieGraph = (props) => {
     });
 
     if (!data || !data.length) {
-        return renderMessage("No data to visualize", id);
+        return renderMessage({ message: "No data to visualize", id, classes });
     }
 
     const type = percentages ? LEGEND_PERCENTAGE : undefined;

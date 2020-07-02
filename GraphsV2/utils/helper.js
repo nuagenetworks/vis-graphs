@@ -224,9 +224,17 @@ export const scaleColor = (props, data, defaultColumn, setGraphColor) => {
     return colorList;
 }
 
-export const renderMessage = (message, id) => {
-    return (
-        <div id={`${id}-message`} className="center-text">
+
+export const renderMessage = (props) => {
+    const {
+        classes,
+        message,
+        id
+    } = props;
+    const messageClass = classes && classes.messageClass;
+
+     return (
+        <div id={`${id}-message`} className={messageClass ? messageClass : "center-text"}>
             {message}
         </div>
     )
