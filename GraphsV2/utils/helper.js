@@ -234,7 +234,7 @@ export const renderMessage = (props) => {
     const messageClass = classes && classes.messageClass;
 
      return (
-        <div id={`${id}-message`} className={messageClass ? messageClass : "center-text"}>
+        <div id={`${id}-message`} className={`center-text ${messageClass || ''}`}>
             {message}
         </div>
     )
