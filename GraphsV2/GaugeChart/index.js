@@ -9,6 +9,8 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import config from './default.config';
 import colorConvert from 'color-convert';
 
+const LabelHeight = 10;
+
 const renderNeedle = ({ cx, cy, outerRadius, chartValue }) => {
     let x1 = cx,
       y1 = cy - 2.5,
@@ -98,7 +100,7 @@ const GaugeChart = (props) => {
             startAngle: 180,
             endAngle: 0,
             cx: width * .50,
-            cy: width * .50,
+            cy: width * .45,
         };
 
         pieRadius = {
@@ -113,7 +115,7 @@ const GaugeChart = (props) => {
             <Label id="chart-value">
                 {parseInt(chartValue)}%
             </Label>
-            <PieChart width={width} height={height- 22} >
+            <PieChart width={width} height={height- 2 * LabelHeight} >
                 <Pie
                     data={chartData}
                     fill="#8884d8"

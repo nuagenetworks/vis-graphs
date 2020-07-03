@@ -224,16 +224,17 @@ export const scaleColor = (props, data, defaultColumn, setGraphColor) => {
     return colorList;
 }
 
+
 export const renderMessage = (props) => {
     const {
-        data,
+        classes,
         message,
         id
     } = props;
-    const messageClass = data && data.classes && data.classes.messageClass;
+    const messageClass = classes && classes.messageClass;
 
-    return (
-        <div id={`${id}-message`} className={messageClass ? messageClass : "center-text"}>
+     return (
+        <div id={`${id}-message`} className={`center-text ${messageClass || ''}`}>
             {message}
         </div>
     )

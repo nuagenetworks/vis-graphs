@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { compose } from 'redux';
 import {
     select,
@@ -24,7 +24,6 @@ let rectWidth = 0;
 let rectHeight = 0;
 let availableWidth = 0;
 let availableHeight = 0;
-let nodeElement = {};
 
 const TooltipFirstRow = styled('small')({
     fontWeight: 'bold',
@@ -87,14 +86,6 @@ const collapse = d => {
         d._children.forEach(collapse);
         d.children = null;
     }
-}
-
-const getGraph = () => select(nodeElement);
-
-const getGraphContainer = () => getGraph().select('.tree-graph-container');
-
-const removePreviousChart = () => {
-    getGraphContainer().selectAll('g.node').remove();
 }
 
 const parseTransformation = a => {
@@ -215,17 +206,23 @@ const TreeGraph = (props) => {
     } = properties;
 
     const isFirst = useRef(true);
+    const [nodeElement, setNodeElement] = useState(null);
+
     useEffect(() => {
         if (isFirst.current) {
             isFirst.current = false;
+            if (!nodeElement) return;
         } else {
-            removePreviousChart();
+            nodeElement && removePreviousChart();
         }
-        initiate(props);
-        transformAttribute = setSVGTransform(properties);
-        elementGenerator();
-        setDraggingRef(props);
-    }, [props]);
+        if (nodeElement) {
+            nodeElement && removePreviousChart()
+            initiate(props);
+            transformAttribute = setSVGTransform(properties);
+            elementGenerator();
+            setDraggingRef(props);
+        }
+    }, [props, nodeElement]);
 
     // Toggle children on click.
     const click = d => {
@@ -240,6 +237,14 @@ const TreeGraph = (props) => {
             onClickChild(d);
         }
         update(d);
+    }
+
+    const getGraph = () => select(nodeElement);
+
+    const getGraphContainer = () => getGraph().select('.tree-graph-container');
+
+    const removePreviousChart = () => {
+        getGraphContainer().selectAll('g.node').remove();
     }
 
     const getAvailableHeight = () => {
@@ -574,7 +579,7 @@ const TreeGraph = (props) => {
                 height={'100%'}
                 className='svgWidth'
                 ref={(node) => {
-                    nodeElement = node;
+                    setNodeElement(node);
                     select(node)
                         .call(zoom()
                             .scaleExtent([1 / 2, 8])

@@ -5,6 +5,6 @@ export default (props) => {
         value,
         tickFormat,
     } = props;
-
-    return moment(value).format(tickFormat || "LT");
+    let format = tickFormat && !tickFormat.includes("%") ? tickFormat : "LT";
+    return moment(value).format(format);
 }
