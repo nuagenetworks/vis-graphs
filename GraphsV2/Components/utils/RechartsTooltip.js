@@ -14,7 +14,7 @@ const Item = styled('p')({
 });
 
 export default ({ tooltip, tooltipKey, yColumn }) => {
-    if (!isEmpty(tooltip) && tooltipKey !== -1) {
+    if (!isEmpty(tooltip)) {
         return (<Tooltip
             content={
                 <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} />
@@ -29,29 +29,34 @@ const TooltipComponent = (props) => {
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
-              let col;
-              const elementKey = element.column || element.label;
-              if(tooltipKey) {
-                  col = payload.find(k => k['name'] === tooltipKey);
-                  if(col && !col.payload[elementKey]) {
-                    col.payload[elementKey] = tooltipKey;
-                  }
-                  if(col && yColumn && col.payload[yColumn]) {
-                    col.payload[yColumn] = col.value;
-                  }
-              }
-              if(!col) {
-                col = payload[0];
-              }
-              let columnFormatter = columnAccessor(element);
-              return (
-                <Item
-                    key={`tooltip-${index}`}
-                >
-                    {element.label || element.column} :
-                        { col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) || col.name}
-                </Item>
-            )})}
+                let col;
+                let elementKey = element.column || element.label;
+                if (elementKey === 'yColumn') {
+                    elementKey = payload[0].name;
+                    col = payload[0];
+                }
+                if(tooltipKey && tooltipKey !== -1) {
+                    col = payload.find(k => k['name'] === tooltipKey);
+                    if(col && !col.payload[elementKey]) {
+                        col.payload[elementKey] = tooltipKey;
+                    }
+                    if(col && yColumn && col.payload[yColumn]) {
+                        col.payload[yColumn] = col.value;
+                    }
+                }
+                if(!col) {
+                    col = payload[0];
+                }
+                let columnFormatter = columnAccessor(element);
+                return (
+                    <Item
+                        key={`tooltip-${index}`}
+                    >
+                        {element.label || element.column} :
+                        { col['payload'][elementKey] !== undefined ? col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) : col.name}
+                    </Item>
+                )
+            })}
         </Container>
     )
 }
