@@ -112,13 +112,17 @@ const LineGraph = (props) => {
                 })
             }
             {
-                customTooltip({ tooltip, tooltipKey })
+                customTooltip({ tooltip, tooltipKey, yColumn })
             }
             {
                 lineKeys.map((lineItem, index) => {
-                    const color = colors[index % colors.length];
+                    let color = colors[index % colors.length];
+                    if (typeof (lineItem) === 'object') {
+                        lineItem = lineItem.key;
+                        color = lineItem.color || color;
+                    }
                     return (
-                        <Line 
+                        <Line
                             connectNulls={zeroStart}
                             key={`line-${index}`}
                             className="line-graph-line"
@@ -127,9 +131,9 @@ const LineGraph = (props) => {
                             name={lineItem}
                             dataKey={lineItem}
                             stroke={color}
-                            fill={color} 
+                            fill={color}
                             isAnimationActive={false}
-                            activeDot={{r: 8}}
+                            activeDot={{ r: 8 }}
                             dot={showDots}
                         />
                     )
