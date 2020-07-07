@@ -118,8 +118,8 @@ const LineGraph = (props) => {
                 lineKeys.map((lineItem, index) => {
                     let color = colors[index % colors.length];
                     if (typeof (lineItem) === 'object') {
-                        lineItem = lineItem.key;
                         color = lineItem.color || color;
+                        lineItem = lineItem.key;
                     }
                     return (
                         <Line
