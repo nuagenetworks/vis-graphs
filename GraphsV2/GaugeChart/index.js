@@ -62,6 +62,8 @@ const GaugeChart = (props) => {
         properties,
     } = props;
 
+    const radius = width > height ? height*1.2 : width*1.2;
+
     const {
         minValue,
         maxValue,
@@ -102,12 +104,12 @@ const GaugeChart = (props) => {
             startAngle: 180,
             endAngle: 0,
             cx: width * .50,
-            cy: width * .45,
+            cy: height * .55,
         };
 
         pieRadius = {
-            innerRadius: width * 0.25,
-            outerRadius: width * 0.32,
+            innerRadius: radius * 0.25,
+            outerRadius: radius * 0.32,
         };
 
     }, [props.data, props.height, props.width]);
