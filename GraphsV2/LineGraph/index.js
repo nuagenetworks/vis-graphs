@@ -42,6 +42,7 @@ const LineGraph = (props) => {
         xLabelLimit,
         yLabelLimit,
         brushEnabled,
+        xTicks,
     } = properties;
 
     let {
@@ -53,6 +54,7 @@ const LineGraph = (props) => {
         key: linesColumn,
         xColumn,
         yColumn,
+        isVertical: true,
     });
 
     XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;
@@ -96,6 +98,7 @@ const LineGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
+                    interval: Math.floor(parsedData.length / xTicks)
                 })
             }
             {

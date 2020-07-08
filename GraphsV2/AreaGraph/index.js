@@ -47,6 +47,7 @@ const AreaGraph = (props) => {
         xLabelLimit,
         yLabelLimit,
         brushEnabled,
+        xTicks,
     } = properties;
 
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
@@ -57,6 +58,7 @@ const AreaGraph = (props) => {
         key: linesColumn,
         xColumn,
         yColumn,
+        isVertical: true
     });
 
     return (
@@ -96,6 +98,7 @@ const AreaGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
+                    interval: Math.floor(parsedData.length / xTicks)
                 })
             }
             {
