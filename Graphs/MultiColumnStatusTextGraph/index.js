@@ -31,8 +31,8 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
             <div style={{width: "25%", display: "inline-block"}}>
                 <div style={{
                     borderRadius: "100%",
-                    height: "2.9em",
-                    width: "2.9em",
+                    height: "2.7em",
+                    width: "2.7em",
                     textAlign: "center",
                     background: color,
                     display: "inline-block",
@@ -41,8 +41,9 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                 }}
                 >
                     <div style={{
-                        marginTop: "27%",
-                        fontSize: "1em",
+                        position: 'relative',
+                        top: "35%",
+                        fontSize: ".7em",
                         color: fontColor,
                     }}>
                         <span>{this.displayText(data, column)}</span>
