@@ -10,4 +10,5 @@ export default {
         left: 30, 
         right: 30 
     },
+    showDots: { r: 2, fill: "white" },
 }

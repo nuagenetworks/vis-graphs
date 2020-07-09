@@ -13,7 +13,7 @@ import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey } from '../utils/helper';
-import { BRUSH_HEIGHT, XLABEL_HEIGHT } from '../../constants';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
 
 const LineGraph = (props) => {
     const {
@@ -48,6 +48,24 @@ const LineGraph = (props) => {
     let {
       XAxisLabelConfig
     } = properties;
+
+    if (dateHistogram) {
+        let addTimestamp = true;
+        tooltip.forEach(element => {
+            if (element.column === xColumn) {
+                addTimestamp = false;
+            }
+        });
+        if (addTimestamp) {
+            tooltip.push({ column: xColumn, label: "Timestamp", timeFormat: "%b %d, %y %X" });
+        }
+    }
+
+    if (margin.right < 15) {
+        margin.right = 15;
+    }
+
+    const xtickLimits = width / XTICKS_WIDTH > xTicks ? xTicks : width / XTICKS_WIDTH;
 
     const { parsedData, uniqueKeys: lineKeys } = dataParser({
         data,
@@ -98,7 +116,7 @@ const LineGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
-                    interval: Math.floor(parsedData.length / xTicks)
+                    interval: Math.floor(parsedData.length / xtickLimits)
                 })
             }
             {

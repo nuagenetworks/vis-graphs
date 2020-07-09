@@ -3,5 +3,5 @@ export default {
         show: false
     },
     zeroStart: false,
-    showDots: false,
+    showDots: { r: 2, fill: "white" },
 }

@@ -20,7 +20,7 @@ export default ({
             type={type}
             dataKey={xColumn}
             interval={interval || 0}
-            label={{ value: xLabel, ...XAxisLabelConfig }}
+            label={ !!xLabel ? { value: xLabel, ...XAxisLabelConfig } : ''}
             height={X_AXIS_HEIGHT}
             axisLine={{ stroke: '#E9ECF0' }}
             tickLine={false}
@@ -30,7 +30,7 @@ export default ({
                     tickFormat={xTickFormat}
                     dateHistogram={dateHistogram}
                     dy="15"
-                    dx="-23"
+                    dx="-10"
                     limit={limit}
                 />
             }
