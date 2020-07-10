@@ -8,7 +8,7 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import { PERCENTAGE } from '../../constants';
-import { longestLabelLength, customTooltip } from '../utils/helper';
+import { longestLabelLength, customTooltip, renderMessage } from '../utils/helper';
 
 const getWidth = (
     barData,
@@ -31,15 +31,15 @@ const getData = ({
 }) => {
 
     if (display === PERCENTAGE) {
-        const data = barData[maxData] ? parseInt(barData[usedData] * 100 / barData[maxData]) : barData[usedData];
-        return `${data}%`;
+        const data = barData[maxData] ? (barData[usedData] * 100) / barData[maxData] : barData[usedData];
+        return `${data.toFixed(2)}%`;
     }
 
     barData[usedData] = format(maxDataFormat)(barData[usedData]);
     barData[maxData] = barData[maxData] ? format(maxDataFormat)(barData[maxData]) : undefined;
     const dataUnits = barData['unit'] || units ? ` ${barData['unit'] || units}` : '';
 
-    return barData[maxData] ? `${parseInt(barData[usedData])}${dataUnits}/ ${parseInt(barData[maxData])}${dataUnits}` : `${parseInt(barData[usedData])}${dataUnits}/ ${parseInt(defaultRange)}${dataUnits}`;
+    return barData[maxData] ? `${barData[usedData]}${dataUnits}/ ${barData[maxData]}${dataUnits}` : `${barData[usedData]}${dataUnits}/ ${defaultRange}${dataUnits}`;
 }
 
 const getPercentage = ({
@@ -182,7 +182,7 @@ const ProgressBarGraph = (props) => {
     const [hoveredDatum, setHoveredDataum] = useState(null);
 
     const {
-        data,
+        data: originalData,
         width,
         height,
         properties
@@ -204,8 +204,11 @@ const ProgressBarGraph = (props) => {
         defaultRange,
         fontSize,
         maxSectionHeight,
-        id
+        id,
+        classes
     } = properties;
+
+    const data = originalData.filter( element => !isNaN(element[maxData]));
 
     useEffect(() => {
         setCustomTooltips(customTooltip(properties));
@@ -227,6 +230,10 @@ const ProgressBarGraph = (props) => {
             }
         );
     }, [props.data, props.width, props.height]);
+
+    if (!data || !data.length) {
+        return renderMessage({ message: "No data to visualize", id, classes });
+    }
 
     const setHoveredData = (barData) => {
         if (barData) {
