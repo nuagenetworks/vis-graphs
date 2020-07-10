@@ -107,5 +107,4 @@ export default {
         dx: -10,
         fill: '#757575CB',
     },
-    xTicks: 10,
 }

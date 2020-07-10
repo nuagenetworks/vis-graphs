@@ -390,3 +390,11 @@ export const wrapD3Text = (text, width) => {
       }
   });
 };
+
+export const insertTimestampToTooltip = ({ tooltip, xColumn }) => {
+    const timestampTooltip = tooltip.filter(element => element.column === xColumn);
+    if (!timestampTooltip.length) {
+        tooltip = [{column: xColumn, label: "Timestamp", timeFormat: "%b %d, %y %X"}, ...tooltip]
+    }
+    return tooltip;
+};

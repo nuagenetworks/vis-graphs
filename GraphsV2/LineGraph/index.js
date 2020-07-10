@@ -12,7 +12,7 @@ import dataParser from '../utils/DataParser';
 import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { sortAscendingOnKey } from '../utils/helper';
+import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
 import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
 
 const LineGraph = (props) => {
@@ -28,7 +28,6 @@ const LineGraph = (props) => {
         yLabel,
         xColumn,
         yColumn,
-        tooltip,
         legend,
         margin,
         xLabelRotateHeight,
@@ -46,26 +45,19 @@ const LineGraph = (props) => {
     } = properties;
 
     let {
-      XAxisLabelConfig
+      XAxisLabelConfig,
+      tooltip,
     } = properties;
 
-    if (dateHistogram) {
-        let addTimestamp = true;
-        tooltip.forEach(element => {
-            if (element.column === xColumn) {
-                addTimestamp = false;
-            }
-        });
-        if (addTimestamp) {
-            tooltip.push({ column: xColumn, label: "Timestamp", timeFormat: "%b %d, %y %X" });
-        }
+    if (dateHistogram && tooltip) {
+        tooltip = insertTimestampToTooltip({ tooltip, xColumn });
     }
 
     if (margin.right < 15) {
         margin.right = 15;
     }
 
-    const xtickLimits = width / XTICKS_WIDTH > xTicks ? xTicks : width / XTICKS_WIDTH;
+    const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 
     const { parsedData, uniqueKeys: lineKeys } = dataParser({
         data,
