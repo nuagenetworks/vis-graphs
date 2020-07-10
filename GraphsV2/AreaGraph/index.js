@@ -17,7 +17,8 @@ import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { BRUSH_HEIGHT, XLABEL_HEIGHT, LEGEND_SEPARATE } from '../../constants';
+import { insertTimestampToTooltip } from '../utils/helper';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, LEGEND_SEPARATE, XTICKS_WIDTH } from '../../constants';
 
 const AreaGraph = (props) => {
 
@@ -33,7 +34,6 @@ const AreaGraph = (props) => {
         yLabel,
         xColumn,
         yColumn,
-        tooltip,
         legend,
         XAxisLabelConfig,
         margin,
@@ -47,9 +47,17 @@ const AreaGraph = (props) => {
         xLabelLimit,
         yLabelLimit,
         brushEnabled,
+        xTicks,
     } = properties;
 
+    let { tooltip } = properties;
+
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
+
+    if (dateHistogram && tooltip) {
+        tooltip = insertTimestampToTooltip({ tooltip, xColumn });
+    }
+    const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 
     // Formatting data for direct consumption by Area Graph
     const { parsedData, uniqueKeys: areaKeys } = dataParser({
@@ -57,6 +65,7 @@ const AreaGraph = (props) => {
         key: linesColumn,
         xColumn,
         yColumn,
+        isVertical: true
     });
 
     return (
@@ -96,6 +105,7 @@ const AreaGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
+                    interval: Math.floor(parsedData.length / xtickLimits)
                 })
             }
             {

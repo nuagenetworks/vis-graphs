@@ -12,14 +12,15 @@ export default ({
     xTickFormat,
     dateHistogram,
     type,
-    limit
+    limit,
+    interval,
 }) => {
     return (
         <XAxis
             type={type}
             dataKey={xColumn}
-            interval={0}
-            label={{ value: xLabel, ...XAxisLabelConfig }}
+            interval={interval || 0}
+            label={ !!xLabel ? { value: xLabel, ...XAxisLabelConfig } : ''}
             height={X_AXIS_HEIGHT}
             axisLine={{ stroke: '#E9ECF0' }}
             tickLine={false}
@@ -29,7 +30,7 @@ export default ({
                     tickFormat={xTickFormat}
                     dateHistogram={dateHistogram}
                     dy="15"
-                    dx="-15"
+                    dx="-10"
                     limit={limit}
                 />
             }
