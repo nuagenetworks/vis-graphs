@@ -1,4 +1,4 @@
-import lightMuiTheme from "material-ui/styles/baseThemes/lightBaseTheme";
+import lightMuiTheme from "@material-ui/core/styles/defaultTheme";
 import { createMuiTheme } from '@material-ui/core/styles';
 
 const customTheme = {
