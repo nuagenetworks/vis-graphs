@@ -4,12 +4,12 @@ import { compose } from 'redux';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-lightweight-tooltip';
 import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+import Dialog from '@material-ui/core/Dialog';
+import FlatButton from '@material-ui/core/Button';
 import objectPath from "object-path";
 import hash from 'object-hash';
-import IconButton from 'material-ui/IconButton';
-import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+import IconButton from '@material-ui/core/IconButton';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -25,6 +25,7 @@ import SearchBar from "../../SearchBar";
 import InfoBox from "../../InfoBox";
 import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip as MUITooltip} from "@material-ui/core";
 
 let displayColumn = [];
 let filterData = [];
@@ -871,16 +872,17 @@ const Table = (props) => {
 
         return (
             scroll && !disableRefresh ?
-                <div style={{ flex: "none" }}>
-                    <IconButton
-                        tooltip="Refresh"
-                        tooltipPosition={'top-left'}
-                        style={style.button.design}
-                        onClick={() => updateTableStatus({ currentPage: 1, selectedRow: {}, event: events.REFRESH }, props.updateScroll)}
-                    >
-                        <RefreshIcon className='refreshIcon' />
-                    </IconButton>
-                </div>
+                <span>
+                    <MUITooltip title={"Refresh"}>
+                        <IconButton
+                            tooltip="Refresh"
+                            tooltipPosition={'top-left'}
+                            onClick={() => updateTableStatus({ currentPage: 1, selectedRow: {}, event: events.REFRESH }, props.updateScroll)}
+                        >
+                            <RefreshIcon className='refreshIcon' />
+                        </IconButton>
+                    </MUITooltip>
+                </span>
                 : ''
         )
     }
@@ -923,32 +925,34 @@ const Table = (props) => {
     const renderConfirmationDialog = () => {
         const actions = [
             <FlatButton
-                label="Stay on Current Page"
-                labelStyle={style.button.labelStyle}
                 primary={true}
                 onClick={() => setShowConfirmationPopup(false)}
-            />,
+            >Stay on Current Page</FlatButton>,
             <FlatButton
-                label="Continue"
-                labelStyle={style.button.labelStyle}
                 primary={true}
                 onClick={() => updateTableStatus({ currentPage: 1, selectedRow: {}, event: events.REFRESH }, props.updateScroll)}
-            />,
+            >Continue</FlatButton>,
         ];
 
         return (
             showConfirmationPopup &&
-            <React.Fragment>
-                <Dialog
-                    title="Unable to fetch"
-                    actions={actions}
-                    modal={true}
-                    contentClassName='dialogBody'
-                    open={true}
-                >
-                    Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
-                </Dialog>
-            </React.Fragment>
+            <Dialog
+                title="Unable to fetch"
+                actions={actions}
+                modal={true}
+                contentClassName='dialogBody'
+                open={true}
+            >
+                <DialogTitle>Unable to fetch</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    {actions}
+                </DialogActions>
+            </Dialog>
         );
     }
 
@@ -1040,6 +1044,7 @@ const Table = (props) => {
                 deleteAria: "Delete Selected Rows",
             },
         },
+        customToolbar: resetScrollData
     };
 
     const theme = createMuiTheme({
@@ -1051,8 +1056,6 @@ const Table = (props) => {
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                {resetScrollData()}
-
                 {renderConfirmationDialog()}
                 {renderInfoBox()}
 
