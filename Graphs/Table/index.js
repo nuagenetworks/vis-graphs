@@ -7,7 +7,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import objectPath from "object-path";
 import IconButton from '@material-ui/core/IconButton';
-import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 import uuid from 'lodash/uniqueId';
 
