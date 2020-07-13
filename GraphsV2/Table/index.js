@@ -816,7 +816,8 @@ const Table = (props) => {
         node.id = 'contextMenu';
         node.style = `top: ${y}px; left: ${x}px; z-index: 100000;`;
 
-        const { goTo, context, id } = props;
+        const { goTo, context, properties } = props;
+        const { id } = properties || {};
         context.id = id;
 
         menu.forEach((item) => {
