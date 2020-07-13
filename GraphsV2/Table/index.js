@@ -11,6 +11,7 @@ import hash from 'object-hash';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
+import uuid from 'lodash/uniqueId';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import WithValidationHOC from '../../HOC/WithValidationHOC';
@@ -31,7 +32,7 @@ let displayColumn = [];
 let filterData = [];
 let container = "";
 let selectedRows = {};
-const TIMEOUT = 1000;
+let unformattedData = {};
 
 const useStyles  = (props) => ({
   MUIDataTableSelectCell: {
@@ -332,7 +333,7 @@ const Table = (props) => {
     const [displayColumns, setDisplayColumns] = useState([]);
     const [removedColumns, setRemovedColumn] = useState([]);
     const [dataMap, setDataMap] = useState(new Map());
-    const [unformattedData, setUnformattedData] = useState({});
+    const [stateUnformattedData, setStateUnformattedData] = useState({});
 
     const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
     const removedColumn = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
@@ -406,13 +407,14 @@ const Table = (props) => {
     
         filterData = [];
         const columnNameList = [];
+        unformattedData = {}
     
         columns.forEach(d => {
             columnNameList.push(d.column);
         });
     
         props.data.forEach((d, i) => {
-            const random = Math.floor(new Date().valueOf() * Math.random());
+            const random = uuid();
             const data = {
                 'row_id': random,
             };
@@ -436,9 +438,10 @@ const Table = (props) => {
             }
     
             filterData.push(data);
-            setUnformattedData({[random] : d});
+            unformattedData[random] = d;
         });
         setStateData(filterData);
+        setStateUnformattedData(unformattedData);
         setOriginalData(filterData);
         resetFilters(selectedRows);
     }
@@ -635,7 +638,7 @@ const Table = (props) => {
             highlight
         } = props.properties;
 
-        filterData = !isSearch && !isEmpty(stateData) ? stateData : filterData;
+        let data = !isSearch && !isEmpty(stateData) ? stateData : filterData;
         
         const {
             pageSize,
@@ -643,7 +646,7 @@ const Table = (props) => {
         } = getGraphProperties(props);
 
         const offset = pageSize * (currentPage - 1);
-        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
+        data = scroll ? data.slice(0, offset + pageSize) : data;
         let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
@@ -715,8 +718,13 @@ const Table = (props) => {
     }
 
     const handleClick = (key) => {
-        if (props.onMarkClick && data[key])
-            props.onMarkClick(unformattedData[data[key]['row_id']]);
+        if (props.onMarkClick && data[key] && filterData[key]) {
+            if(stateUnformattedData[data[key]['row_id']]) {
+                props.onMarkClick(stateUnformattedData[data[key]['row_id']]);
+            } else {
+                props.onMarkClick(stateUnformattedData[filterData[key]['row_id']]);
+            }
+        }
     }
 
     const handleRowSelection = (currentSelectedRow, allRows) => {
@@ -767,10 +775,9 @@ const Table = (props) => {
         saveSelectedRow({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll);
     }
 
-    const saveSelectedRow = debounce((tableData, updateScroll) => {
-        clearTimeout();
+    const saveSelectedRow =(tableData, updateScroll) => {
         updateTableStatus(tableData, updateScroll);
-    }, TIMEOUT);
+    }
 
     const handleContextMenu = (event) => {
         const menu = getMenu(props);
