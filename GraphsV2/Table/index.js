@@ -303,6 +303,7 @@ const Table = (props) => {
         scrollData,
         context, 
         selectedColumns,
+        onSelect
     } = props;
 
     const {
@@ -750,7 +751,7 @@ const Table = (props) => {
         }
 
         selectedRows[currentPage] = selectedRowsCurr.slice();
-        const { onSelect, scrollData } = properties;
+        const { scrollData } = properties;
         if (onSelect) {
             let matchingRows = [];
             let rows = {};
