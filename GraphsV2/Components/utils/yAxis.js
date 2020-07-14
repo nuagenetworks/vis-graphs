@@ -1,6 +1,7 @@
 import React from 'react';
 import { YAxis } from 'recharts';
 import GraphAxis from './GraphAxis';
+import { YAXIS_ROTATION } from '../../../constants';
 
 const AxisLabel = (props) => {
     return (
@@ -16,6 +17,7 @@ export default ({
     type,
     yColumn,
     limit,
+    isVertical,
 }) => {
     return (
         <YAxis
@@ -25,6 +27,7 @@ export default ({
             tickLine={false}
             tick={
                 <GraphAxis
+                    rotation={!isVertical ?  -YAXIS_ROTATION : undefined}
                     tickFormat={yTickFormat}
                     dy="5"
                     limit={limit}

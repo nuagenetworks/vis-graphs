@@ -57,6 +57,7 @@ const BarGraph = (props) => {
 
     let {
         XAxisLabelConfig,
+        yLabelLimit,
     } = properties;
 
     const {
@@ -77,7 +78,6 @@ const BarGraph = (props) => {
         dateHistogram,
         colors,
         xLabelLimit,
-        yLabelLimit,
         brush,
         isCustomColor,
         colorColumn,
@@ -97,6 +97,7 @@ const BarGraph = (props) => {
     const stack = stackColumn || undefined;
     const column = stackColumn || dimension;
     const isBrush = brush && !stack && brush < data.length;
+    yLabelLimit = !isVertical ? 8 : yLabelLimit;
 
     const barColors = scaleColor({
         colors,
@@ -153,6 +154,7 @@ const BarGraph = (props) => {
                         type: yAxisType,
                         yColumn,
                         limit: yLabelLimit,
+                        isVertical,
                     })
                 }
 
