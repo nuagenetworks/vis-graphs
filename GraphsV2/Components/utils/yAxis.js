@@ -27,7 +27,6 @@ export default ({
             tickLine={false}
             tick={
                 <GraphAxis
-                    rotation={!isVertical ?  -YAXIS_ROTATION : undefined}
                     tickFormat={yTickFormat}
                     dy="5"
                     limit={limit}

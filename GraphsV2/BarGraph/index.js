@@ -18,10 +18,12 @@ import dataParser from '../utils/DataParser';
 import {
     DEFAULT_BARGRAPH_ORIENTATION,
     BRUSH_HEIGHT,
+    YTICK_LENGTH,
+    DEFAULT_MARGIN_LEFT,
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { scaleColor } from '../utils/helper';
+import { scaleColor, longestLabelLength } from '../utils/helper';
 
 const BarGraph = (props) => {
     const [tooltipKey, setToolTipKey] = useState(-1);
@@ -57,7 +59,6 @@ const BarGraph = (props) => {
 
     let {
         XAxisLabelConfig,
-        yLabelLimit,
     } = properties;
 
     const {
@@ -81,7 +82,8 @@ const BarGraph = (props) => {
         brush,
         isCustomColor,
         colorColumn,
-        otherColors
+        otherColors,
+        yLabelLimit,
     } = properties;
 
     let dimension;
@@ -97,7 +99,6 @@ const BarGraph = (props) => {
     const stack = stackColumn || undefined;
     const column = stackColumn || dimension;
     const isBrush = brush && !stack && brush < data.length;
-    yLabelLimit = !isVertical ? 8 : yLabelLimit;
 
     const barColors = scaleColor({
         colors,
@@ -117,6 +118,10 @@ const BarGraph = (props) => {
     );
 
     XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
+    const longestLabel = longestLabelLength(parsedData);
+    if(longestLabel > YTICK_LENGTH) {
+        margin.left = longestLabel + DEFAULT_MARGIN_LEFT;
+    }
 
     return (
         <div onMouseDown={onDrag}>
@@ -154,7 +159,6 @@ const BarGraph = (props) => {
                         type: yAxisType,
                         yColumn,
                         limit: yLabelLimit,
-                        isVertical,
                     })
                 }
 
