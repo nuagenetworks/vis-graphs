@@ -88,6 +88,8 @@ const PieGraph = (props) => {
                 innerRadius={pieInnerRadius * 100}
                 outerRadius={pieOuterRadius * 100}
                 dataKey={sliceColumn}
+                startAngle={90}
+                endAngle={-270}
                 onClick={
                     (d) => (
                         onMarkClick && (!otherOptions || d[labelColumn] !== otherOptions.label)

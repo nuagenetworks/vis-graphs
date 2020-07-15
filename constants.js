@@ -8,3 +8,6 @@ export const BRUSH_HEIGHT = 20;
 export const XLABEL_HEIGHT = 20;
 export const RADIAN = Math.PI / 180;
 export const XTICKS_WIDTH = 50;
+export const YAXIS_ROTATION = 30;
+export const YTICK_LENGTH = 5;
+export const DEFAULT_MARGIN_LEFT = 30;

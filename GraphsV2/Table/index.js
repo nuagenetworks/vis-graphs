@@ -365,7 +365,7 @@ const Table = (props) => {
                 filterData = data;
                 setStateData(filterData);
                 resetFilters();
-                updateData(true);
+                updateData();
 
                 if (!searchText || searchString !== searchText) {
                     updateTableStatus({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH }, props.updateScroll);
@@ -374,7 +374,7 @@ const Table = (props) => {
                 filterData = data;
                 setStateData(filterData);
                 resetFilters();
-                updateData(true);
+                updateData();
             }
         }
     }
@@ -461,12 +461,12 @@ const Table = (props) => {
         return initialSort;
     }
 
-    const updateData = (isSearch = false) => {
+    const updateData = (isSort = false) => {
         const {
             data,
             selected,
             tableData,
-        } = getData(isSearch);
+        } = getData(isSort);
 
         setSelectedState(selected);
         setTableData(tableData);
@@ -633,13 +633,13 @@ const Table = (props) => {
         }, props.updateScroll)
     }
 
-    const getData = (isSearch) => {
+    const getData = (isSort) => {
         
         const {
             highlight
         } = props.properties;
 
-        let data = !isSearch && !isEmpty(stateData) ? stateData : filterData;
+        filterData = isSort && !isEmpty(stateData) ? stateData : filterData;
         
         const {
             pageSize,
@@ -647,7 +647,7 @@ const Table = (props) => {
         } = getGraphProperties(props);
 
         const offset = pageSize * (currentPage - 1);
-        data = scroll ? data.slice(0, offset + pageSize) : data;
+        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
         let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
@@ -683,7 +683,7 @@ const Table = (props) => {
         if(!isEqual(headerData, newHeaderData)) {
             setHeaderData(newHeaderData);
         }
-        updateData();
+        updateData(true);
     }
 
     const handleSortOrderChange = (column, order) => {
@@ -719,12 +719,10 @@ const Table = (props) => {
     }
 
     const handleClick = (key) => {
-        if (props.onMarkClick && data[key] && filterData[key]) {
+       if (props.onMarkClick && data[key]) {
             if(stateUnformattedData[data[key]['row_id']]) {
                 props.onMarkClick(stateUnformattedData[data[key]['row_id']]);
-            } else {
-                props.onMarkClick(stateUnformattedData[filterData[key]['row_id']]);
-            }
+            } 
         }
     }
 
@@ -773,11 +771,7 @@ const Table = (props) => {
         }
 
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-        saveSelectedRow({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll);
-    }
-
-    const saveSelectedRow =(tableData, updateScroll) => {
-        updateTableStatus(tableData, updateScroll);
+        updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll);
     }
 
     const handleContextMenu = (event) => {
@@ -1085,7 +1079,4 @@ Table.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
 };
 
-export default compose(
-    WithValidationHOC(),
-    (WithConfigHOC(properties))
-)(Table);
+export default WithConfigHOC(properties)(Table);
