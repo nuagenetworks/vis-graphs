@@ -82,7 +82,7 @@ const PieGraph = (props) => {
             element.percantage = `${(element[sliceColumn] / Total * 100).toFixed(2)}%`;
         });
 
-        tooltip = insertElementIntoTooltip(tooltip, { column: "percantage", label: "Percantage" });
+        tooltip = insertElementIntoTooltip(tooltip, { column: "percantage", label: "Percentage" });
     }
 
     return (
