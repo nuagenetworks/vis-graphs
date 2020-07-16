@@ -17,7 +17,7 @@ import renderLegend from '../Components/utils/Legend';
 import config from './default.config';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { insertTimestampToTooltip } from '../utils/helper';
+import { insertElementIntoTooltip } from '../utils/helper';
 import { BRUSH_HEIGHT, XLABEL_HEIGHT, LEGEND_SEPARATE, XTICKS_WIDTH } from '../../constants';
 
 const AreaGraph = (props) => {
@@ -55,7 +55,10 @@ const AreaGraph = (props) => {
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
     if (dateHistogram && tooltip) {
-        tooltip = insertTimestampToTooltip({ tooltip, xColumn });
+        const timestampTooltip = tooltip.filter(element => element.column === xColumn);
+        if (!timestampTooltip.length) {
+            tooltip = insertElementIntoTooltip(tooltip, { column: xColumn, label: "Timestamp", timeFormat: "%b %d, %y %X"});
+        }
     }
     const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 

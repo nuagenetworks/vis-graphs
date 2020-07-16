@@ -16,7 +16,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import customTooltip from '../Components/utils/RechartsTooltip';
 import renderLegend from '../Components/utils/Legend';
 import { filterEmptyData } from '../../utils/helpers';
-import { renderMessage } from '../utils/helper';
+import { renderMessage, insertElementIntoTooltip } from '../utils/helper';
 import { limit } from '../../utils/helpers/limit';
 
 const PieGraph = (props) => {
@@ -40,13 +40,14 @@ const PieGraph = (props) => {
         showZero,
         sliceColumn,
         legend,
-        tooltip,
         percentages,
         colors,
         mappedColors,
         id,
         classes,
     } = properties;
+
+    let { tooltip } = properties;
 
     const settings = {
         "metric": sliceColumn,
@@ -68,6 +69,21 @@ const PieGraph = (props) => {
     }
 
     const type = percentages ? LEGEND_PERCENTAGE : undefined;
+
+    if (percentages) {
+        const Total = data.reduce((prev, cur) => {
+            if (typeof prev !== 'number') {
+                prev = prev[sliceColumn];
+            }
+            return prev + cur[sliceColumn];
+        });
+
+        data.forEach(element => {
+            element.percantage = `${(element[sliceColumn] / Total * 100).toFixed(2)}%`;
+        });
+
+        tooltip = insertElementIntoTooltip(tooltip, { column: "percantage", label: "Percantage" });
+    }
 
     return (
         <PieChart
