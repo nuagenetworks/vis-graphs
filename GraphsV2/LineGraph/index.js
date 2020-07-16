@@ -50,7 +50,7 @@ const LineGraph = (props) => {
     } = properties;
 
     if (dateHistogram && tooltip) {
-        tooltip = insertTimestampToTooltip({ tooltip, xColumn });
+        tooltip = insertTimestampToTooltip({tooltip, xColumn});
     }
 
     if (margin.right < 15) {

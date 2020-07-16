@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import {
@@ -55,7 +55,7 @@ const AreaGraph = (props) => {
     const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
     if (dateHistogram && tooltip) {
-        tooltip = insertTimestampToTooltip({ tooltip, xColumn });
+        tooltip = insertTimestampToTooltip({tooltip, xColumn});
     }
     const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 
