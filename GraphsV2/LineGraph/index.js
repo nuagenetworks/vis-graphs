@@ -12,7 +12,7 @@ import dataParser from '../utils/DataParser';
 import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { sortAscendingOnKey, insertElementIntoTooltip } from '../utils/helper';
+import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
 import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
 
 const LineGraph = (props) => {
@@ -50,10 +50,7 @@ const LineGraph = (props) => {
     } = properties;
 
     if (dateHistogram && tooltip) {
-        const timestampTooltip = tooltip.filter(element => element.column === xColumn);
-        if (!timestampTooltip.length) {
-            tooltip = insertElementIntoTooltip(tooltip, { column: xColumn, label: "Timestamp", timeFormat: "%b %d, %y %X"});
-        }
+        tooltip = insertTimestampToTooltip({tooltip, xColumn});
     }
 
     if (margin.right < 15) {
