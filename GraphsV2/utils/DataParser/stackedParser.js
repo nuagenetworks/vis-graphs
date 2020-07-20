@@ -17,9 +17,9 @@ export default ({ data, key, xColumn, yColumn }) => {
                 rowData[d[key]] = d[yColumn];
                 rowData[xColumn] = d[xColumn];
                 rowData[yColumn] = d[yColumn];
-
             }
         }); 
+        delete rowData[yColumn];
         finalData.push(rowData);
     });
 
