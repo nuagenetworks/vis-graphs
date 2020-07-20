@@ -3,11 +3,11 @@ import React from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {Tooltip} from 'react-lightweight-tooltip'
 import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash'
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+import Dialog from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
 import objectPath from "object-path";
-import IconButton from 'material-ui/IconButton';
-import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+import IconButton from '@material-ui/core/IconButton';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 import uuid from 'lodash/uniqueId';
 
@@ -978,13 +978,13 @@ class Table extends AbstractGraph {
     // show confirmation popup to refresh data if scroll is enable
     renderConfirmationDialog() {
         const actions = [
-            <FlatButton
+            <Button
                 label="Stay on Current Page"
                 labelStyle={style.button.labelStyle}
                 primary={true}
                 onClick={ () => this.setState({showConfirmationPopup: false}) }
             />,
-            <FlatButton
+            <Button
                 label="Continue"
                 labelStyle={style.button.labelStyle}
                 primary={true}

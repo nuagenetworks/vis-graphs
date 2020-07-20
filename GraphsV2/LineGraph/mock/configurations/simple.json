@@ -1,0 +1,25 @@
+{
+  "data": {
+    "dateHistogram": true,
+    "yTicks": 5,
+    "stroke": {
+      "color": "#f76159",
+      "width": "2px"
+    },
+    "xTickGrid": false,
+    "yTickGrid": true,
+    "yTickFormat": ".2s",
+    "xLabel": "Time",
+    "yLabel": "Total # ACL Hits",
+    "xColumn": "timestamp",
+    "yColumn": "CPU",
+    "linesColumn": "MEMORY",
+    "brushEnabled": false,
+    "legend": {
+      "orientation": "vertical",
+      "show": true,
+      "circleSize": 5,
+      "labelOffset": 5
+    }
+  }
+}

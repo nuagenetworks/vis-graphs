@@ -1,1 +1,1 @@
-export { GraphManager } from "./Graphs/index"
+export { GraphManager } from './GraphManager';

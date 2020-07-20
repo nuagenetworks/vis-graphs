@@ -1,0 +1,36 @@
+{
+    "data": {
+        "dateHistogram": true,
+        "xColumn": "timestamp",
+        "yColumn": "CPU",
+        "linesColumn": "MEMORY",
+        "xLabel": "Time",
+        "yTickFormat": ",.0f",
+        "yLabel": "",
+        "yTicks": 5,
+        "legend": {
+            "orientation": "vertical",
+            "show": true,
+            "circleSize": 5,
+            "labelOffset": 5
+        },
+        "defaultY": {
+            "column": "MEMORY"
+        },
+        "tooltip": [
+            {
+                "column": "columnType",
+                "label": "Type"
+            },
+            {
+                "column": "yColumn",
+                "label": "Value",
+                "format": "0.2f"
+            },
+            {
+                "column": "timestamp",
+                "label": "Timestamp"
+            }
+        ]
+    }
+}
