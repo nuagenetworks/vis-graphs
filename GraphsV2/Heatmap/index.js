@@ -29,7 +29,6 @@ import {
     renderLegend,
     getGraphDimension,
     checkIsVerticalLegend,
-    renderMessage,
     longestLabelLength,
     wrapTextByWidth,
     wrapD3Text,
@@ -300,7 +299,7 @@ const HeatmapGraph = (props) => {
             data,
             legendArea,
             legend,
-        }, label, legendData, checkIsVerticalLegend(legend));
+        }, label, legendData);
 
         setGraphWidth(graphWidth);
         setGraphHeight(graphHeight);
@@ -313,11 +312,8 @@ const HeatmapGraph = (props) => {
     }
 
     const setAvailableHeight = (height) => {
-        let availableHeightT = height - (chartHeightToPixel + getXAxisHeight())
-
-        if (isBrush()) {
-            availableHeightT = availableHeightT * 0.75;
-        }
+        let availableHeightT = (height - (chartHeightToPixel + getXAxisHeight()))* 0.80;
+        
         setAvailableGraphHeight(availableHeightT);
     }
 
