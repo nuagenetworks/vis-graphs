@@ -46,6 +46,7 @@ import {
     let leftMargin = 0;
     let node = "";
     let availableMinWidth = 0;
+    let axist = {}
 
 const getMappedScaleColor = (data, defaultColumn, properties) => {
 
@@ -236,12 +237,22 @@ const HeatmapGraph = (props) => {
     const [hoveredDatum, setHoveredDataum] = useState(null);
     const [minMarginLeft, setMinMarginLeft] = useState(0);
     const [yLabelWidth, setGraphYLabelWidth] = useState(0);
+    const [showGraph, setShowGraph] = useState(false);
+
+    useEffect(() => {
+        initiate();
+        elementGenerator(graphId);
+        if(!isEmpty(axis) && !isEmpty(titlePosition)) {
+            updateElements();
+        }
+        setCustomTooltips(customTooltip(properties));
+    }, [props.data, props.height, props.width, props.context]);
 
     useEffect(() => {
         initiate();
         elementGenerator(graphId);
         setCustomTooltips(customTooltip(properties));
-    }, [props.data, props.height, props.width, props.context]);
+    }, []);
 
     const initiate = () => {
         parseData();
@@ -449,8 +460,6 @@ const HeatmapGraph = (props) => {
 
         const distXDatas = map(data, getXLabelFn()).keys().sort()
 
-        let axist = {}
-
         axist.x = axisBottom(getScale().x)
             .tickSizeInner(xTickGrid ? -availableHeight : xTickSizeInner)
             .tickSizeOuter(xTickSizeOuter);
@@ -487,7 +496,6 @@ const HeatmapGraph = (props) => {
         } = properties;
 
         const svg = getGraph();
-        if(!svg) {return;}
         svg.select(`#clip${graphId}`)
             .select("rect")
             .attr("x", -yLabelWidth)
@@ -508,8 +516,9 @@ const HeatmapGraph = (props) => {
 
         yAxis.selectAll('.tick text')
             .call(wrapD3Text, yLabelLimit);
-
-        setAxisTitles({ ...properties, titlePosition, xLabel, xColumn, yColumn });
+        if(titlePosition.x.left !== margin.left) {
+            setAxisTitles({ ...properties, titlePosition, xLabel, xColumn, yColumn });
+        }
 
         if (isBrush()) {
             configureMinGraph()
@@ -682,9 +691,11 @@ const HeatmapGraph = (props) => {
         height: graphHeight,
         order: checkIsVerticalLegend(legend) ? 2 : 1,
     };
-    
-    updateElements();
 
+    if(getLeftMargin() !== margin.left && getLeftMargin() !== 0 && showGraph === false) {
+        setShowGraph(true);
+    } 
+    
     const Tooltip = styled('div')({});
 
     return (
