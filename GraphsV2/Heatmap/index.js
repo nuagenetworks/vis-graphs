@@ -564,7 +564,7 @@ const HeatmapGraph = (props) => {
 
         const {
             onMarkClick,
-        } = properties;
+        } = props;
 
         const {
             stroke,
