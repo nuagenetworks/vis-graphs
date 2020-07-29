@@ -312,9 +312,8 @@ const Table = (props) => {
         fixedHeader,
         selectColumnOption,
         searchBar,
+        multiSelectable,
     } = properties;
-
-    let multiSelectable = true;
 
     const [selected, setSelectedState] = useState([]);
     const [tableData, setTableData] = useState([]);
