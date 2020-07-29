@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react'
-import { compose } from 'redux';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-lightweight-tooltip';
-import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash';
+import { first, last, isEqual, orderBy, isEmpty, uniq } from 'lodash';
 import Dialog from '@material-ui/core/Dialog';
 import FlatButton from '@material-ui/core/Button';
 import objectPath from "object-path";
@@ -14,7 +13,6 @@ import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
 import uuid from 'lodash/uniqueId';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
-import WithValidationHOC from '../../HOC/WithValidationHOC';
 import columnAccessor from "../../utils/columnAccessor";
 import { toolTipStyle, lastColToolTipStyle, firstColToolTipStyle } from './tooltipStyle';
 import "./style.css";
@@ -33,6 +31,42 @@ let filterData = [];
 let container = "";
 let selectedRows = {};
 let unformattedData = {};
+
+const option = {
+    print: false,
+    filter: false,
+    download: false,
+    search: false,
+    sort: true,
+    selectableRowsOnClick: true,
+    disableToolbarSelect: true,
+    rowsPerPageOptions: [],
+    responsive: "scroll",
+    textLabels: {
+        body: {
+            noMatch: "No data to visualize",
+            toolTip: "Sort",
+        },
+        pagination: {
+            next: "Next Page",
+            previous: "Previous Page",
+            rowsPerPage: "Rows per page:",
+            displayRows: "of",
+        },
+        toolbar: {
+            viewColumns: "Select Column",
+        },
+        viewColumns: {
+            title: "Select Column",
+            titleAria: "Show/Hide Table Columns",
+        },
+        selectedRows: {
+            text: "row(s) selected",
+            delete: "Delete",
+            deleteAria: "Delete Selected Rows",
+        },
+    },
+}
 
 const useStyles  = (props) => ({
   MUIDataTableSelectCell: {
@@ -312,9 +346,8 @@ const Table = (props) => {
         fixedHeader,
         selectColumnOption,
         searchBar,
+        multiSelectable,
     } = properties;
-
-    let multiSelectable = true;
 
     const [selected, setSelectedState] = useState([]);
     const [tableData, setTableData] = useState([]);
@@ -322,10 +355,7 @@ const Table = (props) => {
     const [fontSize, setFontSize] = useState(style.defaultFontsize);
     const [showInfoBox, setShowInfoBox] = useState(false);
     const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
-    const [infoBoxRow, setInfoBoxRow] = useState({});
-    const [infoBoxColumn, setInfoBoxColumn] = useState({});
-    const [infoBoxData, setInfoBoxData] = useState({});
-    const [infoBoxScript, setInfoBoxScript] = useState({});
+    const [infoBoxDetail, setInfoBoxDetail] = useState({});
     const [originalData, setOriginalData] = useState([]);
     const [stateData, setStateData] = useState([]);
     const [stateSortOrder, setStateSortOrder] = useState({});
@@ -334,7 +364,6 @@ const Table = (props) => {
     const [displayColumns, setDisplayColumns] = useState([]);
     const [removedColumns, setRemovedColumn] = useState([]);
     const [dataMap, setDataMap] = useState(new Map());
-    const [stateUnformattedData, setStateUnformattedData] = useState({});
 
     const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
     const removedColumn = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
@@ -442,7 +471,6 @@ const Table = (props) => {
             unformattedData[random] = d;
         });
         setStateData(filterData);
-        setStateUnformattedData(unformattedData);
         setOriginalData(filterData);
         resetFilters(selectedRows);
     }
@@ -720,8 +748,8 @@ const Table = (props) => {
 
     const handleClick = (key) => {
        if (props.onMarkClick && data[key]) {
-            if(stateUnformattedData[data[key]['row_id']]) {
-                props.onMarkClick(stateUnformattedData[data[key]['row_id']]);
+            if(unformattedData[data[key]['row_id']]) {
+                props.onMarkClick(unformattedData[data[key]['row_id']]);
             } 
         }
     }
@@ -897,10 +925,12 @@ const Table = (props) => {
         infoBoxScript,
     }) => {
         setShowInfoBox(true);
-        setInfoBoxRow(infoBoxRow);
-        setInfoBoxColumn(infoBoxColumn);
-        setInfoBoxData(infoBoxData);
-        setInfoBoxScript(infoBoxScript);
+        setInfoBoxDetail({
+            infoBoxRow,
+            infoBoxColumn,
+            infoBoxData,
+            infoBoxScript
+        });
     }
 
     const onInfoBoxCloseHandler = () => setShowInfoBox(false);
@@ -909,6 +939,13 @@ const Table = (props) => {
         const {
             Script,
         } = props;
+
+        const {
+            infoBoxRow,
+            infoBoxColumn,
+            infoBoxData,
+            infoBoxScript,
+        } = infoBoxDetail;
 
         return (
             showInfoBox &&
@@ -1002,51 +1039,19 @@ const Table = (props) => {
     const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
     const heightMargin = getHeightMargin({ ...properties, showFooter });
     const options = {
-        print: false,
-        filter: false,
-        download: false,
-        search: false,
-        sort: true,
+        ...option,
         viewColumns: selectColumnOption || false,
-        responsive: "scroll",
         fixedHeaderOptions: { yAxis: fixedHeader },
         pagination: showFooter,
         rowsPerPage: pageSize,
         count: totalRecords,
         page: tableCurrentPage,
-        rowsPerPageOptions: [],
         selectableRows: multiSelectable ? 'multiple' : 'single',
         onChangePage: handlePageClick,
         rowsSelected: selected,
         onRowsSelect: props.handleRowSelection ? props.handleRowSelection : handleRowSelection,
-        selectableRowsOnClick: true,
         onColumnSortChange: handleSortOrderChange,
         onColumnViewChange: handleColumnViewChange,
-        disableToolbarSelect: true,
-        textLabels: {
-            body: {
-                noMatch: "No data to visualize",
-                toolTip: "Sort",
-            },
-            pagination: {
-                next: "Next Page",
-                previous: "Previous Page",
-                rowsPerPage: "Rows per page:",
-                displayRows: "of",
-            },
-            toolbar: {
-                viewColumns: "Select Column",
-            },
-            viewColumns: {
-                title: "Select Column",
-                titleAria: "Show/Hide Table Columns",
-            },
-            selectedRows: {
-                text: "row(s) selected",
-                delete: "Delete",
-                deleteAria: "Delete Selected Rows",
-            },
-        },
         customToolbar: resetScrollData
     };
 
