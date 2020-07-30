@@ -349,9 +349,7 @@ const Table = (props) => {
         multiSelectable,
     } = properties;
 
-    const [selected, setSelectedState] = useState([]);
-    const [tableData, setTableData] = useState([]);
-    const [data, setData] = useState([]);
+    const [tableDetail, setTableDetail] = useState([]);
     const [fontSize, setFontSize] = useState(style.defaultFontsize);
     const [showInfoBox, setShowInfoBox] = useState(false);
     const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
@@ -496,9 +494,11 @@ const Table = (props) => {
             tableData,
         } = getData(isSort);
 
-        setSelectedState(selected);
-        setTableData(tableData);
-        setData(data);
+        setTableDetail({
+            selected,
+            tableData,
+            data
+        });
     }
 
     const getTableData = (columns, tableData) => {
@@ -679,7 +679,7 @@ const Table = (props) => {
         let tableData = getTableData(getColumns(props), data);
 
         if (highlight) {
-            tableData = removeHighlighter(tableData, highlight, selected);
+            tableData = removeHighlighter(tableData, highlight, tableDetail.selected);
         }
 
         return {
@@ -747,9 +747,9 @@ const Table = (props) => {
     }
 
     const handleClick = (key) => {
-       if (props.onMarkClick && data[key]) {
-            if(unformattedData[data[key]['row_id']]) {
-                props.onMarkClick(unformattedData[data[key]['row_id']]);
+       if (props.onMarkClick && tableDetail.data[key]) {
+            if(unformattedData[tableDetail.data[key]['row_id']]) {
+                props.onMarkClick(unformattedData[tableDetail.data[key]['row_id']]);
             } 
         }
     }
@@ -1048,7 +1048,7 @@ const Table = (props) => {
         page: tableCurrentPage,
         selectableRows: multiSelectable ? 'multiple' : 'single',
         onChangePage: handlePageClick,
-        rowsSelected: selected,
+        rowsSelected: tableDetail.selected,
         onRowsSelect: props.handleRowSelection ? props.handleRowSelection : handleRowSelection,
         onColumnSortChange: handleSortOrderChange,
         onColumnViewChange: handleColumnViewChange,
@@ -1071,7 +1071,7 @@ const Table = (props) => {
                 {renderSearchBarIfNeeded(headerData)}
 
                 <MUIDataTable
-                    data={tableData}
+                    data={tableDetail.tableData}
                     columns={headerData}
                     options={options}
                 />
