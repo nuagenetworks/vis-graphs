@@ -31,6 +31,9 @@ let filterData = [];
 let container = "";
 let selectedRows = {};
 let unformattedData = {};
+let showInfoBox = false;
+let infoBoxDetail = {};
+let dataMap = new Map();
 
 const option = {
     print: false,
@@ -328,6 +331,139 @@ const getMenu = (props) => {
     return menu || false;
 }
 
+const getTableData = (props, tableData, removedColumns, fontSize) => {
+    const {
+        highlight,
+        highlightColor,
+    } = props.properties;
+
+    const columns = getColumns(props);
+
+    if (!columns) {
+        return [];
+    }
+
+    const usedColumns = columns.filter((column, index) => !removedColumns.includes(index.toString()));
+
+    if (usedColumns.length) {
+        first(usedColumns).firstColStyle = firstColToolTipStyle;
+        last(usedColumns).lastColStyle = lastColToolTipStyle;
+    }
+
+    const parsedData = tableData.map((d, j) => {
+
+        const dataKey = hash(d);
+
+        if (dataMap.has(dataKey)) {
+            return dataMap.get(dataKey);
+        }
+
+        let data = {},
+            highlighter = false;
+
+        for (let key in columns) {
+            if (columns.hasOwnProperty(key)) {
+
+                const columnObj = columns[key],
+                    originalData = d[columnObj.column];
+                let columnData = originalData;
+
+                if (columnObj.totalCharacters) {
+                    columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d);
+                }
+
+                if ((columnData || columnData === 0) && columnObj.tooltip) {
+                    let fullText = d[columnObj.tooltip.column] || originalData;
+                    fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText;
+
+                    const hoverContent = (
+                        <div key={`tooltip_${j}_${key}`}>
+                            {fullText} &nbsp;
+                            <CopyToClipboard text={fullText ? fullText.toString() : ''}>
+                                <button style={{ background: '#000', padding: 1 }} title="copy">
+                                    <FaRegClipboard size={10} color="#fff" />
+                                </button>
+                            </CopyToClipboard>
+                        </div>
+                    )
+
+                    columnData = (
+                        <Tooltip key={`tooltip_${j}_${key}`}
+                            content={[hoverContent]}
+                            styles={columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle}>
+                            {columnData}
+                        </Tooltip>
+                    )
+                }
+
+                if (highlight && highlight.includes(columnObj.column) && originalData) {
+                    highlighter = true;
+                }
+
+                if (columnObj.colors && columnObj.colors[originalData]) {
+                    columnData = (
+                        <div style={{ background: columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+                    )
+                }
+
+                if (columnObj.infoBox && columnData) {
+                    columnData = (
+                        <React.Fragment>
+                            {columnData}
+                            <span style={{ padding: "0px 5px" }} className="showInfoBox" onClick={(e) => {
+                                e.stopPropagation();
+                                openInfoBox({
+                                    infoBoxRow: d,
+                                    infoBoxColumn: columnObj.column,
+                                    infoBoxData: originalData,
+                                    infoBoxScript: columnObj.infoBox
+                                })
+                            }}>
+                                <EyeIcon size={fontSize + 2} color="#555555" />
+                            </span>
+                        </React.Fragment>
+                    )
+                }
+
+                if (columnData || columnData === 0) {
+                    data[key] = typeof (columnData) === "boolean" ? columnData.toString().toUpperCase() :
+                        (typeof originalData === "object") ? React.isValidElement(originalData) ? columnData : null : columnData;
+
+                    if (columnObj.fontColor) {
+                        data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
+                    }
+                }
+            }
+        }
+
+        if (highlighter) {
+            Object.keys(data).map(key => {
+                return data[key] = <div style={{ background: highlightColor || '', height: style.row.height, padding: "10px 0" }}>
+                    {data[key]}</div>
+            })
+        }
+        dataMap.set(dataKey, data);
+        return data
+    })
+
+    return parsedData;
+}
+
+const openInfoBox = ({
+    infoBoxRow,
+    infoBoxColumn,
+    infoBoxData,
+    infoBoxScript,
+}) => {
+    showInfoBox = true;
+    infoBoxDetail = {
+        infoBoxRow,
+        infoBoxColumn,
+        infoBoxData,
+        infoBoxScript
+    };
+}
+
 const Table = (props) => {
     const {
         width,
@@ -351,9 +487,7 @@ const Table = (props) => {
 
     const [tableDetail, setTableDetail] = useState([]);
     const [fontSize, setFontSize] = useState(style.defaultFontsize);
-    const [showInfoBox, setShowInfoBox] = useState(false);
     const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
-    const [infoBoxDetail, setInfoBoxDetail] = useState({});
     const [originalData, setOriginalData] = useState([]);
     const [stateData, setStateData] = useState([]);
     const [stateSortOrder, setStateSortOrder] = useState({});
@@ -361,7 +495,6 @@ const Table = (props) => {
     const [headerData, setHeaderData] = useState({});
     const [displayColumns, setDisplayColumns] = useState([]);
     const [removedColumns, setRemovedColumn] = useState([]);
-    const [dataMap, setDataMap] = useState(new Map());
 
     const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
     const removedColumn = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
@@ -501,123 +634,6 @@ const Table = (props) => {
         });
     }
 
-    const getTableData = (columns, tableData) => {
-        const {
-            highlight,
-            highlightColor,
-        } = properties;
-
-        if (!columns) {
-            return [];
-        }
-
-        const keyColumns = getColumns(props);
-        const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
-
-        if (usedColumns.length) {
-            first(usedColumns).firstColStyle = firstColToolTipStyle;
-            last(usedColumns).lastColStyle = lastColToolTipStyle;
-        }
-
-        const parsedData = tableData.map((d, j) => {
-
-            const dataKey = hash(d);
-
-            if (dataMap.has(dataKey)) {
-                return dataMap.get(dataKey);
-            }
-
-            let data = {},
-                highlighter = false;
-
-            for (let key in keyColumns) {
-                if (keyColumns.hasOwnProperty(key)) {
-
-                    const columnObj = keyColumns[key],
-                        originalData = d[columnObj.column];
-                    let columnData = originalData;
-
-                    if (columnObj.totalCharacters) {
-                        columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d);
-                    }
-
-                    if ((columnData || columnData === 0) && columnObj.tooltip) {
-                        let fullText = d[columnObj.tooltip.column] || originalData;
-                        fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText;
-
-                        const hoverContent = (
-                            <div key={`tooltip_${j}_${key}`}>
-                                {fullText} &nbsp;
-                                <CopyToClipboard text={fullText ? fullText.toString() : ''}>
-                                    <button style={{ background: '#000', padding: 1 }} title="copy">
-                                        <FaRegClipboard size={10} color="#fff" />
-                                    </button>
-                                </CopyToClipboard>
-                            </div>
-                        )
-
-                        columnData = (
-                            <Tooltip key={`tooltip_${j}_${key}`}
-                                content={[hoverContent]}
-                                styles={columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle}>
-                                {columnData}
-                            </Tooltip>
-                        )
-                    }
-
-                    if (highlight && highlight.includes(columnObj.column) && originalData) {
-                        highlighter = true;
-                    }
-
-                    if (columnObj.colors && columnObj.colors[originalData]) {
-                        columnData = (
-                            <div style={{ background: columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
-                        )
-                    }
-
-                    if (columnObj.infoBox && columnData) {
-                        columnData = (
-                            <React.Fragment>
-                                {columnData}
-                                <span style={{ padding: "0px 5px" }} className="showInfoBox" onClick={(e) => {
-                                    e.stopPropagation();
-                                    openInfoBox({
-                                        infoBoxRow: d,
-                                        infoBoxColumn: columnObj.column,
-                                        infoBoxData: originalData,
-                                        infoBoxScript: columnObj.infoBox
-                                    })
-                                }}>
-                                    <EyeIcon size={fontSize + 2} color="#555555" />
-                                </span>
-                            </React.Fragment>
-                        )
-                    }
-
-                    if (columnData || columnData === 0) {
-                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() :
-                            (typeof originalData === "object") ? React.isValidElement(originalData) ? columnData : null : columnData;
-
-                        if (columnObj.fontColor) {
-                            data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
-                        }
-                    }
-                }
-            }
-
-            if (highlighter) {
-                Object.keys(data).map(key => {
-                    return data[key] = <div style={{ background: highlightColor || '', height: style.row.height, padding: "10px 0" }}>
-                        {data[key]}</div>
-                })
-            }
-            setDataMap(dataMap.set(dataKey, data));
-            return data
-        })
-
-        return parsedData;
-    }
-
     const handleColumnViewChange = (changedColumn, action) => {
         let latestDisplayColumns = [];
 
@@ -676,7 +692,7 @@ const Table = (props) => {
 
         const offset = pageSize * (currentPage - 1);
         const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
-        let tableData = getTableData(getColumns(props), data);
+        let tableData = getTableData(props, data, removedColumns, fontSize);
 
         if (highlight) {
             tableData = removeHighlighter(tableData, highlight, tableDetail.selected);
@@ -918,48 +934,37 @@ const Table = (props) => {
         )
     }
 
-    const openInfoBox = ({
-        infoBoxRow,
-        infoBoxColumn,
-        infoBoxData,
-        infoBoxScript,
-    }) => {
-        setShowInfoBox(true);
-        setInfoBoxDetail({
-            infoBoxRow,
-            infoBoxColumn,
-            infoBoxData,
-            infoBoxScript
-        });
+    const onInfoBoxCloseHandler = () => {
+        showInfoBox = false;
     }
-
-    const onInfoBoxCloseHandler = () => setShowInfoBox(false);
 
     const renderInfoBox = () => {
         const {
             Script,
         } = props;
 
-        const {
-            infoBoxRow,
-            infoBoxColumn,
-            infoBoxData,
-            infoBoxScript,
-        } = infoBoxDetail;
+        if(!isEmpty(infoBoxDetail) && Script) {
+            const {
+                infoBoxRow,
+                infoBoxColumn,
+                infoBoxData,
+                infoBoxScript,
+            } = infoBoxDetail;
 
-        return (
-            showInfoBox &&
-            <InfoBox
-                onInfoBoxClose={onInfoBoxCloseHandler}
-            >
-                <Script
-                    row={infoBoxRow}
-                    key={infoBoxColumn}
-                    value={infoBoxData}
-                    script={infoBoxScript}
-                />
-            </InfoBox>
-        )
+            return (
+                showInfoBox &&
+                <InfoBox
+                    onInfoBoxClose={onInfoBoxCloseHandler}
+                >
+                    <Script
+                        row={infoBoxRow}
+                        key={infoBoxColumn}
+                        value={infoBoxData}
+                        script={infoBoxScript}
+                    />
+                </InfoBox>
+            )
+        }
     }
 
     const renderConfirmationDialog = () => {
