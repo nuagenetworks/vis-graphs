@@ -26,7 +26,6 @@ import MUIDataTable from "mui-datatables";
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip as MUITooltip} from "@material-ui/core";
 
-let displayColumn = [];
 let filterData = [];
 let container = "";
 let selectedRows = {};
@@ -34,6 +33,8 @@ let unformattedData = {};
 let showInfoBox = false;
 let infoBoxDetail = {};
 let dataMap = new Map();
+let headerData = {};
+let displayColumns = [];
 
 const option = {
     print: false,
@@ -492,8 +493,6 @@ const Table = (props) => {
     const [stateData, setStateData] = useState([]);
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [initialSort, setInitialSort] = useState({});
-    const [headerData, setHeaderData] = useState({});
-    const [displayColumns, setDisplayColumns] = useState([]);
     const [removedColumns, setRemovedColumn] = useState([]);
 
     const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
@@ -652,12 +651,8 @@ const Table = (props) => {
             latestDisplayColumns = [...mergedColumns];
         }
         if(!isEqual(displayColumns,latestDisplayColumns)) {
-            setDisplayColumns(latestDisplayColumns);
-            displayColumn = latestDisplayColumns;
-            const newHeaderData = getHeaderData(props, getInitialSort(props), null, latestDisplayColumns);
-            if(!isEqual(headerData, newHeaderData)) {
-                setHeaderData(newHeaderData);
-            }
+            displayColumns = latestDisplayColumns;
+            headerData = getHeaderData(props, getInitialSort(props), null, latestDisplayColumns);
         }
     }
 
@@ -723,10 +718,7 @@ const Table = (props) => {
         setStateData(filterData);
 
         resetFilters();
-        const newHeaderData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-        if(!isEqual(headerData, newHeaderData)) {
-            setHeaderData(newHeaderData);
-        }
+        headerData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder, !isEmpty(displayColumns) ? displayColumns : removedColumns);
         updateData(true);
     }
 
@@ -756,10 +748,7 @@ const Table = (props) => {
 
         scroll ? updateTableStatus({ currentPage: pageNo, event: events.PAGING }, props.updateScroll) : updateData();
         
-        const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-        if(!isEqual(headerData, newHeaderData)) {
-            setHeaderData(newHeaderData);
-        }
+        headerData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
     }
 
     const handleClick = (key) => {
@@ -1006,9 +995,9 @@ const Table = (props) => {
             scrollData,
         } = props;
 
-        if (!isEmpty(displayColumn)) {
+        if (!isEmpty(displayColumns)) {
             updateTableStatus({
-                [`removedColumn`]: displayColumn,
+                [`removedColumn`]: displayColumns,
                 event: events.REMOVED_COLUMNS
             }, props.updateScroll);
         }
@@ -1021,6 +1010,7 @@ const Table = (props) => {
 
         selectedRows = {};
         filterData = [];
+        displayColumns = []; 
     }
  
     useEffect(() => {
@@ -1036,10 +1026,8 @@ const Table = (props) => {
     }, []);
 
     const tableCurrentPage = currentPage - 1;
-    const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-    if(!isEqual(headerData, newHeaderData)) {
-        setHeaderData(newHeaderData);
-    }
+    headerData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
+    
     const totalRecords = scroll ? size : filterData.length;
     const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
     const heightMargin = getHeightMargin({ ...properties, showFooter });
