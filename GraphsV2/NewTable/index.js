@@ -1,19 +1,18 @@
 import PropTypes from 'prop-types';
-import React from 'react'
-import { Column, Table, InfiniteLoader, AutoSizer } from 'react-virtualized';
+import React, { useState } from 'react'
+import { Column, Table, InfiniteLoader, AutoSizer, SortIndicator } from 'react-virtualized';
 import 'react-virtualized/styles.css';
 import objectPath from "object-path";
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
+import orderBy from 'lodash/orderBy';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
-
-let filterData = [];
 
 const getGraphProperties = (props) => {
     const {
@@ -76,13 +75,55 @@ const TableGraph = (props) => {
         data,
         context,
         scrollData,
+        scroll,
         selectedColumns,
         size,
     } = props;
 
-    const getColumns = () => (properties.columns || []);
+    const {
+        multiSelectable,
+    } = properties;
 
-    filterData = data;
+    const [stateSortOrder, setStateSortOrder] = useState({});
+    const [rowSelected, setRowSelected] = useState([]);
+    const [filterData, setFilterData] = useState(data);
+
+    const handleScrollSorting = (sortBy, sortDirection) => {
+
+        const sort = objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined;
+        if (sort && sort.column === sortBy.toLowerCase()) {
+            sortDirection = sort.order === 'desc' ? 'asc' : 'desc';
+        }
+        setStateSortOrder({ column: sortBy, order: sortDirection });
+
+        props.updateScroll({
+            sort: { column: sortBy, order: sortDirection },
+            currentPage: 1,
+            selectedRow: {},
+            event: events.SORTING,
+        });
+    }
+
+    const handleStaticSorting = (sortBy, sortDirection) => {
+        const sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : {};
+        if (sortOrder && sortOrder.column === sortBy) {
+            sortDirection = sortOrder.order === 'desc' ? 'asc' : 'desc';
+            sortOrder.order = sortDirection;
+            setStateSortOrder(sortOrder);
+        } else {
+            sortOrder.order = sortDirection;
+            sortOrder.column = sortBy;
+            setStateSortOrder(sortOrder);
+        }
+
+        setFilterData(orderBy(filterData, [sortBy], [sortDirection]));
+    }
+
+    const handleSortOrderChange = ({ sortBy, sortDirection }) => {
+        scroll ? handleScrollSorting(sortBy, sortDirection) : handleStaticSorting(sortBy, sortDirection)
+    }
+
+    const getColumns = () => (properties.columns || []);
 
     const { filterColumns } = getColumnByContext(getColumns(), context);
     const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
@@ -130,13 +171,47 @@ const TableGraph = (props) => {
 
     const columns = getHeaderData().filter(d => d.options.display === 'true');
 
+    const headerRenderer = ({ dataKey, label }) => {
+        return (
+            <div>
+                {label}
+                {stateSortOrder.column === dataKey && <SortIndicator sortDirection={stateSortOrder.order} />}
+            </div>
+        );
+    }
+
     const columnsDetail = () => {
-        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} width={200} />);
+        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
     }
 
     const onScroll = ({ startIndex, stopIndex }) => {
         const page = (startIndex / 10) + 1;
         props.updateScroll({ currentPage: page, event: events.PAGING })
+    }
+
+    const onRowClick = ({ index }) => {
+        let selectedRowsCurr = rowSelected;
+        if (rowSelected.includes(index)) {
+            selectedRowsCurr = rowSelected.filter(item => item !== index);
+        } else {
+            selectedRowsCurr = !!multiSelectable ? [...selectedRowsCurr, index] : [index];
+        }
+        setRowSelected(selectedRowsCurr);
+        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
+        props.updateScroll({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRowsCurr } });
+    }
+
+    const rowStyleFormat = (row) => {
+        if (!!rowSelected && rowSelected.includes(row.index)) {
+            return {
+                backgroundColor: '#b7b9bd',
+                color: '#333'
+            };
+        }
+        return {
+            backgroundColor: '#fff',
+            color: '#333'
+        };
     }
 
     const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
@@ -147,13 +222,13 @@ const TableGraph = (props) => {
                 } = getGraphProperties(props);
 
                 const search = labelToField(expandExpression(expression), getColumns());
-                filterData = data;
+                setFilterData(data);
 
                 if (!searchText || searchString !== searchText) {
                     props.updateScroll({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH });
                 }
             } else {
-                filterData = data;
+                setFilterData(data);
             }
         }
     }
@@ -225,6 +300,11 @@ const TableGraph = (props) => {
                                             rowCount={filterData.length}
                                             rowGetter={({ index }) => filterData[index]}
                                             isRowLoaded={({ index }) => filterData[index]}
+                                            sort={handleSortOrderChange}
+                                            sortBy={stateSortOrder.column}
+                                            sortDirection={stateSortOrder.order}
+                                            onRowClick={onRowClick}
+                                            rowStyle={rowStyleFormat}
                                         >
                                             {columnsDetail()}
                                         </Table>
