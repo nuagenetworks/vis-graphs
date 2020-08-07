@@ -1,11 +1,72 @@
 import PropTypes from 'prop-types';
 import React from 'react'
-import WithConfigHOC from '../../HOC/WithConfigHOC';
-import { properties } from "./default.config";
 import { Column, Table, InfiniteLoader, AutoSizer } from 'react-virtualized';
 import 'react-virtualized/styles.css';
+import objectPath from "object-path";
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import uniq from 'lodash/uniq';
+
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import { properties } from "./default.config";
 import { events } from '../../utils/types';
+import SearchBar from "../../SearchBar";
+import { expandExpression, labelToField } from '../../utils/helpers';
+
+let filterData = [];
+
+const getGraphProperties = (props) => {
+    const {
+        data,
+        scrollData,
+        size,
+    } = props;
+
+    return {
+        searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
+        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
+        size: size || data.length, expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+    }
+}
+
+const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
+    let removedColumns = [];
+    columns.forEach((d, index) => {
+        if (d.displayOption) {
+            if (d.display === false || !filterColumns.length || !filterColumns.find(column => d.column === column)) {
+                removedColumns.push(`${index}`);
+            }
+        } else if (selectedColumns && selectedColumns.length) {
+            if (!selectedColumns.find(column => d.label === column)) {
+                removedColumns.push(`${index}`)
+            }
+        } else if (d.display === false) {
+            removedColumns.push(`${index}`);
+        }
+    });
+    return removedColumns;
+}
+
+const getColumnByContext = (columns, context) => {
+    const filterColumns = [];
+    let removedColumnsKey = '';
+    columns.forEach((d) => {
+        if (d.displayOption) {
+            for (let key in d.displayOption) {
+                if (context.hasOwnProperty(key)) {
+                    removedColumnsKey = context[key];
+                    const keyValue = d.displayOption[key];
+                    const contextKeyValue = context[key];
+                    if ((typeof keyValue === 'string' && contextKeyValue === keyValue) ||
+                        (Array.isArray(keyValue) && keyValue.includes(contextKeyValue))) {
+                        filterColumns.push(d.column);
+                    }
+                }
+            }
+        }
+    })
+    return { filterColumns, removedColumnsKey };
+}
 
 const TableGraph = (props) => {
     const {
@@ -13,23 +74,37 @@ const TableGraph = (props) => {
         height,
         properties,
         data,
+        context,
+        scrollData,
+        selectedColumns,
+        size,
     } = props;
 
     const getColumns = () => (properties.columns || []);
 
+    filterData = data;
+
+    const { filterColumns } = getColumnByContext(getColumns(), context);
+    const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
+    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+
     const getHeaderData = () => {
         const { ESColumns } = props;
         let columnKeys = new Map();
+
         if (ESColumns) {
             ESColumns.forEach(item => {
                 columnKeys.set(item.key, true);
             });
         }
-        const columns = getColumns()
-        const headerData = [];
+
+        const columns = getColumns();
+        let headerData = [];
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
+                const displayColumn = removedColumn.includes(index) ? 'false' : 'true';
+                const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
@@ -39,49 +114,129 @@ const TableGraph = (props) => {
                     type: columnRow.selection ? "selection" : "text",
                     style: {
                         textIndent: '2px'
+                    },
+                    options: {
+                        display: displayColumn,
+                        sort,
                     }
                 };
+
                 headerData.push(headerColumn);
             }
         }
-        return headerData
+
+        return headerData;
     }
 
+    const columns = getHeaderData().filter(d => d.options.display === 'true');
+
     const columnsDetail = () => {
-        const columns = getHeaderData();
         return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} width={200} />);
     }
 
-    const onScroll = () => {
-        props.updateScroll({ currentPage: 10, event: events.PAGING })
+    const onScroll = ({ startIndex, stopIndex }) => {
+        const page = (startIndex / 10) + 1;
+        props.updateScroll({ currentPage: page, event: events.PAGING })
+    }
+
+    const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
+        if (isSuccess) {
+            if (expression) {
+                const {
+                    searchString,
+                } = getGraphProperties(props);
+
+                const search = labelToField(expandExpression(expression), getColumns());
+                filterData = data;
+
+                if (!searchText || searchString !== searchText) {
+                    props.updateScroll({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH });
+                }
+            } else {
+                filterData = data;
+            }
+        }
+    }
+
+    const renderSearchBarIfNeeded = (headerData) => {
+        if (isEmpty(headerData)) {
+            return;
+        }
+
+        const {
+            searchString,
+        } = getGraphProperties(props);
+
+        const {
+            searchBar,
+            searchText,
+            autoSearch,
+            disableRefresh,
+            selectColumnOption,
+        } = properties;
+
+        const {
+            width,
+            scroll,
+        } = props;
+
+        if (searchBar === false) {
+            return;
+        }
+
+        const search = searchString !== null ? searchString : searchText,
+            filteroption = headerData.filter(d => d.options.display === 'true');
+        return ((filteroption.length || (data.length === 0)) &&
+            <SearchBar
+                data={data}
+                searchText={search}
+                options={filteroption}
+                handleSearch={handleSearch}
+                scroll={props.scroll}
+                autoSearch={autoSearch}
+                columnOption={selectColumnOption}
+                enableRefresh={!disableRefresh && scroll}
+                cardWidth={width}
+            />
+        );
     }
 
     return (
-        <InfiniteLoader
-            isRowLoaded={({ index }) => !!data[index]}
-            loadMoreRows={onScroll}
-            rowCount={10000000}
-        >
-            {({ onRowsRendered, registerChild }) => (
-                <AutoSizer>
-                    {({ width }) => (
-                        <Table
-                            ref={registerChild}
-                            onRowsRendered={onRowsRendered}
-                            width={width + 3500}
-                            height={height}
-                            headerHeight={20}
-                            rowHeight={20}
-                            rowCount={data.length}
-                            rowGetter={({ index }) => data[index]}
-                            isRowLoaded={({ index }) => data[index]}
-                        >
-                            {columnsDetail()}
-                        </Table>
-                    )}
-                </AutoSizer>
-            )}
-        </InfiniteLoader>
+        <div style={{ clear: "both" }}>
+            {renderSearchBarIfNeeded(getHeaderData())}
+            <div style={{ overflowX: "auto" }}>
+                <div style={{ height: height, minWidth: width }}>
+                    <InfiniteLoader
+                        isRowLoaded={({ index }) => !!filterData[index]}
+                        loadMoreRows={onScroll}
+                        rowCount={size}
+                    >
+                        {({ onRowsRendered, registerChild }) => (
+                            <AutoSizer>
+                                {({ height, width }) => {
+                                    return (
+                                        <Table
+                                            ref={registerChild}
+                                            onRowsRendered={onRowsRendered}
+                                            width={width + (columns.length * 80)}
+                                            height={height}
+                                            headerHeight={50}
+                                            rowHeight={30}
+                                            rowCount={filterData.length}
+                                            rowGetter={({ index }) => filterData[index]}
+                                            isRowLoaded={({ index }) => filterData[index]}
+                                        >
+                                            {columnsDetail()}
+                                        </Table>
+
+                                    )
+                                }}
+                            </AutoSizer>
+                        )}
+                    </InfiniteLoader>
+                </div>
+            </div>
+        </div>
     );
 }
 
