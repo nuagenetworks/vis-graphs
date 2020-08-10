@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Column, Table, InfiniteLoader, AutoSizer, SortIndicator } from 'react-virtualized';
 import 'react-virtualized/styles.css';
 import objectPath from "object-path";
@@ -7,12 +7,15 @@ import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
 import orderBy from 'lodash/orderBy';
+import uuid from 'lodash/uniqueId';
+import isEqual from 'lodash/isEqual';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
+import columnAccessor from "../../utils/columnAccessor";
 
 const getGraphProperties = (props) => {
     const {
@@ -87,6 +90,67 @@ const TableGraph = (props) => {
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [rowSelected, setRowSelected] = useState([]);
     const [filterData, setFilterData] = useState(data);
+    const [orignalData, setOrignalData] = useState(data);
+
+    useEffect(() => {
+        initiate(props);
+    }, [props.data, props.scrollData]);
+
+    const {
+        sort,
+    } = getGraphProperties(props);
+
+    if (!isEmpty(sort) && !isEqual(stateSortOrder, sort)) {
+        setStateSortOrder(sort);
+    }
+
+    const initiate = (props) => {
+        const {
+            matchingRowColumn,
+        } = props.properties;
+
+        const columns = getColumns(props);
+
+        if (!columns.length) {
+            return;
+        }
+
+        const filterData = [];
+        const columnNameList = [];
+
+        columns.forEach(d => {
+            columnNameList.push(d.column);
+        });
+
+        props.data.forEach((d, i) => {
+            const random = uuid();
+            const data = {
+                'row_id': random,
+            };
+
+            for (let key in columns) {
+                if (columns.hasOwnProperty(key)) {
+                    const columnData = { ...columns[key] };
+                    delete columnData.totalCharacters;
+
+                    const accessor = columnAccessor(columnData);
+                    data[columnData.column] = accessor(d);
+
+                    if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
+                        data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
+                    }
+
+                    if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
+                        data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
+                    }
+                }
+            }
+
+            filterData.push(data);
+        });
+        setFilterData(filterData);
+        setOrignalData(filterData);
+    }
 
     const handleScrollSorting = (sortBy, sortDirection) => {
 
@@ -94,7 +158,6 @@ const TableGraph = (props) => {
         if (sort && sort.column === sortBy.toLowerCase()) {
             sortDirection = sort.order === 'desc' ? 'asc' : 'desc';
         }
-        setStateSortOrder({ column: sortBy, order: sortDirection });
 
         props.updateScroll({
             sort: { column: sortBy, order: sortDirection },
@@ -185,8 +248,8 @@ const TableGraph = (props) => {
     }
 
     const onScroll = ({ startIndex, stopIndex }) => {
-        const page = (startIndex / 10) + 1;
-        props.updateScroll({ currentPage: page, event: events.PAGING })
+        const page = (startIndex / 100) + 1;
+        props.updateScroll({ currentPage: page, event: events.PAGING });
     }
 
     const onRowClick = ({ index }) => {
@@ -263,7 +326,7 @@ const TableGraph = (props) => {
             filteroption = headerData.filter(d => d.options.display === 'true');
         return ((filteroption.length || (data.length === 0)) &&
             <SearchBar
-                data={data}
+                data={orignalData}
                 searchText={search}
                 options={filteroption}
                 handleSearch={handleSearch}
