@@ -17,6 +17,8 @@ import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
 
+let container = '';
+
 const getGraphProperties = (props) => {
     const {
         data,
@@ -28,6 +30,7 @@ const getGraphProperties = (props) => {
         searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
         sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
         size: size || data.length, expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+        currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
     }
 }
 
@@ -91,6 +94,7 @@ const TableGraph = (props) => {
     const [rowSelected, setRowSelected] = useState([]);
     const [filterData, setFilterData] = useState(data);
     const [orignalData, setOrignalData] = useState(data);
+    const [startIndex, setStartIndex] = useState(0);
 
     useEffect(() => {
         initiate(props);
@@ -98,6 +102,7 @@ const TableGraph = (props) => {
 
     const {
         sort,
+        currentPage,
     } = getGraphProperties(props);
 
     if (!isEmpty(sort) && !isEqual(stateSortOrder, sort)) {
@@ -113,6 +118,12 @@ const TableGraph = (props) => {
 
         if (!columns.length) {
             return;
+        }
+
+        const currentIndex = (currentPage - 1) * 100;
+
+        if(!isEqual(currentIndex, startIndex)) {
+            setStartIndex(currentIndex);
         }
 
         const filterData = [];
@@ -339,44 +350,127 @@ const TableGraph = (props) => {
         );
     }
 
+    const handleContextMenu = (event) => {
+        const menu = getMenu(props);
+
+        if (!menu) {
+            return false;
+        }
+        event.preventDefault();
+        const { clientX: x, clientY: y } = event;
+        openContextMenu({ x, y });
+        return true;
+    }
+
+    const openContextMenu = (contextMenu) => {
+        const { x, y } = contextMenu;
+        const menu = getMenu(props);
+
+        closeContextMenu();
+        document.body.addEventListener('click', handleCloseContextMenu);
+
+        const node = document.createElement('ul');
+        node.classList.add('contextMenu');
+        node.id = 'contextMenu';
+        node.style = `top: ${y}px; left: ${x}px; z-index: 100000;`;
+
+        const { goTo, context, properties } = props;
+        const { id } = properties || {};
+        context.id = id;
+
+        menu.forEach((item) => {
+            const { text, rootpath, params } = item;
+            const pathname = `${process.env.PUBLIC_URL}/${rootpath}`;
+            const li = document.createElement('li');
+            li.textContent = text;
+            const queryParams = (params && Object.getOwnPropertyNames(params).length > 0) ?
+                Object.assign({}, context, params) : Object.assign({}, context);
+            li.onclick = (e) => {
+                goTo && goTo(pathname, queryParams);
+            };
+            node.append(li);
+        });
+        document.body.append(node);
+    }
+
+    const closeContextMenu = () => {
+        document.body.removeEventListener('click', handleCloseContextMenu);
+        const node = document.getElementById('contextMenu');
+        if (node) {
+            node.remove();
+        }
+    }
+
+    const handleCloseContextMenu = () => {
+        closeContextMenu();
+    }
+
+    const getSelectedRows = () => {
+
+        let selected = [];
+        for (let rowindex in rowSelected) {
+            selected.push(filterData[rowindex]);
+        }
+        return selected;
+    }
+
+    const getMenu = (props) => {
+        const {
+            menu,
+            multiMenu,
+        } = props.properties;
+
+        if (multiMenu && getSelectedRows().length > 1) {
+            return multiMenu;
+        }
+
+        return menu || false;
+    }
+
+
     return (
         <div style={{ clear: "both" }}>
-            {renderSearchBarIfNeeded(getHeaderData())}
-            <div style={{ overflowX: "auto" }}>
-                <div style={{ height: height, minWidth: width }}>
-                    <InfiniteLoader
-                        isRowLoaded={({ index }) => !!filterData[index]}
-                        loadMoreRows={onScroll}
-                        rowCount={size}
-                    >
-                        {({ onRowsRendered, registerChild }) => (
-                            <AutoSizer>
-                                {({ height, width }) => {
-                                    return (
-                                        <Table
-                                            ref={registerChild}
-                                            onRowsRendered={onRowsRendered}
-                                            width={width + (columns.length * 80)}
-                                            height={height}
-                                            headerHeight={50}
-                                            rowHeight={30}
-                                            rowCount={filterData.length}
-                                            rowGetter={({ index }) => filterData[index]}
-                                            isRowLoaded={({ index }) => filterData[index]}
-                                            sort={handleSortOrderChange}
-                                            sortBy={stateSortOrder.column}
-                                            sortDirection={stateSortOrder.order}
-                                            onRowClick={onRowClick}
-                                            rowStyle={rowStyleFormat}
-                                        >
-                                            {columnsDetail()}
-                                        </Table>
+            <div ref={(input) => { container = input; }}
+                onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
+            >
+                {renderSearchBarIfNeeded(getHeaderData())}
+                <div style={{ overflowX: "auto" }}>
+                    <div style={{ height: height, minWidth: width }}>
+                        <InfiniteLoader
+                            isRowLoaded={({ index }) => !!filterData[index]}
+                            loadMoreRows={onScroll}
+                            rowCount={size}
+                        >
+                            {({ onRowsRendered, registerChild }) => (
+                                <AutoSizer>
+                                    {({ height, width }) => {
+                                        return (
+                                            <Table
+                                                ref={registerChild}
+                                                onRowsRendered={onRowsRendered}
+                                                width={width + (columns.length * 80)}
+                                                height={height}
+                                                headerHeight={50}
+                                                rowHeight={30}
+                                                rowCount={filterData.length}
+                                                rowGetter={({ index }) => filterData[index]}
+                                                isRowLoaded={({ index }) => filterData[index]}
+                                                sort={handleSortOrderChange}
+                                                sortBy={stateSortOrder.column}
+                                                sortDirection={stateSortOrder.order}
+                                                onRowClick={onRowClick}
+                                                rowStyle={rowStyleFormat}
+                                                scrollToIndex={startIndex}
+                                            >
+                                                {columnsDetail()}
+                                            </Table>
 
-                                    )
-                                }}
-                            </AutoSizer>
-                        )}
-                    </InfiniteLoader>
+                                        )
+                                    }}
+                                </AutoSizer>
+                            )}
+                        </InfiniteLoader>
+                    </div>
                 </div>
             </div>
         </div>
