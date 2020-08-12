@@ -23,6 +23,8 @@ import columnAccessor from "../../utils/columnAccessor";
 import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH } from '../../constants';
 
 let container = '';
+let selectedRows = [];
+let displayColumn = [];
 
 const getGraphProperties = (props) => {
     const {
@@ -78,6 +80,16 @@ const getColumnByContext = (columns, context) => {
     return { filterColumns, removedColumnsKey };
 }
 
+const setSelectedRows = (props) => {
+    const {
+        scrollData,
+        requestId,
+    } = props;
+
+    const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : [];
+    return !isEmpty(selectedRows) ? selectedRows[requestId] : [];
+}
+
 const TableGraph = (props) => {
     const {
         width,
@@ -100,12 +112,16 @@ const TableGraph = (props) => {
 
     const getColumns = () => (properties.columns || []);
 
+    if (scroll) {
+        selectedRows = setSelectedRows(props);
+    }
+
     const { filterColumns } = getColumnByContext(getColumns(), context);
     const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
     const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
 
     const [stateSortOrder, setStateSortOrder] = useState({});
-    const [rowSelected, setRowSelected] = useState([]);
+    const [rowSelected, setRowSelected] = useState(selectedRows);
     const [filterData, setFilterData] = useState(data);
     const [orignalData, setOrignalData] = useState(data);
     const [startIndex, setStartIndex] = useState(0);
@@ -114,6 +130,27 @@ const TableGraph = (props) => {
     useEffect(() => {
         initiate(props);
     }, [props.data, props.scrollData]);
+
+    useEffect(() => {
+        return () => {
+            cleanup();
+        }
+    }, []);
+
+    const cleanup = () => {
+        const {
+            updateScroll,
+        } = props;
+
+        if (!isEmpty(displayColumn)) {
+            updateScroll({
+                [`removedColumn`]: displayColumn,
+                event: events.REMOVED_COLUMNS
+            });
+        }
+
+        selectedRows = {};
+    }
 
     const {
         sort,
@@ -397,6 +434,7 @@ const TableGraph = (props) => {
     }
 
     const handleColumnSelection = (event) => {
+        displayColumn = event.target.value;
         setStateColumn(event.target.value);
     }
 
@@ -477,7 +515,6 @@ const TableGraph = (props) => {
         return menu || false;
     }
 
-
     return (
         <React.Fragment>
             <div ref={(input) => { container = input; }}
@@ -486,7 +523,7 @@ const TableGraph = (props) => {
                 <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
                     {filteredColumnBar(selectColumnOption)}
                 </div>
-                <div style={{clear:"both"}}></div>
+                <div style={{ clear: "both" }}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
                 <div style={{ overflowX: "auto" }}>
                     <div style={{ height: height, minWidth: width }}>
