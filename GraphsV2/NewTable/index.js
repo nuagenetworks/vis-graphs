@@ -128,6 +128,7 @@ const TableGraph = (props) => {
     const [orignalData, setOrignalData] = useState(data);
     const [startIndex, setStartIndex] = useState(0);
     const [stateColumn, setStateColumn] = useState(removedColumn);
+    const [onRowOver, setOnRowOver] = useState(null);
 
     useEffect(() => {
         initiate(props);
@@ -327,12 +328,25 @@ const TableGraph = (props) => {
         props.updateScroll({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRowsCurr } });
     }
 
+    const onRowMouseOver = ({ index }) => {
+        setOnRowOver(index);
+    }
+
+    const onRowMouseOut = () => {
+        setOnRowOver(null);
+    }
+
     const rowStyleFormat = (row) => {
         if (!!rowSelected && rowSelected.includes(row.index)) {
             return {
                 backgroundColor: '#b7b9bd',
                 color: '#333'
             };
+        } else if (row.index === onRowOver) {
+            return {
+                backgroundColor: '#f2f2f2',
+                cursor: 'pointer'
+            }
         }
         return {
             backgroundColor: '#fff',
@@ -560,6 +574,8 @@ const TableGraph = (props) => {
                                                 sortBy={stateSortOrder.column}
                                                 sortDirection={stateSortOrder.order}
                                                 onRowClick={onRowClick}
+                                                onRowMouseOver={onRowMouseOver}
+                                                onRowMouseOut={onRowMouseOut}
                                                 rowStyle={rowStyleFormat}
                                                 scrollToIndex={startIndex}
                                                 noRowsRenderer={noRowsRenderer}
