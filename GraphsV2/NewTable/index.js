@@ -9,6 +9,10 @@ import uniq from 'lodash/uniq';
 import orderBy from 'lodash/orderBy';
 import uuid from 'lodash/uniqueId';
 import isEqual from 'lodash/isEqual';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
@@ -16,6 +20,7 @@ import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
+import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH } from '../../constants';
 
 let container = '';
 
@@ -39,14 +44,14 @@ const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     columns.forEach((d, index) => {
         if (d.displayOption) {
             if (d.display === false || !filterColumns.length || !filterColumns.find(column => d.column === column)) {
-                removedColumns.push(`${index}`);
+                removedColumns.push(`${d.label || d.column}`);
             }
         } else if (selectedColumns && selectedColumns.length) {
             if (!selectedColumns.find(column => d.label === column)) {
-                removedColumns.push(`${index}`)
+                removedColumns.push(`${d.label || d.column}`)
             }
         } else if (d.display === false) {
-            removedColumns.push(`${index}`);
+            removedColumns.push(`${d.label || d.column}`);
         }
     });
     return removedColumns;
@@ -88,13 +93,23 @@ const TableGraph = (props) => {
 
     const {
         multiSelectable,
+        selectColumnOption,
+        rowHeight,
+        headerHeight,
     } = properties;
+
+    const getColumns = () => (properties.columns || []);
+
+    const { filterColumns } = getColumnByContext(getColumns(), context);
+    const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
+    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
 
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [rowSelected, setRowSelected] = useState([]);
     const [filterData, setFilterData] = useState(data);
     const [orignalData, setOrignalData] = useState(data);
     const [startIndex, setStartIndex] = useState(0);
+    const [stateColumn, setStateColumn] = useState(removedColumn);
 
     useEffect(() => {
         initiate(props);
@@ -122,7 +137,7 @@ const TableGraph = (props) => {
 
         const currentIndex = (currentPage - 1) * 100;
 
-        if(!isEqual(currentIndex, startIndex)) {
+        if (!isEqual(currentIndex, startIndex)) {
             setStartIndex(currentIndex);
         }
 
@@ -197,12 +212,6 @@ const TableGraph = (props) => {
         scroll ? handleScrollSorting(sortBy, sortDirection) : handleStaticSorting(sortBy, sortDirection)
     }
 
-    const getColumns = () => (properties.columns || []);
-
-    const { filterColumns } = getColumnByContext(getColumns(), context);
-    const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
-    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
-
     const getHeaderData = () => {
         const { ESColumns } = props;
         let columnKeys = new Map();
@@ -218,7 +227,7 @@ const TableGraph = (props) => {
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
-                const displayColumn = removedColumn.includes(index) ? 'false' : 'true';
+                const displayColumn = stateColumn.includes(columnRow.label || columnRow.column) ? 'false' : 'true';
                 const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
                 const headerColumn = {
                     name: index,
@@ -350,6 +359,47 @@ const TableGraph = (props) => {
         );
     }
 
+    const filteredColumnBar = (selectColumnOption = false) => {
+        if (!selectColumnOption) {
+            return
+        }
+
+        const MenuProps = {
+            PaperProps: {
+                style: {
+                    maxHeight: FILTER_COLUMN_MAX_HEIGHT,
+                    width: FILTER_COLUMN_WIDTH,
+                },
+            },
+        };
+
+        return (
+            <div className={'select-column'} style={{ flex: "none" }}>
+                <Select
+                    labelId="demo-mutiple-checkbox-label"
+                    id="demo-mutiple-checkbox"
+                    multiple
+                    displayEmpty={true}
+                    value={stateColumn}
+                    onChange={handleColumnSelection}
+                    renderValue={(selected) => 'Select Columns'}
+                    MenuProps={MenuProps}
+                >
+                    {getColumns().map((name) => (
+                        <MenuItem key={name.label || name.column} value={name.label || name.column}>
+                            <Checkbox checked={stateColumn.indexOf(name.label || name.column) === -1} />
+                            <ListItemText primary={name.label || name.column} />
+                        </MenuItem>
+                    ))}
+                </Select>
+            </div>
+        )
+    }
+
+    const handleColumnSelection = (event) => {
+        setStateColumn(event.target.value);
+    }
+
     const handleContextMenu = (event) => {
         const menu = getMenu(props);
 
@@ -429,10 +479,14 @@ const TableGraph = (props) => {
 
 
     return (
-        <div style={{ clear: "both" }}>
+        <React.Fragment>
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
+                <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                    {filteredColumnBar(selectColumnOption)}
+                </div>
+                <div style={{clear:"both"}}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
                 <div style={{ overflowX: "auto" }}>
                     <div style={{ height: height, minWidth: width }}>
@@ -450,8 +504,8 @@ const TableGraph = (props) => {
                                                 onRowsRendered={onRowsRendered}
                                                 width={width + (columns.length * 80)}
                                                 height={height}
-                                                headerHeight={50}
-                                                rowHeight={30}
+                                                headerHeight={headerHeight}
+                                                rowHeight={rowHeight}
                                                 rowCount={filterData.length}
                                                 rowGetter={({ index }) => filterData[index]}
                                                 isRowLoaded={({ index }) => filterData[index]}
@@ -473,7 +527,7 @@ const TableGraph = (props) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </React.Fragment>
     );
 }
 
