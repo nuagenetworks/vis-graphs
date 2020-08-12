@@ -108,9 +108,11 @@ const TableGraph = (props) => {
         selectColumnOption,
         rowHeight,
         headerHeight,
+        searchBar,
     } = properties;
 
     const getColumns = () => (properties.columns || []);
+    const graphHeight = searchBar !== false ? height - 60 : height;
 
     if (scroll) {
         selectedRows = setSelectedRows(props);
@@ -149,7 +151,7 @@ const TableGraph = (props) => {
             });
         }
 
-        selectedRows = {};
+        selectedRows = [];
     }
 
     const {
@@ -301,7 +303,11 @@ const TableGraph = (props) => {
     }
 
     const columnsDetail = () => {
-        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
+        if (filterData.length) {
+            return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
+        }
+
+        return;
     }
 
     const onScroll = ({ startIndex, stopIndex }) => {
@@ -515,6 +521,10 @@ const TableGraph = (props) => {
         return menu || false;
     }
 
+    const noRowsRenderer = () => (
+        <span style={{ fontSize: '1.5em' }} className='center-text' > No data to visualize </span>
+    )
+
     return (
         <React.Fragment>
             <div ref={(input) => { container = input; }}
@@ -526,7 +536,7 @@ const TableGraph = (props) => {
                 <div style={{ clear: "both" }}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
                 <div style={{ overflowX: "auto" }}>
-                    <div style={{ height: height, minWidth: width }}>
+                    <div style={{ height: graphHeight, minWidth: width }}>
                         <InfiniteLoader
                             isRowLoaded={({ index }) => !!filterData[index]}
                             loadMoreRows={onScroll}
@@ -539,7 +549,7 @@ const TableGraph = (props) => {
                                             <Table
                                                 ref={registerChild}
                                                 onRowsRendered={onRowsRendered}
-                                                width={width + (columns.length * 80)}
+                                                width={filterData.length ? width + (columns.length * 80) : width}
                                                 height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
@@ -552,6 +562,7 @@ const TableGraph = (props) => {
                                                 onRowClick={onRowClick}
                                                 rowStyle={rowStyleFormat}
                                                 scrollToIndex={startIndex}
+                                                noRowsRenderer={noRowsRenderer}
                                             >
                                                 {columnsDetail()}
                                             </Table>
