@@ -23,7 +23,12 @@ import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
 import style from './style';
-import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH, LIMIT } from '../../constants';
+import { 
+    FILTER_COLUMN_MAX_HEIGHT, 
+    FILTER_COLUMN_WIDTH, 
+    LIMIT,
+    FOOTER_HEIGHT,
+ } from '../../constants';
 
 let container = '';
 let selectedRows = [];
@@ -117,10 +122,15 @@ const TableGraph = (props) => {
     } = properties;
 
     const getColumns = () => (properties.columns || []);
-    const graphHeight = searchBar !== false ? height - 60 : height;
+    let graphHeight = searchBar !== false ? height - FOOTER_HEIGHT : height;
 
     if (scroll) {
         selectedRows = setSelectedRows(props);
+        if(!isEqual(graphHeight, height)) {
+            graphHeight -= 25; 
+        } else {
+            graphHeight -= FOOTER_HEIGHT;
+        }
     }
 
     const { filterColumns } = getColumnByContext(getColumns(), context);
@@ -578,7 +588,7 @@ const TableGraph = (props) => {
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 45 : 20 }}>
                     {resetScrollData()}
                     {filteredColumnBar(selectColumnOption)}
                 </div>
@@ -598,7 +608,7 @@ const TableGraph = (props) => {
                                             <Table
                                                 ref={registerChild}
                                                 onRowsRendered={onRowsRendered}
-                                                width={filterData.length ? width + (columns.length * 80) : width}
+                                                width={width + (columns.length * 80)}
                                                 height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
@@ -625,6 +635,11 @@ const TableGraph = (props) => {
                     </div>
                 </div>
             </div>
+
+            {scroll && <div className="totalData" style={{ clear: "both" }}></div>}
+            {scroll && <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                TotalData: {size || data.length || 0}
+            </div>}
         </React.Fragment>
     );
 }
