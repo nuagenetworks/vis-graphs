@@ -13,6 +13,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
+import IconButton from '@material-ui/core/IconButton';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
@@ -20,11 +22,13 @@ import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
+import style from './style';
 import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH, LIMIT } from '../../constants';
 
 let container = '';
 let selectedRows = [];
 let displayColumn = [];
+let unformattedData = {};
 
 const getGraphProperties = (props) => {
     const {
@@ -109,6 +113,7 @@ const TableGraph = (props) => {
         rowHeight,
         headerHeight,
         searchBar,
+        disableRefresh,
     } = properties;
 
     const getColumns = () => (properties.columns || []);
@@ -153,6 +158,7 @@ const TableGraph = (props) => {
         }
 
         selectedRows = [];
+        displayColumn = [];
     }
 
     const {
@@ -213,6 +219,7 @@ const TableGraph = (props) => {
             }
 
             filterData.push(data);
+            unformattedData[random] = d;
         });
         setFilterData(filterData);
         setOrignalData(filterData);
@@ -304,11 +311,7 @@ const TableGraph = (props) => {
     }
 
     const columnsDetail = () => {
-        if (filterData.length) {
-            return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
-        }
-
-        return;
+        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
     }
 
     const onScroll = ({ startIndex }) => {
@@ -323,6 +326,12 @@ const TableGraph = (props) => {
         } else {
             selectedRowsCurr = !!multiSelectable ? [...selectedRowsCurr, index] : [index];
         }
+
+        if (!multiSelectable) {
+            handleClick(...selectedRowsCurr);
+            selectedRows = {};
+        }
+
         setRowSelected(selectedRowsCurr);
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
         props.updateScroll({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRowsCurr } });
@@ -470,6 +479,14 @@ const TableGraph = (props) => {
         return true;
     }
 
+    const handleClick = (key) => {
+        if (props.onMarkClick && filterData[key]) {
+            if (unformattedData[filterData[key]['row_id']]) {
+                props.onMarkClick(unformattedData[filterData[key]['row_id']]);
+            }
+        }
+    }
+
     const openContextMenu = (contextMenu) => {
         const { x, y } = contextMenu;
         const menu = getMenu(props);
@@ -537,7 +554,24 @@ const TableGraph = (props) => {
 
     const noRowsRenderer = () => (
         <span style={{ fontSize: '1.5em' }} className='center-text' > No data to visualize </span>
-    )
+    );
+
+    const resetScrollData = () => {
+        return (
+            scroll && !disableRefresh ?
+                <div style={{ flex: "none" }}>
+                    <IconButton
+                        tooltip="Refresh"
+                        tooltipPosition={'top-left'}
+                        style={style.design}
+                        onClick={() => props.updateScroll({ currentPage: 1, selectedRow: {}, event: events.REFRESH })}
+                    >
+                        <RefreshIcon className='refreshIcon' />
+                    </IconButton>
+                </div>
+                : ''
+        )
+    }
 
     return (
         <React.Fragment>
@@ -545,6 +579,7 @@ const TableGraph = (props) => {
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
                 <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                    {resetScrollData()}
                     {filteredColumnBar(selectColumnOption)}
                 </div>
                 <div style={{ clear: "both" }}></div>
