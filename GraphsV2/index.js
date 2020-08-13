@@ -15,4 +15,3 @@ export { default as ProgressBarGraph } from './ProgressBarGraph';
 export { default as TreeGraph } from './TreeGraph';
 export { default as DynamicBarGraph } from './BarGraph';
 export { default as NewTable } from './NewTable';
-

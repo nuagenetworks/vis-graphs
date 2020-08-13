@@ -20,7 +20,7 @@ import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
-import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH } from '../../constants';
+import { FILTER_COLUMN_MAX_HEIGHT, FILTER_COLUMN_WIDTH, LIMIT } from '../../constants';
 
 let container = '';
 let selectedRows = [];
@@ -43,7 +43,7 @@ const getGraphProperties = (props) => {
 
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
-    columns.forEach((d, index) => {
+    columns.forEach(d => {
         if (d.displayOption) {
             if (d.display === false || !filterColumns.length || !filterColumns.find(column => d.column === column)) {
                 removedColumns.push(`${d.label || d.column}`);
@@ -62,7 +62,7 @@ const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
 const getColumnByContext = (columns, context) => {
     const filterColumns = [];
     let removedColumnsKey = '';
-    columns.forEach((d) => {
+    columns.forEach(d => {
         if (d.displayOption) {
             for (let key in d.displayOption) {
                 if (context.hasOwnProperty(key)) {
@@ -175,7 +175,7 @@ const TableGraph = (props) => {
             return;
         }
 
-        const currentIndex = (currentPage - 1) * 100;
+        const currentIndex = (currentPage - 1) * LIMIT;
 
         if (!isEqual(currentIndex, startIndex)) {
             setStartIndex(currentIndex);
@@ -188,7 +188,7 @@ const TableGraph = (props) => {
             columnNameList.push(d.column);
         });
 
-        props.data.forEach((d, i) => {
+        props.data.forEach(d => {
             const random = uuid();
             const data = {
                 'row_id': random,
@@ -311,8 +311,8 @@ const TableGraph = (props) => {
         return;
     }
 
-    const onScroll = ({ startIndex, stopIndex }) => {
-        const page = (startIndex / 100) + 1;
+    const onScroll = ({ startIndex }) => {
+        const page = (startIndex / LIMIT) + 1;
         props.updateScroll({ currentPage: page, event: events.PAGING });
     }
 
@@ -486,7 +486,7 @@ const TableGraph = (props) => {
         const { id } = properties || {};
         context.id = id;
 
-        menu.forEach((item) => {
+        menu.forEach(item => {
             const { text, rootpath, params } = item;
             const pathname = `${process.env.PUBLIC_URL}/${rootpath}`;
             const li = document.createElement('li');
@@ -582,7 +582,6 @@ const TableGraph = (props) => {
                                             >
                                                 {columnsDetail()}
                                             </Table>
-
                                         )
                                     }}
                                 </AutoSizer>
