@@ -608,7 +608,7 @@ const TableGraph = (props) => {
                                             <Table
                                                 ref={registerChild}
                                                 onRowsRendered={onRowsRendered}
-                                                width={width + (columns.length * 80)}
+                                                width={width + (columns.length * 35)}
                                                 height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
