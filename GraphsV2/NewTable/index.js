@@ -124,6 +124,10 @@ const TableGraph = (props) => {
     const getColumns = () => (properties.columns || []);
     let graphHeight = searchBar !== false ? height - FOOTER_HEIGHT : height;
 
+    if (selectColumnOption) {
+        graphHeight -= 35;
+    }
+
     if (scroll) {
         selectedRows = setSelectedRows(props);
         if(!isEqual(graphHeight, height)) {
