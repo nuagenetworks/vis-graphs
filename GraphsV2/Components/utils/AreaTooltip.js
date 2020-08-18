@@ -29,7 +29,7 @@ const TooltipComponent = (props) => {
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && Object.entries(payload[0].payload).map((element, index) => {
-                if (element[0] !== xColumn && element[0] !== yColumn && element[0] !== linesColumn) {
+                if (element[0] !== xColumn && element[0] !== linesColumn && (Array.isArray(linesColumn) || element[0] !== yColumn)) {
                     let label = element[0]; 
                     let col = tooltip.find(k => k['column'] === label);
                     let columnFormatter;
@@ -40,17 +40,20 @@ const TooltipComponent = (props) => {
                         col =  tooltip.find(k => k['column'] === yColumn);
                         columnFormatter = columnAccessor(col);
                     }
-                    return (
-                        <Item
-                            key={`tooltip-${index}`}
-                        >
-                            {label} : {columnFormatter(element[1])}
-                        </Item>
-                    )
+                    const tooltipdata = tooltip.filter(ele => ele.column === element[0]);
+                    if (!Array.isArray(linesColumn) || !!tooltipdata.length) {
+                        return (
+                            <Item
+                                key={`tooltip-${index}`}
+                            >
+                                {label} : {columnFormatter(element[1])}
+                            </Item>
+                        )
+                    }
                 }
-                
+
             })}
-            
+
         </Container>
     )
 }

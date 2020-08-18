@@ -16,7 +16,7 @@ const Item = styled('div')({
     padding: '0.15rem 0',
 });
 
-export default ({ payload: legends, labelColumn, legend }) => {
+export default ({ payload: legends, labelColumn, legend, customLegendLabel }) => {
     if (legends && legends[0].value === undefined) {
         return false;
     }
@@ -25,10 +25,20 @@ export default ({ payload: legends, labelColumn, legend }) => {
         legends = legends[0].payload.children || [legends[0]];
     }
 
+    if (!!customLegendLabel) {
+        customLegendLabel.forEach(element => {
+            legends.forEach(legend => {
+                if (element.column === legend.value) {
+                    legend.value = element.label;
+                }
+            });
+        });
+    }
+
     return (
         <Container legend={legend}>
             {
-                legends.map(({ color, payload, value, props: { fill, name: { xVal } = {}}={}} , index) => (
+                legends.map(({ color, payload, value, props: { fill, name: { xVal } = {} } = {} }, index) => (
                     <Item key={`legend-${index}`} color={color || fill}>
                         <svg height='0.8rem' width='0.9rem'>
                             <circle cx="7" cy="9" r="3.5" fill={color || fill} />
