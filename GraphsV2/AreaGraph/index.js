@@ -68,6 +68,8 @@ const AreaGraph = (props) => {
         isVertical: true
     });
 
+    const customLegendLabel = !!Array.isArray(linesColumn) ? tooltip : null;
+
     return (
         <AreaChart
             width={width}
@@ -119,6 +121,7 @@ const AreaGraph = (props) => {
                 renderLegend({
                     legend,
                     height,
+                    customLegendLabel
                 })
             }
             {
