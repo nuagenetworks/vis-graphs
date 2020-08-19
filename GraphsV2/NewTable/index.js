@@ -110,6 +110,7 @@ const TableGraph = (props) => {
         scroll,
         selectedColumns,
         size,
+        onSelect,
     } = props;
 
     const {
@@ -119,6 +120,7 @@ const TableGraph = (props) => {
         headerHeight,
         searchBar,
         disableRefresh,
+        matchingRowColumn,
     } = properties;
 
     const getColumns = () => (properties.columns || []);
@@ -347,6 +349,25 @@ const TableGraph = (props) => {
         }
 
         setRowSelected(selectedRowsCurr);
+        if (onSelect) {
+            let matchingRows = [];
+            let rows = {};
+            const selectedData = getSelectedRows(selectedRowsCurr);;
+            if (selectedData.length > 1) {
+                rows = selectedData;
+            } else {
+                let row = selectedData.length ? selectedData[0] : {};
+                if (matchingRowColumn && row) {
+                    const value = objectPath.get(row, matchingRowColumn);
+                    matchingRows = filterData.filter((d) => {
+                        const matchingRowValue = objectPath.get(d, matchingRowColumn);
+                        return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue;
+                    });
+                }
+                rows = row;
+            }
+            onSelect({ rows, matchingRows });
+        }
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
         props.updateScroll({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRowsCurr } });
     }
@@ -544,10 +565,9 @@ const TableGraph = (props) => {
         closeContextMenu();
     }
 
-    const getSelectedRows = () => {
-
+    const getSelectedRows = (selectedRowsCurr = rowSelected) => {
         let selected = [];
-        for (let rowindex in rowSelected) {
+        for (let rowindex in selectedRowsCurr) {
             selected.push(filterData[rowindex]);
         }
         return selected;
@@ -612,7 +632,7 @@ const TableGraph = (props) => {
                                             <Table
                                                 ref={registerChild}
                                                 onRowsRendered={onRowsRendered}
-                                                width={width + (columns.length * 35)}
+                                                width={width + (columns.length * 55)}
                                                 height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
