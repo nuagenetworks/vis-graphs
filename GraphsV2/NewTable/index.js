@@ -331,7 +331,16 @@ const TableGraph = (props) => {
     }
 
     const columnsDetail = () => {
-        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={150} />);
+        return columns.map(column => (
+            <Column
+                label={column.label}
+                dataKey={(column.columnField)}
+                cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)}
+                headerRenderer={headerRenderer}
+                width={150}
+                cellRenderer={({cellData}) => cellData}
+            />
+            ));
     }
 
     const onScroll = ({ startIndex }) => {
@@ -489,11 +498,26 @@ const TableGraph = (props) => {
                     onChange={handleColumnSelection}
                     renderValue={(selected) => 'Select Columns'}
                     MenuProps={MenuProps}
+                    classes={{
+                        root: 'select-column',
+                        selectMenu: 'select-column'
+                    }}
                 >
                     {getColumns().map((name) => (
-                        <MenuItem key={name.label || name.column} value={name.label || name.column}>
+                        <MenuItem
+                            key={name.label || name.column}
+                            value={name.label || name.column}
+                            classes={{
+                                root: 'select-column',
+                                selected: 'select-column'
+                            }}
+                        >
                             <Checkbox checked={stateColumn.indexOf(name.label || name.column) === -1} />
-                            <ListItemText primary={name.label || name.column} />
+                            <ListItemText
+                                disableTypography
+                                primary={name.label || name.column}
+                                classes={{root: 'select-column'}}
+                            />
                         </MenuItem>
                     ))}
                 </Select>
