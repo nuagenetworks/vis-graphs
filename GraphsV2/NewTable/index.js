@@ -139,6 +139,10 @@ const TableGraph = (props) => {
         }
     }
 
+    if(searchBar === false && (!scroll) && (!selectColumnOption)) {
+        graphHeight -= 25;
+    }
+
     const { filterColumns } = getColumnByContext(getColumns(), context);
     const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
     const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
@@ -327,7 +331,7 @@ const TableGraph = (props) => {
     }
 
     const columnsDetail = () => {
-        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={200} />);
+        return columns.map(column => <Column label={column.label} dataKey={(column.columnField)} cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)} headerRenderer={headerRenderer} width={150} />);
     }
 
     const onScroll = ({ startIndex }) => {
@@ -607,6 +611,8 @@ const TableGraph = (props) => {
         )
     }
 
+    const graphWidth = (columns.length * 120) > width ? (columns.length * 120) : width;
+
     return (
         <React.Fragment>
             <div ref={(input) => { container = input; }}
@@ -632,7 +638,7 @@ const TableGraph = (props) => {
                                             <Table
                                                 ref={registerChild}
                                                 onRowsRendered={onRowsRendered}
-                                                width={width + (columns.length * 55)}
+                                                width={graphWidth}
                                                 height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
