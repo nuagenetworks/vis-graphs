@@ -484,7 +484,8 @@ const TableGraph = (props) => {
                     maxHeight: FILTER_COLUMN_MAX_HEIGHT,
                     width: FILTER_COLUMN_WIDTH,
                 },
-            },
+            },   
+            getContentAnchorEl: null
         };
 
         return (
