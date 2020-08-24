@@ -12,19 +12,15 @@ import {
     merge,
     timeFormat
 } from "d3";
-import moment from 'moment';
-import momentDuration from 'moment-duration-format';
 import isEqual from 'lodash/isEqual';
 import * as d3 from 'd3'
 import isEmpty from 'lodash/isEmpty';
 import ReactTooltip from 'react-tooltip';
-
+import {addMillisecs, formatDate} from "vis-graphs/utils/DateTimeUtils";
 import XYGraph from "../XYGraph";
 import { pick } from "../../utils/helpers";
 import { nest } from "../../utils/helpers/nest";
 import {properties} from "./default.config";
-
-momentDuration(moment);
 
 const duration = "duration";
 const FILTER_KEY = ['data', 'height', 'width', 'context'];
@@ -454,7 +450,7 @@ class LineGraph extends XYGraph {
           .tickSizeOuter(yTickSizeOuter);
 
         if (yTickFormat || yTickFormat === "") {
-            const yAxisTickFormat = (yTickFormatType === duration) ? (d) => moment.duration(d).format(yTickFormat, { trim: false }) : format(yTickFormat);
+            const yAxisTickFormat = (yTickFormatType === duration) ? (d) => formatDate(addMillisecs(new Date(new Date(0).getTimezoneOffset()*1000*60), d), yTickFormat) : format(yTickFormat);
             yAxis.tickFormat(yAxisTickFormat);
         }
 
