@@ -1,8 +1,5 @@
 import { format, timeFormat } from "d3";
-import moment from 'moment';
-import momentDuration from 'moment-duration-format';
-
-momentDuration(moment);
+import {addMillisecs, formatDate} from "vis-graphs/utils/DateTimeUtils";
 
 const d3 = { format, timeFormat };
 
@@ -50,7 +47,8 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters, duration 
                 )
         }
     } else if (duration) {
-        return (d) => moment.duration(value(d)).format(duration);
+        //convert d to Date in milliseconds with timezone offset, and format the same using duration string passed
+        return (d) => formatDate(addMillisecs(new Date(new Date(0).getTimezoneOffset()*1000*60), value(d)), duration);
     } else {
         return value;
     }
