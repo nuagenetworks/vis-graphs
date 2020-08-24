@@ -1,105 +1,68 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react'
-import { compose } from 'redux';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import { Tooltip } from 'react-lightweight-tooltip';
-import { first, last, isEqual, orderBy, isEmpty, uniq, debounce } from 'lodash';
-import Dialog from '@material-ui/core/Dialog';
-import FlatButton from '@material-ui/core/Button';
+import { Column, Table, InfiniteLoader, AutoSizer, SortIndicator } from 'react-virtualized';
+import 'react-virtualized/styles.css';
 import objectPath from "object-path";
-import hash from 'object-hash';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import uniq from 'lodash/uniq';
+import orderBy from 'lodash/orderBy';
+import uuid from 'lodash/uniqueId';
+import isEqual from 'lodash/isEqual';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { FaRegEye as EyeIcon, FaRegClipboard } from 'react-icons/fa';
-import uuid from 'lodash/uniqueId';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
-import WithValidationHOC from '../../HOC/WithValidationHOC';
-import columnAccessor from "../../utils/columnAccessor";
-import { toolTipStyle, lastColToolTipStyle, firstColToolTipStyle } from './tooltipStyle';
-import "./style.css";
-import style from './style';
 import { properties } from "./default.config";
-import { expandExpression, labelToField } from '../../utils/helpers';
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
-import InfoBox from "../../InfoBox";
-import MUIDataTable from "mui-datatables";
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import {DialogActions, DialogContent, DialogContentText, DialogTitle, Tooltip as MUITooltip} from "@material-ui/core";
+import { expandExpression, labelToField } from '../../utils/helpers';
+import columnAccessor from "../../utils/columnAccessor";
+import style from './style';
+import { 
+    FILTER_COLUMN_MAX_HEIGHT, 
+    FILTER_COLUMN_WIDTH, 
+    LIMIT,
+    FOOTER_HEIGHT,
+ } from '../../constants';
 
+let container = '';
+let selectedRows = [];
 let displayColumn = [];
-let filterData = [];
-let container = "";
-let selectedRows = {};
 let unformattedData = {};
 
-const useStyles  = (props) => ({
-  MUIDataTableSelectCell: {
-      root: {
-          display: props.showCheckboxes ? '' : 'none',
-      },
-  },
-  MUIDataTableBody: {
-      emptyTitle: {
-          maxWidth: props.width,
-      },
-  },
-  MUIDataTable: {
-      responsiveScroll: {
-          height: (props.height - props.heightMargin),
-      },
-  },
-  MUIDataTableToolbar: {
-      actions: {
-          marginTop: props.searchBar || props.searchBar === undefined ? '-90px' : '0px',
-          marginRight: props.searchBar || props.searchBar === undefined ? '-10px' : '0px',
-      }
-  },
-  MuiPaper: {
-      elevation4: {
-          boxShadow: (props.searchBar || props.searchBar === undefined ? '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)' : '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 0px 0px 0px rgba(0,0,0,0.12)'),
-      }
-  },
-  MUIDataTableToolbarSelect: {
-      root: {
-          display: "none",
-      },
-  },
-  MuiTableCell: {
-      root: {
-          padding: "10px 20px 10px 15px",
-          fontSize: props.fontSize,
-      },
-      head: {
-          backgroundColor: "#FAFAFA !important",
-      }
-  },
-  MUIDataTableHeadCell: {
-      root: {
-          whiteSpace: 'nowrap',
-      }
-  },
-  MUIDataTableBodyCell: {
-      root: {
-        whiteSpace: 'nowrap',
-      }
-  }
-});
+const getGraphProperties = (props) => {
+    const {
+        data,
+        scrollData,
+        size,
+    } = props;
+
+    return {
+        searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
+        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
+        size: size || data.length, expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
+        currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
+    }
+}
 
 const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
     let removedColumns = [];
-    columns.forEach((d, index) => {
+    columns.forEach(d => {
         if (d.displayOption) {
             if (d.display === false || !filterColumns.length || !filterColumns.find(column => d.column === column)) {
-                removedColumns.push(`${index}`);
+                removedColumns.push(`${d.label || d.column}`);
             }
         } else if (selectedColumns && selectedColumns.length) {
             if (!selectedColumns.find(column => d.label === column)) {
-                removedColumns.push(`${index}`)
+                removedColumns.push(`${d.label || d.column}`)
             }
         } else if (d.display === false) {
-            removedColumns.push(`${index}`);
+            removedColumns.push(`${d.label || d.column}`);
         }
     });
     return removedColumns;
@@ -108,7 +71,7 @@ const getRemovedColumns = (columns, filterColumns, selectedColumns) => {
 const getColumnByContext = (columns, context) => {
     const filterColumns = [];
     let removedColumnsKey = '';
-    columns.forEach((d) => {
+    columns.forEach(d => {
         if (d.displayOption) {
             for (let key in d.displayOption) {
                 if (context.hasOwnProperty(key)) {
@@ -126,641 +89,290 @@ const getColumnByContext = (columns, context) => {
     return { filterColumns, removedColumnsKey };
 }
 
-const updateTableStatus = (param = {}, updateScroll) => (updateScroll && updateScroll(param));
-
-const resetFilters = (selectedRow = {}) => {
-    selectedRows = selectedRow;
-}
-
-const getGraphProperties = (props) => {
-    const {
-        data,
-        scrollData,
-        size,
-    } = props;
-
-    return {
-        searchString: objectPath.has(scrollData, 'searchText') ? objectPath.get(scrollData, 'searchText') : null,
-        sort: objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined,
-        size: size || data.length,
-        pageSize: objectPath.has(scrollData, 'pageSize') ? objectPath.get(scrollData, 'pageSize') : properties.limit || 100,
-        currentPage: objectPath.has(scrollData, 'currentPage') ? objectPath.get(scrollData, 'currentPage') : 1,
-        expiration: objectPath.has(scrollData, 'expiration') ? objectPath.get(scrollData, 'expiration') : false,
-    }
-}
-
-const getHeaderData = (props, initialSort, stateSortOrder, removedColumns) => {
-    const { ESColumns } = props;
-    let columnKeys = new Map();
-
-    if (ESColumns) {
-        ESColumns.forEach(item => {
-            columnKeys.set(item.key, true);
-        });
-    }
-
-    const columns = props.properties.columns || [];
-    let headerData = [];
-    for (let index in columns) {
-        if (columns.hasOwnProperty(index)) {
-            const columnRow = columns[index];
-            const displayColumn = removedColumns.includes(index) ? 'false' : 'true';
-            const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
-            const headerColumn = {
-                name: index,
-                label: columnRow.label || columnRow.column,
-                columnField: columnRow.column,
-                columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
-                filter: columnRow.filter !== false,
-                type: columnRow.selection ? "selection" : "text",
-                style: {
-                    textIndent: '2px'
-                },
-                options: {
-                    display: displayColumn,
-                    sort,
-                }
-            };
-
-            if ((initialSort && initialSort.column === columnRow.column) ||
-                (stateSortOrder && stateSortOrder.column === columnRow.column)) {
-                headerColumn.options = {
-                    display: displayColumn,
-                    sortDirection: isEmpty(initialSort) ? stateSortOrder.order : initialSort.order,
-                    sort,
-                }
-            }
-            headerData.push(headerColumn);
-        }
-    }
-
-    return headerData;
-}
-
-const getHeightMargin = (properties) => {
-    const {
-        searchBar,
-        selectColumnOption,
-        filterOptions,
-        showFooter,
-    } = properties;
-
-    let heightMargin = showFooter ? 40 : 0;
-    heightMargin = searchBar === false ? heightMargin : heightMargin + 50;
-    heightMargin = filterOptions ? heightMargin : heightMargin + 10;
-    heightMargin = selectColumnOption ? heightMargin + 20 : heightMargin;
-
-    return heightMargin;
-}
-
-const removeHighlighter = (data = [], highlight, selected) => {
-    if (!data.length)
-        return data;
-
-    if (highlight) {
-        selected.forEach((key) => {
-            if (highlight && data[key]) {
-                for (let i in data[key]) {
-                    if (data[key].hasOwnProperty(i)) {
-                        if (data[key][i].props.style)
-                            data[key][i].props.style.background = '';
-                    }
-                }
-            }
-        })
-    }
-    return data;
-}
-
 const setSelectedRows = (props) => {
     const {
         scrollData,
         requestId,
     } = props;
 
-    const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {};
-    return selectedRows[requestId];
+    const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : [];
+    return !isEmpty(selectedRows) ? selectedRows[requestId] : [];
 }
 
-const getColumns = (props) => (props.properties.columns || []);
-
-const isScrollExpired = (props) => {
-    const {
-        expiration,
-    } = getGraphProperties(props);
-
-    return props.scroll && expiration && expiration <= Date.now();
-}
-
-const isScrollDataExists = (page, props) => {
-    const {
-        data,
-    } = props;
-
-    const {
-        pageSize,
-    } = getGraphProperties(props);
-
-    let startIndex = (page - 1) * pageSize;
-    return startIndex < data.length;
-}
-
-const getSelectedRows = (props) => {
-    const {
-        pageSize,
-    } = getGraphProperties(props);
-
-    let selected = [];
-    for (let page in selectedRows) {
-        if (selectedRows.hasOwnProperty(page)) {
-            selectedRows[page].forEach((index) => {
-                selected.push(props.data[(page - 1) * pageSize + index]);
-            })
-        }
-    }
-    return selected;
-}
-
-const getMenu = (props) => {
-    const {
-        menu,
-        multiMenu,
-    } = props.properties;
-
-    if (multiMenu && getSelectedRows(props).length > 1) {
-        return multiMenu;
-    }
-
-    return menu || false;
-}
-
-const Table = (props) => {
+const TableGraph = (props) => {
     const {
         width,
         height,
         properties,
-        scroll,
+        data,
+        context,
         scrollData,
-        context, 
+        scroll,
         selectedColumns,
-        onSelect
+        size,
+        onSelect,
     } = props;
 
     const {
-        showCheckboxes,
-        hidePagination,
-        fixedHeader,
+        multiSelectable,
         selectColumnOption,
+        rowHeight,
+        headerHeight,
         searchBar,
+        disableRefresh,
+        matchingRowColumn,
     } = properties;
 
-    let multiSelectable = true;
+    const getColumns = () => (properties.columns || []);
+    let graphHeight = searchBar !== false ? height - FOOTER_HEIGHT : height;
 
-    const [selected, setSelectedState] = useState([]);
-    const [tableData, setTableData] = useState([]);
-    const [data, setData] = useState([]);
-    const [fontSize, setFontSize] = useState(style.defaultFontsize);
-    const [showInfoBox, setShowInfoBox] = useState(false);
-    const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
-    const [infoBoxRow, setInfoBoxRow] = useState({});
-    const [infoBoxColumn, setInfoBoxColumn] = useState({});
-    const [infoBoxData, setInfoBoxData] = useState({});
-    const [infoBoxScript, setInfoBoxScript] = useState({});
-    const [originalData, setOriginalData] = useState([]);
-    const [stateData, setStateData] = useState([]);
+    if (selectColumnOption) {
+        graphHeight -= 35;
+    }
+
+    if (scroll) {
+        selectedRows = setSelectedRows(props);
+        if(!isEqual(graphHeight, height)) {
+            graphHeight -= 25; 
+        } else {
+            graphHeight -= FOOTER_HEIGHT;
+        }
+    }
+
+    if(searchBar === false && (!scroll) && (!selectColumnOption)) {
+        graphHeight -= 25;
+    }
+
+    const { filterColumns } = getColumnByContext(getColumns(), context);
+    const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
+    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+
     const [stateSortOrder, setStateSortOrder] = useState({});
-    const [initialSort, setInitialSort] = useState({});
-    const [headerData, setHeaderData] = useState({});
-    const [displayColumns, setDisplayColumns] = useState([]);
-    const [removedColumns, setRemovedColumn] = useState([]);
-    const [dataMap, setDataMap] = useState(new Map());
-    const [stateUnformattedData, setStateUnformattedData] = useState({});
+    const [rowSelected, setRowSelected] = useState(selectedRows);
+    const [filterData, setFilterData] = useState(data);
+    const [orignalData, setOrignalData] = useState(data);
+    const [startIndex, setStartIndex] = useState(0);
+    const [stateColumn, setStateColumn] = useState(removedColumn);
+    const [onRowOver, setOnRowOver] = useState(null);
 
-    const { filterColumns } = getColumnByContext(props.properties.columns || [], context);
-    const removedColumn = getRemovedColumns(props.properties.columns || [], filterColumns, selectedColumns);
-    const columns = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumn);
-    
-    if(!isEqual(removedColumns, columns)) {
-        setRemovedColumn(columns);
+    useEffect(() => {
+        initiate(props);
+    }, [props.data, props.scrollData]);
+
+    useEffect(() => {
+        return () => {
+            cleanup();
+        }
+    }, []);
+
+    const cleanup = () => {
+        const {
+            updateScroll,
+        } = props;
+
+        if (!isEmpty(displayColumn)) {
+            updateScroll({
+                [`removedColumn`]: displayColumn,
+                event: events.REMOVED_COLUMNS
+            });
+        }
+
+        selectedRows = [];
+        displayColumn = [];
     }
 
     const {
-        size,
-        pageSize,
+        sort,
         currentPage,
     } = getGraphProperties(props);
 
-    const decrementFontSize = () => (setFontSize(fontSize - 1));
-
-    const checkFontsize = () => (container && container.querySelector('table').clientWidth > container.clientWidth && fontSize >= style.defaultFontsize ? decrementFontSize() : fontSize);
-    
-    const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
-        if (isSuccess) {
-            if (expression) {
-                const {
-                    searchString,
-                } = getGraphProperties(props);
-
-                const search = labelToField(expandExpression(expression), getColumns(props));
-                filterData = data;
-                setStateData(filterData);
-                resetFilters();
-                updateData();
-
-                if (!searchText || searchString !== searchText) {
-                    updateTableStatus({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH }, props.updateScroll);
-                }
-            } else {
-                filterData = data;
-                setStateData(filterData);
-                resetFilters();
-                updateData();
-            }
-        }
+    if (!isEmpty(sort) && !isEqual(stateSortOrder, sort)) {
+        setStateSortOrder(sort);
     }
 
     const initiate = (props) => {
         const {
-            scroll,
-            scrollData,
-        } = props;
-    
-        const {
-            pageSize
-        } = getGraphProperties(props);
-    
-        if (scroll) {
-            selectedRows = setSelectedRows(props);
-            if (!objectPath.has(scrollData, 'pageSize')) {
-                updateTableStatus({ pageSize }, props.updateScroll);
-            }
-        }
-    
-        const {
             matchingRowColumn,
-        } = properties;
-    
+        } = props.properties;
+
         const columns = getColumns(props);
-    
+
         if (!columns.length) {
             return;
         }
-    
-        filterData = [];
+
+        const currentIndex = (currentPage - 1) * LIMIT;
+
+        if (!isEqual(currentIndex, startIndex)) {
+            setStartIndex(currentIndex);
+        }
+
+        const filterData = [];
         const columnNameList = [];
-        unformattedData = {}
-    
+
         columns.forEach(d => {
             columnNameList.push(d.column);
         });
-    
-        props.data.forEach((d, i) => {
+
+        props.data.forEach(d => {
             const random = uuid();
             const data = {
                 'row_id': random,
             };
-    
+
             for (let key in columns) {
                 if (columns.hasOwnProperty(key)) {
                     const columnData = { ...columns[key] };
                     delete columnData.totalCharacters;
-    
+
                     const accessor = columnAccessor(columnData);
                     data[columnData.column] = accessor(d);
-    
+
                     if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
                         data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
                     }
-    
+
                     if (matchingRowColumn && !columnNameList.includes(matchingRowColumn)) {
                         data[matchingRowColumn] = columnAccessor({ column: matchingRowColumn })(d);
                     }
                 }
             }
-    
+
             filterData.push(data);
             unformattedData[random] = d;
         });
-        setStateData(filterData);
-        setStateUnformattedData(unformattedData);
-        setOriginalData(filterData);
-        resetFilters(selectedRows);
+        setFilterData(filterData);
+        setOrignalData(filterData);
     }
 
-    const getInitialSort = (props, sortOrder) => {
-        const {
-            sort,
-        } = getGraphProperties(props);
-    
-        if (sort && sort.column && sort.order && !isEqual(initialSort, sort)) {
-            setInitialSort({ ...sort, column: sort.column });
-        } else if (!isEmpty(sortOrder)) {
-            setInitialSort(sortOrder);
-        }
-    
-        return initialSort;
-    }
+    const handleScrollSorting = (sortBy, sortDirection) => {
 
-    const updateData = (isSort = false) => {
-        const {
-            data,
-            selected,
-            tableData,
-        } = getData(isSort);
-
-        setSelectedState(selected);
-        setTableData(tableData);
-        setData(data);
-    }
-
-    const getTableData = (columns, tableData) => {
-        const {
-            highlight,
-            highlightColor,
-        } = properties;
-
-        if (!columns) {
-            return [];
+        const sort = objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined;
+        if (sort && sort.column === sortBy.toLowerCase()) {
+            sortDirection = sort.order === 'desc' ? 'asc' : 'desc';
         }
 
-        const keyColumns = getColumns(props);
-        const usedColumns = keyColumns.filter((column, index) => !removedColumns.includes(index.toString()));
-
-        if (usedColumns.length) {
-            first(usedColumns).firstColStyle = firstColToolTipStyle;
-            last(usedColumns).lastColStyle = lastColToolTipStyle;
-        }
-
-        const parsedData = tableData.map((d, j) => {
-
-            const dataKey = hash(d);
-
-            if (dataMap.has(dataKey)) {
-                return dataMap.get(dataKey);
-            }
-
-            let data = {},
-                highlighter = false;
-
-            for (let key in keyColumns) {
-                if (keyColumns.hasOwnProperty(key)) {
-
-                    const columnObj = keyColumns[key],
-                        originalData = d[columnObj.column];
-                    let columnData = originalData;
-
-                    if (columnObj.totalCharacters) {
-                        columnData = columnAccessor({ column: columnObj.column, totalCharacters: columnObj.totalCharacters })(d);
-                    }
-
-                    if ((columnData || columnData === 0) && columnObj.tooltip) {
-                        let fullText = d[columnObj.tooltip.column] || originalData;
-                        fullText = Array.isArray(fullText) ? fullText.join(", ") : fullText;
-
-                        const hoverContent = (
-                            <div key={`tooltip_${j}_${key}`}>
-                                {fullText} &nbsp;
-                                <CopyToClipboard text={fullText ? fullText.toString() : ''}>
-                                    <button style={{ background: '#000', padding: 1 }} title="copy">
-                                        <FaRegClipboard size={10} color="#fff" />
-                                    </button>
-                                </CopyToClipboard>
-                            </div>
-                        )
-
-                        columnData = (
-                            <Tooltip key={`tooltip_${j}_${key}`}
-                                content={[hoverContent]}
-                                styles={columnObj.firstColStyle || columnObj.lastColStyle || toolTipStyle}>
-                                {columnData}
-                            </Tooltip>
-                        )
-                    }
-
-                    if (highlight && highlight.includes(columnObj.column) && originalData) {
-                        highlighter = true;
-                    }
-
-                    if (columnObj.colors && columnObj.colors[originalData]) {
-                        columnData = (
-                            <div style={{ background: columnObj.colors[originalData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
-                        )
-                    }
-
-                    if (columnObj.infoBox && columnData) {
-                        columnData = (
-                            <React.Fragment>
-                                {columnData}
-                                <span style={{ padding: "0px 5px" }} className="showInfoBox" onClick={(e) => {
-                                    e.stopPropagation();
-                                    openInfoBox({
-                                        infoBoxRow: d,
-                                        infoBoxColumn: columnObj.column,
-                                        infoBoxData: originalData,
-                                        infoBoxScript: columnObj.infoBox
-                                    })
-                                }}>
-                                    <EyeIcon size={fontSize + 2} color="#555555" />
-                                </span>
-                            </React.Fragment>
-                        )
-                    }
-
-                    if (columnData || columnData === 0) {
-                        data[key] = typeof(columnData) === "boolean" ? columnData.toString().toUpperCase() :
-                            (typeof originalData === "object") ? React.isValidElement(originalData) ? columnData : null : columnData;
-
-                        if (columnObj.fontColor) {
-                            data[key] = <div style={{ color: columnObj.fontColor }}> {data[key]} </div>;
-                        }
-                    }
-                }
-            }
-
-            if (highlighter) {
-                Object.keys(data).map(key => {
-                    return data[key] = <div style={{ background: highlightColor || '', height: style.row.height, padding: "10px 0" }}>
-                        {data[key]}</div>
-                })
-            }
-            setDataMap(dataMap.set(dataKey, data));
-            return data
-        })
-
-        return parsedData;
-    }
-
-    const handleColumnViewChange = (changedColumn, action) => {
-        let latestDisplayColumns = [];
-
-        if (action === 'remove') {
-            latestDisplayColumns = displayColumns.length === 0 ?
-                uniq([...displayColumns, ...removedColumns, changedColumn]) :
-                uniq([...displayColumns, changedColumn]);
-        } else {
-            const mergedColumns = displayColumns.length === 0 ?
-                uniq([...displayColumns, ...removedColumns]) : displayColumns;
-
-            const mergedIndex = mergedColumns.indexOf(changedColumn);
-            if (mergedIndex > -1 && !isEmpty(mergedColumns)) {
-                mergedColumns.splice(mergedIndex, 1);
-            }
-            latestDisplayColumns = [...mergedColumns];
-        }
-        if(!isEqual(displayColumns,latestDisplayColumns)) {
-            setDisplayColumns(latestDisplayColumns);
-            displayColumn = latestDisplayColumns;
-            const newHeaderData = getHeaderData(props, getInitialSort(props), null, latestDisplayColumns);
-            if(!isEqual(headerData, newHeaderData)) {
-                setHeaderData(newHeaderData);
-            }
-        }
-    }
-
-    const handleScrollSorting = (column) => {
-        const { sort } = getGraphProperties(props);
-
-        let colOrder = 'asc';
-        if (sort && sort.column === column) {
-            colOrder = sort.order === 'desc' ? 'asc' : 'desc';
-        }
-
-        updateTableStatus({
-            sort: { column: column, order: colOrder },
+        props.updateScroll({
+            sort: { column: sortBy, order: sortDirection },
             currentPage: 1,
             selectedRow: {},
             event: events.SORTING,
-        }, props.updateScroll)
-    }
-
-    const getData = (isSort) => {
-        
-        const {
-            highlight
-        } = props.properties;
-
-        filterData = isSort && !isEmpty(stateData) ? stateData : filterData;
-        
-        const {
-            pageSize,
-            currentPage
-        } = getGraphProperties(props);
-
-        const offset = pageSize * (currentPage - 1);
-        const data = scroll ? filterData.slice(0, offset + pageSize) : filterData;
-        let tableData = getTableData(getColumns(props), data);
-
-        if (highlight) {
-            tableData = removeHighlighter(tableData, highlight, selected);
-        }
-
-        return {
-            data,
-            selected: selectedRows[currentPage] || [],
-            tableData,
-        }
-    }
-
-    const handleStaticSorting = (column) => {
-        let colOrder = 'asc';
-        const sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : {};
-        if (sortOrder && sortOrder.column === column) {
-            colOrder = sortOrder.order === 'desc' ? 'asc' : 'desc';
-            sortOrder.order = colOrder;
-            setStateSortOrder(sortOrder);
-        } else {
-            sortOrder.order = colOrder;
-            sortOrder.column = column;
-            setStateSortOrder(sortOrder);
-        }
-
-        filterData = !isEmpty(stateData) ? stateData : filterData;
-        filterData = orderBy(filterData, [column], [colOrder]);
-        setStateData(filterData);
-
-        resetFilters();
-        const newHeaderData = getHeaderData(props, getInitialSort(props, sortOrder), sortOrder, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-        if(!isEqual(headerData, newHeaderData)) {
-            setHeaderData(newHeaderData);
-        }
-        updateData(true);
-    }
-
-    const handleSortOrderChange = (column, order) => {
-        const columnList = getColumns(props);
-        const columnData = columnList[column];
-
-        scroll ? handleScrollSorting(columnData.column) : handleStaticSorting(columnData.column)
-    }
-
-    const handlePageClick = (page) => {
-        const {
-            currentPage
-        } = getGraphProperties(props);
-
-        let pageNo;
-
-        if (page > currentPage - 1) {
-            if (isScrollExpired(props) && !isScrollDataExists(currentPage + 1, props)) {
-                setShowConfirmationPopup(true);
-                return;
-            }
-            pageNo = currentPage + 1;
-        } else {
-            pageNo = currentPage - 1;
-        }
-
-        scroll ? updateTableStatus({ currentPage: pageNo, event: events.PAGING }, props.updateScroll) : updateData();
-        
-        const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-        if(!isEqual(headerData, newHeaderData)) {
-            setHeaderData(newHeaderData);
-        }
-    }
-
-    const handleClick = (key) => {
-       if (props.onMarkClick && data[key]) {
-            if(stateUnformattedData[data[key]['row_id']]) {
-                props.onMarkClick(stateUnformattedData[data[key]['row_id']]);
-            } 
-        }
-    }
-
-    const handleRowSelection = (currentSelectedRow, allRows) => {
-        const {
-            currentPage
-        } = getGraphProperties(props);
-
-        let selectedRowsCurr = [];
-        allRows.forEach(x => {
-            if (!selectedRowsCurr.includes(x.dataIndex)) {
-                selectedRowsCurr.push(x.dataIndex);
-            }
         });
+    }
 
-        const {
-            multiSelectable,
-            matchingRowColumn,
-        } = properties;
+    const handleStaticSorting = (sortBy, sortDirection) => {
+        const sortOrder = !isEmpty(stateSortOrder) ? stateSortOrder : {};
+        if (sortOrder && sortOrder.column === sortBy) {
+            sortDirection = sortOrder.order === 'desc' ? 'asc' : 'desc';
+            sortOrder.order = sortDirection;
+            setStateSortOrder(sortOrder);
+        } else {
+            sortOrder.order = sortDirection;
+            sortOrder.column = sortBy;
+            setStateSortOrder(sortOrder);
+        }
+
+        setFilterData(orderBy(filterData, [sortBy], [sortDirection]));
+    }
+
+    const handleSortOrderChange = ({ sortBy, sortDirection }) => {
+        scroll ? handleScrollSorting(sortBy, sortDirection) : handleStaticSorting(sortBy, sortDirection)
+    }
+
+    const getHeaderData = () => {
+        const { ESColumns } = props;
+        let columnKeys = new Map();
+
+        if (ESColumns) {
+            ESColumns.forEach(item => {
+                columnKeys.set(item.key, true);
+            });
+        }
+
+        const columns = getColumns();
+        let headerData = [];
+        for (let index in columns) {
+            if (columns.hasOwnProperty(index)) {
+                const columnRow = columns[index];
+                const displayColumn = stateColumn.includes(columnRow.label || columnRow.column) ? 'false' : 'true';
+                const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
+                const headerColumn = {
+                    name: index,
+                    label: columnRow.label || columnRow.column,
+                    columnField: columnRow.column,
+                    columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
+                    filter: columnRow.filter !== false,
+                    type: columnRow.selection ? "selection" : "text",
+                    style: {
+                        textIndent: '2px'
+                    },
+                    options: {
+                        display: displayColumn,
+                        sort,
+                    }
+                };
+
+                headerData.push(headerColumn);
+            }
+        }
+
+        return headerData;
+    }
+
+    const columns = getHeaderData().filter(d => d.options.display === 'true');
+
+    const headerRenderer = ({ dataKey, label }) => {
+        return (
+            <div>
+                {label}
+                {stateSortOrder.column === dataKey && <SortIndicator sortDirection={stateSortOrder.order} />}
+            </div>
+        );
+    }
+
+    const columnsDetail = () => {
+        return columns.map(column => (
+            <Column
+                label={column.label}
+                dataKey={(column.columnField)}
+                cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)}
+                headerRenderer={headerRenderer}
+                width={150}
+                cellRenderer={({cellData}) => cellData}
+            />
+            ));
+    }
+
+    const onScroll = ({ startIndex }) => {
+        const page = (startIndex / LIMIT) + 1;
+        props.updateScroll({ currentPage: page, event: events.PAGING });
+    }
+
+    const onRowClick = ({ index }) => {
+        let selectedRowsCurr = rowSelected;
+        if (rowSelected.includes(index)) {
+            selectedRowsCurr = rowSelected.filter(item => item !== index);
+        } else {
+            selectedRowsCurr = !!multiSelectable ? [...selectedRowsCurr, index] : [index];
+        }
 
         if (!multiSelectable) {
             handleClick(...selectedRowsCurr);
             selectedRows = {};
         }
 
-        selectedRows[currentPage] = selectedRowsCurr.slice();
-        const { scrollData } = properties;
+        setRowSelected(selectedRowsCurr);
         if (onSelect) {
             let matchingRows = [];
             let rows = {};
-            const selectedData = getSelectedRows(props);
+            const selectedData = getSelectedRows(selectedRowsCurr);;
             if (selectedData.length > 1) {
                 rows = selectedData;
             } else {
                 let row = selectedData.length ? selectedData[0] : {};
                 if (matchingRowColumn && row) {
                     const value = objectPath.get(row, matchingRowColumn);
-                    matchingRows = props.data.filter((d) => {
+                    matchingRows = filterData.filter((d) => {
                         const matchingRowValue = objectPath.get(d, matchingRowColumn);
                         return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue;
                     });
@@ -769,9 +381,158 @@ const Table = (props) => {
             }
             onSelect({ rows, matchingRows });
         }
-
         const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-        updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll);
+        props.updateScroll({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRowsCurr } });
+    }
+
+    const onRowMouseOver = ({ index }) => {
+        setOnRowOver(index);
+    }
+
+    const onRowMouseOut = () => {
+        setOnRowOver(null);
+    }
+
+    const rowStyleFormat = (row) => {
+        if (!!rowSelected && rowSelected.includes(row.index)) {
+            return {
+                backgroundColor: '#b7b9bd',
+                color: '#333'
+            };
+        } else if (row.index === onRowOver) {
+            return {
+                backgroundColor: '#f2f2f2',
+                cursor: 'pointer'
+            }
+        }
+        return {
+            backgroundColor: '#fff',
+            color: '#333'
+        };
+    }
+
+    const handleSearch = (data, isSuccess, expression = null, searchText = null) => {
+        if (isSuccess) {
+            if (expression) {
+                const {
+                    searchString,
+                } = getGraphProperties(props);
+
+                const search = labelToField(expandExpression(expression), getColumns());
+                setFilterData(data);
+
+                if (!searchText || searchString !== searchText) {
+                    props.updateScroll({ search, searchText, selectedRow: {}, currentPage: 1, event: events.SEARCH });
+                }
+            } else {
+                setFilterData(data);
+            }
+        }
+    }
+
+    const renderSearchBarIfNeeded = (headerData) => {
+        if (isEmpty(headerData)) {
+            return;
+        }
+
+        const {
+            searchString,
+        } = getGraphProperties(props);
+
+        const {
+            searchBar,
+            searchText,
+            autoSearch,
+            disableRefresh,
+            selectColumnOption,
+        } = properties;
+
+        const {
+            width,
+            scroll,
+        } = props;
+
+        if (searchBar === false) {
+            return;
+        }
+
+        const search = searchString !== null ? searchString : searchText,
+            filteroption = headerData.filter(d => d.options.display === 'true');
+        return ((filteroption.length || (data.length === 0)) &&
+            <SearchBar
+                data={orignalData}
+                searchText={search}
+                options={filteroption}
+                handleSearch={handleSearch}
+                scroll={props.scroll}
+                autoSearch={autoSearch}
+                columnOption={selectColumnOption}
+                enableRefresh={!disableRefresh && scroll}
+                cardWidth={width}
+            />
+        );
+    }
+
+    const filteredColumnBar = (selectColumnOption = false) => {
+        if (!selectColumnOption) {
+            return
+        }
+
+        const MenuProps = {
+            PaperProps: {
+                style: {
+                    maxHeight: FILTER_COLUMN_MAX_HEIGHT,
+                    width: FILTER_COLUMN_WIDTH,
+                },
+            },
+            classes: {
+                root: 'select-column'
+            },
+            getContentAnchorEl: null
+        };
+
+        return (
+            <div className={'select-column'} style={{ flex: "none" }}>
+                <Select
+                    labelId="demo-mutiple-checkbox-label"
+                    id="demo-mutiple-checkbox"
+                    multiple
+                    displayEmpty={true}
+                    value={stateColumn}
+                    onChange={handleColumnSelection}
+                    renderValue={(selected) => 'Select Columns'}
+                    MenuProps={MenuProps}s
+                    classes={{
+                        root: 'select-column',
+                        selectMenu: 'select-column',
+                        select: 'select-column'
+                    }}
+                >
+                    {getColumns().map((name) => (
+                        <MenuItem
+                            key={name.label || name.column}
+                            value={name.label || name.column}
+                            classes={{
+                                root: 'select-column',
+                                selected: 'select-column'
+                            }}
+                        >
+                            <Checkbox checked={stateColumn.indexOf(name.label || name.column) === -1} size="small"/>
+                            <ListItemText
+                                disableTypography
+                                primary={name.label || name.column}
+                                classes={{root: 'select-column'}}
+                            />
+                        </MenuItem>
+                    ))}
+                </Select>
+            </div>
+        )
+    }
+
+    const handleColumnSelection = (event) => {
+        displayColumn = event.target.value;
+        setStateColumn(event.target.value);
     }
 
     const handleContextMenu = (event) => {
@@ -786,15 +547,11 @@ const Table = (props) => {
         return true;
     }
 
-    const handleCloseContextMenu = () => {
-        closeContextMenu();
-    }
-
-    const closeContextMenu = () => {
-        document.body.removeEventListener('click', handleCloseContextMenu);
-        const node = document.getElementById('contextMenu');
-        if (node) {
-            node.remove();
+    const handleClick = (key) => {
+        if (props.onMarkClick && filterData[key]) {
+            if (unformattedData[filterData[key]['row_id']]) {
+                props.onMarkClick(unformattedData[filterData[key]['row_id']]);
+            }
         }
     }
 
@@ -814,7 +571,7 @@ const Table = (props) => {
         const { id } = properties || {};
         context.id = id;
 
-        menu.forEach((item) => {
+        menu.forEach(item => {
             const { text, rootpath, params } = item;
             const pathname = `${process.env.PUBLIC_URL}/${rootpath}`;
             const li = document.createElement('li');
@@ -829,254 +586,125 @@ const Table = (props) => {
         document.body.append(node);
     }
 
-    const renderSearchBarIfNeeded = (headerData) => {
-
-        if(isEmpty(headerData)) {
-            return;
+    const closeContextMenu = () => {
+        document.body.removeEventListener('click', handleCloseContextMenu);
+        const node = document.getElementById('contextMenu');
+        if (node) {
+            node.remove();
         }
-
-        const {
-            searchString,
-        } = getGraphProperties(props);
-        const {
-            searchBar,
-            searchText,
-            autoSearch,
-            disableRefresh,
-            selectColumnOption,
-        } = properties;
-
-        const {
-            width,
-        } = props;
-
-        if (searchBar === false)
-            return;
-
-        const search = searchString !== null ? searchString : searchText,
-            filteroption = headerData.filter(d => d.options.display === 'true');
-        return ((filteroption.length || (originalData.length === 0)) &&
-            <SearchBar
-                data={originalData}
-                searchText={search}
-                options={filteroption}
-                handleSearch={handleSearch}
-                scroll={props.scroll}
-                autoSearch={autoSearch}
-                enableRefresh={!disableRefresh && scroll}
-                columnOption={selectColumnOption}
-                cardWidth={width}
-            />
-        );
     }
 
-    const resetScrollData = () => {
-        const { disableRefresh } = properties;
+    const handleCloseContextMenu = () => {
+        closeContextMenu();
+    }
 
+    const getSelectedRows = (selectedRowsCurr = rowSelected) => {
+        let selected = [];
+        for (let rowindex in selectedRowsCurr) {
+            selected.push(filterData[rowindex]);
+        }
+        return selected;
+    }
+
+    const getMenu = (props) => {
+        const {
+            menu,
+            multiMenu,
+        } = props.properties;
+
+        if (multiMenu && getSelectedRows().length > 1) {
+            return multiMenu;
+        }
+
+        return menu || false;
+    }
+
+    const noRowsRenderer = () => (
+        <span style={{ fontSize: '1.5em' }} className='center-text' > No data to visualize </span>
+    );
+
+    const resetScrollData = () => {
         return (
             scroll && !disableRefresh ?
-                <span>
-                    <MUITooltip title={"Refresh"}>
-                        <IconButton
-                            tooltip="Refresh"
-                            tooltipPosition={'top-left'}
-                            onClick={() => updateTableStatus({ currentPage: 1, selectedRow: {}, event: events.REFRESH }, props.updateScroll)}
-                        >
-                            <RefreshIcon className='refreshIcon' />
-                        </IconButton>
-                    </MUITooltip>
-                </span>
+                <div style={{ flex: "none" }}>
+                    <IconButton
+                        tooltip="Refresh"
+                        tooltipPosition={'top-left'}
+                        style={style.design}
+                        onClick={() => props.updateScroll({ currentPage: 1, selectedRow: {}, event: events.REFRESH })}
+                    >
+                        <RefreshIcon className='refreshIcon' />
+                    </IconButton>
+                </div>
                 : ''
         )
     }
 
-    const openInfoBox = ({
-        infoBoxRow,
-        infoBoxColumn,
-        infoBoxData,
-        infoBoxScript,
-    }) => {
-        setShowInfoBox(true);
-        setInfoBoxRow(infoBoxRow);
-        setInfoBoxColumn(infoBoxColumn);
-        setInfoBoxData(infoBoxData);
-        setInfoBoxScript(infoBoxScript);
-    }
-
-    const onInfoBoxCloseHandler = () => setShowInfoBox(false);
-
-    const renderInfoBox = () => {
-        const {
-            Script,
-        } = props;
-
-        return (
-            showInfoBox &&
-            <InfoBox
-                onInfoBoxClose={onInfoBoxCloseHandler}
-            >
-                <Script
-                    row={infoBoxRow}
-                    key={infoBoxColumn}
-                    value={infoBoxData}
-                    script={infoBoxScript}
-                />
-            </InfoBox>
-        )
-    }
-
-    const renderConfirmationDialog = () => {
-        const actions = [
-            <FlatButton
-                primary={true}
-                onClick={() => setShowConfirmationPopup(false)}
-            >Stay on Current Page</FlatButton>,
-            <FlatButton
-                primary={true}
-                onClick={() => updateTableStatus({ currentPage: 1, selectedRow: {}, event: events.REFRESH }, props.updateScroll)}
-            >Continue</FlatButton>,
-        ];
-
-        return (
-            showConfirmationPopup &&
-            <Dialog
-                title="Unable to fetch"
-                actions={actions}
-                modal={true}
-                contentClassName='dialogBody'
-                open={true}
-            >
-                <DialogTitle>Unable to fetch</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Due to inactivity, we are not able to process the next page. Please press "Continue", to reload the data from first page.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    {actions}
-                </DialogActions>
-            </Dialog>
-        );
-    }
-
-    const cleanup = () => {
-        const {
-            scrollData,
-        } = props;
-
-        if (!isEmpty(displayColumn)) {
-            updateTableStatus({
-                [`removedColumn`]: displayColumn,
-                event: events.REMOVED_COLUMNS
-            }, props.updateScroll);
-        }
-
-        const rowsInStore = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : {}
-
-        if (!objectPath.has(scrollData, 'selectedRow') && !isEmpty(selectedRows)) {
-            updateTableStatus({ selectedRow: { ...rowsInStore, [props.requestId]: selectedRows } }, props.updateScroll)
-        }
-
-        selectedRows = {};
-        filterData = [];
-    }
- 
-    useEffect(() => {
-        initiate(props);
-        updateData();
-        checkFontsize();
-    }, [props.data, props.scrollData]);
-
-    useEffect(() => {
-        return () => {
-            cleanup();
-        }
-    }, []);
-
-    const tableCurrentPage = currentPage - 1;
-    const newHeaderData = getHeaderData(props, getInitialSort(props), null, !isEmpty(displayColumns) ? displayColumns : removedColumns);
-    if(!isEqual(headerData, newHeaderData)) {
-        setHeaderData(newHeaderData);
-    }
-    const totalRecords = scroll ? size : filterData.length;
-    const showFooter = (totalRecords <= pageSize && hidePagination !== false && scroll !== true) ? false : true;
-    const heightMargin = getHeightMargin({ ...properties, showFooter });
-    const options = {
-        print: false,
-        filter: false,
-        download: false,
-        search: false,
-        sort: true,
-        viewColumns: selectColumnOption || false,
-        responsive: "scroll",
-        fixedHeaderOptions: { yAxis: fixedHeader },
-        pagination: showFooter,
-        rowsPerPage: pageSize,
-        count: totalRecords,
-        page: tableCurrentPage,
-        rowsPerPageOptions: [],
-        selectableRows: multiSelectable ? 'multiple' : 'single',
-        onChangePage: handlePageClick,
-        rowsSelected: selected,
-        onRowsSelect: props.handleRowSelection ? props.handleRowSelection : handleRowSelection,
-        selectableRowsOnClick: true,
-        onColumnSortChange: handleSortOrderChange,
-        onColumnViewChange: handleColumnViewChange,
-        disableToolbarSelect: true,
-        textLabels: {
-            body: {
-                noMatch: "No data to visualize",
-                toolTip: "Sort",
-            },
-            pagination: {
-                next: "Next Page",
-                previous: "Previous Page",
-                rowsPerPage: "Rows per page:",
-                displayRows: "of",
-            },
-            toolbar: {
-                viewColumns: "Select Column",
-            },
-            viewColumns: {
-                title: "Select Column",
-                titleAria: "Show/Hide Table Columns",
-            },
-            selectedRows: {
-                text: "row(s) selected",
-                delete: "Delete",
-                deleteAria: "Delete Selected Rows",
-            },
-        },
-        customToolbar: resetScrollData
-    };
-
-    const theme = createMuiTheme({
-        overrides: { ...style.muiStyling, ...useStyles({showCheckboxes, width, height, heightMargin, searchBar, fontSize}) }
-    });
+    const graphWidth = (columns.length * 120) > width ? (columns.length * 120) : width;
 
     return (
-        <MuiThemeProvider theme={theme}>
+        <React.Fragment>
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                {renderConfirmationDialog()}
-                {renderInfoBox()}
-
+                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 45 : 20 }}>
+                    {resetScrollData()}
+                    {filteredColumnBar(selectColumnOption)}
+                </div>
                 <div style={{ clear: "both" }}></div>
-                {renderSearchBarIfNeeded(headerData)}
-
-                <MUIDataTable
-                    data={tableData}
-                    columns={headerData}
-                    options={options}
-                />
+                {renderSearchBarIfNeeded(getHeaderData())}
+                <div style={{ overflowX: "auto" }}>
+                    <div style={{ height: graphHeight, minWidth: width }}>
+                        <InfiniteLoader
+                            isRowLoaded={({ index }) => !!filterData[index]}
+                            loadMoreRows={onScroll}
+                            rowCount={size}
+                        >
+                            {({ onRowsRendered, registerChild }) => (
+                                <AutoSizer>
+                                    {({ height, width }) => {
+                                        return (
+                                            <Table
+                                                ref={registerChild}
+                                                onRowsRendered={onRowsRendered}
+                                                width={graphWidth}
+                                                height={height}
+                                                headerHeight={headerHeight}
+                                                rowHeight={rowHeight}
+                                                rowCount={filterData.length}
+                                                rowGetter={({ index }) => filterData[index]}
+                                                isRowLoaded={({ index }) => filterData[index]}
+                                                sort={handleSortOrderChange}
+                                                sortBy={stateSortOrder.column}
+                                                sortDirection={stateSortOrder.order}
+                                                onRowClick={onRowClick}
+                                                onRowMouseOver={onRowMouseOver}
+                                                onRowMouseOut={onRowMouseOut}
+                                                rowStyle={rowStyleFormat}
+                                                scrollToIndex={startIndex}
+                                                noRowsRenderer={noRowsRenderer}
+                                            >
+                                                {columnsDetail()}
+                                            </Table>
+                                        )
+                                    }}
+                                </AutoSizer>
+                            )}
+                        </InfiniteLoader>
+                    </div>
+                </div>
             </div>
-        </MuiThemeProvider>
+
+            {scroll && <div className="totalData" style={{ clear: "both" }}></div>}
+            {scroll && <div style={{ float: 'right', display: 'flex', paddingRight: 15 }}>
+                TotalData: {size || data.length || 0}
+            </div>}
+        </React.Fragment>
     );
 }
 
-Table.propTypes = {
+TableGraph.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
 };
 
-export default WithConfigHOC(properties)(Table);
+export default WithConfigHOC(properties)(TableGraph);

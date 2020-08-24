@@ -11,3 +11,7 @@ export const XTICKS_WIDTH = 50;
 export const YAXIS_ROTATION = 30;
 export const YTICK_LENGTH = 5;
 export const DEFAULT_MARGIN_LEFT = 30;
+export const FILTER_COLUMN_MAX_HEIGHT = 250;
+export const FILTER_COLUMN_WIDTH = 250;
+export const LIMIT = 100;
+export const FOOTER_HEIGHT = 65;
