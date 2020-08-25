@@ -1,30 +1,27 @@
 import PropTypes from 'prop-types';
 import React from "react";
-
-import AbstractGraph from "../AbstractGraph";
-
-import "./style.css";
-
-import { properties } from "./default.config";
-
 import objectPath from "object-path";
 
+import { properties } from "./default.config";
+import defaultProperties from "../defaultProperties";
+import "./style.css";
 /*
     This is a very basic graph that displays a text message
 */
 
 const INITIAL_FONT_SIZE = 4
 
-class TextGraph extends AbstractGraph {
+class TextGraph extends React.Component {
 
     constructor(props) {
-        super(props, properties);
-
+        super(props);
+        this.configuredProperties = {};
         this.state = {
             fontSize: INITIAL_FONT_SIZE,
             height: props.height,
             width: props.width
         }
+        this.setConfiguredProperties(props, properties);
     }
 
     componentDidMount() {
@@ -33,6 +30,20 @@ class TextGraph extends AbstractGraph {
 
     componentDidUpdate() {
         this.checkFontsize();
+    }
+
+    setConfiguredProperties(props, properties) {
+        this.configuredProperties = Object.assign(
+            {},
+            { isCustomColor: objectPath.has(props.configuration.data, 'colors') || false },
+            defaultProperties,
+            properties,
+            props.configuration.data,
+            { multiMenu: props.configuration.multiMenu, menu: props.configuration.menu });
+    }
+
+    getConfiguredProperties() {
+        return this.configuredProperties;
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -217,4 +228,4 @@ TextGraph.propTypes = {
     configuration: PropTypes.object
 };
 
-export default TextGraph
+export default TextGraph;
