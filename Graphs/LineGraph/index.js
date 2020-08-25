@@ -16,7 +16,7 @@ import isEqual from 'lodash/isEqual';
 import * as d3 from 'd3'
 import isEmpty from 'lodash/isEmpty';
 import ReactTooltip from 'react-tooltip';
-import {addMillisecs, formatDate} from "vis-graphs/utils/DateTimeUtils";
+import {formatDuration} from "../../utils/DateTimeUtils";
 import XYGraph from "../XYGraph";
 import { pick } from "../../utils/helpers";
 import { nest } from "../../utils/helpers/nest";
@@ -450,7 +450,7 @@ class LineGraph extends XYGraph {
           .tickSizeOuter(yTickSizeOuter);
 
         if (yTickFormat || yTickFormat === "") {
-            const yAxisTickFormat = (yTickFormatType === duration) ? (d) => formatDate(addMillisecs(new Date(new Date(0).getTimezoneOffset()*1000*60), d), yTickFormat) : format(yTickFormat);
+            const yAxisTickFormat = (yTickFormatType === duration) ? (d) => formatDuration(d, yTickFormat) : format(yTickFormat);
             yAxis.tickFormat(yAxisTickFormat);
         }
 
