@@ -1,4 +1,4 @@
-import {formatDate} from "vis-graphs/utils/DateTimeUtils"
+import {formatDate} from "../../../utils/DateTimeUtils"
 
 export default (props) => {
     const {

@@ -1,5 +1,5 @@
 import { format, timeFormat } from "d3";
-import {addMillisecs, formatDate} from "vis-graphs/utils/DateTimeUtils";
+import {addMillisecs, formatDate} from "./DateTimeUtils";
 
 const d3 = { format, timeFormat };
 
