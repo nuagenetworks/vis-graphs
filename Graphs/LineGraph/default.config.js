@@ -1,15 +1,7 @@
-import { theme } from "../../theme"
-
-export const properties = {
-    stroke: {
-        color: "red",
-        width: "2px"
-    },
+export default {
     legend: {
         show: false
     },
-    zeroStart: true,
-    circleRadius: 5,
-    defaultYColor: theme.palette.greenColor,
-    chartWidthToPixel: 7,
+    zeroStart: false,
+    showDots: false,
 }

@@ -1,7 +1,6 @@
 {
   "data": {
     "dateHistogram": true,
-    "xColumn": "timestamp",
     "yTicks": 5,
     "stroke": {
       "color": "#f76159",
@@ -12,7 +11,9 @@
     "yTickFormat": ".2s",
     "xLabel": "Time",
     "yLabel": "Total # ACL Hits",
+    "xColumn": "timestamp",
     "yColumn": "CPU",
+    "linesColumn": "MEMORY",
     "brushEnabled": false,
     "legend": {
       "orientation": "vertical",

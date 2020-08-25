@@ -1,195 +1,160 @@
+import React from 'react';
 import PropTypes from 'prop-types';
-import React from "react";
+import { compose } from 'redux';
+import { Cell, PieChart, Pie } from 'recharts';
+import { styled } from '@material-ui/core/styles';
 
-import AbstractGraph from "../AbstractGraph";
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
+import config from './default.config';
+import colorConvert from 'color-convert';
 
-import * as d3 from "d3";
-
-import "./style.css";
-
-import {properties} from "./default.config"
-
-
-export default class GaugeGraph extends AbstractGraph {
-
-    constructor(props) {
-        super(props, properties);
-    }
-
-    deg2rad(deg) {
-        return deg * Math.PI / 180;
-    }
-
-    componentDidMount() {
-        const {
-            configuration
-        } = this.props;
-
-        const {
-            gaugePtrTransition,
-            gaugeCtrFormat,
-            gaugeCtrSuffix
-        } = this.getConfiguredProperties();
-
-        const format = d3.format(gaugeCtrFormat);
-        const currentValue = this.currentValue;
-        const minValue = this.minValue;
-
-        d3.timeout(() => {
-            d3.select(`#gauge-needle-${configuration.id}`)
-                .transition()
-                .ease(d3.easeLinear)
-    			      .duration(gaugePtrTransition)
-    			      .attr('transform', 'rotate(' + this.angle +')');
-
-            d3.select(`#gauge-counter-${configuration.id}`)
-                .transition()
-                    .duration(gaugePtrTransition)
-                    .on("start", function repeat() {
-                        d3.active(this)
-                            .tween("text", function() {
-                                var that = d3.select(this),
-                                i = d3.interpolateNumber(minValue, currentValue);
-                                return function(t) { that.text( i(t) ? format(i(t)) + ' ' + gaugeCtrSuffix : ""); }
-                             });
-                    });
-        }, 500);
-    }
-
-    render() {
-        const {
-            data,
-            width,
-            height,
-            configuration
-        } = this.props;
-
-        let cData = data;
-
-        if (!data)
-            return this.renderMessage('No data to visualize')
-
-        if(data.length)
-            cData = data[0];
-
-        const {
-            minValue,
-            maxValue,
-            minColumn,
-            maxColumn,
-            currentColumn,
-            margin,
-            gaugePtrWidth,
-            gaugePtrTailLength,
-            gaugePtrHeadLengthPercent,
-            gaugeLabelInset,
-            gaugePtrColor,
-            gaugeTicks,
-            gaugeRingInset,
-            gaugeRingWidth,
-            gaugeCtrColor,
-            gaugeCtrFontSize,
-            labelFormat,
-            fontColor,
-            colors
-        } = this.getConfiguredProperties();
-
-        const angles = {
-            min: -90,
-            max: 90
-        };
-
-        let availableWidth     = width - (margin.left + margin.right);
-        let availableHeight    = height - (margin.top + margin.bottom);
+const LabelHeight = 10;
 
 
-        const minRange         = cData[minColumn] ? cData[minColumn] : (minValue ? minValue : 0);
-        const maxRange         = cData[maxColumn] ? cData[maxColumn] : (maxValue ? maxValue : 100);
-        const currentValue     = cData[currentColumn] ? cData[currentColumn] : 0;
+const renderNeedle = ({ cx, cy, outerRadius, chartValue }) => {
+    const x1 = cx,
+        y1 = cy - 2.5,
+        x2 = cx,
+        y2 = cy + 2.5,
+        x3 = cx + outerRadius * 0.95,
+        y3 = cy;
 
-        const minRadius   = Math.min(availableWidth, availableHeight) / 2;
-
-        const innerRadius = minRadius - gaugeRingInset - gaugeRingWidth;
-        const outerRadius = minRadius - gaugeRingInset;
-
-        const pointerHeadLength = Math.round(minRadius * gaugePtrHeadLengthPercent);
-
-        const arcColor = d3.interpolateHsl(d3.rgb(colors[0] ? colors[0] : '#e8e2ca'), d3.rgb(colors[1] ? colors[1] : '#3e6c0a'))
-
-        const range = angles.max - angles.min;
-
-        const arc = d3.arc()
-            .innerRadius(innerRadius)
-            .outerRadius(outerRadius)
-            .startAngle((d, i) => {
-    			      return this.deg2rad(angles.min + (d * i * range));
-    			  })
-            .endAngle((d, i) => {
-                return this.deg2rad(angles.min + (d * (i + 1) * range));
-    			  });
-
-        let scale = d3.scaleLinear()
-            .range([0,1])
-            .domain([minRange, maxRange]);
-
-        let ticks = scale.ticks(gaugeTicks);
-        let tickData = d3.range(gaugeTicks).map(function() {return 1 / gaugeTicks;});
-
-        const textLabel = ((d) => {
-            const formatter = d3.format(labelFormat || ",.2s");
-            return formatter(d);
-        });
-
-        const transformText = ((d, i) => {
-            return `rotate(${angles.min + (scale(d) * range)}) translate(0, ${gaugeLabelInset - minRadius})`;
-        });
-
-        const lineData = [ [gaugePtrWidth / 2, 0],
-            [0, -pointerHeadLength],
-            [-(gaugePtrWidth / 2), 0],
-            [0, gaugePtrTailLength],
-            [gaugePtrWidth / 2, 0] ];
-
-        const pointerLine = d3.line()
-            .curve(d3.curveMonotoneX);
-
-        this.angle        = angles.min + (scale(currentValue) * range) || -90
-        this.minValue     = minValue
-        this.currentValue = currentValue;
-
-        return (
-            <div className="gauge-graph">
-                <svg width={ width } height={ height }>
-                    <g transform={ `translate(${ width / 2 }, ${ height * (3 / 5) })` } >
-                        {
-                            tickData.map((tick, i) => {
-                                return <g key={i} >
-                                    <path
-                                        d={ arc(tick, i) }
-                                        fill={ arcColor(tick * i) }
-                                        />
-                                </g>
-                            })
-                        }
-                        {
-                            ticks.map((tick, i) => {
-                                return <g key={i} >
-                                    <text transform={ transformText(tick, i) } fill={ fontColor }>
-                                        {textLabel(tick)}
-                                    </text>
-                                </g>
-                            })
-                        }
-                        <path id={`gauge-needle-${configuration.id}`} d={ pointerLine(lineData) } fill={ gaugePtrColor } transform={ `rotate(${angles.min})` } />
-                        <text id={`gauge-counter-${configuration.id}`} fill={ gaugeCtrColor } style={{fontSize: gaugeCtrFontSize}} transform={ `translate(0, ${height * (1 / 5)})` } > </text>
-                    </g>
-                </svg>
-            </div>
-        );
-    }
+    const needleAngle = parseInt((180 + chartValue * 1.8));
+    
+    return (<g id="needle">
+        <polygon
+            points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
+            stroke="#666"
+            fill="#666"
+            transform={`rotate(${needleAngle} ${cx} ${cy})`}
+        />
+        <circle
+            stroke="#666"
+            fill="none"
+            cx={cx}
+            cy={cy}
+            r="2"
+            stroke="#666"
+        />
+    </g>);
 }
 
-GaugeGraph.propTypes = {
-    configuration: PropTypes.object,
-    data: PropTypes.array
+let chartData = [];
+let gaugeTickValue = 0;
+let sumValues = [];
+let arrowData = [];
+let pieProps = {};
+let pieRadius = {};
+
+const Label = styled('div')({
+    fontSize: '1em',
+    margin: '10px 0 0 10px',
+    height: '10px',
+});
+
+const GaugeChart = (props) => {
+
+    const {
+        data: originalData,
+        width,
+        height,
+        properties,
+    } = props;
+
+    const radius = width > height ? height*1.2 : width*1.2;
+
+    const {
+        minValue,
+        maxValue,
+        gaugeTicks,
+        fontSize,
+    } = properties;
+
+    const chartValue = originalData[0].value;
+
+    React.useEffect(() => {
+        chartData = [];
+        
+        gaugeTickValue = parseInt(parseInt(maxValue) / parseInt(gaugeTicks));
+
+        for (let i = parseInt(minValue) + gaugeTickValue; i <= parseInt(maxValue); i += gaugeTickValue) {
+            chartData.push({
+                name: i,
+                value: gaugeTickValue,
+                label: i,
+                color: ((code) => {
+                    var rgb = colorConvert.hsl.rgb(code, 100, 50);
+                    return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+                })(parseInt(maxValue) - i),
+            })
+        }
+
+        sumValues = chartData
+            .map(cur => cur.value)
+            .reduce((a, b) => a + b);
+
+        arrowData = [
+            { value: chartValue },
+            { value: 0 },
+            { value: sumValues - chartValue },
+        ];
+
+        pieProps = {
+            startAngle: 180,
+            endAngle: 0,
+            cx: width * .50,
+            cy: height * .55,
+        };
+
+        pieRadius = {
+            innerRadius: radius * 0.25,
+            outerRadius: radius * 0.32,
+        };
+
+    }, [props.data, props.height, props.width]);
+
+    return (
+        <React.Fragment>
+            <Label id="chart-value">
+                {parseInt(chartValue)}%
+            </Label>
+            <PieChart width={width} height={height- 2 * LabelHeight} >
+                <Pie
+                    data={chartData}
+                    fill="#8884d8"
+                    {...pieRadius}
+                    {...pieProps}
+                    stroke="none"
+                    className="gauge-sector-fill"
+                    labelLine={false}
+                >
+                    {
+                        chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={chartData[index].color} />
+                        ))
+                    }
+                </Pie>
+                <Pie
+                    stroke="none"
+                    activeIndex={1}
+                    activeShape={(props) => (renderNeedle({ ...props, width, fontSize, chartValue}))}
+                    data={arrowData}
+                    outerRadius={pieRadius.innerRadius}
+                    fill="none"
+                    {...pieProps}
+                    label
+                />
+            </PieChart>
+        </React.Fragment>
+    );
 };
+
+GaugeChart.propTypes = {
+    data: PropTypes.arrayOf(PropTypes.object),
+};
+
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(GaugeChart);

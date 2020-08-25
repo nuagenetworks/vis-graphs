@@ -1,232 +1,135 @@
 import PropTypes from 'prop-types';
-import React from "react";
+import React from 'react';
+import { compose } from 'redux';
+import {
+    PieChart,
+    Pie,
+    Cell
+} from 'recharts';
 
-import AbstractGraph from "../AbstractGraph";
+import { 
+    LEGEND_PERCENTAGE
+} from './../../constants';
+import { config } from './default.config';
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
+import customTooltip from '../Components/utils/RechartsTooltip';
+import renderLegend from '../Components/utils/Legend';
+import { filterEmptyData } from '../../utils/helpers';
+import { renderMessage, insertElementIntoTooltip } from '../utils/helper';
+import { limit } from '../../utils/helpers/limit';
 
-import * as d3 from "d3";
+const PieGraph = (props) => {
+    const {
+        data: originalData,
+        width,
+        height,
+        properties,
+        onMarkClick
+    } = props;
 
-import "./style.css";
-
-import {properties} from "./default.config"
-import { filterEmptyData } from "../../utils/helpers";
-import {limit} from '../../utils/helpers/limit';
-
-
-export default class PieGraph extends AbstractGraph {
-
-    constructor(props) {
-        super(props, properties);
+    if (!originalData || !originalData.length) {
+        return this.renderMessage("No data to visualize");
     }
 
-    getColor = (scale) => {
-        const {
-            stroke,
-            colorColumn,
-            labelColumn,
-            colors,
-            legendColumn,
-            emptyBoxColor
-        } = this.getConfiguredProperties()
+    const {
+        otherOptions,
+        labelColumn,
+        pieInnerRadius,
+        pieOuterRadius,
+        showZero,
+        sliceColumn,
+        legend,
+        percentages,
+        colors,
+        mappedColors,
+        id,
+        classes,
+    } = properties;
 
+    let { tooltip } = properties;
 
-        return (d) => {
-            let value = null
-            if (d.hasOwnProperty(legendColumn)) {
-                value = d[legendColumn]
-            } else if (d.hasOwnProperty(colorColumn)) {
-                value = d[colorColumn]
-            } else if (d.hasOwnProperty(labelColumn)) {
-                value = d[labelColumn]
-            } else if (d.hasOwnProperty("key")) {
-                value = d["key"]
-            }
+    const settings = {
+        "metric": sliceColumn,
+        "dimension": labelColumn,
+        "limitOption": otherOptions
+    };
 
-            if (value === 'Empty') {
-                return emptyBoxColor
-            }
-            return scale ? scale(value) : stroke.color || colors[0];
-        }
-
-    }
-
-    render() {
-        const {
+    const data = limit({
+        data: filterEmptyData({
             data: originalData,
-            height,
-            width,
-            onMarkClick
-        } = this.props;
+            column: sliceColumn,
+            showZero: showZero
+        }),
+        ...settings
+    });
 
-        const {
-            graphHeight,
-            graphWidth,
-        } = this.getGraphDimension(label);
-
-        if (!originalData || !originalData.length)
-            return this.renderMessage("No data to visualize");
-
-        const {
-          chartWidthToPixel,
-          circleToPixel,
-          colorColumn,
-          sliceColumn,
-          labelColumn,
-          legend,
-          margin,
-          pieInnerRadius,
-          pieOuterRadius,
-          pieLabelRadius,
-          stroke,
-          fontColor,
-          percentages,
-          percentagesFormat,
-          otherOptions,
-          showZero,
-          mappedColors,
-          labelCount,
-          labelLimit,
-          labelFontSize,
-        } = this.getConfiguredProperties();
-
-
-        /*
-        Add below code snippet in visulaization's configuration json files
-        to use grouping data feature
-
-        "others": {
-            "label": "Others",
-            "limit": 5
-        }
-
-        */
-        const settings = {
-            "metric": sliceColumn,
-            "dimension": labelColumn,
-            "limitOption": otherOptions
-          };
-
-        const data =  limit({
-            data: filterEmptyData({
-                data: originalData,
-                column: sliceColumn,
-                showZero:showZero
-            }),
-            ...settings
-        })
-
-        if (!data || !data.length)
-            return this.renderMessage("No data to visualize")
-
-        let availableWidth     = graphWidth - (margin.left + margin.right);
-        let availableHeight    = graphHeight - (margin.top + margin.bottom);
-        const value            = (d) => d[sliceColumn];
-        const label            = (d) => d[labelColumn];
-        const scale            = mappedColors ?
-            this.getMappedScaleColor(data, labelColumn) : this.scaleColor(data, labelColumn);
-
-        const getColor         = mappedColors ?
-            this.getColor(scale) : (d) => scale ? scale(d[colorColumn || labelColumn]) : null;
-
-        const maxRadius   = Math.min(availableWidth, availableHeight) / 2;
-        const innerRadius = pieInnerRadius * maxRadius;
-        const outerRadius = pieOuterRadius * maxRadius;
-        const labelRadius = pieLabelRadius * maxRadius;
-
-        const arc = d3.arc()
-            .innerRadius(innerRadius)
-            .outerRadius(outerRadius);
-
-        const labelArc = d3.arc()
-            .innerRadius(labelRadius)
-            .outerRadius(labelRadius);
-
-        const pie    = d3.pie().value(value).sort(null);
-        const slices = pie(data);
-
-        const getLabelText = (() => {
-            if (percentages) {
-                const percentageFormat = d3.format(percentagesFormat || ",.2%");
-                const sum              = d3.sum(data, value);
-                return (d) => percentageFormat(value(d) / sum);
-            }
-            return label;
-        })();
-
-        const style = {
-            strokeStyle: {
-                strokeWidth: stroke.width,
-                stroke: stroke.color
-            },
-            graphStyle: {
-                width: graphWidth,
-                height: graphHeight,
-                order:this.checkIsVerticalLegend() ? 2 : 1,
-            }
-        };
-
-        return (
-            <div className="pie-graph">
-                {this.tooltip}
-                <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-                    {this.renderLegend(data, legend, getColor, label,this.checkIsVerticalLegend())}
-                    <div className='graphContainer' style={ style.graphStyle }>
-                        <svg width={ graphWidth } height={ graphHeight }>
-                            <g className = {'pieGraph'} transform={ `translate(${ graphWidth / 2 }, ${ graphHeight / 2 })` } >
-                                {
-                                    slices.map((slice, i) => {
-                                        const d = slice.data;
-                                        const labelFullText = labelCount >= slices.length ? getLabelText(d) : '';
-                                        const isTruncate = labelFullText.length > labelLimit;
-                                        const labelText = isTruncate ? `${labelFullText.substr(0, labelLimit)}...` : labelFullText;
-
-                                        // Set up clicking and cursor style.
-                                        const { onClick, cursor } = (
-                                            onMarkClick && (!otherOptions || d[settings.dimension] !== otherOptions.label) ? {
-                                                onClick: () => onMarkClick(d),
-                                                cursor: "pointer"
-                                            } : { }
-                                        );
-
-                                        const textAnchor = (
-                                        (pieLabelRadius > pieOuterRadius)
-                                        ? ((slice.startAngle + slice.endAngle) / 2 < Math.PI ? "start" : "end")
-                                        : "middle"
-                                        );
-
-                                        return <g className="section" key={i} >
-                                            <path
-                                            d={ arc(slice) }
-                                            fill={ getColor(d) }
-                                            onClick={ onClick }
-                                            style={ Object.assign({cursor}, style.strokeStyle) }
-                                            { ...this.tooltipProps(d) }
-                                            />
-                                            <text
-                                            transform={`translate(${labelArc.centroid(slice)})`}
-                                            textAnchor={ textAnchor }
-                                            dy=".35em"
-                                            fill={ fontColor }
-                                            onClick={ onClick }
-                                            style={{cursor, fontSize: labelFontSize}}
-                                            { ...this.tooltipProps(d) }
-                                            >
-                                                <title>{isTruncate ? labelFullText : ''}</title>
-                                                { labelText }
-                                            </text>
-                                        </g>
-                                    })
-                                }
-                            </g>
-                           
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        );
+    if (!data || !data.length) {
+        return renderMessage({ message: "No data to visualize", id, classes });
     }
+
+    const type = percentages ? LEGEND_PERCENTAGE : undefined;
+
+    if (percentages) {
+        const Total = data.reduce((prev, cur) => {
+            if (typeof prev !== 'number') {
+                prev = prev[sliceColumn];
+            }
+            return prev + cur[sliceColumn];
+        });
+
+        data.forEach(element => {
+            element.percantage = `${(element[sliceColumn] / Total * 100).toFixed(2)}%`;
+        });
+
+        tooltip = insertElementIntoTooltip(tooltip, { column: "percantage", label: "Percentage" });
+    }
+
+    return (
+        <PieChart
+            width={width}
+            height={height}
+            cursor={onMarkClick ? "pointer" : ''}
+        >
+           
+            {   
+                renderLegend({ legend, height, labelColumn, type})        
+            }
+            {
+                customTooltip({ tooltip })
+            }
+            <Pie
+                labelLine={false}
+                data={data}
+                innerRadius={pieInnerRadius * 100}
+                outerRadius={pieOuterRadius * 100}
+                dataKey={sliceColumn}
+                startAngle={90}
+                endAngle={-270}
+                onClick={
+                    (d) => (
+                        onMarkClick && (!otherOptions || d[labelColumn] !== otherOptions.label)
+                            ? onMarkClick(d)
+                            : ''
+                    )
+                }
+            >
+                {
+                    data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={mappedColors ? mappedColors[entry[labelColumn]] : colors[index]} />
+                    ))
+                }
+            </Pie>
+        </PieChart>
+    );
 }
 
 PieGraph.propTypes = {
-  configuration: PropTypes.object,
-  data: PropTypes.array
+    configuration: PropTypes.object,
+    data: PropTypes.arrayOf(PropTypes.object),
 };
+
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(PieGraph);
