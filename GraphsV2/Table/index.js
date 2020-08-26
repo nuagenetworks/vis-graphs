@@ -600,9 +600,9 @@ const TableGraph = (props) => {
 
     const getSelectedRows = (selectedRowsCurr = rowSelected) => {
         let selected = [];
-        selectedRowsCurr.forEach((rowindex) =>
-            selected.push(filterData[rowindex])
-        )
+        if (Array.isArray(selectedRowsCurr)) {
+            selectedRowsCurr.forEach((rowindex) => selected.push(filterData[rowindex]))
+        }
         return selected;
     }
 
