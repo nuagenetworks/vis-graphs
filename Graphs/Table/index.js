@@ -358,7 +358,7 @@ const TableGraph = (props) => {
 
         if (!multiSelectable) {
             handleClick(...selectedRowsCurr);
-            selectedRows = {};
+            selectedRows = [];
         }
 
         setRowSelected(selectedRowsCurr);
