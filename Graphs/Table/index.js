@@ -365,7 +365,7 @@ const TableGraph = (props) => {
         if (onSelect) {
             let matchingRows = [];
             let rows = {};
-            const selectedData = getSelectedRows(selectedRowsCurr);;
+            const selectedData = getSelectedRows(selectedRowsCurr);
             if (selectedData.length > 1) {
                 rows = selectedData;
             } else {
@@ -600,8 +600,8 @@ const TableGraph = (props) => {
 
     const getSelectedRows = (selectedRowsCurr = rowSelected) => {
         let selected = [];
-        for (let rowindex in selectedRowsCurr) {
-            selected.push(filterData[rowindex]);
+        if (Array.isArray(selectedRowsCurr)) {
+            selectedRowsCurr.forEach((rowindex) => selected.push(filterData[rowindex]))
         }
         return selected;
     }
