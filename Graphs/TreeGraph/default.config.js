@@ -2,7 +2,7 @@ import {
     theme
 } from "../../theme"
 
-export const properties = {
+export const config = {
     linksSettings: {
         stroke: {
             "defaultColor": "lightsteelblue",
@@ -43,6 +43,7 @@ export const properties = {
         },
         width: 180,
         height: 45,
+        textMargin: 5,
     },
     margin: {
         top: -80,

@@ -1,223 +1,335 @@
 import PropTypes from 'prop-types';
-import React from "react";
-import isEqual from 'lodash/isEqual';
-import AbstractGraph from "../AbstractGraph";
-import { properties } from "./default.config";
-import './styles.css'
+import React, { useEffect, useRef, useState } from 'react';
+import { compose } from 'redux';
 import {
     select,
     zoom,
     event,
     tree,
     hierarchy
-  } from "d3";
+} from 'd3';
+import { styled } from '@material-ui/core/styles';
 
-import * as d3 from "d3";
-import {isFunction} from "../../utils/helpers";
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
+import { config } from './default.config';
+import './styles.css';
+import { isFunction } from '../../utils/helpers';
 
-class TreeGraph extends AbstractGraph {
+let root = null;
+let treeData = null;
+let treemap = null;
+let transformAttribute = null;
+let rectWidth = 0;
+let rectHeight = 0;
+let availableWidth = 0;
+let availableHeight = 0;
 
-    constructor(props) {
-        super(props, properties);
-        this.root = null;
-        this.treeData = null;
-        this.treemap = null;
-        this.transformAttr = null;
-        this.rectWidth = 0
-        this.rectHeight = 0
-        this.depth = 0;
-        this.module = null;
-        this.initiate(props);
+const TooltipFirstRow = styled('small')({
+    fontWeight: 'bold',
+    fontSize: '10px',
+    wordWrap: 'break-word',
+    textAlign: 'center',
+    padding: '4px',
+    color: '#000000;',
+});
+
+const TooltipSecondRow = styled('small')({
+    textAlign: 'justify',
+    wordWrap: 'break-word',
+    marginTop: '10px',
+    fontSize: '9px',
+    padding: '4px',
+    color: '#000000',
+});
+
+const setAvailableWidth = (width, margin) => width - (margin.left + margin.right);
+
+const setAvailableHeight = (height, margin) => height - (margin.top + margin.bottom);
+
+const setSVGTransform = (properties) => {
+    const { transformAttr } = properties;
+    const dx = transformAttr['translate'][0];
+    const dy = transformAttr['translate'][1];
+    return `translate(${dx},${dy})`;
+}
+
+const showToolTip = (tooltip, d, showToolTip, commonEN) => {
+    const tooltipContent = (`<TooltipFirstRow> 
+                                ${d.data.name} 
+                            </TooltipFirstRow>
+                            <br/> 
+                            <TooltipSecondRow>
+                                ${(d.data.description) ? d.data.description : commonEN.general.noDescription}
+                            </TooltipSecondRow>`);
+    if (showToolTip) {
+        tooltip.transition()
+            .duration(200)
+            .style('opacity', 5);
+
+        // todo
+        tooltip.html(tooltipContent)
+            .style('left', (event.pageX) + 'px')
+            .style('top', (event.pageY - 28) + 'px');
     }
+}
 
-    componentDidMount() {
-        const {
-            data
-        } = this.props;
+const hideToolTip = tooltip => {
+    tooltip.transition()
+        .duration(500)
+        .style('opacity', 0);
+}
 
-        if (!data || !data.length)
-            return
-
-        this.setSVGTransform(this.props)
-        this.elementGenerator();
-        this.setDraggingRef(this.props)
+const collapse = d => {
+    if (d.children) {
+        d._children = d.children;
+        d._children.forEach(collapse);
+        d.children = null;
     }
+}
 
-    setDraggingRef = (props) => {
-        if(props.onDragStartRef) {
-            props.onDragStartRef(this.dragStart)
+const parseTransformation = a => {
+    const b = {};
+    for (const i in a = a.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g)) {
+        const c = a[i].match(/[\w.-]+/g);
+        b[c.shift()] = c;
+    }
+    return b;
+}
+
+const diagonal = d => {
+
+// Creates a Line (diagonal) path from parent to the child nodes
+    let p0 = {
+        x: d.x + rectHeight / 2,
+        y: (d.y)
+    },
+        p3 = {
+            x: d.parent.x + rectHeight / 2,
+            y: d.parent.y + 180 // -12, so the end arrows are just before the rect node
+        },
+        m = (p0.y + p3.y) / 2,
+        p = [p0, {
+            x: p0.x,
+            y: m
+        }, {
+                x: p3.x,
+                y: m
+            }, p3];
+    p = p.map(d => [d.y, d.x]);
+
+    return 'M' + p[0] + 'L' + p[1] + ' ' + p[2] + ' ' + p[3];
+}
+
+const normalArrow = (svg, linksSettings) => {
+    svg.append('svg:defs').append('marker')
+        .attr('id', 'normal-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 0)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .attr('fill', linksSettings.stroke.defaultColor)
+        .append('path')
+        .attr('d', 'M10,-5L0,0L10,5');
+}
+
+const coloredArrow = (svg, linksSettings) => {
+    svg.append('svg:defs').append('marker')
+        .attr('id', 'colored-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 0)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .attr('fill', linksSettings.stroke.selectedColor)
+        .append('path')
+        .attr('d', 'M10,-5L0,0L10,5');
+}
+
+const renderRectNode = (d, props, rectNode) => {
+    const {
+        renderNode,
+        store,
+        theme,
+        ...rest
+    } = props;
+
+    if (!isFunction(renderNode)) return '<div/>';
+
+    const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor;
+
+    return renderNode(
+        {   theme,
+            data: d.data,
+            textColor: rectColorText,
+            nodeId: `node-${d.id}`,
+            store,
+            ...rectNode,
+            onItemRender: () => (rest)
         }
-    }
+    );
+}
 
-    componentDidUpdate(prevProps) {
-        if(!isEqual(prevProps, this.props)) {
-            this.initiate(this.props);
+const TreeGraph = (props) => {
+    const {
+        data,
+        properties,
+        graphRenderView,
+        siteIcons: {
+            preBtn,
+            nextBtn
+        },
+        commonEN,
+        OnSetDragging,
+        onHandleTreeGraphOnZoom,
+        onClickChild,
+        updateTreeData,
+    } = props;
+
+    const {
+        margin,
+        pagination: {
+            paginationIconColor,
+            max
+        },
+        transition: {
+            duration
+        },
+        rectNode,
+        maximumNodesToShowOnPage,
+        linksSettings,
+        xLabelRotateHeight,
+        xLabelRotate,
+    } = properties;
+
+    const isFirst = useRef(true);
+    const [nodeElement, setNodeElement] = useState(null);
+
+    useEffect(() => {
+        if (isFirst.current) {
+            isFirst.current = false;
+            if (!nodeElement) return;
+        } else {
+            nodeElement && removePreviousChart();
         }
-
-        const {
-            data
-        } = this.props;
-
-        if (!data)
-            return
-        
-        this.setSVGTransform(this.props)
-        this.elementGenerator();
-    }
-
-    getGraph = () => {
-        return this.getSVG();
-    }
-
-    getGraphContainer = () => {
-        return this.getGraph().select('.tree-graph-container');
-    }
+        if (nodeElement) {
+            nodeElement && removePreviousChart()
+            initiate(props);
+            transformAttribute = setSVGTransform(properties);
+            elementGenerator();
+            setDraggingRef(props);
+        }
+    }, [props, nodeElement]);
 
     // Toggle children on click.
-    click = (d) => {
+    const click = d => {
         d.clicked = true;
         if (d.children) {
             d._children = d.children;
             d.children = null;
-            this.collapse(d)
+            collapse(d);
         } else {
             d.children = d._children;
             d._children = null;
-            this.props.onClickChild(d);
+            onClickChild(d);
         }
-        this.update(d);
+        update(d);
     }
-    
-    collapse = (d) => {
-        if (d.children) {
-            d._children = d.children
-            d._children.forEach(this.collapse)
-            d.children = null
-        }
+
+    const getGraph = () => select(nodeElement);
+
+    const getGraphContainer = () => getGraph().select('.tree-graph-container');
+
+    const removePreviousChart = () => {
+        getGraphContainer().selectAll('g.node').remove();
+    }
+
+    const getAvailableHeight = () => {
+        return availableHeight - (xLabelRotate ? xLabelRotateHeight : 0);
     }
 
     // generate methods which helps to create charts
-    elementGenerator = () => {
-        const {
-            data,
-            graphRenderView
-        } = this.props;
+    const elementGenerator = () => {
 
         // declares a tree layout and assigns the size
-        this.treemap = tree().size([this.getAvailableHeight(), this.getAvailableWidth()]);
-        this.treeData = data[0];
-        
+        treemap = tree().size([getAvailableHeight(), availableWidth]);
+        treeData = data[0];
+
         // Assigns parent, children, height, depth
-        this.root = hierarchy(this.treeData, (d) => { return graphRenderView ? d.kids : d.children; });
+        root = hierarchy(treeData, d => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
-        this.root.x0 = this.getAvailableHeight() / 2;
-        this.root.y0 = 0;
-        this.update(this.root)
+        root.x0 = getAvailableHeight() / 2;
+        root.y0 = 0;
+        update(root);
     }
 
-    setSVGTransform = () => {
-            const {
-                transformAttr
-            } = this.getConfiguredProperties();
-            const dx = transformAttr['translate'][0];
-            const dy = transformAttr['translate'][1];
-            this.transformAttr = `translate(${dx},${dy})`;
-    }
-
-    initiate = (props) => {
-        this.setAvailableWidth(props);
-        this.setAvailableHeight(props);
-        this.setSVGTransform();
-    }
-
-    setAvailableWidth = (props) => {
+    const initiate = (props) => {
         const {
-            width
+            width,
+            height,
         } = props;
-        const {
-            margin
-        } = this.getConfiguredProperties();
-        this.availableWidth = width - margin.left - margin.right
+
+        availableWidth = setAvailableWidth(width, margin);
+        availableHeight = setAvailableHeight(height, margin);
+        transformAttribute = setSVGTransform(properties);
     }
 
-    setAvailableHeight = (props) => {
-        const {
-            height
-        } = props;
-        const {
-            margin
-        } = this.getConfiguredProperties();
-        this.availableHeight = height - margin.top - margin.bottom
-    }
-
-    update = (source) => {
-        const {
-            siteIcons: {
-                preBtn,
-                nextBtn
-            },
-            graphRenderView
-        } = this.props;
-
-        const {
-            pagination: {
-                paginationIconColor,
-                max
-            }
-        } = this.getConfiguredProperties();
+    const update = (source) => {
 
         // Assigns the x and y position for the nodes
-        this.treeData = this.treemap(this.root);
+        treeData = treemap(root);
 
         // Compute the new tree layout.
-        const nodes = this.treeData.descendants(),
-            links = this.treeData.descendants().slice(1);
+        const nodes = treeData.descendants();
+        const links = treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach((d) => { d.y = d.depth * 250 });
+        nodes.forEach(d => { d.y = d.depth * 250 });
 
-        this.updateNodes(source, nodes);
-        this.updateLinks(source, links);
+        updateNodes(source, nodes);
+        updateLinks(source, links);
 
         // Store the old positions for transition.
-        nodes.forEach((d) => {
+        nodes.forEach(d => {
             d.x0 = d.x;
             d.y0 = d.y;
         });
 
-        const svg = this.getGraphContainer();
+        const svg = getGraphContainer();
 
         // ======================pagination starts here==============================
-        const parents = nodes.filter( (d) => {
-            if(graphRenderView) {
+        const parents = nodes.filter(d => {
+            if (graphRenderView) {
                 return (d.data.pagination) ? true : false;
             }
             return (d.data.kids && d.data.kids.length > max) ? true : false;
         });
 
-        svg.selectAll(".page").remove();
+        svg.selectAll('.page').remove();
 
-        parents.forEach((p) => {
+        parents.forEach(p => {
             if (p.children) {
                 const p1 = p.children[p.children.length - 1];
                 const p2 = p.children[0];
-
                 const pr = p.data;
                 const pagingData = [];
 
-                if(graphRenderView) {
+                if (graphRenderView) {
                     if (p2.data.pageNumber > 1) {
                         pagingData.push({
-                            type: "prev",
+                            type: 'prev',
                             parent: p,
                             module: p2.data.context.moduleName,
                             no: (p2.data.pageNumber - 1)
                         });
                     }
-    
+
                     if (p1.data.pageNumber < p1.data.totalPages) {
                         pagingData.push({
-                            type: "next",
+                            type: 'next',
                             parent: p,
                             module: p2.data.context.moduleName,
                             no: (p1.data.pageNumber + 1)
@@ -226,7 +338,7 @@ class TreeGraph extends AbstractGraph {
                 } else {
                     if (pr.page > 1) {
                         pagingData.push({
-                            type: "prev",
+                            type: 'prev',
                             parent: p,
                             no: (pr.page - 1)
                         });
@@ -234,297 +346,159 @@ class TreeGraph extends AbstractGraph {
 
                     if (pr.page < Math.ceil(pr.kids.length / max)) {
                         pagingData.push({
-                            type: "next",
+                            type: 'next',
                             parent: p,
                             no: (pr.page + 1)
                         });
                     }
                 }
 
-                const pageControl = svg.selectAll(".page")
-                    .data(pagingData, function (d) {
+                const pageControl = svg.selectAll('.page')
+                    .data(pagingData, d => {
                         return (d.parent.id + d.type);
                     }).enter()
-                    .append("g")
-                    .attr("class", "page")
-                    .attr("transform", function (d) {
-                        const x = (d.type === "next") ? p2.y : p1.y;
-                        const y = (d.type === "prev") ? (p2.x - 30) : (p1.x + 60);
-                        return "translate(" + x + "," + y + ")";
-                    }).on("click", this.paginate);
+                    .append('g')
+                    .attr('class', 'page')
+                    .attr('transform', d => {
+                        const x = (d.type === 'next') ? p2.y : p1.y;
+                        const y = (d.type === 'prev') ? (p2.x - 30) : (p1.x + 60);
+                        return `translate(${x}, ${y})`;
+                    }).on('click', paginate);
 
                 pageControl
-                    .append("circle")
-                    .attr("r", 15)
-                    .style("fill", paginationIconColor)
+                    .append('circle')
+                    .attr('r', 15)
+                    .style('fill', paginationIconColor);
 
                 pageControl
-                    .append("image")
-                    .attr("xlink:href", function (d) {
-                        if (d.type === "next") {
-                            return nextBtn
-                        } else {
-                            return preBtn
-                        }
-                    })
-                    .attr("x", -12.5)
-                    .attr("y", -12.5)
-                    .attr("width", 25)
-                    .attr("height", 25);
-
+                    .append('image')
+                    .attr('xlink:href', d => d.type === 'next' ? nextBtn : preBtn)
+                    .attr('x', -12.5)
+                    .attr('y', -12.5)
+                    .attr('width', 25)
+                    .attr('height', 25);
             }
         });
     }
 
-    renderSelectedNodesInfo = (nodes) => {
-
-        const {
-            selectedNodesInfo
-        } = this.getConfiguredProperties();
-
-        const svg = this.getGraphContainer();
-        const selectedNodes = nodes.filter(function (d) {
-            return (d.data.clicked) ? true : false;
-        });
-        if(selectedNodes.length > 1)
-        {
-            const line = svg.selectAll(".genealogy")
-                .data(selectedNodes, d => d.data);
-
-            const newLine = line.enter()
-                .append("g")
-                .attr("class", "genealogy");
-
-            let yAxis1 =  5;
-            let yAxis2 =  20;
-
-            newLine.append("svg:defs").append("svg:marker")
-            .attr("id", "triangle")
-            .attr("refX", 6)
-            .attr("refY", 6)
-            .attr("markerWidth", 30)
-            .attr("markerHeight", 30)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M 0 0 12 6 0 12 3 6")
-            .style("fill", selectedNodesInfo.stroke);
-
-            newLine.append("line")          // attach a line
-            .style("stroke", selectedNodesInfo.stroke)  // colour the line
-            .style("opacity", (d, i) => {
-                if(selectedNodes.length === ++i || !d.children) {
-                    return 0;
-                }
-            })  // colour the line
-            .attr("x1", 5)     // x position of the first end of the line
-            .attr("y1", (d, i)=>{
-                const axisDifference = i > 0 ? 40 : 0;
-                yAxis1 += parseInt(axisDifference)
-                return yAxis1;
-            })                  // y position of the first end of the line
-            .attr("x2", 5)     // x position of the second end of the line
-            .attr("y2", (d, i) => {
-                const axisDifference = i > 0 ? 40 : 0;
-                yAxis2 += parseInt(axisDifference)
-                return yAxis2;
-            })
-            .attr("marker-end", "url(#triangle)");
-
-            newLine.append("text")
-            .attr("dy", (d, i) => {
-                const height = 10*i*4;
-                return height;
-            })
-            .text((d) => d.data.name)
-            .style('fill', selectedNodesInfo.fontColor)
-            .style('font-weight', 'bold')
-
-            newLine.merge(line);
-
-            let xTra = 0;
-            let yTra = 0;
-
-            svg.selectAll('.genealogy')
-            .data(selectedNodes)
-            .each(function (d) {
-                if(d.children) {
-                    const firstChild = d.children[0];
-                    if(!firstChild.data.loaded) {
-                        xTra = firstChild.x + 40
-                        yTra = firstChild.y + 200
-                    }
-                } else if(d.data.clicked) {
-                    xTra = d.x + 40
-                    yTra = d.y + 200
-                }
-            })
-
-            d3.selectAll('.genealogy').attr("transform", "translate(" + yTra + ","+ xTra +")");
-
-            line.exit().remove();
+    const paginate = d => {
+        if (graphRenderView) {
+            updateTreeData(d);
         } else {
-            svg.selectAll(".genealogy").remove();
+            if (d && d.parent) {
+                d.parent.data.page = d.no;
+                setPage(d.parent);
+            }
         }
     }
 
-    paginate = (d) => {
-        const {
-            graphRenderView,
-            updateTreeData
-        } = this.props;
-        if(graphRenderView) {
-            updateTreeData(d)
-        } else {
-            d.parent.data.page = d.no;
-            this.setPage(d.parent);
-        }
-    }
-
-    setPage = (d) => {
-        if (d && d.data.kids) {
-            d.data.children = [];
-            d.data.kids.forEach( (d1, i) => {
-                if (d.data.page === d1.pageNo) {
-                    d.data.children.push(d1);
+    const setPage = d => {
+        const data = d.data;
+        if (d && data.kids) {
+            data.children = [];
+            data.kids.forEach((d1, i) => {
+                if (data.page === d1.pageNo) {
+                    data.children.push(d1);
                 }
             })
-            this.props.onSetPaginatedData(d)
+            props.onSetPaginatedData(d);
         }
     }
 
-    removePreviousChart(){
-        this.getGraphContainer().selectAll('g.node').remove();
-    } 
-
-    componentWillUpdate() {
-        this.removePreviousChart();
-    }
-
-    count_leaves = (node) => {
+    const count_leaves = (node) => {
         let count = 0;
-        for (var i = 0; i < node.length; i++) {
-            if (node[i].children) {
-                if(node[i].children.length > count) {
-                    count = node[i].children.length
+        for (let i = 0; i < node.length; i++) {
+            const child = node[i].children;
+            if (child) {
+                if (child.length > count) {
+                    count = child.length;
                 }
             }
         }
         return count;
     }
-    showToolTip = (tooltip, d, showToolTip) => {
-        if (showToolTip){
-            const {
-                commonEN,
-            } = this.props;
-            
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", 5)
-            tooltip.html(`<small style="font-weight:bold; font-size:10px; word-wrap: break-word; text-align: center; padding: 4px; color: #000000;">${d.data.name}</small><br/><small style="text-align: justify;word-wrap: break-word;margin-top: 10px;font-size: 9px;padding: 4px;color: #000000;">${(d.data.description) ? d.data.description : commonEN.general.noDescription}</small>`)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
+
+    const setDraggingRef = (props) => {
+        if (props.onDragStartRef) {
+            props.onDragStartRef(dragStart);
         }
     }
 
-    hideToolTip = (tooltip, d) => {
-        tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
+    const dragStart = (event, depth, moduleName, subModule) => {
+        const svg = getGraphContainer();
+        OnSetDragging(depth, moduleName, svg, subModule);
     }
 
-    updateNodes = (source, nodes) => {
+    const updateNodes = (source, nodes) => {
         // update graph
-        const svg = this.getGraphContainer();
+        const svg = getGraphContainer();
+        let i = 0;
+        let showOnlyImg = false;
 
-        const {
-            transition: {
-                duration
-            },
-            rectNode,
-            maximumNodesToShowOnPage
-        } = this.getConfiguredProperties();
+        rectWidth = rectNode.width;
+        rectHeight = rectNode.height;
 
-        const {
-            graphRenderView
-        } = this.props;
-
-        let i = 0,
-            showOnlyImg = false;
-
-        this.rectWidth = rectNode.width;
-        this.rectHeight = rectNode.height;
-
-        if (this.count_leaves(nodes)) {
-            const countLeaves = this.count_leaves(nodes);
+        if (count_leaves(nodes)) {
+            const countLeaves = count_leaves(nodes);
             if (countLeaves > maximumNodesToShowOnPage) {
-                this.rectWidth = rectNode.smallerWidth;
-                this.rectHeight = rectNode.smallerHeight;
+                rectWidth = rectNode.smallerWidth;
+                rectHeight = rectNode.smallerHeight;
                 showOnlyImg = true;
             }
         }
-        d3.select(".tooltip").remove();
+        select('.tooltip').remove();
         // Define the div for the tooltip
-        const tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip")
-            .style("background", '#F2F2F2')
-            .style("opacity", 0);
+        const tooltip = select('body').append('div')
+            .attr('class', 'tooltip')
+            .style('background', '#F2F2F2')
+            .style('opacity', 0);
 
         // Update the nodes...
         const node = svg.selectAll('g.node')
-            .data(nodes, (d) => {
+            .data(nodes, d => {
                 return d.id || (d.id = ++i);
             });
 
         // Enter any new nodes at the parent's previous position.
-        const nodeEnter = node.enter().append("g")
-        .attr("class", "node")
-        .attr("transform", (d) => {
-            return d.parent ?
-                "translate(" + d.parent.y + "," + d.parent.x + ")" :
-                "translate(" + source.y0 + "," + source.x0 + ")";
-        })
-        .on("click", (d) => {
-            !graphRenderView ? this.click(d) : this.props.OnChangleContext(d);
-        })
-	    .on("dragleave", (event) => this.props.OnSubmitFormOnDragLeave(event));
+        const nodeEnter = node.enter().append('g')
+            .attr('class', 'node')
+            .attr('transform', d => d.parent ? `translate(${d.parent.y}, ${d.parent.x})` : `translate(${source.y0}, ${source.x0})`)
+            .on('click', d => {
+                !graphRenderView ? click(d) : props.OnChangleContext(d);
+            })
+            .on('dragleave', event => props.OnSubmitFormOnDragLeave(event));
 
         // ****************** Nodes section ***************************
 
         if (showOnlyImg) {
             nodeEnter
-                .attr("width", 25)
-                .attr("height", 25)
-                .on("mouseover", (d) => this.showToolTip (tooltip, d, true))
-                .on("mouseout", (d) => this.hideToolTip (tooltip, d))
+                .attr('width', 25)
+                .attr('height', 25)
+                .on('mouseover', d => showToolTip(tooltip, d, true, commonEN))
+                .on('mouseout', d => hideToolTip(tooltip, d));
 
-            nodeEnter.append("text")
-                .attr("x", 28)
-                .attr("dy", "18px")
-                .text(function (d) {
-                    return d.data.name && d.data.name.length > 23 ? `${d.data.name.substring(0,23)}...` : d.data.name;
-                })
-                .style("fill-opacity", 1);
+            nodeEnter.append('text')
+                .attr('x', 28)
+                .attr('dy', '18px')
+                .text(d => d.data.name && d.data.name.length > 23 ? `${d.data.name.substring(0, 23)}...` : d.data.name)
+                .style('fill-opacity', 1);
         } else {
             nodeEnter.append('g').append('rect')
-            .attr('rx', 0)
-            .attr('ry', 0)
-            .attr('width', this.rectWidth)
-            .attr('height', this.rectHeight)
-            .attr("stroke", (d) => {
-                return d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor;
-            })
-            .attr("stroke-width", rectNode.stroke.width)
-            .attr('class', 'node-rect')
-            
+                .attr('rx', 0)
+                .attr('ry', 0)
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
+                .attr('stroke', d => d.data.clicked ? rectNode.stroke.selectedColor : rectNode.stroke.defaultColor)
+                .attr('stroke-width', rectNode.stroke.width)
+                .attr('class', 'node-rect')
+
             nodeEnter.append('foreignObject')
-                .attr("id", (d) => `node-${d.id}`)
-                .attr('width', this.rectWidth)
-                .attr('height', this.rectHeight)
-                .html((d) => {
-                    return this.renderRectNode(d);
-                })
-                .on("mouseover", (d) => this.showToolTip (tooltip, d, (d.data.name && d.data.name.length > 23) || (d.data.description && d.data.name.description > 24)))
-                .on("mouseout", (d) => this.hideToolTip (tooltip, d))
+                .attr('id', d => `node-${d.id}`)
+                .attr('width', rectWidth)
+                .attr('height', rectHeight)
+                .html(d => renderRectNode(d, props, rectNode))
+                .on('mouseover', d => showToolTip(tooltip, d, (d.data.name && d.data.name.length > 23) || (d.data.description && d.data.name.description > 24), commonEN))
+                .on('mouseout', d => hideToolTip(tooltip, d));
         }
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
@@ -534,229 +508,90 @@ class TreeGraph extends AbstractGraph {
 
         // Transition to the proper position for the node
         nodeUpdate.transition()
-            .duration((d) => {
-                return d.data.loaded ? 0 : duration;
-            })
-            .attr("transform", (d) => {
-                return "translate(" + d.y + "," + d.x + ")";
-            });
+            .duration(d => d.data.loaded ? 0 : duration)
+            .attr('transform', d => `translate(${d.y}, ${d.x})`);
 
         // Remove any exiting nodes
         node.exit().transition()
             .duration(duration)
-            .attr("transform", (d) => {
-                return "translate(" + source.y + "," + source.x + ")";
-            })
+            .attr('transform', () => `translate(${source.y}, ${source.x})`)
             .remove();
 
-        nodeUpdate.select("rect")
-            .style("fill", (d) => {
-                return d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground;
-            });
+        nodeUpdate.select('rect')
+            .style('fill', d => d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
     }
 
-    changeContextBasedOnSelection = (contextName, removalContext) => {
-        const isRemovalContextPos = contextName.search(removalContext)
-        return (isRemovalContextPos !== -1) ? contextName.substr(0, isRemovalContextPos) : contextName
-    }
-
-    renderRectNode = (d) => {
-        const {
-            rectNode
-        } = this.getConfiguredProperties();
-
-        const {
-            renderNode,
-            store,
-            theme,
-            ...rest
-        } = this.props;
-
-        if (!isFunction(renderNode)) return '<div/>';
-
-        const rectColorText = d.data.clicked ? rectNode.selectedTextColor : rectNode.defaultTextColor
-        return renderNode({theme, data: d.data, textColor: rectColorText, nodeId: `node-${d.id}`, store, ...rectNode, onItemRender: () => (rest)});
-    }
-
-    fetchImage =(apiData, contextName) => {
-        const {
-            fetchImage
-        } = this.props;
-
-        if(!isFunction(fetchImage))
-            return false;
-
-        return fetchImage({apiData, contextName});
-    }
-
-    updateLinks = (source, links) => {
+    const updateLinks = (source, links) => {
         // update graph
-        const svg = this.getGraphContainer();
-
-        const {
-            transition: {
-                duration
-            },
-            linksSettings
-        } = this.getConfiguredProperties();
+        const svg = getGraphContainer();
 
         // ****************** links section ***************************
         // Update the links...
-        const link = svg.selectAll('path.link').data(links, (d) => {
-            return d.id;
-        });
+        const link = svg.selectAll('path.link').data(links, d => d.id);
 
         // // Enter any new links at the parent's previous position.
-        const linkEnter = link.enter().insert('path', "g")
-            .attr("class", "link")
-            .attr('d', (d) => {
-                return this.diagonal(d)
-            })
-            .attr("stroke-width", linksSettings.stroke.width)
+        const linkEnter = link.enter().insert('path', 'g')
+            .attr('class', 'link')
+            .attr('d', d => diagonal(d))
+            .attr('stroke-width', linksSettings.stroke.width)
 
-        this.normalArrow(svg, linksSettings);
-        this.coloredArrow(svg, linksSettings);
+        normalArrow(svg, linksSettings);
+        coloredArrow(svg, linksSettings);
 
         // UPDATE
         const linkUpdate = linkEnter.merge(link);
         const highlight = linkUpdate.filter(d => d.data.clicked);
         highlight.raise();
 
-        linkUpdate.style("stroke", (d) => {
+        linkUpdate.style('stroke', d => {
             return d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor;
         })
 
         linkUpdate.transition()
-            .duration((d) => {
-                return d.data.loaded ? 0 : duration;
-            })
-            .attr('d', (d) => {
-                return this.diagonal(d)
-            })
-            .attr("marker-start", (d) => {
-                return d.data.clicked ? "url(#colored-arrow)" : "url(#normal-arrow)"
-            });
+            .duration(d => d.data.loaded ? 0 : duration)
+            .attr('d', d => diagonal(d))
+            .attr('marker-start', d => d.data.clicked ? 'url(#colored-arrow)' : 'url(#normal-arrow)');
 
         // Remove any exiting links
         link.exit().transition()
             .duration(duration)
-            .attr('d', (d) => {
-                return this.diagonal(d)
-            })
+            .attr('d', d => diagonal(d))
             .remove();
     }
 
-    normalArrow(svg, linksSettings) {
-        svg.append("svg:defs").append('marker')
-		.attr('id', 'normal-arrow')
-		.attr('viewBox', '0 -5 10 10')
-		.attr('refX', 0)
-		.attr('refY', 0)
-		.attr('markerWidth', 6)
-		.attr('markerHeight', 6)
-		.attr('orient', 'auto')
-		.attr('fill', linksSettings.stroke.defaultColor)
-		.append('path')
-		.attr('d', 'M10,-5L0,0L10,5');
-    }
-
-    coloredArrow(svg, linksSettings) {
-        svg.append("svg:defs").append('marker')
-		.attr('id', 'colored-arrow')
-		.attr('viewBox', '0 -5 10 10')
-		.attr('refX', 0)
-		.attr('refY', 0)
-		.attr('markerWidth', 6)
-		.attr('markerHeight', 6)
-		.attr('orient', 'auto')
-		.attr('fill', linksSettings.stroke.selectedColor)
-		.append('path')
-		.attr('d', 'M10,-5L0,0L10,5');
-    }
-
-    diagonal = (d) => {
-
-        // Creates a Line (diagonal) path from parent to the child nodes
-        var p0 = {
-                x: d.x + this.rectHeight / 2,
-                y: (d.y)
-            },
-            p3 = {
-                x: d.parent.x + this.rectHeight / 2 ,
-                y: d.parent.y + 180
-            },
-            m = (p0.y + p3.y) / 2,
-            p = [p0, {
-                x: p0.x,
-                y: m
-            }, {
-                x: p3.x,
-                y: m
-            }, p3];
-        p = p.map( (d) => {
-            return [d.y, d.x];
-        });
-
-        return 'M' + p[0] + 'L' + p[1] + ' ' + p[2] + ' ' + p[3];
-
-    }
-
-    parseTransformation = (a) => {
-        const b={};
-        for (const i in a = a.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g))
-        {
-            const c = a[i].match(/[\w.-]+/g);
-            b[c.shift()] = c;
-        }
-        return b;
-    }
-
-    zoomed = () => {
-        this.getGraphContainer().attr("transform", event.transform);
-        const tr = this.getGraphContainer().attr("transform");
-        const transformAttr = this.parseTransformation(tr)
+    const zoomed = () => {
+        getGraphContainer().attr('transform', event.transform);
+        const tr = getGraphContainer().attr('transform');
+        const transformAttr = parseTransformation(tr)
         const dx = transformAttr['translate'][0];
         const dy = transformAttr['translate'][1];
         const zm = transformAttr['scale'][0];
-        this.props.onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`)
+        onHandleTreeGraphOnZoom(`translate(${dx},${dy}) scale(${zm})`);
     }
 
-    dragStart = (event, depth, moduleName, subModule) => {
-        const svg = this.getGraphContainer();
-        this.props.OnSetDragging(depth, moduleName, svg, subModule)
-    }
+    let {
+        transformAttr = transformAttribute,
+    } = props;
 
-    renderTopologyGraph = () => {
-        let { transformAttr } = this.props;
-        if(!transformAttr) {
-            transformAttr = this.transformAttr;
-        }
-        return (
-            <div className="tree-graph" style={{height:'100%', background: '#FCFCFC'}}>
-                <svg
-                    height={'100%'}
-                    ref={ (node) => {
-                        this.node = node;
-                        select(node)
+    return (
+        <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
+            <svg
+                height={'100%'}
+                className='svgWidth'
+                ref={(node) => {
+                    setNodeElement(node);
+                    select(node)
                         .call(zoom()
-                        .scaleExtent([1 / 2, 8])
-                        .on("zoom", this.zoomed)
-                    )}
-                    }
-                    className="svgWidth"
-                >
-                    <g className='tree-graph-container' transform={transformAttr}>
-
-                    </g>
-                </svg>
-            </div>
-        )
-    }
-
-
-    render() {
-        return this.renderTopologyGraph();
-    }
+                            .scaleExtent([1 / 2, 8])
+                            .on('zoom', zoomed)
+                        )
+                }
+                }
+            >
+                <g className='tree-graph-container' transform={transformAttr}></g>
+            </svg>
+        </div>
+    )
 }
 TreeGraph.propTypes = {
     configuration: PropTypes.object,
@@ -765,4 +600,7 @@ TreeGraph.propTypes = {
     fetchChildren: PropTypes.func,
 };
 
-export default TreeGraph;
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(TreeGraph);

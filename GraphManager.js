@@ -1,10 +1,9 @@
 import * as graphs from './Graphs/';
-import * as v2Graphs from './GraphsV2';
 
 /*
 Stores all graphs.
 */
-const registry = { ...graphs, ...v2Graphs };
+const registry = { ...graphs };
 
 /*
     Registers a new graph for a given name
