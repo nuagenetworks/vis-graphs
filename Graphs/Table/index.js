@@ -272,6 +272,7 @@ const TableGraph = (props) => {
             setStateSortOrder(sortOrder);
         }
 
+        setRowSelected([]);
         setFilterData(orderBy(filterData, [sortBy], [sortDirection]));
     }
 
@@ -372,7 +373,7 @@ const TableGraph = (props) => {
                 let row = selectedData.length ? selectedData[0] : {};
                 if (matchingRowColumn && row) {
                     const value = objectPath.get(row, matchingRowColumn);
-                    matchingRows = filterData.filter((d) => {
+                    matchingRows = props.data.filter((d) => {
                         const matchingRowValue = objectPath.get(d, matchingRowColumn);
                         return (value || value === 0) && !isEqual(row, d) && value === matchingRowValue;
                     });
@@ -601,7 +602,7 @@ const TableGraph = (props) => {
     const getSelectedRows = (selectedRowsCurr = rowSelected) => {
         let selected = [];
         if (Array.isArray(selectedRowsCurr)) {
-            selectedRowsCurr.forEach((rowindex) => selected.push(filterData[rowindex]))
+            selectedRowsCurr.forEach((rowindex) => selected.push(props.data[rowindex]))
         }
         return selected;
     }
