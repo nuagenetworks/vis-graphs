@@ -837,9 +837,18 @@ __minPortFontSize__ (number) minimum font size of the port icon. Default is 20 (
 
 __maxPortFontSize__ (number) maximum font size of the port icon. Default is 40 (px).
 
+__showUpperColumnName__ (boolean) show column text on the top of Port. Default is true.
+
+__showLowerCloumnName__ (boolean) show column text on the bottom of the Port. Default is true.
+
 __minPortWidth__ (number) minimum width of each port (container). Default is 45 (px).
 
-__rowLimit__ (number) show number of ports in each row. Default is 8.
+__rowLimit__ (number) show number of ports in each row. Default is 16.
+
+__tooltipScript__ (string) a custom Tooltip component to allow for more customization of the tooltip.
+The tooltip component must be available at: `@/scripts` and it will have available 2 props:
+ - `data` which is the data coming from the port hovered over
+ - `data2` which is data from the second query
 
 ## *ProgressBarGraph*
 This graph is used to display process data out of the total data

@@ -1,220 +1,66 @@
 import PropTypes from 'prop-types';
-import React from "react";
+import React from 'react';
+import { styled } from '@material-ui/core/styles';
+import objectPath from 'object-path';
+import { config } from './default.config';
+import { compose } from 'redux'
 
-import AbstractGraph from "../AbstractGraph";
-
-import "./style.css";
-
-import { properties } from "./default.config";
-
-import objectPath from "object-path";
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
 
 /*
     This is a very basic graph that displays a text message
 */
 
-const INITIAL_FONT_SIZE = 4
+const Container = styled('div')({
+    fontSize: ({properties : {fontSize}} = {}) => fontSize,
+    fontWeight: ({properties: {fontWeight}} = {}) => fontWeight,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "flex-end",
+});
 
-class SimpleTextGraph extends AbstractGraph {
+const Item = styled('div')({
+    paddingLeft: "0.6rem",
+    paddingBottom: "0.3rem",
+});
 
-    constructor(props) {
-        super(props, properties);
-
-        this.state = {
-            fontSize: INITIAL_FONT_SIZE,
-            height: props.height,
-            width: props.width
-        }
+const handleMarkerClick = (props, e) => {
+    e.stopPropagation();
+    const { data, onMarkClick } = props;
+    if (data && Array.isArray(data) && data.length && onMarkClick) {
+        onMarkClick(data[0]);
     }
+    return {};
+}
 
-    componentDidMount() {
-        this.checkFontsize();
-    }
-
-    componentDidUpdate() {
-        this.checkFontsize();
-    }
-
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (prevState.height !== nextProps.height || prevState.width !== nextProps.width) {
-            return { 
-                fontSize: INITIAL_FONT_SIZE,
-                height: nextProps.height,
-                width: nextProps.width
-            };
-        }
-        return null;
-    }
-
-    checkFontsize() {
-        const {
-            height,
-            width,
-            data
-        } = this.props;
-
-        const {
-            innerWidth,
-            innerHeight,
-            targetedColumn,
-            defaultFontSize
-        } = this.getConfiguredProperties();
-
-        if (!data || !data.length)
-            return;
-
-        const text = this.displayText(data, targetedColumn) || 0
-
-        const blockWidth = width * innerWidth
-        const blockHeight = height * innerHeight
-        const textSize = this.state.fontSize * text.toString().length * 0.4
-
-        if (text.toString().length <= 3 && this.state.fontSize !== defaultFontSize) {
-            this.setState({
-                fontSize: defaultFontSize
-            })
-        }
-        else if (blockWidth > textSize && blockHeight > textSize) {
-            this.setState({
-                fontSize: this.state.fontSize + 1
-            })
-        }
-    }
-
-    currentTitle() {
-        const {
-            configuration,
-        } = this.props;
-
-        if (configuration && configuration.title)
-            return configuration.title;
-
-        return "Untitled";
-    }
-
-    renderTitleIfNeeded(requestedPosition, currentPosition, title) {
-        const { labelFontSize } = this.getConfiguredProperties();
-        if (requestedPosition !== currentPosition)
-            return;
-
-        return (
-            <div className="simpleText"
-            style={{ fontSize: labelFontSize, marginBottom: 10, textAlign: 'center' }}>
-                {(title !== undefined && title !== null) ? title : this.currentTitle()}
-            </div>
-        );
-    }
-
-    displayText(data, targetedColumn) {
-        if (!data)
-            return
-
-        if (!targetedColumn)
-            return data.length
-
-        return objectPath.get(data[0], targetedColumn);
-    }
-
-    handleMarkerClick = e => {
-        e.stopPropagation();
-        const { data, onMarkClick } = this.props;
-        if (data && Array.isArray(data) && data.length && onMarkClick) {
-            onMarkClick(data[0])
-        }
-        return {};
-    }
-
-    renderText = ({
-        blockWidth,
-        blockHeight,
-        borderRadius,
-        stroke,
-        fontColor,
-        colors,
-        cursor,
+const SimpleTextGraph = (props) => {
+    const {
         data,
-        padding,
-        targetedColumn,
-        titlePosition,
-        customText
-    }) => {
-        return (
-            <div style={{
-                width: blockWidth,
-                height: blockHeight,
-                borderRadius: borderRadius,
-                borderColor: stroke.color,
-                borderWidth: stroke.width,
-                background: colors[0],
-                color: fontColor,
-                fontSize: this.state.fontSize,
-                cursor: cursor,
-                margin: 'auto',
-                display: 'table',
-            }}
-            >
-                <div style={{
-                    width: blockWidth,
-                    height: blockHeight,
-                    padding: [padding.top, padding.right, padding.bottom, padding.left].join(" "),
-                    display: "table-cell",
-                    verticalAlign: "middle",
-                    textAlign: "center",
-                    whiteSpace: 'nowrap',
-                }}>
-                    {this.displayText(data, targetedColumn)}
-                    {this.renderTitleIfNeeded(titlePosition, "bottom", customText)}
-                </div>
-            </div>
-        );
-    }
+        properties,
+    } = props;
 
-    getStyleClasses = () => ('center-text simpleTextGraph')
+    const targetedColumn = properties.targetedColumn;
 
-    render() {
-        const {
-            height,
-            onMarkClick,
-            data,
-            width,
-        } = this.props;
-
-        const {
-            innerHeight,
-            innerWidth,
-            titlePosition,
-        } = this.getConfiguredProperties();
-
-        if (!data || !data.length)
-            return this.renderMessage('No data to visualize')
-
-        const cursor = onMarkClick ? "pointer" : undefined
-        const blockWidth = width * innerWidth
-        const blockHeight = height * innerHeight
-
-        return (
-            <div className={this.getStyleClasses()}
-                onClick={this.handleMarkerClick}
-            >
-                {this.renderTitleIfNeeded(titlePosition, "top")}
-                {
-                    this.renderText({
-                        ...this.getConfiguredProperties(),
-                        blockWidth,
-                        blockHeight,
-                        cursor,
-                        data
-                    })
-                }
-
-            </div>
-        );
-
-    }
+    return (
+        <Container
+            onClick={(event) => handleMarkerClick(props, event)}
+            properties={properties}
+        >
+            <Item>
+                {targetedColumn ? objectPath.get(data[0], targetedColumn) : data.length}
+            </Item>
+        </Container>
+    );
 }
 
 SimpleTextGraph.propTypes = {
-    configuration: PropTypes.object
+    configuration: PropTypes.object,
+    data: PropTypes.array,
 };
 
-export default SimpleTextGraph
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(SimpleTextGraph)

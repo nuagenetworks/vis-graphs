@@ -1,4 +1,4 @@
-export const properties = {
+export const config = {
     maxZoom: 18,
     minZoom: 3,
     urgency: [

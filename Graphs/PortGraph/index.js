@@ -1,80 +1,166 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import objectPath from 'object-path';
-import isEqual from 'lodash/isEqual'
-import chunk from 'lodash/chunk'
-import XYGraph from '../XYGraph';
-import columnAccessor from '../../utils/columnAccessor';
-import { properties } from './default.config';
-import styles from './styles';
+import { compose } from 'redux';
 import evalExpression from 'eval-expression';
-import { getIconPath, pick } from '../../utils/helpers';
+import objectPath from 'object-path';
+import chunk from 'lodash/chunk';
+import { styled } from '@material-ui/core/styles';
 
-const PROPS_FILTER_KEY = ['data', 'context', 'data2', 'height', 'width'];
-class PortGraph extends XYGraph {
+import columnAccessor from '../../utils/columnAccessor';
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
+import { config } from './default.config';
+import { getIconPath } from '../../utils/helpers';
+import InfoBox from "../../InfoBox";
+import { customTooltip, renderLegend, getGraphDimension } from '../utils/helper';
 
-    constructor(props) {
-        super(props, properties);
+const MAX_LABEL_LENGTH = 8;
 
-        this.isMultipleRows = false;
-        this.state = {
-            portAreaWidth: 100,
-            rowCount: 0,
+const getColumns = (columns, data) => (
+    columns.map(column => {
+        const accessor = columnAccessor(column);
+        const columnsData = [];
+        for (let d of data) {
+            const val = accessor(d);
+            if (val) {
+                columnsData.push(
+                    <div style={{ flexGrow: 1 }}>
+                        <strong>{column.label}:</strong> {val}
+                    </div>
+                );
+            }
         }
-    }
+        return columnsData;
+    })
+);
 
-    componentDidMount() {
-        this.initiate(this.props);
-    }
-    
-    componentDidUpdate(prevProps) {
-        if (!isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
-            this.initiate(this.props);
-        }
-    }
+// get port name
+const getPortAttribute = (row = {}, attribute) => {
+    const label = objectPath.get(row, attribute);
 
-    initiate(props) {
-        this.checkMultipleRows(props);
-        this.setPortAreaWidth(props);
-        this.setRowCount(props);
-    }
+    return label ? ((label.length > MAX_LABEL_LENGTH) ?
+        label.substr(0, MAX_LABEL_LENGTH) + '...' : label) : '';
+}
 
+const Container = styled('div')({
+    width: ({ width } = {}) => width,
+    height: ({ height } = {}) => height,
+    display: ({ display } = {}) => display
+});
 
-    // to check whether there are multiple rows or a single row
-    checkMultipleRows(props) {
-        const { data } = props;
-        const { rowLimit } = this.getConfiguredProperties();
+const GraphContainer = styled('div')({
+    width: ({ width } = {}) => width,
+    height: ({ height } = {}) => height,
+    display: 'flex',
+    verticalAlign: 'middle',
+    flexFlow: 'row wrap',
+    overflowY: 'auto',
+    order: ({ isVertical } = {}) => isVertical ? 2 : 1
+});
 
-        this.isMultipleRows = data.length > rowLimit;
-    }
+const IconContainer = styled('div')({
+    display: 'contents',
+    justifyContent: ({ justifyContent } = {}) => justifyContent,
+});
 
-    hasMultipleRows() {
-        return this.isMultipleRows;
-    }
+const LabelContainer = styled('div')({
+    width: '100%',
+    display: 'flex',
+    flexWrap: 'wrap',
+    fontSize: ({ fontSize } = {}) => fontSize,
+});
 
-    // calculate the width of each port section
-    setPortAreaWidth(props) {
-        const { data, width } = props;
-        const { rowLimit, minPortWidth } = this.getConfiguredProperties();
-        const portWidth = width / (this.hasMultipleRows() ? rowLimit : data.length);
+const LabelItem = styled('div')({
+    width: '100%',
+    display: 'flex',
+    overflow: 'hidden',
+    listStyle: 'none',
+    padding: '0.6em 1em',
+    order: ({ order } = {}) => order,
+});
 
-        this.setState({ portAreaWidth: portWidth < minPortWidth ? minPortWidth : portWidth });
-    }
+const Item = styled('div')({
+    display: 'flex',
+    flexFlow: 'row nowrap',
+    marginLeft: '0.6rem',
+    marginTop: '0.5rem',
+});
 
-    // calculate length of the row to show number of ports in each row. 
-    setRowCount(props) {
-        const { data } = props;
-        const { rowLimit } = this.getConfiguredProperties();
+const PortBox = styled('div')({
+    textAlign: 'center',
+    marginBottom: '0.6rem',
+    minWidth: ({ minWidth }) => minWidth,
+});
 
-        this.setState({ rowCount: this.hasMultipleRows() ? rowLimit : data.length });
-    }
+const Icon = styled('div')({
+    marginBottom: '0.5rem',
+    marginTop: '0.5rem',
+});
 
-    // Get the color of the port icons based on the field's value set in configuration.
-    getIconColor(row) {
-        const {
-            portColor,
-            defaultIconColor
-        } = this.getConfiguredProperties();
+const UpperText = styled('div')({
+    marginRight: '0.5rem',
+    fontSize: ({ fontSize } = {}) => fontSize,
+});
+
+const LowerText = styled('div')({
+    marginRight: '0.5rem',
+    fontSize: ({ fontSize } = {}) => fontSize,
+})
+
+const Svg = styled('svg')({
+    cursor: 'pointer', 
+    background: ({ background } = {}) => background, 
+    padding: '0.5rem 0.5rem 0 0.5rem',
+});
+
+const Tooltip = styled('div')({});
+
+const PortGraph = (props) => {
+    let isMultipleRows = false;
+
+    const [portAreaWidth, setStatePortAreaWidth] = useState(100);
+    const [openModal, setOpenModal] = useState(false);
+    const [infoBoxData, setInfoBoxData] = useState({});
+    const [customTooltips, setCustomTooltips] = useState({});
+    const [hoveredDatum, setHoveredDatum] = useState(null);
+
+    useEffect(() => {
+        initiate(props);
+        setCustomTooltips(customTooltip(properties));
+    }, [props.data, props.height, props.width, props.data2])
+
+    const {
+        data,
+        data2,
+        width,
+        height,
+        properties
+    } = props;
+
+    const {
+        topColumn,
+        bottomColumn,
+        rowLimit,
+        columns,
+        rows,
+        tooltipScript,
+        portIcon,
+        defaultIconColor,
+        portColor,
+        legend,
+        legendArea,
+        circleToPixel,
+        fontColor,
+        id,
+        showUpperColumnName,
+        showLowerColumnName,
+        minPortFontSize,
+        maxPortFontSize,
+        fontSize,
+        background,
+    } = properties;
+
+    const getIconColor = (row) => {
 
         const { getColor } = portColor || {};
         // if there is a getColor function then use that function otherwise use criteria
@@ -86,7 +172,7 @@ class PortGraph extends XYGraph {
                 }
             }
             catch (e) {
-               console.error(`Failed to evaluate getColor function`, e);
+                console.error(`Failed to evaluate getColor function`, e);
             }
         }
         if (portColor && typeof portColor === 'object' && portColor.field) {
@@ -103,155 +189,252 @@ class PortGraph extends XYGraph {
         return defaultIconColor;
     }
 
+    const checkMultipleRows = ({ data, rowLimit }) => {
+        isMultipleRows = data.length > rowLimit;
+    }
+
+    const setPortAreaWidth = ({ data, width, rowLimit, minPortWidth }) => {
+        const portWidth = (width * 0.95) / (isMultipleRows ? rowLimit : data.length);
+
+        setStatePortAreaWidth(portWidth < minPortWidth ? minPortWidth : portWidth);
+    }
+
+    const renderInfoBox = () => {
+        if (!tooltipScript) {
+            return;
+        }
+        const Scripts = require('@/scripts');
+        const TooltipComponent = Scripts[tooltipScript];
+        return (
+            openModal &&
+            <InfoBox
+                onInfoBoxClose={onInfoBoxCloseHandler}
+            >
+                <TooltipComponent
+                    data={infoBoxData}
+                    data2={data2}
+                    {...properties} />
+            </InfoBox>
+        )
+    }
+
+    const onInfoBoxCloseHandler = () => {
+        setOpenModal(false);
+    }
+
+    const openInfoBox = (data) => ev => {
+        ev.stopPropagation();
+        setInfoBoxData(data);
+        setOpenModal(true);
+    }
+
+    const portRowset = chunk(data, rowLimit);
+
+    const getTooltipContent = ({ tooltipScript, tooltip, yTicksLabel, data2 }) => {
+        if (hoveredDatum) {
+            if (tooltipScript) {
+                const Scripts = require('@/scripts');
+                const TooltipComponent = Scripts[tooltipScript];
+                return (
+                    <TooltipComponent
+                        data={hoveredDatum}
+                        data2={data2}
+                        {...properties} />
+                )
+            }
+
+            const accessors = tooltip.map(columnAccessor);
+            return tooltipContent({ tooltip, accessors, yTicksLabel })
+        } else {
+            return <div>Hover over a port icon to see details.</div>;
+        }
+    }
+
+    const initiate = (props) => {
+        const {
+            data,
+            data2,
+            width,
+            properties,
+        } = props;
+
+        const {
+            tooltipScript,
+            tooltip,
+            rowLimit,
+            minPortWidth,
+            yTicksLabel,
+        } = properties;
+
+        checkMultipleRows({ data, rowLimit });
+        setPortAreaWidth({ data, width, rowLimit, minPortWidth });
+        getTooltipContent({ tooltipScript, tooltip, yTicksLabel, data2 });
+    }
+
+    const tooltipContent = ({ tooltip, accessors, yTicksLabel }) => {
+        if (!yTicksLabel || typeof yTicksLabel !== 'object') {
+            yTicksLabel = {};
+        }
+
+        if (!Array.isArray(tooltip)) {
+            return null;
+        }
+
+        return (
+            /* Display each tooltip column as "label : value". */
+            tooltip.map(({ column, label }, i) => {
+                let data = accessors[i](hoveredDatum)
+
+                return (data !== null && data !== 'undefined') ?
+                    (<div key={column}>
+                        <strong>
+                            {/* Use label if present, fall back to column name. */}
+                            {label || column}
+                        </strong> : <span>
+                            {/* Apply number and date formatting to the value. */}
+                            {yTicksLabel[data] || data}
+                        </span>
+                    </div>
+                    ) : null
+            })
+
+        )
+    }
+
+    const renderColumns = () => {
+
+        let columnData = [];
+        if (Array.isArray(rows) && rows.length && data2.length) {
+            columnData = rows.map(rowItem => getColumns(rowItem, data2))
+        }
+        else if (Array.isArray(columns) && columns.length && data2.length) {
+            columnData.push(getColumns(columns, data2));
+        }
+
+        return (
+            columnData.map((rowData, idx) => (
+                <LabelContainer fontSize={fontSize}>
+                    <LabelItem order={idx + 1}
+                    >
+                        {rowData}
+                    </LabelItem>
+                </LabelContainer>
+            ))
+        )
+    }
+
     // calculate the font size of port icon.
-    calculatePortFontSize() {
-        const { minPortFontSize, maxPortFontSize } = this.getConfiguredProperties();
-        const font = this.state.portAreaWidth * 0.4;
+    const calculatePortFontSize = () => {
+        const font = portAreaWidth * 0.4;
 
         return font > maxPortFontSize ? maxPortFontSize : (font < minPortFontSize ? minPortFontSize : font);
     }
 
-    // get port name
-    getPortAttribute(row = {}, attribute) {
-        return objectPath.get(row, attribute) || '';
-    }
-
     // icon to show port status
-    getIcon(row) {
-        const { portIcon } = this.getConfiguredProperties();
-        const fontSize = this.calculatePortFontSize();
-        const { IconSvg, viewBox } = getIconPath(portIcon, row, true);
-
+    const getIcon = (data) => {
+        const calculatedFontSize = calculatePortFontSize();
+        const { IconSvg, viewBox } = getIconPath(portIcon, data, true);
         return (
-            <svg
-                style={{ cursor: 'pointer' }}
+            <Svg
                 data-tip={true}
-                data-for={this.tooltipId}
-                onMouseMove={() => this.hoveredDatum = row}
-                width={fontSize}
-                height={fontSize}
+                data-for={id}
+                onMouseMove={() => setHoveredDatum(data)}
+                width={calculatedFontSize}
+                height={calculatedFontSize}
                 viewBox={viewBox}
             >
-                <IconSvg color={this.getIconColor(row)}/>
-            </svg>
+                <IconSvg color={getIconColor(data)} />
+            </Svg>
         )
     }
 
-    processPortRowset() {
-        const { data } = this.props;
-        const { rowLimit } = this.getConfiguredProperties();
-
-        return chunk(data, rowLimit);
-    }
-
-    renderGraph() {
-        const {
-            topColumn,
-            bottomColumn,
-        } = this.getConfiguredProperties();
-        const nextRow = this.hasMultipleRows();
-        const portRowset = this.processPortRowset();
-        const { rowCount } = this.state;
-
+    const renderPort = () => {
         return (
-            <div style={{
-                ...styles.iconContainer,
-                justifyContent: nextRow ? 'flex-start' : 'space-between',
-            }}>
-                {
-                    portRowset.map((portRow, index) => {
-                        return (
-                            <div
-                                key={index}
-                                style={styles.row}
-                            >
-                                {
-                                    portRow.map((data, i) => {
-                                        return (
-                                            <div
-                                                key={i}
-                                                style={{
-                                                    ...styles.portBox,
-                                                    minWidth: this.state.portAreaWidth,
-                                                }}
-                                            >
-                                                {this.getPortAttribute(data, topColumn)}
-                                                <div style={{ borderRight: (i % rowCount) < (rowCount - 1) ? styles.borderRight : '' }}>
-                                                    {this.getIcon(data)}
-                                                </div>
-                                                {this.getPortAttribute(data, bottomColumn)}
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </div>
-                        )
-                    })}
-            </div>
-        );
-    }
-
-    getColumns = (columns, data) => (
-        columns.map(column => {
-                const accessor = columnAccessor(column);
-                const columnsData = [];
-                for (let d of data) {
-                    const val = accessor(d);
-                    if (val) {
-                        columnsData.push(
-                            <div style={{flexGrow: 1}}>
-                                <strong>{column.label}:</strong> {val}
-                            </div>
-                        );
-                    }
-                }
-                return columnsData;
-            }
-        )
-    )
-
-    // show "key: value" data in top section of the graph
-    renderColumns() {
-        const { data2 } = this.props;
-        const { columns, rows } = this.getConfiguredProperties();
-
-        let columnData = [];
-        if (Array.isArray(rows) && rows.length && data2.length) {
-            columnData = rows.map( rowItem => this.getColumns(rowItem, data2))
-        }
-        else if (Array.isArray(columns) && columns.length && data2.length) {
-            columnData.push(this.getColumns(columns, data2));
-
-        }
-
-        return (
-            columnData.map((rowData, idx) => (<div style={styles.labelContainer}><div style={{...styles.labelRow, order: idx + 1}}>{rowData}</div></div>))
+            portRowset.map((portRow, index) => {
+                return (
+                    <Item className='PortGraph' key={index}>
+                        {portRow.map((data, i) => {
+                            return (
+                                <PortBox
+                                    key={i}
+                                    minWidth={portAreaWidth}
+                                    onClick={openInfoBox(data)}
+                                >
+                                    {showUpperColumnName && topColumn && <UpperText fontSize={fontSize}>{getPortAttribute(data, topColumn)}</UpperText>}
+                                    {showUpperColumnName && !topColumn && <UpperText fontSize={fontSize}>{`Port ${index ? ((index * rowLimit) + i + 1) : i + 1}`}</UpperText>}
+                                    <Icon>{getIcon(data)}</Icon>
+                                    {showLowerColumnName && bottomColumn && <LowerText fontSize={fontSize}>{getPortAttribute(data, bottomColumn)}</LowerText>}
+                                </PortBox>
+                            )
+                        })
+                        }
+                    </Item>
+                )
+            })
         )
     }
 
-    render() {
-        const {
-            data,
-            width,
+    const legendData = legend && legend.getData ? evalExpression(legend.getData)(data) : data;
+    const legendGetColor = legend && legend.getColor ? evalExpression(legend.getColor) : getIconColor;
+    const legendGetLabel = legend && legend.getLabel ? evalExpression(legend.getLabel) : (d) => (d);
+    const isVertical = false;
+
+    const {
+        graphHeight,
+        graphWidth,
+    } = getGraphDimension(
+        {
             height,
-        } = this.props;
+            width,
+            data,
+            legendArea,
+            legend
+        },
+        legendGetLabel,
+        legendData,
+        isVertical,
+    );
 
-        if (!data.length) {
-            return this.renderMessage('No data to visualize');
-        }
-
-        return (
-            <div className='port-graph'>
-                <div>{this.tooltip}</div>
-                <div style={{ width, height, ...styles.container }}>
-                    {this.renderColumns()}
-                    {this.renderGraph()}
-                </div>
-            </div>
-        )
-    }
+    return (
+        <Container
+            height={height}
+            width={width}
+            display={isVertical ? 'flex' : 'inline-grid'}
+        >
+            <Tooltip> {customTooltips.tooltipWrapper && customTooltips.tooltipWrapper(hoveredDatum)} </Tooltip>
+            {
+                renderLegend(
+                    {
+                        width,
+                        height,
+                        legendArea,
+                        fontColor,
+                        circleToPixel
+                    },
+                    legendData,
+                    legend,
+                    legendGetColor,
+                    legendGetLabel,
+                    isVertical
+                )
+            }
+            <GraphContainer
+                width={graphWidth}
+                height={graphHeight}
+                data-test="port-graph"
+                isVertical={isVertical}
+            >
+                {renderColumns()}
+                <IconContainer
+                    justifyContent={isMultipleRows ? 'flex-start' : 'space-between'}
+                >
+                    {renderInfoBox()}
+                    {renderPort()}
+                </IconContainer>
+            </GraphContainer>
+        </Container>
+    );
 }
-
 
 PortGraph.defaultProps = {
     data: [],
@@ -259,9 +442,11 @@ PortGraph.defaultProps = {
 };
 
 PortGraph.propTypes = {
+    configuration: PropTypes.object,
     data: PropTypes.array,
-    height: PropTypes.number,
-    width: PropTypes.number,
 };
 
-export default PortGraph;
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(PortGraph) 

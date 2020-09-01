@@ -2,7 +2,6 @@ const toolTipStyle = {
   wrapper: {
     position: 'relative',
     display: 'inline-block',
-    zIndex: '9998',
     color: '#555',
     cursor: 'pointer !important',
   },

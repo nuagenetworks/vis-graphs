@@ -1,73 +1,58 @@
 [
-    {
-        "timestamp": 1500883469000,
-        "Application": "Default Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883468000,
-        "Application": "1 Application",
-        "SlaStatus": "test"
-    },
-    {
-        "timestamp": 1500883466000,
-        "Application": "5 Application",
-        "SlaStatus": "InSla"
-    },
-
-    {
-        "timestamp": 1500883470000,
-        "Application": "Default Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883470000,
-        "Application": "1 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883470000,
-        "Application": "2 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883470000,
-        "Application": "3 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883471000,
-        "Application": "Default Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883471000,
-        "Application": "1 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883471000,
-        "Application": "2 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883471000,
-        "Application": "3 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883472000,
-        "Application": "Default Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883472000,
-        "Application": "2 Application",
-        "SlaStatus": "InSla"
-    },
-    {
-        "timestamp": 1500883472000,
-        "Application": "3 Application",
-        "SlaStatus": "InSla"
-    }
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559080000,
+    "doc_count": 2,
+    "dnsg": "ovs-4",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559200000,
+    "doc_count": 4,
+    "dnsg": "ovs-4",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559320000,
+    "doc_count": 4,
+    "dnsg": "ovs-1",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559440000,
+    "doc_count": 2,
+    "dnsg": "ovs-1",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559440000,
+    "doc_count": 2,
+    "dnsg": "ovs-2",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559560000,
+    "doc_count": 4,
+    "dnsg": "ovs-2",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559680000,
+    "doc_count": 4,
+    "dnsg": "ovs-3",
+    "ReachabilityStatus": 1
+  },
+  {
+    "key_as_string": "true",
+    "date_histo": 1584559800000,
+    "doc_count": 2,
+    "dnsg": "ovs-3",
+    "ReachabilityStatus": 1
+  }
 ]

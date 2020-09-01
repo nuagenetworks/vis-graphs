@@ -9,15 +9,16 @@ const style = {
             bottom: 'auto',
             marginRight: '-50%',
             minWidth: "400px",
-            minHeight: "250px",
+            minHeight: "50px",
             transform: 'translate(-50%, -50%)',
-            color: '#000',
             border: '1px solid rgb(167, 162, 162)',
-            padding: '0px 0px 50px',
+            boxShadow: '5px 5px 2px rgb(167, 162, 162, .7)'
         },
+        overlay: {zIndex: 1000}
     },
     container: {
-        padding: '10px'
+        padding: '25px',
+        color: '#000',
     },
     footer: {
         position: 'absolute',

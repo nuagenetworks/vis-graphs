@@ -1,15 +1,19 @@
 import PropTypes from 'prop-types';
 import React from "react";
-
+import { styled } from '@material-ui/core/styles';
+ 
 import "../style.css";
+import TextGraph from "../TextGraph";
 
-import SimpleTextGraph from "../SimpleTextGraph";
+const Container = styled('div')({
+    marginBottom: '5px',
+});
 
 /*
     This graphs displays color coded statuses based on multi-column data
 */
 
-class MultiColumnStatusTextGraph extends SimpleTextGraph {
+class MultiColumnStatusTextGraph extends TextGraph {
     renderTitleIfNeeded() {
         return "";
     }
@@ -27,8 +31,8 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
             <div style={{width: "25%", display: "inline-block"}}>
                 <div style={{
                     borderRadius: "100%",
-                    height: "2.9em",
-                    width: "2.9em",
+                    height: "2.7em",
+                    width: "2.7em",
                     textAlign: "center",
                     background: color,
                     display: "inline-block",
@@ -37,8 +41,9 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
                 }}
                 >
                     <div style={{
-                        marginTop: "27%",
-                        fontSize: "1em",
+                        position: 'relative',
+                        top: "35%",
+                        fontSize: ".7em",
                         color: fontColor,
                     }}>
                         <span>{this.displayText(data, column)}</span>
@@ -78,9 +83,9 @@ class MultiColumnStatusTextGraph extends SimpleTextGraph {
         }
         const { inline } = this.getConfiguredProperties();
         return (
-            <div className={inline ? 'inline-alarms' : ''}>
+            <Container className={inline ? 'inline-alarms' : ''} >
                 {this.renderColumns({targetedColumns, ...rest})}
-            </div>
+            </Container>
         )
     }
 }

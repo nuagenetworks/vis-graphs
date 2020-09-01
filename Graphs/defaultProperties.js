@@ -36,6 +36,7 @@ export default {
         orientation: 'vertical',    // Orientation between 'vertical' and 'horizontal'
         circleSize: 4,              // Size in pixel of the circle
         labelOffset: 2,             // Space in pixels between the circle and the label
+        separate: 30
     },
     labelFontSize: 10,
     labelLimit: 10,
@@ -47,13 +48,10 @@ export default {
     brushArea: 20, // // in percentage
     otherColors: [
         theme.palette.bluePaleColor,
-        theme.palette.orangeLightColor,
         theme.palette.blueLightColor,
         theme.palette.pinkLightColor,
         theme.palette.blackLightColor,
         theme.palette.greenLightColor,
-        theme.palette.greyLightDarkColor,
-        theme.palette.peach,
         theme.palette.aquaLightColor,
         theme.palette.windowBodyColor,
         theme.palette.orangeBlindColor,
@@ -63,6 +61,19 @@ export default {
         theme.palette.redLightColor,
     ],
     colors: [
+        '#8949D5', //material ui new colors
+        '#76CBC1',
+        '#5FB7FA',
+        '#FFB673',
+        '#FFD047',
+        '#C777F6',
+        '#FEA7E8',
+        '#86C9FB',
+        '#48BBAD',
+        '#76CBC1',
+        '#FC89E2',
+        '#F8B13D',
+        '#355DA1',
         theme.palette.blueColor,
         theme.palette.pinkColor,
         theme.palette.orangeColor,
@@ -90,4 +101,10 @@ export default {
     zeroStart: true,
     yRangePadding: true,
     legendArea: 0.20,
+    XAxisLabelConfig: {
+        position: "insideBottom",
+        dy: 10, 
+        dx: -10,
+        fill: '#757575CB',
+    },
 }

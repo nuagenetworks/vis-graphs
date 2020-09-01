@@ -1,8 +1,5 @@
 import { format, timeFormat } from "d3";
-import moment from 'moment';
-import momentDuration from 'moment-duration-format';
-
-momentDuration(moment);
+import {formatDuration} from "./DateTimeUtils";
 
 const d3 = { format, timeFormat };
 
@@ -50,7 +47,7 @@ const columnAccessor = ({ column, format, timeFormat, totalCharacters, duration 
                 )
         }
     } else if (duration) {
-        return (d) => moment.duration(value(d)).format(duration);
+        return (d) => formatDuration(value(d), duration);
     } else {
         return value;
     }
