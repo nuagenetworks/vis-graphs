@@ -331,7 +331,6 @@ export const customTooltip = (properties) => {
         type="dark"
         effect="float"
         getContent={[() => getTooltipContent(data), 200]}
-        delayUpdate={200}
     />)
 
     // Provide tooltips for subclasses.
