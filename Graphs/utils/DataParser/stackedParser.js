@@ -2,8 +2,10 @@ export default ({ data, key, xColumn, yColumn }) => {
     const uniqueKeys = new Set();
     const uniqueXkeys = new Set();
     data.map((item) => {
-        uniqueKeys.add(item[key]);
-        uniqueXkeys.add(item[xColumn]);
+        if (item[key] !== null && item[xColumn] !== null) {
+            uniqueKeys.add(item[key]);
+            uniqueXkeys.add(item[xColumn]);
+        }
     });
 
     const uniqueArrayKey = Array.from(uniqueKeys);
