@@ -50,6 +50,8 @@ import {
     let axist = {}
     let titlePosition = {};
 
+const Tooltip = styled('div')({});
+
 const getMappedScaleColor = (data, defaultColumn, properties) => {
 
     const {
@@ -700,8 +702,6 @@ const HeatmapGraph = (props) => {
     if(getLeftMargin() !== margin.left && getLeftMargin() !== 0 && showGraph === false) {
         setShowGraph(true);
     } 
-
-    const Tooltip = styled('div')({});
 
     const getLegends = () => {
         if (!boxSize.height && !boxSize.width) {
