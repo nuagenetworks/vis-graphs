@@ -326,7 +326,7 @@ const TableGraph = (props) => {
         return (
             <div>
                 {label}
-                {stateSortOrder.column === dataKey && <SortIndicator sortDirection={stateSortOrder.order} />}
+                {stateSortOrder.column === dataKey && <SortIndicator sortDirection={stateSortOrder.order.toUpperCase()} />}
             </div>
         );
     }
@@ -677,7 +677,7 @@ const TableGraph = (props) => {
                                                 isRowLoaded={({ index }) => filterData[index]}
                                                 sort={handleSortOrderChange}
                                                 sortBy={stateSortOrder.column}
-                                                sortDirection={stateSortOrder.order}
+                                                sortDirection={!!stateSortOrder.order ? stateSortOrder.order.toUpperCase() : ''}
                                                 onRowClick={onRowClick}
                                                 onRowMouseOver={onRowMouseOver}
                                                 onRowMouseOut={onRowMouseOut}
