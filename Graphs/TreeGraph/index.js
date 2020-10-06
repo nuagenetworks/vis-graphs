@@ -15,6 +15,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
+import { MARGIN_TOP, Text_Default_X } from '../../constants';
 
 let root = null;
 let treeData = null;
@@ -261,8 +262,8 @@ const TreeGraph = (props) => {
         // Assigns parent, children, height, depth
         root = hierarchy(treeData, d => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
-        root.x0 = getAvailableHeight() / 2;
-        root.y0 = 0;
+        root.x0 = 100;
+        root.y0 = 40;
         update(root);
     }
 
@@ -287,7 +288,18 @@ const TreeGraph = (props) => {
         const links = treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach(d => { d.y = d.depth * 250 });
+        let depth, count = 0;
+        nodes.forEach(d => {
+            d.y = d.depth * 250 + 40
+            if (depth !== d.depth) {
+                depth = d.depth;
+                d.x = 100;
+                count = 1;
+            } else {
+                d.x = count * 60 + 100;
+                count++;
+            }
+        });
 
         updateNodes(source, nodes);
         updateLinks(source, links);
@@ -300,8 +312,18 @@ const TreeGraph = (props) => {
 
         const svg = getGraphContainer();
 
+        svg.selectAll('.dataCount').remove();
+
         // ======================pagination starts here==============================
         const parents = nodes.filter(d => {
+            if ((!!d.depth || !!d.height) && !!d.parent) {
+                svg.selectAll(`#${d.data.contextName}-dataCount`).remove();
+                svg.append('text')
+                    .attr('class', 'dataCount')
+                    .attr('id', `${d.data.contextName}-dataCount`)
+                    .text(`${d.parent.data.kids.length} ${d.data.contextName} of ${d.parent.data.name}`)
+                    .attr('transform', `translate(${d.y + MARGIN_TOP}, ${Text_Default_X})`);
+            }
             if (graphRenderView) {
                 return (d.data.pagination) ? true : false;
             }
@@ -518,7 +540,8 @@ const TreeGraph = (props) => {
             .remove();
 
         nodeUpdate.select('rect')
-            .style('fill', d => d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
+            .attr('stroke', d => d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor)
+            .style('fill', rectNode.defaultBackground);
     }
 
     const updateLinks = (source, links) => {
