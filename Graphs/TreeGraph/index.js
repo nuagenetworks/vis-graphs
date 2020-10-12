@@ -213,8 +213,6 @@ const TreeGraph = (props) => {
         if (isFirst.current) {
             isFirst.current = false;
             if (!nodeElement) return;
-        } else {
-            nodeElement && removePreviousChart();
         }
         if (nodeElement) {
             nodeElement && removePreviousChart()
