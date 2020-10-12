@@ -17,3 +17,5 @@ export const LIMIT = 100;
 export const FOOTER_HEIGHT = 65;
 export const MARGIN_TOP = 20;
 export const Text_Default_X = 70;
+export const TREE_NODE_DEFAUKT_X = 100;
+export const TREE_NODE_DEFAUKT_Y = 40;

@@ -15,7 +15,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
-import { MARGIN_TOP, Text_Default_X } from '../../constants';
+import { MARGIN_TOP, Text_Default_X, TREE_NODE_DEFAUKT_X, TREE_NODE_DEFAUKT_Y } from '../../constants';
 
 let root = null;
 let treeData = null;
@@ -260,8 +260,8 @@ const TreeGraph = (props) => {
         // Assigns parent, children, height, depth
         root = hierarchy(treeData, d => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
-        root.x0 = 100;
-        root.y0 = 40;
+        root.x0 = TREE_NODE_DEFAUKT_X;
+        root.y0 = TREE_NODE_DEFAUKT_Y;
         update(root);
     }
 
@@ -291,10 +291,10 @@ const TreeGraph = (props) => {
             d.y = d.depth * 250 + 40
             if (depth !== d.depth) {
                 depth = d.depth;
-                d.x = 100;
+                d.x = TREE_NODE_DEFAUKT_X;
                 count = 1;
             } else {
-                d.x = count * 60 + 100;
+                d.x = count * 60 + TREE_NODE_DEFAUKT_X;
                 count++;
             }
         });
