@@ -288,7 +288,8 @@ const TreeGraph = (props) => {
         // Normalize for fixed-depth.
         let depth, count = 0;
         nodes.forEach(d => {
-            d.y = d.depth * 250 + 40
+            d.id = d.data.ID;
+            d.y = d.depth * 250 + 40;
             if (depth !== d.depth) {
                 depth = d.depth;
                 d.x = TREE_NODE_DEFAUKT_X;
@@ -375,7 +376,7 @@ const TreeGraph = (props) => {
 
                 const pageControl = svg.selectAll('.page')
                     .data(pagingData, d => {
-                        return (d.parent.id + d.type);
+                        return (d.parent.pageId + d.type);
                     }).enter()
                     .append('g')
                     .attr('class', 'page')
@@ -476,7 +477,10 @@ const TreeGraph = (props) => {
         // Update the nodes...
         const node = svg.selectAll('g.node')
             .data(nodes, d => {
-                return d.id || (d.id = ++i);
+                if (!d.pageId) {
+                    d.pageId = i++;
+                }
+                return d.id;
             });
 
         // Enter any new nodes at the parent's previous position.
