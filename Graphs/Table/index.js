@@ -140,7 +140,7 @@ const TableGraph = (props) => {
     }
 
     if(searchBar === false && (!scroll) && (!selectColumnOption)) {
-        graphHeight -= 25;
+        graphHeight -= 35;
     }
 
     const { filterColumns } = getColumnByContext(getColumns(), context);
