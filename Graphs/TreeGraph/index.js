@@ -25,6 +25,7 @@ let rectWidth = 0;
 let rectHeight = 0;
 let availableWidth = 0;
 let availableHeight = 0;
+let pageNo = 0;
 
 const TooltipFirstRow = styled('small')({
     fontWeight: 'bold',
@@ -188,6 +189,7 @@ const TreeGraph = (props) => {
         onHandleTreeGraphOnZoom,
         onClickChild,
         updateTreeData,
+        dataCount,
     } = props;
 
     const {
@@ -221,7 +223,7 @@ const TreeGraph = (props) => {
             elementGenerator();
             setDraggingRef(props);
         }
-    }, [props, nodeElement]);
+    },  [props.params, props.data, nodeElement, pageNo]);
 
     // Toggle children on click.
     const click = d => {
@@ -316,11 +318,12 @@ const TreeGraph = (props) => {
         // ======================pagination starts here==============================
         const parents = nodes.filter(d => {
             if ((!!d.depth || !!d.height) && !!d.parent) {
+                const entityCount = graphRenderView ? dataCount[`${d.data.contextName}s`] : d.parent.data.kids.length;
                 svg.selectAll(`#${d.data.contextName}-dataCount`).remove();
                 svg.append('text')
                     .attr('class', 'dataCount')
                     .attr('id', `${d.data.contextName}-dataCount`)
-                    .text(`${d.parent.data.kids.length} ${d.data.contextName} of ${d.parent.data.name}`)
+                    .text(`${entityCount} ${d.data.contextName} of ${d.parent.data.name}`)
                     .attr('transform', `translate(${d.y + MARGIN_TOP}, ${Text_Default_X})`);
             }
             if (graphRenderView) {
@@ -405,6 +408,7 @@ const TreeGraph = (props) => {
     const paginate = d => {
         if (graphRenderView) {
             updateTreeData(d);
+            ++pageNo;
         } else {
             if (d && d.parent) {
                 d.parent.data.page = d.no;
