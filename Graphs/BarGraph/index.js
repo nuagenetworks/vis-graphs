@@ -191,7 +191,7 @@ const BarGraph = (props) => {
                                 stackId={stack ? "1" : undefined}
                                 onMouseEnter={(props) => {
                                     const value = props.value;
-                                    setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
+                                    setToolTipKey(item)
                                 }}
                             >
                                 {!stack && parsedData.map((item, index) => (
