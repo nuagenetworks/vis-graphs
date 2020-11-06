@@ -189,8 +189,7 @@ const BarGraph = (props) => {
                                 }}
                                 fill={barColors[index % 20]}
                                 stackId={stack ? "1" : undefined}
-                                onMouseEnter={(props) => {
-                                    const value = props.value;
+                                onMouseEnter={() => {
                                     setToolTipKey(item)
                                 }}
                             >
