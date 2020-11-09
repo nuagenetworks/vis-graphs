@@ -6,7 +6,7 @@ export const config = {
     linksSettings: {
         stroke: {
             "defaultColor": "lightsteelblue",
-            "selectedColor": "#0e15ec",
+            "selectedColor": "#183F91",
             "width": "1px"
         }
     },
