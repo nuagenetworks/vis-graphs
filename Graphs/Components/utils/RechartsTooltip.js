@@ -59,6 +59,14 @@ const TooltipComponent = (props) => {
                         )
                     });
                 }
+
+                return (
+                    <Item
+                        key={`tooltip-${index}`}
+                    >
+                        {element.label || element.column} : { col['payload'][elementKey] !== undefined ? col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) : col.name}
+                    </Item>
+                )
             })}
         </Container>
     )
