@@ -13,11 +13,11 @@ const Item = styled('p')({
     color: 'white',
 });
 
-export default ({ tooltip, tooltipKey, yColumn }) => {
+export default ({ tooltip, tooltipKey, yColumn, groupedKeys }) => {
     if (!isEmpty(tooltip)) {
         return (<Tooltip
             content={
-                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} />
+                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} groupedKeys={groupedKeys} />
             }
             wrapperStyle={{ backgroundColor: "black" }}
         />)
@@ -25,7 +25,7 @@ export default ({ tooltip, tooltipKey, yColumn }) => {
 }
 
 const TooltipComponent = (props) => {
-    const { tooltip, payload, tooltipKey, yColumn } = props;
+    const { tooltip, payload, tooltipKey, yColumn, groupedKeys } = props;
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
@@ -48,13 +48,17 @@ const TooltipComponent = (props) => {
                     col = payload[0];
                 }
                 let columnFormatter = columnAccessor(element);
-                return (
-                    <Item
-                        key={`tooltip-${index}`}
-                    >
-                        {element.label || element.column} : { col['payload'][elementKey] !== undefined ? col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) : col.name}
-                    </Item>
-                )
+                if (groupedKeys && yColumn === elementKey) {
+                    return groupedKeys.map(Label => {
+                        return (
+                            <Item
+                                key={`tooltip-${index}`}
+                            >
+                                {Label} : { col['payload'][Label] !== undefined ? col['payload'][Label] && (columnFormatter(col['payload'][Label])) : col.name}
+                            </Item>
+                        )
+                    });
+                }
             })}
         </Container>
     )

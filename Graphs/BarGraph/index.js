@@ -84,6 +84,7 @@ const BarGraph = (props) => {
         colorColumn,
         otherColors,
         yLabelLimit,
+        groupedKeys,
     } = properties;
 
     let dimension;
@@ -113,7 +114,8 @@ const BarGraph = (props) => {
             key: stack,
             xColumn,
             yColumn,
-            isVertical
+            isVertical,
+            groupedKeys
         }
     );
 
@@ -167,7 +169,7 @@ const BarGraph = (props) => {
                 }
 
                 {
-                    customTooltip({ tooltip, tooltipKey, yColumn })
+                    customTooltip({ tooltip, tooltipKey, yColumn, groupedKeys })
                 }
 
                 {
@@ -193,7 +195,7 @@ const BarGraph = (props) => {
                                     setToolTipKey(item)
                                 }}
                             >
-                                {!stack && parsedData.map((item, index) => (
+                                {!stack  && !groupedKeys && parsedData.map((item, index) => (
                                     <Cell
                                         key={`cell-${index}`}
                                         fill={barColors[(index + startIndex) % 20]}
