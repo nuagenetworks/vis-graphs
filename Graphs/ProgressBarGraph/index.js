@@ -21,7 +21,7 @@ const getWidth = (
 }
 
 const getData = ({
-    barData,
+    barData: barDataFromProps,
     maxData,
     usedData,
     display,
@@ -29,6 +29,7 @@ const getData = ({
     defaultRange,
     units
 }) => {
+    const barData = {...barDataFromProps};
 
     if (display === PERCENTAGE) {
         const data = barData[maxData] ? (barData[usedData] * 100) / barData[maxData] : barData[usedData];
