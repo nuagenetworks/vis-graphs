@@ -15,6 +15,9 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import ReactTooltip from 'react-tooltip';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { FaRegClipboard } from 'react-icons/fa';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
@@ -310,7 +313,9 @@ const TableGraph = (props) => {
                     options: {
                         display: displayColumn,
                         sort,
-                    }
+                    },
+                    tooltip: columnRow.tooltip,
+                    totalCharacters: columnRow.totalCharacters
                 };
 
                 headerData.push(headerColumn);
@@ -331,6 +336,33 @@ const TableGraph = (props) => {
         );
     }
 
+    const hoverContent = (cellData, columnIndex, rowIndex) => {
+        return <div key={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>
+            {cellData} &nbsp;
+        <CopyToClipboard text={cellData ? cellData.toString() : ''}>
+                <button style={{ background: '#000', padding: 1 }} title="copy">
+                    <FaRegClipboard size={10} color="#fff" />
+                </button>
+            </CopyToClipboard>
+        </div>
+    }
+
+    const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
+        const data = (!!column.totalCharacters && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+        return (
+            <div>
+                <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`} delayUpdate={1000}>{data}</p>
+                { !!column.tooltip && <ReactTooltip
+                    id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
+                    place="top"
+                    delayUpdate={1000}
+                    overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 2 * cellData.length, top: rowHeight * rowIndex - 20 })}
+                    getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
+                />}
+            </div>
+        );
+    }
+
     const columnsDetail = () => {
         return columns.map(column => (
             <Column
@@ -339,7 +371,7 @@ const TableGraph = (props) => {
                 cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)}
                 headerRenderer={headerRenderer}
                 width={150}
-                cellRenderer={({cellData}) => cellData}
+                cellRenderer={({cellData, columnIndex, rowIndex}) => cellRendererData(cellData, columnIndex, rowIndex, column)}
             />
             ));
     }
