@@ -37,6 +37,7 @@ let container = '';
 let selectedRows = [];
 let displayColumn = [];
 let unformattedData = {};
+let currentStartIndex = 0;
 
 const getGraphProperties = (props) => {
     const {
@@ -349,14 +350,16 @@ const TableGraph = (props) => {
 
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
         const data = (!!column.totalCharacters && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+        const place = rowIndex === currentStartIndex ? 'bottom' : 'top';
+        const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex +1)) - 20 : (rowHeight * rowIndex) - 20;
         return (
             <div>
                 <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`} delayUpdate={1000}>{data}</p>
                 { !!column.tooltip && <ReactTooltip
                     id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
-                    place="top"
+                    place={place}
                     delayUpdate={1000}
-                    overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 2 * cellData.length, top: rowHeight * rowIndex - 20 })}
+                    overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 2 * cellData.length, top})}
                     getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
                 />}
             </div>
@@ -699,7 +702,10 @@ const TableGraph = (props) => {
                                         return (
                                             <Table
                                                 ref={registerChild}
-                                                onRowsRendered={onRowsRendered}
+                                                onRowsRendered={({ startIndex }) => {
+                                                    currentStartIndex = startIndex;
+                                                    return onRowsRendered
+                                                }}
                                                 width={graphWidth}
                                                 height={height}
                                                 headerHeight={headerHeight}
