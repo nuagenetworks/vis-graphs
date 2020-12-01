@@ -37,7 +37,6 @@ let container = '';
 let selectedRows = [];
 let displayColumn = [];
 let unformattedData = {};
-let currentStartIndex = 0;
 
 const getGraphProperties = (props) => {
     const {
@@ -158,6 +157,7 @@ const TableGraph = (props) => {
     const [startIndex, setStartIndex] = useState(0);
     const [stateColumn, setStateColumn] = useState(removedColumn);
     const [onRowOver, setOnRowOver] = useState(null);
+    const [currentStartIndex, setCurrentStartIndex] = useState(0);
 
     useEffect(() => {
         initiate(props);
@@ -348,20 +348,26 @@ const TableGraph = (props) => {
         </div>
     }
 
-    const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
-        const data = (!!column.totalCharacters && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+    const renderTooltip = (cellData, columnIndex, rowIndex) => {
         const place = rowIndex === currentStartIndex ? 'bottom' : 'top';
-        const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex +1)) - 20 : (rowHeight * rowIndex) - 20;
+        const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex + 1)) - 20 : (rowHeight * rowIndex) - 15;
+
+        return <ReactTooltip
+            id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
+            place={place}
+            delayUpdate={1000}
+            overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 3 * cellData.length, top })}
+            getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
+        />;
+    }
+
+    const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
+        const data = (!!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+
         return (
             <div>
                 <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`} delayUpdate={1000}>{data}</p>
-                { !!column.tooltip && <ReactTooltip
-                    id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
-                    place={place}
-                    delayUpdate={1000}
-                    overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 2 * cellData.length, top})}
-                    getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
-                />}
+                { !!column.tooltip && renderTooltip(cellData, columnIndex, rowIndex)}
             </div>
         );
     }
@@ -702,9 +708,9 @@ const TableGraph = (props) => {
                                         return (
                                             <Table
                                                 ref={registerChild}
-                                                onRowsRendered={({ startIndex }) => {
-                                                    currentStartIndex = startIndex;
-                                                    return onRowsRendered
+                                                onRowsRendered={(props) => {
+                                                    setCurrentStartIndex(props.startIndex);
+                                                    onRowsRendered(props);
                                                 }}
                                                 width={graphWidth}
                                                 height={height}
