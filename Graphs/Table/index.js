@@ -336,7 +336,14 @@ const TableGraph = (props) => {
             <Column
                 label={column.label}
                 dataKey={(column.columnField)}
-                cellDataGetter={({ dataKey, rowData }) => get(rowData, dataKey)}
+                cellDataGetter={({ dataKey, rowData }) => {
+                    let data = get(rowData, dataKey);
+                    // In certain cases, data is processed incorrectly and the value is an object.
+                    // We do not support javascript objects to be displayed in a column, but we do support react elements to be displayed
+                    data = typeof(data) === "boolean" ? data.toString().toUpperCase()
+                        : (typeof data === "object") ? React.isValidElement(data) ? data : null : data;
+                    return data;
+                }}
                 headerRenderer={headerRenderer}
                 width={150}
                 cellRenderer={({cellData}) => cellData}
