@@ -158,6 +158,7 @@ const TableGraph = (props) => {
     const [stateColumn, setStateColumn] = useState(removedColumn);
     const [onRowOver, setOnRowOver] = useState(null);
     const [currentStartIndex, setCurrentStartIndex] = useState(0);
+    const [tooltipStatus, setTooltipStatus] = useState(false);
 
     useEffect(() => {
         initiate(props);
@@ -350,12 +351,15 @@ const TableGraph = (props) => {
 
     const renderTooltip = (cellData, columnIndex, rowIndex) => {
         const place = rowIndex === currentStartIndex ? 'bottom' : 'top';
+        // top calculate position of tooltip, -20 is to show tooltip below element when element at top of table otherwise -15 is to show tooltip above element.
         const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex + 1)) - 20 : (rowHeight * rowIndex) - 15;
 
         return <ReactTooltip
             id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
             place={place}
             delayUpdate={1000}
+            afterShow={() => setTooltipStatus(true)}
+            afterHide={() => setTooltipStatus(false)}
             overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 3 * cellData.length, top })}
             getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
         />;
@@ -366,7 +370,7 @@ const TableGraph = (props) => {
 
         return (
             <div>
-                <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`} delayUpdate={1000}>{data}</p>
+                <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>{data}</p>
                 { !!column.tooltip && renderTooltip(cellData, columnIndex, rowIndex)}
             </div>
         );
@@ -722,7 +726,7 @@ const TableGraph = (props) => {
                                                 sort={handleSortOrderChange}
                                                 sortBy={stateSortOrder.column}
                                                 sortDirection={stateSortOrder.order}
-                                                onRowClick={onRowClick}
+                                                onRowClick={!tooltipStatus && onRowClick}
                                                 onRowMouseOver={onRowMouseOver}
                                                 onRowMouseOut={onRowMouseOut}
                                                 rowStyle={rowStyleFormat}
