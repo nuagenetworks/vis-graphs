@@ -15,6 +15,9 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import ReactTooltip from 'react-tooltip';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { FaRegClipboard } from 'react-icons/fa';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
@@ -154,6 +157,8 @@ const TableGraph = (props) => {
     const [startIndex, setStartIndex] = useState(0);
     const [stateColumn, setStateColumn] = useState(removedColumn);
     const [onRowOver, setOnRowOver] = useState(null);
+    const [currentStartIndex, setCurrentStartIndex] = useState(0);
+    const [tooltipStatus, setTooltipStatus] = useState(false);
 
     useEffect(() => {
         initiate(props);
@@ -310,7 +315,9 @@ const TableGraph = (props) => {
                     options: {
                         display: displayColumn,
                         sort,
-                    }
+                    },
+                    tooltip: columnRow.tooltip,
+                    totalCharacters: columnRow.totalCharacters
                 };
 
                 headerData.push(headerColumn);
@@ -331,6 +338,44 @@ const TableGraph = (props) => {
         );
     }
 
+    const hoverContent = (cellData, columnIndex, rowIndex) => {
+        return <div key={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>
+            {cellData} &nbsp;
+        <CopyToClipboard text={cellData ? cellData.toString() : ''}>
+                <button style={{ background: '#000', padding: 1 }} title="copy">
+                    <FaRegClipboard size={10} color="#fff" />
+                </button>
+            </CopyToClipboard>
+        </div>
+    }
+
+    const renderTooltip = (cellData, columnIndex, rowIndex) => {
+        const place = rowIndex === currentStartIndex ? 'bottom' : 'top';
+        // top calculate position of tooltip, -20 is to show tooltip below element when element at top of table otherwise -15 is to show tooltip above element.
+        const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex + 1)) - 20 : (rowHeight * rowIndex) - 15;
+
+        return <ReactTooltip
+            id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
+            place={place}
+            delayUpdate={1000}
+            afterShow={() => setTooltipStatus(true)}
+            afterHide={() => setTooltipStatus(false)}
+            overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 3 * cellData.length, top })}
+            getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
+        />;
+    }
+
+    const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
+        const data = (!!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+
+        return (
+            <div>
+                <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>{data}</p>
+                { !!column.tooltip && renderTooltip(cellData, columnIndex, rowIndex)}
+            </div>
+        );
+    }
+
     const columnsDetail = () => {
         return columns.map(column => (
             <Column
@@ -346,7 +391,7 @@ const TableGraph = (props) => {
                 }}
                 headerRenderer={headerRenderer}
                 width={150}
-                cellRenderer={({cellData}) => cellData}
+                cellRenderer={({cellData, columnIndex, rowIndex}) => cellRendererData(cellData, columnIndex, rowIndex, column)}
             />
             ));
     }
@@ -674,7 +719,10 @@ const TableGraph = (props) => {
                                         return (
                                             <Table
                                                 ref={registerChild}
-                                                onRowsRendered={onRowsRendered}
+                                                onRowsRendered={(props) => {
+                                                    setCurrentStartIndex(props.startIndex);
+                                                    onRowsRendered(props);
+                                                }}
                                                 width={graphWidth}
                                                 height={height}
                                                 headerHeight={headerHeight}
@@ -685,7 +733,7 @@ const TableGraph = (props) => {
                                                 sort={handleSortOrderChange}
                                                 sortBy={stateSortOrder.column}
                                                 sortDirection={stateSortOrder.order}
-                                                onRowClick={onRowClick}
+                                                onRowClick={!tooltipStatus && onRowClick}
                                                 onRowMouseOver={onRowMouseOver}
                                                 onRowMouseOut={onRowMouseOut}
                                                 rowStyle={rowStyleFormat}
