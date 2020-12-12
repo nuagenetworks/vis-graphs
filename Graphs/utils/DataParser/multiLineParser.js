@@ -1,7 +1,32 @@
-export default ({ data, key, xColumn, yColumn }) => {
+export default ({ data, key, xColumn, yColumn, graph }) => {
+
+    let linesColumn = key || [yColumn];
+    let uniqueArrayKey, keyList;
+
+    /* Check if MultiLineGraph props key contains array of multiLine fields or its label.
+    key contians array value of type of line to be drawn
+    eg: key = [ 'ovs-1', 'ovs-2' ]
+    key contians name of label for dynamic value of type of line to be drawn
+    eg: key = "GatewayNSG"
+    */
+    const dynamicMultiLine = graph === "MultiLineGraph" && !Array.isArray(key) ? true : false;
+
+    // Calculate MultiLineGraph key value
+    if (dynamicMultiLine) {
+        const uniqueKeys = new Set();
+        data.map((item) => {
+            if (item[key] !== null && item[xColumn] !== null) {
+                uniqueKeys.add(item[key]);
+            }
+        });
+
+        uniqueArrayKey = Array.from(uniqueKeys);
+        keyList = key;
+        linesColumn = uniqueArrayKey;
+    }
+    
     const finalYColumn = typeof yColumn === 'object' ? yColumn : [yColumn];
     let updatedLinesLabel = [];
-    const linesColumn = key || [yColumn];
 
     const colorList = {};
     const getColorList = (linesColumn) => {
@@ -42,13 +67,18 @@ export default ({ data, key, xColumn, yColumn }) => {
                 }
 
                 newData[key] = d[ld['value']] || 0;
+                
+                // initalize MultiLineGraph data containing yColumn value as its keys.
+                if (dynamicMultiLine) {
+                    newData[d[keyList]] = d[finalYColumn];
+                }
             });
             flatData.push(newData);
         }
     });
 
     return {
-        'uniqueKeys': key,
+        'uniqueKeys': uniqueArrayKey || key,
         'parsedData': flatData,
     }
 }
