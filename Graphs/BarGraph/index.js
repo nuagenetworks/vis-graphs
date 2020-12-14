@@ -23,7 +23,7 @@ import {
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { scaleColor, longestLabelLength } from '../utils/helper';
+import { scaleColor, longestLabelLength, renderMessage } from '../utils/helper';
 
 const BarGraph = (props) => {
     const [tooltipKey, setToolTipKey] = useState(-1);
@@ -84,6 +84,8 @@ const BarGraph = (props) => {
         colorColumn,
         otherColors,
         yLabelLimit,
+        id,
+        classes,
     } = properties;
 
     let dimension;
@@ -117,6 +119,9 @@ const BarGraph = (props) => {
         }
     );
 
+    if (!parsedData || !parsedData.length) {
+        return renderMessage({ message: "No data to visualize", id, classes });
+    }
     XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
     const longestLabel = longestLabelLength(parsedData);
     if(longestLabel > YTICK_LENGTH) {
@@ -167,7 +172,7 @@ const BarGraph = (props) => {
                 }
 
                 {
-                    customTooltip({ tooltip, tooltipKey, yColumn })
+                    customTooltip({ tooltip, tooltipKey, yColumn, stack })
                 }
 
                 {
