@@ -420,7 +420,7 @@ export default class AbstractGraph extends React.Component {
             margin
         } = this.getConfiguredProperties();
 
-        this.availableHeight = height - (margin.top + margin.bottom + chartHeightToPixel + this.getXAxisHeight())
+        this.availableHeight = height - (chartHeightToPixel + this.getXAxisHeight())
 
         if (this.isVertical() && this.isBrush()) {
             this.availableHeight = this.availableHeight * 0.75
@@ -443,7 +443,7 @@ export default class AbstractGraph extends React.Component {
             margin
         } = this.getConfiguredProperties();
 
-        return this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight();
+        return this.availableHeight + chartHeightToPixel + this.getXAxisHeight();
     }
 
     // Check whether to display chart as vertical or horizontal
@@ -519,7 +519,9 @@ export default class AbstractGraph extends React.Component {
                 labelWidth: labelTextWidth
             }
         } else {
-            const value = this.getLegendArea(filterData || data, height, label);
+            const lineHeight = this.getLegendLineHeight(legend);
+            const legendData = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+            let value = ((legendData.length) * lineHeight);
             dimensions = {
                 ...dimensions,
                 graphHeight: height - value,
@@ -554,21 +556,15 @@ export default class AbstractGraph extends React.Component {
         const {
             labelWidth,
             legendWidth,
-            legendHeight,
         } = this.getGraphDimension(label, data);
 
         const lineHeight = this.getLegendLineHeight(legend);
-        let legendContentHeight = ((data.length + 2) * lineHeight);
-        if(legendContentHeight > legendHeight) {
-            legendContentHeight = legendHeight;
-        }
-        const marginTop = legendHeight - legendContentHeight;
-
+        let legendContentHeight = (data.length * lineHeight);
+        
         const legendContainerStyle = {
             marginLeft: '5px',
             width: legendWidth,
             height: legendContentHeight,
-            marginTop,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
