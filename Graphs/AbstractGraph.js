@@ -572,7 +572,7 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {width: '100%'};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight - lineHeight }
+            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight }
         } else {
             // Place legends horizontally
             legendStyle = {
