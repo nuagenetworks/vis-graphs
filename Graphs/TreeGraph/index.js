@@ -15,6 +15,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
+import { MARGIN_TOP, Text_Default_X, TREE_NODE_DEFAUKT_X, TREE_NODE_DEFAUKT_Y } from '../../constants';
 
 let root = null;
 let treeData = null;
@@ -24,6 +25,7 @@ let rectWidth = 0;
 let rectHeight = 0;
 let availableWidth = 0;
 let availableHeight = 0;
+let pageNo = 0;
 
 const TooltipFirstRow = styled('small')({
     fontWeight: 'bold',
@@ -212,8 +214,6 @@ const TreeGraph = (props) => {
         if (isFirst.current) {
             isFirst.current = false;
             if (!nodeElement) return;
-        } else {
-            nodeElement && removePreviousChart();
         }
         if (nodeElement) {
             nodeElement && removePreviousChart()
@@ -222,7 +222,7 @@ const TreeGraph = (props) => {
             elementGenerator();
             setDraggingRef(props);
         }
-    }, [props, nodeElement]);
+    },  [props.params, props.data, nodeElement, pageNo]);
 
     // Toggle children on click.
     const click = d => {
@@ -261,8 +261,8 @@ const TreeGraph = (props) => {
         // Assigns parent, children, height, depth
         root = hierarchy(treeData, d => { return graphRenderView ? d.kids : d.children; });
         //form x and y axis
-        root.x0 = getAvailableHeight() / 2;
-        root.y0 = 0;
+        root.x0 = TREE_NODE_DEFAUKT_X;
+        root.y0 = TREE_NODE_DEFAUKT_Y;
         update(root);
     }
 
@@ -287,7 +287,19 @@ const TreeGraph = (props) => {
         const links = treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
-        nodes.forEach(d => { d.y = d.depth * 250 });
+        let depth, count = 0;
+        nodes.forEach(d => {
+            d.id = d.data.ID;
+            d.y = d.depth * 250 + 40;
+            if (depth !== d.depth) {
+                depth = d.depth;
+                d.x = TREE_NODE_DEFAUKT_X;
+                count = 1;
+            } else {
+                d.x = count * 60 + TREE_NODE_DEFAUKT_X;
+                count++;
+            }
+        });
 
         updateNodes(source, nodes);
         updateLinks(source, links);
@@ -299,7 +311,6 @@ const TreeGraph = (props) => {
         });
 
         const svg = getGraphContainer();
-
         // ======================pagination starts here==============================
         const parents = nodes.filter(d => {
             if (graphRenderView) {
@@ -355,7 +366,7 @@ const TreeGraph = (props) => {
 
                 const pageControl = svg.selectAll('.page')
                     .data(pagingData, d => {
-                        return (d.parent.id + d.type);
+                        return (d.parent.pageId + d.type);
                     }).enter()
                     .append('g')
                     .attr('class', 'page')
@@ -384,6 +395,7 @@ const TreeGraph = (props) => {
     const paginate = d => {
         if (graphRenderView) {
             updateTreeData(d);
+            ++pageNo;
         } else {
             if (d && d.parent) {
                 d.parent.data.page = d.no;
@@ -456,7 +468,10 @@ const TreeGraph = (props) => {
         // Update the nodes...
         const node = svg.selectAll('g.node')
             .data(nodes, d => {
-                return d.id || (d.id = ++i);
+                if (!d.pageId) {
+                    d.pageId = i++;
+                }
+                return d.id;
             });
 
         // Enter any new nodes at the parent's previous position.
@@ -518,7 +533,8 @@ const TreeGraph = (props) => {
             .remove();
 
         nodeUpdate.select('rect')
-            .style('fill', d => d.data.clicked ? rectNode.selectedBackground : rectNode.defaultBackground);
+            .attr('stroke', d => d.data.clicked ? linksSettings.stroke.selectedColor : linksSettings.stroke.defaultColor)
+            .style('fill', rectNode.defaultBackground);
     }
 
     const updateLinks = (source, links) => {
