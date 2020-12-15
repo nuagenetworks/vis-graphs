@@ -490,7 +490,7 @@ export default class AbstractGraph extends React.Component {
             data
         } = this.props;
 
-        const { legend } = this.getConfiguredProperties();
+        const { legend, margin } = this.getConfiguredProperties();
 
         let dimensions = {
             graphWidth: width,
@@ -507,7 +507,7 @@ export default class AbstractGraph extends React.Component {
         if(filterData) {
             filterData = filterData.filter((e, i) => filterData.findIndex(a => label(a) === label(e)) === i);
         }
-        let labelTextWidth = this.getLegendArea(filterData || data, width, label);
+        let labelTextWidth = this.getLegendArea(filterData || data, label);
         labelTextWidth = labelTextWidth + ((legend.circleSize || 4) * 5) + (legend.labelOffset || 10);
         // Compute the available space considering a legend
         if (legend.orientation === 'vertical') {
@@ -520,12 +520,13 @@ export default class AbstractGraph extends React.Component {
             }
         } else {
             const lineHeight = this.getLegendLineHeight(legend);
-            const legendData = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-            let value = ((legendData.length) * lineHeight);
+            const legendData = filterData || data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+            const legendCount = legendData.length;
+            const value = this.getLegendArea(filterData || data, label, { lineHeight, legendCount });
             dimensions = {
                 ...dimensions,
-                graphHeight: height - value,
-                legendHeight: value,
+                graphHeight: height - value - margin.top,
+                legendHeight: value + margin.top,
                 legendWidth: width,
                 labelWidth: labelTextWidth,
             }
@@ -552,19 +553,16 @@ export default class AbstractGraph extends React.Component {
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-        
         const {
-            labelWidth,
+            legendHeight,
             legendWidth,
         } = this.getGraphDimension(label, data);
 
-        const lineHeight = this.getLegendLineHeight(legend);
-        let legendContentHeight = (data.length * lineHeight);
-        
         const legendContainerStyle = {
             marginLeft: '5px',
+            marginTop: '5px',
             width: legendWidth,
-            height: legendContentHeight,
+            height: legendHeight,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
@@ -572,13 +570,13 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {width: '100%'};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight }
+            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendHeight }
         } else {
-            // Place legends horizontally
+            // Place legends horizontally, Maximum 3 legend 1 row
             legendStyle = {
                 ...legendStyle,
                 display: 'grid',
-                gridTemplateColumns: `repeat(auto-fit, minmax(${labelWidth * 2}px, 1fr))`,
+                gridTemplateColumns: `repeat(auto-fit, minmax(${legendWidth / 3 - 5}px, 1fr))`,
             }
         }
 
@@ -679,15 +677,17 @@ export default class AbstractGraph extends React.Component {
         return max(highestLabel); 
     }
 
-    getLegendArea(data, dimension, label) {
-        const {
-            legendArea,
-        } = this.getConfiguredProperties();
+    getLegendArea(data, label, legend) {
 
         const highestLabel = this.getLongestLabel(data, label);
-    
-        if(highestLabel > dimension * legendArea) {
-            return dimension * legendArea;
+
+        if (legend) {
+            const { legendCount, lineHeight } = legend;
+            //Maximum 3 legend 1 row
+            const legendRow = legendCount / 3;
+            if (highestLabel > legendRow * lineHeight) {
+                return legendRow * lineHeight;
+            }
         }
 
         return highestLabel;
