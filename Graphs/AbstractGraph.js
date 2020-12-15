@@ -15,29 +15,25 @@ import {
 
 
 export default class AbstractGraph extends React.Component {
-
     constructor(props, properties = {}) {
         super(props);
 
         this.properties = properties;
         this.configuredProperties = {};
         this.node = {};
+        this.yLabelWidth = 0;
+        this.accessors = {}
+        this.tooltips = {}
+        this.brush = false;
         this.origin = {
             x: 0,
             y: 0
         }
 
-        this.yLabelWidth = 0;
-        this.accessors = {}
-        this.tooltips = {}
-
-        this.brush = false;
-
         this.setGraphId();
 
         // set all configuration into single object
         this.setConfiguredProperties(this.props, properties);
-
         this.setTooltip();
     }
 
@@ -49,7 +45,6 @@ export default class AbstractGraph extends React.Component {
     }
 
     setTooltip() {
-
         // Provide tooltips for subclasses.
         const { tooltip, defaultY } = this.getConfiguredProperties();
         if (tooltip) {
@@ -125,28 +120,28 @@ export default class AbstractGraph extends React.Component {
             yTicksLabel = {};
         }
 
-        if (!Array.isArray(tooltip)) {
-            return null;
-        }
-
         return (
-            /* Display each tooltip column as "label : value". */
-            tooltip.map(({ column, label }, i) => {
-                let data = accessors[i](this.hoveredDatum)
+            <React.Fragment>
+                {/* Display each tooltip column as "label : value". */}
+                {tooltip.map(({ column, label }, i) => {
+                    let data = accessors[i](this.hoveredDatum);
+                    if (typeof data  === 'boolean') {
+                        data = data.toString();
+                    }
 
-                return (data !== null && data !== 'undefined') ?
-                    (<div key={column}>
-                        <strong>
-                            {/* Use label if present, fall back to column name. */}
-                            {label || column}
-                        </strong> : <span>
-                            {/* Apply number and date formatting to the value. */}
-                            { yTicksLabel[data] || data }
-                        </span>
-                    </div>
-                    ) : null
-            })
-
+                    return (data || data === 0) ?
+                        (<div key={column}>
+                            <strong>
+                                {/* Use label if present, fall back to column name. */}
+                                {label || column}
+                            </strong> : <span>
+                                {/* Apply number and date formatting to the value. */}
+                                { yTicksLabel[data] || data }
+                            </span>
+                        </div>
+                        ) : null
+                })}
+            </React.Fragment>
         )
     }
 
@@ -297,7 +292,6 @@ export default class AbstractGraph extends React.Component {
         if (formatter)
             format = d3.format(formatter);
 
-
         // Extract the longest legend according to the label function
         const lab = label(data.reduce((a, b) => {
             let labelA = label(a);
@@ -310,13 +304,13 @@ export default class AbstractGraph extends React.Component {
                 return a;
 
             return format(labelA.toString()).length > format(labelB.toString()).length ? a : b;
-        }));
+        }, 0));
 
         const longestLabel = lab ? lab.toString() : '';
         let labelSize = format(longestLabel).length
 
         // and return its length + 2 to ensure we have enough space
-        return labelSize > 8 ? labelSize : labelSize + 2
+        return labelSize > 8 ? labelSize : labelSize + 2;
     }
 
     setYlabelWidth(data, yColumn = null) {
@@ -338,8 +332,7 @@ export default class AbstractGraph extends React.Component {
         };
 
         const labelLength = this.longestLabelLength(data, yLabelFn)
-        this.yLabelWidth = (labelLength > yLabelLimit ? yLabelLimit + appendCharLength : labelLength) * chartWidthToPixel
-
+        this.yLabelWidth = (labelLength > yLabelLimit ? yLabelLimit + appendCharLength : labelLength) * chartWidthToPixel;
     }
 
     getYlabelWidth() {
@@ -484,7 +477,6 @@ export default class AbstractGraph extends React.Component {
             </div>
         )
     }
-
     
     // override this method from respective graphs to generate unique key for graph.
     static getGraphKey(configuration = {}) {
@@ -542,7 +534,7 @@ export default class AbstractGraph extends React.Component {
 
     getValueFromPercentage = (value, percentage) => {
         return (percentage * value) / 100;
-    }
+    };
 
     getLegendLineHeight(legend) {
         const {
@@ -553,11 +545,12 @@ export default class AbstractGraph extends React.Component {
     }
 
     renderLegend(data, legend, getColor, label, isVertical) {
-        if (!legend.show || !data)	
+        if (!legend.show)	
             return;
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+        
         const {
             labelWidth,
             legendWidth,
@@ -567,7 +560,7 @@ export default class AbstractGraph extends React.Component {
         const lineHeight = this.getLegendLineHeight(legend);
         let legendContentHeight = ((data.length + 2) * lineHeight);
         if(legendContentHeight > legendHeight) {
-          legendContentHeight = legendHeight;
+            legendContentHeight = legendHeight;
         }
         const marginTop = legendHeight - legendContentHeight;
 
@@ -575,7 +568,7 @@ export default class AbstractGraph extends React.Component {
             marginLeft: '5px',
             width: legendWidth,
             height: legendContentHeight,
-            marginTop: marginTop,
+            marginTop,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
@@ -583,7 +576,7 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {width: '100%'};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { alignSelf: 'flex-end', ...legendStyle, height: legendContentHeight - lineHeight }
+            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight - lineHeight }
         } else {
             // Place legends horizontally
             legendStyle = {

@@ -1,12 +1,13 @@
 
-export const properties = {
-    strokeWidth: '2px',
-    opacity: '0.4',
+export default {
     legend: {
         show: false
     },
-    zeroStart: true,
     stacked: true,
-    circleRadius: 5,
-    transition: 1000
+    margin: { 
+        top: 30, 
+        bottom: 30, 
+        left: 30, 
+        right: 30 
+    },
 }

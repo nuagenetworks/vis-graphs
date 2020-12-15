@@ -26,6 +26,12 @@
             "circleSize": 5,
             "labelOffset": 5
         },
+        "margin": { 
+          "top": 30, 
+          "bottom": 30, 
+          "left": 30, 
+          "right": 30 
+        },
         "tooltip": [
             { "column": "CPU", "label": "CPU", "format": "0.2f"},
             { "column": "MEMORY", "label": "MEMORY", "format": "0.2f"},

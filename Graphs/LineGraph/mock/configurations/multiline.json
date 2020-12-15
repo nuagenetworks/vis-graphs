@@ -2,20 +2,12 @@
     "data": {
         "dateHistogram": true,
         "xColumn": "timestamp",
+        "yColumn": "CPU",
+        "linesColumn": "MEMORY",
         "xLabel": "Time",
-        "yColumn": [
-            "CPU",
-            "MEMORY",
-            "DISK"
-        ],
         "yTickFormat": ",.0f",
         "yLabel": "",
         "yTicks": 5,
-        "linesColumn": [
-            "CPU",
-            "MEMORY",
-            "DISK"
-        ],
         "legend": {
             "orientation": "vertical",
             "show": true,

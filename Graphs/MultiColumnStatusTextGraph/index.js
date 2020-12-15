@@ -3,7 +3,7 @@ import React from "react";
 import { styled } from '@material-ui/core/styles';
  
 import "../style.css";
-import SimpleTextGraph from "../SimpleTextGraph";
+import TextGraph from "../TextGraph";
 
 const Container = styled('div')({
     marginBottom: '5px',
@@ -13,7 +13,7 @@ const Container = styled('div')({
     This graphs displays color coded statuses based on multi-column data
 */
 
-class MultiColumnStatusTextGraph extends SimpleTextGraph {
+class MultiColumnStatusTextGraph extends TextGraph {
     renderTitleIfNeeded() {
         return "";
     }
