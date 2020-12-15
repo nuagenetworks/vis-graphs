@@ -20,6 +20,7 @@ import {
     BRUSH_HEIGHT,
     YTICK_LENGTH,
     DEFAULT_MARGIN_LEFT,
+    NO_DATA_FOUND,
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
@@ -120,7 +121,7 @@ const BarGraph = (props) => {
     );
 
     if (!parsedData || !parsedData.length) {
-        return renderMessage({ message: "No data to visualize", id, classes });
+        return renderMessage({ message: NO_DATA_FOUND, id, classes });
     }
     XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
     const longestLabel = longestLabelLength(parsedData);
