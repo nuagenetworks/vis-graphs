@@ -13,11 +13,11 @@ const Item = styled('p')({
     color: 'white',
 });
 
-export default ({ tooltip, tooltipKey, yColumn }) => {
+export default ({ tooltip, tooltipKey, yColumn, stack }) => {
     if (!isEmpty(tooltip)) {
         return (<Tooltip
             content={
-                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} />
+                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} stack={stack}/>
             }
             wrapperStyle={{ backgroundColor: "black" }}
         />)
@@ -25,7 +25,7 @@ export default ({ tooltip, tooltipKey, yColumn }) => {
 }
 
 const TooltipComponent = (props) => {
-    const { tooltip, payload, tooltipKey, yColumn } = props;
+    const { tooltip, payload, tooltipKey, yColumn, stack } = props;
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
@@ -40,7 +40,7 @@ const TooltipComponent = (props) => {
                     if(col && !col.payload[elementKey]) {
                         col.payload[elementKey] = tooltipKey;
                     }
-                    if(col && yColumn && col.payload[yColumn]) {
+                    if(col && yColumn && col.payload[yColumn] && stack) {
                         col.payload[yColumn] = col.value;
                     }
                 }
