@@ -684,10 +684,8 @@ export default class AbstractGraph extends React.Component {
         if (legend) {
             const { legendCount, lineHeight } = legend;
             //Maximum 3 legend 1 row
-            const legendRow = legendCount / 3;
-            if (highestLabel > legendRow * lineHeight) {
-                return legendRow * lineHeight;
-            }
+            const legendRow = Math.ceil(legendCount / 3);
+            return legendRow * lineHeight;
         }
 
         return highestLabel;
