@@ -5,8 +5,8 @@ export default {
     },
     stacked: true,
     margin: { 
-        top: 30, 
-        bottom: 30, 
+        top: 5, 
+        bottom: 5, 
         left: 30, 
         right: 30 
     },

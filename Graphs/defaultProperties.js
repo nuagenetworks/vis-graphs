@@ -43,7 +43,7 @@ export default {
     yLabelLimit: 20,
     xLabelLimit: 10,
     xLabelRotate: true,
-    xLabelRotateHeight: 35,
+    xLabelRotateHeight: 25,
     appendCharLength: 3,
     brushArea: 20, // // in percentage
     otherColors: [
