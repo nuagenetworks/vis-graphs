@@ -10,5 +10,6 @@ export const properties = {
     },
     emptyBoxColor: theme.palette.greyLightColor,
     brushArea: 5,
-    brushColor: theme.palette.yellowLightColor
+    brushColor: theme.palette.yellowLightColor,
+    margin: { top: 5, bottom: 5, left: 10, right: 10 },
 }
