@@ -42,6 +42,7 @@ const LineGraph = (props) => {
         yLabelLimit,
         brushEnabled,
         xTicks,
+        graph,
     } = properties;
 
     let {
@@ -65,6 +66,7 @@ const LineGraph = (props) => {
         xColumn,
         yColumn,
         isVertical: true,
+        graph
     });
 
     XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;

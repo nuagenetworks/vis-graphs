@@ -4,8 +4,10 @@ import multiLineParser from './multiLineParser';
 import groupBarParser from './groupBarParser';
 
 export default (props) => {
+    // Check for graph type MultiLineGraph
+    const multiLineGraph = Array.isArray(props.key) || props.graph === 'MultiLineGraph';
     if (props.key) {
-        return Array.isArray(props.key) ? multiLineParser(props) : stackedParser(props);
+        return multiLineGraph ? multiLineParser(props) : stackedParser(props);
     }
     return props.groupedKeys ? groupBarParser(props) : standardParser(props);
 }
