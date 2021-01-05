@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import Modal from 'react-modal';
-import RaisedButton from 'material-ui/RaisedButton';
 import * as d3 from 'd3';
 
 import style from './styles';

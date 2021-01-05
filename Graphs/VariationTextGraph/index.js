@@ -1,217 +1,184 @@
 import PropTypes from 'prop-types';
-import React from "react";
-import isEqual from 'lodash/isEqual';
+import React, { useEffect, useState } from "react";
+import { compose } from 'redux';
+import { format } from "d3";
+import { styled } from '@material-ui/core/styles';
 
-import AbstractGraph from "../AbstractGraph";
-import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValidationHOC from '../../HOC/WithValidationHOC';
+import { config } from "./default.config";
 
-import style from "./styles"
-import {properties} from "./default.config"
-import { format, timeFormat } from "d3";
-import { pick } from '../../utils/helpers';
+const Container = styled('div')({
+    fontSize: ({ properties: { fontSize } } = {}) => fontSize,
+    fontWeight: ({ properties: { fontWeight } } = {}) => fontWeight,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "flex-end",
+});
 
-const d3 = { format, timeFormat };
-const FILTER_KEY = ['data', 'height', 'width', 'context'];
+const Item = styled('div')({
+    paddingLeft: "0.6rem",
+    paddingBottom: "0.3rem",
+});
 
-/*
-    This graph will present the variation between 2 values:
-     - Last value
-     - Variation between previous value and last value
-*/
-export class VariationTextGraph extends AbstractGraph {
+const Label = styled('span')({
+    paddingLeft: '0.25rem',
+    color: ({ color } = {}) => color,
+});
 
-    constructor(props) {
-        super(props, properties);
-        this.settings = {
-            colors: null,
-            icon: 'down',
-            values: null
-        }
-        this.initialize();
+const handleMarkerClick = (props, e) => {
+    e.stopPropagation();
+    const { data, onMarkClick } = props;
+    if (data && Array.isArray(data) && data.length && onMarkClick) {
+        onMarkClick(data[0]);
+    }
+}
+
+const computeValues = (data, target) => {
+    if (!data || !target) {
+        return;
     }
 
-    componentDidUpdate (prevProps) {
-        if (!isEqual(pick(prevProps, ...FILTER_KEY), pick(this.props, ...FILTER_KEY))) {
-            this.initialize();
-        }
-    }
+    let lastInfo = {};
+    let previousInfo = {};
 
-    initialize() {
+    data.forEach((d) => {
+        if (d[target.column] === target.value) {
+            lastInfo = d;
+        } else {
+            previousInfo = d;
+        }
+    })
+
+    const lastValue = lastInfo[target.field];
+    const previousValue = previousInfo[target.field];
+    const variation = lastValue - previousValue;
+
+    return {
+        lastValue,
+        previousValue,
+        variation: (variation !== 0 && previousValue !== 0) ? variation * 100 / previousValue : 0
+    }
+}
+
+const numberWithCommas = (x) => {
+    return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+const formattedValue = (x, valueFormat) => {
+    let formatter = format(valueFormat);
+    return formatter(x);
+}
+
+const decimals = (x, nb = 2) => {
+    return x.toFixed(nb)
+}
+
+const getFormattedValue = (x, valueFormat) => {
+    return (valueFormat) ? formattedValue(x, valueFormat) : numberWithCommas(x);
+}
+
+const renderValues = ({
+    absolute,
+    showVariation,
+    settingValue,
+    target,
+    settingColor
+}) => {
+    if (!settingValue) {
+        return;
+    }
+    const lastValue = getFormattedValue(settingValue.lastValue, target.format);
+    const previousValue = getFormattedValue(settingValue.previousValue, target.format);
+    const info = !absolute ? lastValue : `${lastValue}/${previousValue}`;
+
+    return (
+        <React.Fragment>
+            <Label>
+                {info || info === 0 ? info : 'NaN'}
+            </Label>
+            {showVariation &&
+                <Label color={settingColor ? settingColor : null} >
+                    {`(${decimals(settingValue.variation)}%)`}
+                </Label>
+            }
+        </React.Fragment>
+    );
+}
+
+
+const VariationTextGraph = (props) => {
+    const [settingValue, setSettingValue] = useState(null);
+    const [settingColor, setSettingColor] = useState(null);
+
+    useEffect(() => {
+        initialize(props);
+    }, [props.data, props.context]);
+
+    const {
+        properties
+    } = props;
+
+    const {
+        target,
+        absolute,
+        showVariation
+    } = properties;
+
+    const initialize = (props) => {
         const {
             data,
-        } = this.props;
+            properties,
+        } = props;
 
         const {
             target,
             positiveColors,
             negativeColors,
-            drawColors
-        } = this.getConfiguredProperties();
+            drawColors,
+        } = properties;
 
-        this.settings.values = this.computeValues(data, target);
+        setSettingValue(computeValues(data, target));
 
-        if (!this.settings.values)
+        if (!settingValue)
             return;
 
-        this.settings.colors = drawColors;
-
-        if (this.settings.values.variation > 0){
-            this.settings.colors = positiveColors;
-            this.settings.icon = 'up';
-        }
-
-        if (this.settings.values.variation < 0){
-            this.settings.colors = negativeColors;
-            this.settings.icon = 'down';
-        }
-
-        /**
-         *CODE IS TO CHANGE THE HEADER colors
-         */
-        //this.props.setHeaderColor(configuration.id, this.settings.colors.header);
-    }
-
-    currentTitle() {
-        const {
-            configuration,
-        } = this.props;
-
-        if (configuration && configuration.title)
-            return configuration.title;
-
-        return "Untitled";
-    }
-
-    renderTitleIfNeeded(requestedPosition, currentPosition) {
-        if (requestedPosition !== currentPosition)
-            return;
-
-        return this.currentTitle();
-    }
-
-    computeValues(data, target) {
-        if (!data || !target)
-            return;
-
-        let lastInfo = {},
-            previousInfo = {};
-
-        data.forEach((d) => {
-            if (d[target.column] === target.value)
-                lastInfo = d;
-            else
-                previousInfo = d;
-        })
-
-        const lastValue = lastInfo[target.field];
-        const previousValue = previousInfo[target.field];
-
-        const variation = lastValue - previousValue;
-
-        return {
-            lastValue,
-            previousValue,
-            variation: variation !== 0 ? variation * 100/ previousValue : 0
+        if (settingValue.variation > 0) {
+            setSettingColor(positiveColors);
+        } else if (settingValue.variation < 0) {
+            setSettingColor(negativeColors);
+        } else {
+            setSettingColor(drawColors);
         }
     }
 
-    numberWithCommas(x) {
-        return x && x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
-    formattedValue(x, format) {
-        let formatter = d3.format(format);
-        return formatter(x);
-    }
-
-    decimals(x, nb = 2) {
-        return x.toFixed(nb)
-    }
-
-    getFormattedValue(x) {
-        const {
-            target
-        } = this.getConfiguredProperties();
-        return (target.format) ? this.formattedValue(x, target.format) : this.numberWithCommas(x);
-    }
-
-    renderIcon(icon) {
-        return icon === 'up' ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />;
-    }
-
-    renderValues() {
-        if(!this.settings.values)
-            return;
-
-        const {
-            absolute,
-            showVariation
-        } = this.getConfiguredProperties();
-
-        const {
-            context
-        } = this.props;
-
-        const lastValue = this.getFormattedValue(this.settings.values.lastValue);
-        const previousValue = this.getFormattedValue(this.settings.values.previousValue);
-        const info = !absolute ? lastValue : `${lastValue} / ${previousValue}`;
-
-        let fullScreenFont = context && context.hasOwnProperty("fullScreen") ? style.fullScreenLargeFont : {};
-        return (
-
-            <div style={{height: "100%"}}>
-                {showVariation && <span style={Object.assign({}, style.infoBoxIcon, this.settings.colors.iconBox ? {backgroundColor: this.settings.colors.iconBox} : {})}>
-                    <div style={Object.assign({}, style.iconFont, (context && context.hasOwnProperty("fullScreen")) ? style.fullScreenLargerFont : {})}>
-                        <div style={Object.assign({}, style.labelText, fullScreenFont)}>
-                            { this.renderIcon(this.settings.icon) } <br/>
-                            {`${this.decimals(this.settings.values.variation)}%`}
-                        </div>
-                    </div>
-                </span>}
-                <span style={Object.assign({}, showVariation ? style.infoBoxText : style.infoBoxTextNoVariation, fullScreenFont)}>
-                    <span style={{ color: this.settings.colors.content, margin:"auto" }}>
-                        { info || info === 0 ? info : 'NaN'}
-                    </span>
-                </span>
-            </div>
-        )
-    }
-
-    render() {
-        const {
-            onMarkClick,
-            data
-        } = this.props;
-
-        const {
-          textAlign,
-        } = this.getConfiguredProperties();
-
-        if (!data || !data.length)
-            return;
-
-        const cursor = onMarkClick ? "pointer" : undefined
-        return (
-
-                <div
-                    style={{
-                        textAlign: textAlign,
-                        cursor: cursor,
-                        fontSize: "1.2em",
-                        height: "100%"
-                    }}
-                    onClick={onMarkClick}
-                    >
-                    {this.renderValues()}
-                </div>
-        );
-
-    }
+    return (
+        <Container
+            onClick={(event) => handleMarkerClick(props, event)}
+            properties={properties}
+        >
+            <Item>
+                {renderValues(
+                    {
+                        absolute,
+                        showVariation,
+                        settingValue,
+                        target,
+                        settingColor
+                    }
+                )}
+            </Item>
+        </Container>
+    );
 }
 
 VariationTextGraph.propTypes = {
-  configuration: PropTypes.object,
-  data: PropTypes.array
+    configuration: PropTypes.object,
+    data: PropTypes.array
 };
 
-export default VariationTextGraph;
+export default compose(
+    WithValidationHOC(),
+    (WithConfigHOC(config))
+)(VariationTextGraph);

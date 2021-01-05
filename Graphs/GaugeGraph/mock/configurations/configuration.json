@@ -1,8 +1,8 @@
 {
     "id": "test",
     "data": {
-        "maxValue": "100",
+        "maxValue": 100,
         "currentColumn": "disk",
-        "gauzeTicks": "10"
+        "gauzeTicks": 10
     }
 }

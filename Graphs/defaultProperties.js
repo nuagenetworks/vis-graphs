@@ -36,14 +36,14 @@ export default {
         orientation: 'vertical',    // Orientation between 'vertical' and 'horizontal'
         circleSize: 4,              // Size in pixel of the circle
         labelOffset: 2,             // Space in pixels between the circle and the label
-        separate: 20
+        separate: 30
     },
     labelFontSize: 10,
     labelLimit: 10,
     yLabelLimit: 20,
     xLabelLimit: 10,
     xLabelRotate: true,
-    xLabelRotateHeight: 35,
+    xLabelRotateHeight: 25,
     appendCharLength: 3,
     brushArea: 20, // // in percentage
     otherColors: [

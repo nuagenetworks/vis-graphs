@@ -1,628 +1,159 @@
+import React from 'react';
 import PropTypes from 'prop-types';
-import React from 'react'
-import isEqual from 'lodash/isEqual';
-import XYGraph from '../XYGraph'
-import ReactTooltip from 'react-tooltip'
-
-import { merge, sorter, pick } from "../../utils/helpers";
-import {nest, nestStack} from "../../utils/helpers/nest";
-
+import { compose } from 'redux';
 import {
-    line,
-    area
-} from 'd3';
+    AreaChart,
+    Area,
+    CartesianGrid,
+    Brush,
+} from 'recharts';
 
-import { properties } from './default.config';
+import WithConfigHOC from '../../HOC/WithConfigHOC';
+import WithValiddataHOC from '../../HOC/WithValidationHOC';
+import customTooltip from '../Components/utils/AreaTooltip';
+import dataParser from '../utils/DataParser';
+import Formatter from '../utils/formatter';
+import renderLegend from '../Components/utils/Legend';
+import config from './default.config';
+import xAxis from '../Components/utils/xAxis';
+import yAxis from '../Components/utils/yAxis';
+import { insertTimestampToTooltip } from '../utils/helper';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, LEGEND_SEPARATE, XTICKS_WIDTH } from '../../constants';
 
-const PROPS_FILTER_KEY = ['data', 'context', 'height', 'width'];
-
-class AreaGraph extends XYGraph {
-
-  yKey   = 'yKey'
-  yValue = 'yValue'
-
-  constructor(props) {
-    super(props, properties);
-    this.initiate(this.props);
-  }
-
-  componentDidMount() {
-    const {
-      data
-    } = this.props;
-
-    if (!data || !data.length)
-      return
-
-    this.elementGenerator();
-    this.updateElements();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (!isEqual(pick(prevProps, ...PROPS_FILTER_KEY), pick(this.props, ...PROPS_FILTER_KEY))) {
-      this.initiate(this.props);
-    }
+const AreaGraph = (props) => {
 
     const {
-      data
-    } = this.props;
-
-    if (!data || !data.length)
-      return
-
-    this.updateElements();
-  }
-
-  initiate(props) {
-    const {
-        data,
-    } = props;
-
-    if (!data || !data.length)
-        return;
-
-    const {
-      linesColumn,
-      yColumn
-    } = this.getConfiguredProperties();
-
-    if(linesColumn) {
-      this.yKey = linesColumn
-      this.yValue = yColumn
-    }
-
-    this.parseData(props);
-    this.setDimensions(props, this.getRefinedData(), this.yValue, (d) => d);
-    this.configureAxis({
-      data: this.getRefinedData(),
-      customYColumn: 'y1'
-    });
-  }
-
-  getYColumns() {
-    return this.yColumns;
-  }
-
-  getSequence() {
-    return this.sequence
-  }
-
-  getRefinedData() {
-    return this.refinedData;
-  }
-
-  getLegendConfig() {
-    return this.legendConfig;
-  }
-
-  getRefinedDataNest() {
-    return this.dataNest;
-  }
-
-  getGraph() {
-    return this.getSVG().select('.graph-container');
-  }
-
-  handleShowEvent() {
-    this.getSVG().select('.tooltip-line').style('opacity', 1);
-  }
-
-  handleHideEvent() {
-    this.hoveredDatum = null;
-    this.getSVG().select('.tooltip-line').style('opacity', 0);
-  }
-
-  updateTooltipConfiguration() {
-    const {
-      tooltip,
-      linesColumn,
-      yColumn
-    } = this.getConfiguredProperties();
-
-    const yColumns = this.getYColumns();
-    let updatedTooltip = [];
-    
-    let insertTooltip = false;
-    let format = null;
-    
-    if(tooltip) {
-      tooltip.forEach(t => {
-
-        //Checking whether need to insert all the dynamic values
-        if([linesColumn, yColumn].indexOf(t.column) !== -1) {
-          insertTooltip = true;
-
-          //If Format is specified for metric column
-          if(t.column === yColumn && t.format) {
-            format = t.format;
-          }
-        } else {
-          updatedTooltip.push(Object.assign({}, t));
-        }
-
-      })
-
-      if(insertTooltip) {
-        yColumns.forEach(column => {
-          updatedTooltip.push({
-            column: column.key,
-            format: format
-          })
-        })
-      }
-  
-      this.setTooltipAccessor(updatedTooltip)
-    }
-   
-  }
-
-  parseData(props) {
-    let {
-        data
-    } = props;
-
-    const {
-        yColumn,
-        xColumn,
-        linesColumn,
-        stacked
-    } = this.getConfiguredProperties();
-
-    this.data = []
-    this.sequence = []
-
-    if(linesColumn) {
-
-      let filteredData = data.filter(item => {
-        return (item[linesColumn] && typeof item[linesColumn] !== 'object')
-      })
-
-      //Finding all the distinct lines
-      this.yColumns = [
-        ...new Set(
-          filteredData.map(item => item[linesColumn])
-        )
-      ].map(d => ({key: d}))
-
-      this.data = filteredData;
-      this.updateTooltipConfiguration();
-      
-    } else {
-
-      /**
-       * Spliiting yColumns into respective objects
-       */
-      this.yColumns = typeof yColumn === 'object' ? yColumn : [{ key: yColumn }];
-
-      data.forEach((d) => {
-        this.yColumns.forEach((ld, index) => {
-          this.data.push(Object.assign({
-              [this.yValue]: d[ld.key] !== null ? d[ld.key] : 0,
-              [this.yKey]: ld.key,
-          }, d));
-        })
-      })
-    }
-
-    //Finding the sequence for yAxis ordering to have smaller area at bottom
-    this.sequence = nest({
-      data: this.data,
-      key: this.yKey,
-      sortColumn: this.yValue,
-      sortOrder: 'DESC'
-    }).sort((a, b) => {
-       return b.values[0][this.yValue] - a.values[0][this.yValue]
-    }).map(d => d.key)
-
-    //Nesting the data as per x AXIS
-    let nestedXPartialData = nest({
-        data: this.data,
-        key: xColumn,
-        sortColumn: this.yKey,
-        sortOrder: 'DESC',
-        sequence: this.sequence
-    })
-
-    /**
-     * INSERTING THE MISSING DATA
-     */
-
-    let reverseSequence = this.sequence.slice(0).reverse()
-    let sequenceLength = this.sequence.length
-
-    let nestedXData = nestedXPartialData.map(item => {
-        let d = Object.assign({}, item)
-
-        if(d.values.length === sequenceLength) {
-          return d
-        }
-
-        d.values = reverseSequence.map(key => {
-            let index = (d.values).findIndex(o => {
-              return o[this.yKey] === key
-            })
-
-            return index !== -1
-              ? Object.assign({}, d.values[index])
-              : {
-                [xColumn]: parseInt(d.key, 10),
-                [this.yKey]: key,
-                [this.yValue]: 0
-              }
-        })
-
-        return d
-    })
-
-    if(stacked === false) {
-      nestedXData.forEach(data => {
-        data.values.forEach(value => {
-          Object.assign( value, {
-            y0: 0,
-            y1: value[this.yValue]
-          })
-        })
-      })
-
-    } else {
-      nestedXData = nestStack({
-        data: nestedXData,
-        stackColumn: this.yValue
-      })
-
-    }
-
-    this.tooltipData = nestedXData
-
-    //Merging Back with y0 and y1 calculated according to xAxis and now will be used for line plotting
-    this.refinedData = merge({
-          data: nestedXData,
-          fields: [{name: 'values', type: 'array'}]
-      }).values
-
-    this.dataNest = nest({
-          data: this.refinedData,
-          key: this.yKey
-        }).sort(sorter({
-            column: 'key',
-            sequence: this.sequence
-          })
-        )
-  }
-
-  // generate methods which helps to create charts
-  elementGenerator() {
-
-    const svg =  this.getGraph();
-
-    // for generating transition   
-    svg.select('.area-chart')
-     .append('clipPath')
-       .attr('id', `clip-${this.getGraphId()}`)
-      .append('rect')
-        .attr('width', 0);  
-  }
- 
-  // show circle if data length is 1.
-  boundaryCircle() {
-
-    const {
-        circleRadius
-    } = this.getConfiguredProperties();
-
-    let boundaryCircle = this.getGraph()
-      .select('.area-chart')
-      .selectAll('.boundaryCircle')
-      .data(this.getRefinedData());
-
-    boundaryCircle.enter().append('circle')
-        .attr('class', 'boundaryCircle')
-        .style('fill',this.getColor())
-        .attr('r', circleRadius)
-      .merge(boundaryCircle)
-        .attr('cx', d => this.getScale().x(d.xColumn))
-        .attr('cy', d => this.getScale().y(d.yValue));
-
-    boundaryCircle.exit().remove();   
-  }
-
-  //tooltip circles
-  tooltipCircle(data = null) {
-    const {
-        circleRadius,
-        stacked
-    } = this.getConfiguredProperties();
-    
-    const yScale = this.getScale().y;
-    const cy     = data 
-      ? d => {
-        let finalValue = [];
-        finalValue = data.filter(value =>  value[this.yKey] === d.key);
-        return (finalValue.length && finalValue[0].y1) ? yScale(finalValue[0].y1) : -50;
-      } 
-      : 1
-
-    const tooltipCircle = this.getGraph()
-        .select('.tooltip-line').selectAll('.tooltipCircle')
-        .data(this.getRefinedDataNest(), d => d.key);
-
-    tooltipCircle.enter().append('circle')
-        .attr('class', 'tooltipCircle')
-        .style('fill', stacked === false ?  this.getColor() : 'rgb(255,0,0)')
-        .attr('r', circleRadius)
-      .merge(tooltipCircle)
-        .attr('cx', 0)
-        .attr('cy', cy);
-
-    tooltipCircle.exit().remove();
-  }
-
-  drawArea() {
-
-    const {
-      opacity,
-      xColumn,
-      transition,
-      strokeWidth
-    } = this.getConfiguredProperties();
-
-    const scale          = this.getScale();
-    const availableHeight = this.getAvailableHeight();
-
-    const lineGenerator = line()
-      .x( d => scale.x(d[xColumn]))
-      .y( d => scale.y(d.y1));
-
-    const areaGenerator = area()
-      .x( d => scale.x(d[xColumn]))
-      .y0( d => scale.y(d.y1))
-      .y1( d => scale.y(d.y0))
-
-    const svg = this.getGraph();
-
-    svg.select('.area-chart')
-      .select(`#clip-${this.getGraphId()}`)
-      .select('rect')
-        .attr('height', availableHeight);
-
-    const lines = svg.select('.area-chart')
-        .selectAll('.line-block')
-        .data(this.getRefinedDataNest(), d => d.key );
-
-    const newLines = lines.enter().append('g')
-        .attr('class', 'line-block');
-
-    newLines.append('path')
-        .attr('class', 'line')
-        .style('fill', 'none')
-        .style('strokeWidth', strokeWidth)
-        .attr('clip-path', `url(#clip-${this.getGraphId()})`);
-
-    const allLines = newLines.merge(lines); 
-
-    allLines.select('.line')
-        .style('stroke', this.getColor())
-        .attr('d', d => {
-
-          let data = (d.values)
-          
-          // Starting Line from xAxis over here
-          return lineGenerator([
-            Object.assign({}, data[0], {y1: data[0].y0}),
-            ...data,
-            Object.assign({}, data[data.length-1], {y1: data[data.length-1].y0}),
-          ])
-        })
-
-    // Add area
-    const areas = svg.select('.area-chart')
-        .selectAll('.area-block')
-        .data(this.getRefinedDataNest(), d => d.key );
-
-    const newAreas = areas.enter()
-       .append('g')
-       .attr('class', 'area-block');
-
-    newAreas.append('path')
-        .attr('class', 'area')
-        .attr('fill-opacity', opacity)
-        .attr('clip-path', `url(#clip-${this.getGraphId()})`);
-
-    const allAreas = newAreas.merge(areas); 
-
-    allAreas.select('.area')
-        .style('fill',this.getColor())
-        .attr('d', d => areaGenerator(d.values));
-
-    // add transition effect
-    svg.select(`#clip-${this.getGraphId()} rect`)
-        .transition().duration(transition)
-        .attr('width', this.availableWidth);
-
-    lines.exit().remove();
-    areas.exit().remove();  
-
-  }
- 
-  // update data on props change or resizing
-  updateElements() {
-    const {
-        data
-    } = this.props  
-
-    const {
-      xTickFontSize,
-      yTickFontSize,
-      yLabelLimit,
-      xLabelRotate,
-      xLabelLimit,
-    } = this.getConfiguredProperties();
-
-    const svg =  this.getGraph();
-
-    //Add the X Axis
-    svg.select('.xAxis')
-      .style('font-size', xTickFontSize)
-      .attr('transform', 'translate(0,'+ this.getAvailableHeight() +')')
-      .call(this.getAxis().x)
-      .selectAll('.tick text')
-      .call(this.wrapTextByWidth, { xLabelRotate, xLabelLimit });
-  
-    //Add the Y Axis
-    const yAxis = svg.select('.yAxis')
-      .style('font-size', yTickFontSize)
-      .call(this.getAxis().y);
-
-    yAxis.selectAll('.tick text')
-      .call(this.wrapD3Text, yLabelLimit)
-
-    this.setAxisTitles(); 
-
-    if(data.length === 1) {
-      this.boundaryCircle();
-    } else {
-
-      this.drawArea();
-
-      // update tooltip svg
-      this.renderTooltip();
-
-      //update hover line
-      svg.select('.hover-line')
-       .attr('y2', this.getAvailableHeight());
-
-    }
-  }
-
-  setColor() {
-    const {
-      stroke,
-      colors
-    } = this.getConfiguredProperties()
-
-    const scale =  this.scaleColor(this.getYColumns(), 'key');
-    this.color =  (d) => scale ? scale(d.key ? d.key : d ) : stroke.color || colors[0];
-  }
-
-  getColor() {
-    return this.color
-  }
-
-  // Create tooltip data
-  renderTooltip() {
-
-    let mergeTooltips = (d) => {
-      let records = d.values[0]
-      d.values.forEach((o) => {
-        records[o[this.yKey]] = o[this.yValue]
-      })
-      return records
-    }
-
-    let scale    = this.getScale();
-    let bandwidth = this.getBandScale().x.bandwidth() * 0.8;
-    const tooltip = this.getGraph()
-        .select('.tooltip-section').selectAll('rect')
-        .data(this.tooltipData);
-
-    const newTooltip = tooltip.enter().append('rect')
-        .attr('data-for', this.tooltipId)
-        .attr('data-effect', 'solid')
-        .attr('data-tip', true)
-        .attr('y', 0)
-        .attr('width', bandwidth) 
-        .style('cursor', 'pointer')
-        .style('opacity', 0)
-        .style('fill', 'red');
-
-    const allTooltip = newTooltip.merge(tooltip);  
-    
-    allTooltip     
-        .attr('x', d => scale.x(d.key) - (bandwidth)/2)
-        .attr('height', this.getAvailableHeight())
-        .on('mouseover',  d  => this.updateVerticalLine(d))
-        .on('mouseenter', d => {
-            this.hoveredDatum = mergeTooltips(d)
-        })
-        .on('mousemove',  d  => {
-          this.hoveredDatum = mergeTooltips(d)
-        })
-
-    tooltip.exit().remove();
-  }
-
-  //update vertical line on mouseover 
-  updateVerticalLine(data) {
-      ReactTooltip.rebuild();   
-      const rightMargin = this.getScale().x(data.key);
-      this.tooltipCircle(data.values);
-      this.getGraph()
-       .select('.tooltip-line')
-         .attr('transform', 'translate('+rightMargin+', 0)');  
-  }
-
-  render() {
-
-    const {
-        data,
+        properties,
+        height,
         width,
-        height
-    } = this.props;
-
-    if (!data || !data.length)
-        return this.renderMessage('No data to visualize')
+        data,
+    } = props;
 
     const {
+        xLabel,
+        yLabel,
+        xColumn,
+        yColumn,
+        legend,
+        XAxisLabelConfig,
         margin,
-        legend
-    } = this.getConfiguredProperties();
+        xLabelRotateHeight,
+        dateHistogram,
+        xTickFormat,
+        yTickFormat,
+        linesColumn,
+        stacked,
+        colors,
+        xLabelLimit,
+        yLabelLimit,
+        brushEnabled,
+        xTicks,
+    } = properties;
 
-    {this.setColor()}
+    let { tooltip } = properties;
 
-    const {
-      graphHeight,
-      graphWidth,
-    } = this.getGraphDimension((d) => d);
+    const legendHeight = legend.separate ? (legend.separate * height) / 100 : (LEGEND_SEPARATE * height) / 100;
 
-    const graphStyle = {
-          width: graphWidth,
-          height: graphHeight,
-          order:this.checkIsVerticalLegend() ? 2 : 1,
-    };
-    
+    if (dateHistogram && tooltip) {
+        tooltip = insertTimestampToTooltip({tooltip, xColumn});
+    }
+    const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
+
+    // Formatting data for direct consumption by Area Graph
+    const { parsedData, uniqueKeys: areaKeys } = dataParser({
+        data,
+        key: linesColumn,
+        xColumn,
+        yColumn,
+        isVertical: true
+    });
+
+    const customLegendLabel = !!Array.isArray(linesColumn) ? tooltip : null;
+
     return (
-      <div className='stacked-area-graph'>
-          { this.tooltip }
-        <div style={{ height, width,  display: this.checkIsVerticalLegend() ? 'flex' : 'inline-grid'}}>
-          {this.renderLegend(this.getSequence(), legend, this.getColor(), (d) => d, this.checkIsVerticalLegend())}
-          <div className='graphContainer' style={ graphStyle }>
-            <svg width={graphWidth} height={graphHeight}>
-              <g ref={node => this.node = node}>
-                <g className='graph-container' transform={ `translate(${this.getLeftMargin()},${margin.top})` }>
-                    <g className='area-chart'></g>
-                    <g className='tooltip-line' transform={ `translate(0,0)` } style={{opacity : 0}}>
-                      <line className='hover-line' style={{stroke:'rgb(255,0,0)'}}></line>
-                    </g>
-                    <g className='tooltip-section'></g>
-                    <g className='xAxis'></g>
-                    <g className='yAxis'></g>
-                </g>
-                <g className='axis-title'>
-                  <text className='x-axis-label' textAnchor="middle"></text>
-                  <text className='y-axis-label' textAnchor="middle"></text>
-                </g>
-              </g>  
-            </svg>
-          </div>
-        </div>
-      </div>
+        <AreaChart
+            width={width}
+            height={height}
+            data={parsedData}
+            test-data="area-graph"
+            margin={margin}
+        >
+            <CartesianGrid
+                vertical={false}
+                strokeOpacity={0.3}
+            />
+            {
+                brushEnabled && (
+                    <Brush
+                        data={parsedData}
+                        dataKey={xColumn}
+                        height={BRUSH_HEIGHT}
+                        tickFormatter={
+                            (tickData) => (Formatter({
+                                dateHistogram,
+                                value: tickData,
+                                tickFormat: xTickFormat
+                            }))
+                        }
+                        y={height - (BRUSH_HEIGHT + XLABEL_HEIGHT + legendHeight)}
+                    />)
+            }
+            {
+                xAxis({
+                    xColumn,
+                    xLabel,
+                    XAxisLabelConfig,
+                    xLabelRotateHeight,
+                    xTickFormat,
+                    dateHistogram,
+                    limit: xLabelLimit,
+                    interval: Math.floor(parsedData.length / xtickLimits)
+                })
+            }
+            {
+                yAxis({
+                    yLabel,
+                    yTickFormat,
+                    limit: yLabelLimit,
+                })
+            }
+            {
+                renderLegend({
+                    legend,
+                    height,
+                    customLegendLabel
+                })
+            }
+            {
+                customTooltip({ tooltip, yColumn, linesColumn, xColumn })
+            }
+            {
+                areaKeys.map((areaItem, index) => {
+                    const color = colors[index % colors.length];
+                    return (
+                        <Area
+                            type="monotone"
+                            className="area-fill"
+                            key={`area-${index}`}
+                            name={areaItem}
+                            dataKey={areaItem}
+                            stackId={stacked ? areaKeys.length : index}
+                            stroke={color}
+                            fill={color}
+                        />
+                    )
+                })
+            }
+        </AreaChart>
     );
-  }
 }
 
 AreaGraph.propTypes = {
     configuration: PropTypes.object,
-    response: PropTypes.object
+    data: PropTypes.array,
 };
 
-export default AreaGraph;
+export default compose(
+    WithValiddataHOC(),
+    (WithConfigHOC(config))
+)(AreaGraph);

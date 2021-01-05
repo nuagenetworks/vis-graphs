@@ -8,18 +8,8 @@ export const properties = {
     legend: {
         show: false
     },
-    mapColors: {
-        'InSla': theme.palette.greenColor,
-        'OutSla': theme.palette.redColor,
-        'UnMonitored': theme.palette.yellowLightColor,
-        '0': theme.palette.greenColor,
-        '1': theme.palette.yellowLightColor,
-        '2': theme.palette.redColor,
-        'Green': theme.palette.greenColor,
-        'Red': theme.palette.redColor,
-        'Orange': theme.palette.yellowLightColor
-    },
     emptyBoxColor: theme.palette.greyLightColor,
-    brushArea: 5, // in percentage
-    brushColor: theme.palette.yellowLightColor
+    brushArea: 5,
+    brushColor: theme.palette.yellowLightColor,
+    margin: { top: 5, bottom: 5, left: 10, right: 10 },
 }

@@ -10,22 +10,12 @@ import {
     axisBottom,
     axisLeft,
     scaleBand,
-    map,
-    timeFormat
+    map
 } from "d3";
 
 export default class XYGraph extends AbstractGraph {
-
     constructor(props, properties = {}) {
         super(props, properties);
-    }
-
-    writeYLabel(x, y) {
-        
-    }
-
-    writeXLabel(x, y) {
-        
     }
 
     configureAxis({data, customYColumn = null}) {
@@ -100,7 +90,6 @@ export default class XYGraph extends AbstractGraph {
     }
 
     setAxis(data) {
-
         if (!data || !data.length)
             return;
 
@@ -115,8 +104,7 @@ export default class XYGraph extends AbstractGraph {
             yTicks,
             yTickSizeInner,
             yTickSizeOuter,
-            xTicksLabel,
-            dateHistogram
+            xTicksLabel
         } = this.getConfiguredProperties();
 
         this.axis = {};
@@ -141,11 +129,7 @@ export default class XYGraph extends AbstractGraph {
                 .tickValues(xTicksLabelValue)
                 .tickFormat(value => finalTikcLabel[value]);
         } else if(xTickFormat){
-            if (dateHistogram) {
-                this.axis.x.tickFormat(timeFormat(xTickFormat));
-            } else {
-                this.axis.x.tickFormat(format(xTickFormat));
-            }
+            this.axis.x.tickFormat(format(xTickFormat));
         }
 
         if(xTicks){
@@ -189,8 +173,8 @@ export default class XYGraph extends AbstractGraph {
             x: {
               left: this.getLeftMargin() + this.getAvailableWidth() / 2,
               top: (this.isBrush() && this.isVertical())
-                ?  margin.top + margin.bottom + this.getMinMarginTop() + this.getAvailableMinHeight()
-                :  margin.top + this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
+                ?  this.getMinMarginTop() + this.getAvailableMinHeight()
+                : this.getAvailableHeight() + chartHeightToPixel + this.getXAxisHeight() + (xLabelRotate ? xLabelRotateHeight : 0)
             },
             y: {
               left: margin.left + chartWidthToPixel,
@@ -204,7 +188,6 @@ export default class XYGraph extends AbstractGraph {
     }
 
     axisTitles(xLabelPosition, yLabelPosition) {
-
         const {
           xColumn,
           xLabel,
@@ -250,7 +233,6 @@ export default class XYGraph extends AbstractGraph {
     }
 
     generateAxisTitleElement() {
-
         const {
             xLabel,
             yLabel
@@ -279,7 +261,6 @@ export default class XYGraph extends AbstractGraph {
         } = this.getConfiguredProperties();
 
         const tilePositions = this.getTitlePositions();
-
         const axis = this.getSVG().select('.axis-title');
 
         if(xLabel) {

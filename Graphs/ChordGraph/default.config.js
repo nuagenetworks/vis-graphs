@@ -1,11 +1,18 @@
-export const properties = {
-    outerPadding: 30,
-    arcThickness: 20,
+export const config = {
     padAngle: 0.07,
-    labelPadding: 10,
-    transitionDuration: 500,
-    defaultOpacity: 0.6,
-    fadedOpacity: 0.1,
-    chartWidthToPixel: 6,
-    bidirectionalTooltip: true
+    bidirectionalTooltip: true,
+    componentId: 1,
+    outerRadius: null,
+    innerRadius: null,
+    sortGroups: null,
+    sortChords: null,
+    labelColors: ['#000000'],
+    disableHover: false,
+    disableGroupHover: false,
+    disableRibbonHover: false,
+    strokeWidth: 1,
+    resizeWithWindow: false,
+    blurOnHover: false,
+    ribbonOpacity: '0.67',
+    ribbonHoverOpacity: '0.2',
 }
