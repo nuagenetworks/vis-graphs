@@ -585,7 +585,7 @@ export default class AbstractGraph extends React.Component {
             legendStyle = {
                 ...legendStyle,
                 display: 'grid',        
-                gridTemplateColumns: `repeat(auto-fit, minmax(${highestLabel + 20}px, 1fr))`,
+                gridTemplateColumns: `repeat(auto-fit, ${highestLabel+20}px)`,
             }
         }
 
@@ -693,7 +693,7 @@ export default class AbstractGraph extends React.Component {
         if (legend) {
             const { legendCount, lineHeight, legendWidth } = legend;
             //Caluting legendContainer height, 20 is margin between margin label.
-            let legendRow = Math.ceil(legendWidth / (highestLabel + 20));
+            let legendRow = Math.ceil((highestLabel + 20) / legendWidth);
             legendRow = Math.ceil(legendRow / legendCount)
             
             return legendRow * lineHeight;
