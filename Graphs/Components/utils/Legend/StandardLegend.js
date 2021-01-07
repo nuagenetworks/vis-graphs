@@ -1,5 +1,7 @@
 import React from 'react';
 import { styled } from '@material-ui/core/styles';
+import * as d3 from "d3";
+import max from 'lodash/max';
 
 const Container = styled('div')({
     display: 'flex',
@@ -12,11 +14,20 @@ const Container = styled('div')({
 
 const Item = styled('div')({
     color: ({ color } = {}) => color,
-    flexBasis: '50%',
+    flexBasis: ({ legendWidth }) => legendWidth,
     padding: '0.15rem 0',
 });
 
-export default ({ payload: legends, labelColumn, legend, customLegendLabel }) => {
+const labelSize = (label, LabelFont = '0.6rem') => {
+    const container = d3.select('body').append('svg');
+    container.append('text').text(label).style("font-size", LabelFont);
+    const dimension = container.node().getBBox();
+    container.remove();
+
+    return dimension.width + 30;
+}
+
+export default ({ payload: legends, labelColumn, legend, customLegendLabel, containerWidth }) => {
     if (legends && legends[0].value === undefined) {
         return false;
     }
@@ -35,11 +46,19 @@ export default ({ payload: legends, labelColumn, legend, customLegendLabel }) =>
         });
     }
 
+    const legendWidth = containerWidth ? `${highestLabel/containerWidth * 100}%` : '50%';
+
+    const highestLabel = max(legends.map( ({payload, value}) => {
+        const label = labelColumn ? payload[labelColumn] : value;
+        
+        return labelSize(label);
+    }));
+
     return (
         <Container legend={legend}>
             {
                 legends.map(({ color, payload, value, props: { fill, name: { xVal } = {} } = {} }, index) => (
-                    <Item key={`legend-${index}`} color={color || fill}>
+                    <Item key={`legend-${index}`} color={color || fill} legendWidth={legendWidth}>
                         <svg height='0.8rem' width='0.9rem'>
                             <circle cx="7" cy="9" r="3.5" fill={color || fill} />
                         </svg>

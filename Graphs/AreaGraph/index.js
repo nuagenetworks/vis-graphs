@@ -121,7 +121,9 @@ const AreaGraph = (props) => {
                 renderLegend({
                     legend,
                     height,
-                    customLegendLabel
+                    customLegendLabel,
+                    margin,
+                    containerWidth: width
                 })
             }
             {
