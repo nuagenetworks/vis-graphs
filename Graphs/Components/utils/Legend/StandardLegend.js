@@ -46,13 +46,13 @@ export default ({ payload: legends, labelColumn, legend, customLegendLabel, cont
         });
     }
 
-    const legendWidth = containerWidth ? `${highestLabel/containerWidth * 100}%` : '50%';
-
     const highestLabel = max(legends.map( ({payload, value}) => {
         const label = labelColumn ? payload[labelColumn] : value;
         
         return labelSize(label);
     }));
+
+    const legendWidth = containerWidth ? `${highestLabel/containerWidth * 100}%` : '50%';
 
     return (
         <Container legend={legend}>
