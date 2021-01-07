@@ -1,0 +1,33 @@
+{
+    "id": "top5-app-vertical-bar",
+    "graph": "GroupBarGraph",
+    "title": "Top 5 Apps",
+    "description": "This graph will show something that is really useful for administrators",
+    "author": "Curran Kelleher",
+    "creationDate": "10/13/2016",
+    "data": {
+        "xColumn": "state",
+        "xLabel": "Application",
+        "yColumn": "Sum of MB",
+        "yLabel": "Total Bytes",
+        "yTicks": 5,
+        "legend": {
+            "show": true,
+            "orientation": "vertical",
+            "circleSize": 4,
+            "labelOffset": 2,
+            "separate": 30,
+            "labelFontSize": 9
+        },
+        "groupedKeys": [
+            "Under 5 Years",
+            "5 to 13 Years",
+            "14 to 17 Years",
+            "18 to 24 Years",
+            "25 to 44 Years",
+            "45 to 64 Years",
+            "65 Years and Over"
+        ]
+    },
+    "query": "top5-app-vertical-bar"
+}

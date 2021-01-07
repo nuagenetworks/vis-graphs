@@ -615,4 +615,73 @@ describe('Bar Graph', () => {
             });
         });
     });
+
+    describe('Group Bar Graph', () => {
+
+        let $;
+        const element = document.createElement('div');
+        beforeAll(async (done) => {
+            const data = await require('./mock/data/groupBarData.json');
+            ReactDOM.render(
+                <BarGraph
+                    width={500}
+                    height={500}
+                    configuration={config.groupBar}
+                    data={data}>
+                </BarGraph>,
+                element
+            );
+            /* Delayed added because bar is rendered with 350ms animation */
+            setTimeout(() => {
+                done();
+                $ = cheerio.load(element.innerHTML);
+            }, 350);
+        });
+
+        it('SVG Dimensions', () => {
+            const height = $('svg').attr('height');
+            const width = $('svg').attr('width');
+            expect(height).toEqual('500');
+            expect(width).toEqual('500');
+        });
+
+        it('Total No of Group Bar', () => {
+            const noOfGroupBars = $('.recharts-bar').length;
+            expect(noOfGroupBars).toBe(7);
+        });
+
+        it('Total Bars in each group', () => {
+            const noOfBars = $('.recharts-bar-rectangle').length;
+            expect(noOfBars / 7).toBe(9);
+        });
+
+        it('xAxis Ticks Length', () => {
+            const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
+            expect(xAxisTicks).toBe(9);
+        });
+
+        it('yAxis Ticks Length', () => {
+            const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
+            expect(yAxisTicks).toBe(5);
+        });
+
+        it('First Bar Dimensions Height, Width and Positions', () => {
+            const firstBar = checkBar($, 'first', 'vertical');
+            const bar = {
+                'width': 1,
+                'x': 109.22222222222223,
+            }
+            expect(firstBar).toEqual(bar);
+        });
+
+        it('Second Bar Dimensions Height, Width and Positions', () => {
+            const secondBar = checkBar($, 'second', 'vertical');
+            const bar = {
+                'width': 1,
+                'x': 151.44444444444446
+            }
+            expect(secondBar).toEqual(bar);
+        });
+
+    });
 });

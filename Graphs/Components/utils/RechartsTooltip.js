@@ -3,6 +3,7 @@ import { styled } from '@material-ui/core/styles';
 import { Tooltip } from 'recharts';
 import isEmpty from 'lodash/isEmpty';
 import columnAccessor from '../../../utils/columnAccessor';
+import { isVariableNonNullAndDefined } from '../../../../../utils';
 
 const Container = styled('div')({
     marginLeft: '0.5rem',
@@ -54,7 +55,7 @@ const TooltipComponent = (props) => {
                             <Item
                                 key={`tooltip-${index}`}
                             >
-                                {label} : { col['payload'][label] !== undefined ? col['payload'][label] && (columnFormatter(col['payload'][label])) : col.name}
+                                {label} : { isVariableNonNullAndDefined(col['payload'][label]) ? (columnFormatter(col['payload'][label])) : col.name }
                             </Item>
                         )
                     });
@@ -64,7 +65,7 @@ const TooltipComponent = (props) => {
                     <Item
                         key={`tooltip-${index}`}
                     >
-                        {element.label || element.column} : { col['payload'][elementKey] !== undefined ? col['payload'][elementKey] && (columnFormatter(col['payload'][elementKey])) : col.name}
+                        { element.label || element.column } : { isVariableNonNullAndDefined(col['payload'][elementKey]) ? (columnFormatter(col['payload'][elementKey])) : col.name }
                     </Item>
                 )
             })}
