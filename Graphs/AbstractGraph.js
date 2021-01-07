@@ -693,8 +693,8 @@ export default class AbstractGraph extends React.Component {
         if (legend) {
             const { legendCount, lineHeight, legendWidth } = legend;
             //Caluting legendContainer height, 20 is margin between margin label.
-            let legendRow = Math.ceil((highestLabel + 20) / legendWidth);
-            legendRow = Math.ceil(legendRow / legendCount)
+            let legendRow = Math.ceil( legendCount * (highestLabel + 20) );
+            legendRow = Math.ceil(legendRow / legendWidth)
             
             return legendRow * lineHeight;
         }
