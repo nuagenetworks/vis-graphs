@@ -365,7 +365,8 @@ class HeatmapGraph extends XYGraph {
             colorColumn,
             colors,
             legendColumn,
-            emptyBoxColor
+            emptyBoxColor,
+            heatmapColor,
         } = this.getConfiguredProperties()
 
         const colorScale = this.getMappedScaleColor(this.getFilterData(), legendColumn)
@@ -382,6 +383,9 @@ class HeatmapGraph extends XYGraph {
 
             if (value === 'Empty') {
                 return emptyBoxColor
+            }
+            if (heatmapColor.hasOwnProperty(value)) {
+                return heatmapColor[value]
             }
             return colorScale ? colorScale(value) : stroke.color || colors[0]
         }
