@@ -553,17 +553,20 @@ export default class AbstractGraph extends React.Component {
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-        const dataKey = data.map(element => element.key);
+        const legendData = [];
         for (const key in heatmapColor) {
-            if (!dataKey.includes(key)) {
-                data.push({ key, values: [] });
+            const filterData = data.filter(element => element.key === key);
+            if (!!filterData.length && filterData[0].key === key) {
+                legendData.push(filterData[0]);
+            } else {
+                legendData.push({ key, values: [] });
             }
         }
 
         const {
             legendHeight,
             legendWidth,
-        } = this.getGraphDimension(label, data, heatmapColor);
+        } = this.getGraphDimension(label, legendData, heatmapColor);
 
         const legendContainerStyle = {
             marginLeft: this.props.width - legendWidth,
@@ -580,8 +583,7 @@ export default class AbstractGraph extends React.Component {
             legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendHeight }
         } else {
             // Place legends horizontally, 20 is margin between legends
-            const highestLabel = this.getLongestLabel(data, label);
-            
+            const highestLabel = this.getLongestLabel(legendData, label);
             legendStyle = {
                 ...legendStyle,
                 display: 'grid',        
@@ -592,7 +594,7 @@ export default class AbstractGraph extends React.Component {
         return (
             <div className='legendContainer' style={legendContainerStyle}>
                 <div className='legend' style={legendStyle}>
-                    {this.getLegendContent(data, legend, getColor, label, heatmapColor)}
+                    {this.getLegendContent(legendData, legend, getColor, label, heatmapColor)}
                 </div>
             </div>
         );
