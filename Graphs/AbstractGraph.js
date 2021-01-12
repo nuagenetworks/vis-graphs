@@ -483,7 +483,7 @@ export default class AbstractGraph extends React.Component {
         return null;
     }
 
-    getGraphDimension = (label, filterData = null, heatmapColor) => {
+    getGraphDimension = (label, filterData = null, heatmapColor = {}) => {
         const {
             height,
             width,
@@ -547,7 +547,7 @@ export default class AbstractGraph extends React.Component {
         return legend.circleSize * circleToPixel;
     }
 
-    renderLegend(data, legend, getColor, label, isVertical, heatmapColor) {
+    renderLegend(data, legend, getColor, label, isVertical, heatmapColor = {}) {
         if (!legend.show)	
             return;
 
