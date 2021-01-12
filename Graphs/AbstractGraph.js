@@ -339,11 +339,11 @@ export default class AbstractGraph extends React.Component {
         return this.yLabelWidth;
     }
 
-    setDimensions(props, data = null, column = null, label = null, legendData = null) {
+    setDimensions(props, data = null, column = null, label = null, legendData = null, heatmapColor = {}) {
         const {
             graphWidth,
             graphHeight
-        } = this.getGraphDimension(label, legendData);
+        } = this.getGraphDimension(label, legendData, heatmapColor);
         
         this.setYlabelWidth(data ? data : props.data, column);
         this.setLeftMargin();
@@ -483,7 +483,7 @@ export default class AbstractGraph extends React.Component {
         return null;
     }
 
-    getGraphDimension = (label, filterData = null) => {
+    getGraphDimension = (label, filterData = null, heatmapColor = {}) => {
         const {
             height,
             width,
@@ -521,13 +521,13 @@ export default class AbstractGraph extends React.Component {
         } else {
             const lineHeight = this.getLegendLineHeight(legend);
             const legendData = filterData || data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
-            const legendCount = legendData.length;
-            const value = this.getLegendArea(filterData || data, label, { lineHeight, legendCount });
+            const legendCount = heatmapColor ? Object.keys(heatmapColor).length : legendData.length;
+            const value = this.getLegendArea(filterData || data, label, { lineHeight, legendCount, legendWidth: width });
             dimensions = {
                 ...dimensions,
                 graphHeight: height - value - margin.top,
                 legendHeight: value + margin.top,
-                legendWidth: width,
+                legendWidth: this.getAvailableWidth(),
                 labelWidth: labelTextWidth,
             }
         }
@@ -547,19 +547,29 @@ export default class AbstractGraph extends React.Component {
         return legend.circleSize * circleToPixel;
     }
 
-    renderLegend(data, legend, getColor, label, isVertical) {
+    renderLegend(data, legend, getColor, label, isVertical, heatmapColor = {}) {
         if (!legend.show)	
             return;
 
         // Getting unique labels
         data = data.filter((e, i) => data.findIndex(a => label(a) === label(e)) === i);
+        const legendData = [];
+        for (const key in heatmapColor) {
+            const filterData = data.filter(element => element.key === key);
+            if (!!filterData.length && filterData[0].key === key) {
+                legendData.push(filterData[0]);
+            } else {
+                legendData.push({ key, values: [] });
+            }
+        }
+
         const {
             legendHeight,
             legendWidth,
-        } = this.getGraphDimension(label, data);
+        } = this.getGraphDimension(label, legendData, heatmapColor);
 
         const legendContainerStyle = {
-            marginLeft: '5px',
+            marginLeft: this.props.width - legendWidth,
             marginTop: '5px',
             width: legendWidth,
             height: legendHeight,
@@ -572,31 +582,32 @@ export default class AbstractGraph extends React.Component {
             // Place the legends in the bottom left corner
             legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendHeight }
         } else {
-            // Place legends horizontally, Maximum 3 legend 1 row
+            // Place legends horizontally, 20 is margin between legends
+            const highestLabel = this.getLongestLabel(legendData, label);
             legendStyle = {
                 ...legendStyle,
-                display: 'grid',
-                gridTemplateColumns: `repeat(auto-fit, minmax(${legendWidth / 3 - 5}px, 1fr))`,
+                display: 'grid',        
+                gridTemplateColumns: `repeat(auto-fit, ${highestLabel+20}px)`,
             }
         }
 
         return (
             <div className='legendContainer' style={legendContainerStyle}>
                 <div className='legend' style={legendStyle}>
-                    {this.getLegendContent(data, legend, getColor, label)}
+                    {this.getLegendContent(legendData, legend, getColor, label, heatmapColor)}
                 </div>
             </div>
         );
     }
 
-    getLegendContent(data, legend, getColor, label) {
+    getLegendContent(data, legend, getColor, label, heatmapColor) {
         const {
             fontColor
         } = this.getConfiguredProperties();
 
         const {
             labelWidth
-        } = this.getGraphDimension(label, data);
+        } = this.getGraphDimension(label, data, heatmapColor);
 
         const lineHeight = this.getLegendLineHeight(legend);
 
@@ -682,9 +693,11 @@ export default class AbstractGraph extends React.Component {
         const highestLabel = this.getLongestLabel(data, label);
 
         if (legend) {
-            const { legendCount, lineHeight } = legend;
-            //Maximum 3 legend 1 row
-            const legendRow = Math.ceil(legendCount / 3);
+            const { legendCount, lineHeight, legendWidth } = legend;
+            //Caluting legendContainer height, 20 is margin between margin label.
+            let legendRow = Math.ceil( legendCount * (highestLabel + 20) );
+            legendRow = Math.ceil(legendRow / legendWidth)
+            
             return legendRow * lineHeight;
         }
 
