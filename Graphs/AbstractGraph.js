@@ -420,7 +420,7 @@ export default class AbstractGraph extends React.Component {
             margin
         } = this.getConfiguredProperties();
 
-        this.availableHeight = height - (margin.top + margin.bottom + chartHeightToPixel + this.getXAxisHeight())
+        this.availableHeight = height - (chartHeightToPixel + this.getXAxisHeight())
 
         if (this.isVertical() && this.isBrush()) {
             this.availableHeight = this.availableHeight * 0.75
@@ -443,7 +443,7 @@ export default class AbstractGraph extends React.Component {
             margin
         } = this.getConfiguredProperties();
 
-        return this.availableHeight + (margin.top * 2) + chartHeightToPixel + this.getXAxisHeight();
+        return this.availableHeight + chartHeightToPixel + this.getXAxisHeight();
     }
 
     // Check whether to display chart as vertical or horizontal
@@ -490,7 +490,7 @@ export default class AbstractGraph extends React.Component {
             data
         } = this.props;
 
-        const { legend } = this.getConfiguredProperties();
+        const { legend, margin } = this.getConfiguredProperties();
 
         let dimensions = {
             graphWidth: width,
@@ -507,7 +507,7 @@ export default class AbstractGraph extends React.Component {
         if(filterData) {
             filterData = filterData.filter((e, i) => filterData.findIndex(a => label(a) === label(e)) === i);
         }
-        let labelTextWidth = this.getLegendArea(filterData || data, width, label);
+        let labelTextWidth = this.getLegendArea(filterData || data, label);
         labelTextWidth = labelTextWidth + ((legend.circleSize || 4) * 5) + (legend.labelOffset || 10);
         // Compute the available space considering a legend
         if (legend.orientation === 'vertical') {
@@ -564,23 +564,15 @@ export default class AbstractGraph extends React.Component {
         }
 
         const {
-            labelWidth,
+            legendHeight,
             legendWidth,
         } = this.getGraphDimension(label, legendData, heatmapColor);
-
-        const lineHeight = this.getLegendLineHeight(legend);
-        let legendContentHeight = ((data.length + 2) * lineHeight);
-        if(legendContentHeight > legendHeight) {
-            legendContentHeight = legendHeight;
-        }
-        const marginTop = legendHeight - legendContentHeight;
 
         const legendContainerStyle = {
             marginLeft: this.props.width - legendWidth,
             marginTop: '5px',
             width: legendWidth,
-            height: legendContentHeight,
-            marginTop,
+            height: legendHeight,
             display: this.checkIsVerticalLegend() ? 'grid' : 'inline-block',
             order:this.checkIsVerticalLegend() ? 1 : 2,
         }
@@ -588,7 +580,7 @@ export default class AbstractGraph extends React.Component {
         let legendStyle = {width: '100%'};
         if (isVertical) {
             // Place the legends in the bottom left corner
-            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendContentHeight - lineHeight }
+            legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendHeight }
         } else {
             // Place legends horizontally, 20 is margin between legends
             const highestLabel = this.getLongestLabel(legendData, label);
@@ -696,10 +688,7 @@ export default class AbstractGraph extends React.Component {
         return max(highestLabel); 
     }
 
-    getLegendArea(data, dimension, label) {
-        const {
-            legendArea,
-        } = this.getConfiguredProperties();
+    getLegendArea(data, label, legend) {
 
         const highestLabel = this.getLongestLabel(data, label);
 

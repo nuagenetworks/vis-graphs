@@ -20,10 +20,11 @@ import {
     BRUSH_HEIGHT,
     YTICK_LENGTH,
     DEFAULT_MARGIN_LEFT,
+    NO_DATA_FOUND,
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
-import { scaleColor, longestLabelLength } from '../utils/helper';
+import { scaleColor, longestLabelLength, renderMessage } from '../utils/helper';
 
 const BarGraph = (props) => {
     const [tooltipKey, setToolTipKey] = useState(-1);
@@ -84,6 +85,8 @@ const BarGraph = (props) => {
         colorColumn,
         otherColors,
         yLabelLimit,
+        id,
+        classes,
     } = properties;
 
     let dimension;
@@ -117,6 +120,9 @@ const BarGraph = (props) => {
         }
     );
 
+    if (!parsedData || !parsedData.length) {
+        return renderMessage({ message: NO_DATA_FOUND, id, classes });
+    }
     XAxisLabelConfig = isBrush ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + 30 } : XAxisLabelConfig
     const longestLabel = longestLabelLength(parsedData);
     if(longestLabel > YTICK_LENGTH) {
@@ -167,7 +173,7 @@ const BarGraph = (props) => {
                 }
 
                 {
-                    customTooltip({ tooltip, tooltipKey, yColumn })
+                    customTooltip({ tooltip, tooltipKey, yColumn, stack })
                 }
 
                 {
@@ -189,9 +195,8 @@ const BarGraph = (props) => {
                                 }}
                                 fill={barColors[index % 20]}
                                 stackId={stack ? "1" : undefined}
-                                onMouseEnter={(props) => {
-                                    const value = props.value;
-                                    setToolTipKey(Object.keys(props).find(k => props[k] === (value[1] - value[0])))
+                                onMouseEnter={() => {
+                                    setToolTipKey(item)
                                 }}
                             >
                                 {!stack && parsedData.map((item, index) => (
