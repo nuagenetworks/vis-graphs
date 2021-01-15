@@ -90,7 +90,7 @@ const LeafletGraph = (props) => {
     }
   }
 
-  const displayNSGInfo = (data) => {
+  const displayEntityInfo = (data) => {
     const displayInfo = (info, data) => {
       return info.map((row, i) => (
       <InfoBox key={i}>
@@ -117,14 +117,14 @@ const LeafletGraph = (props) => {
     return (
       data && (
         <Tooltip>
-          {displayNSGInfo(data)}
+          {displayEntityInfo(data)}
         </Tooltip>
       )
     )
   }
 
   // draw markers on map
-  const renderMarkersIfNeeded = () => {
+  const renderMarkers = () => {
     return stateData.filter(d => {
       return (d[latitudeColumn] && d[longitudeColumn]);
     }).map(d => {
@@ -152,7 +152,6 @@ const LeafletGraph = (props) => {
         icon={iconPerson}
         onClick={() => handleMarkerClick(data, onMarkClick)}
         onMouseOver={tooltip ? () => toggleInfoWindow(data, position) : undefined}
-        onMouseOut={tooltip ? () => toggleInfoWindow() : undefined}
       >
         {renderInfowindow()}
       </Marker>
@@ -167,7 +166,7 @@ const LeafletGraph = (props) => {
     }
   }
 
-  const renderSearchBarIfNeeded = () => {
+  const renderSearchBar = () => {
     if (searchBar === false) {
       return;
     }
@@ -265,7 +264,7 @@ const LeafletGraph = (props) => {
     });
   }
 
-  const renderPolylineIfNeeded = () => {
+  const renderPolyline = () => {
     return line.map((link, i) => {
       return <Polyline
         color= {link.color}
@@ -302,7 +301,7 @@ const LeafletGraph = (props) => {
 
   return (
     <React.Fragment>
-      {renderSearchBarIfNeeded()}
+      {renderSearchBar()}
       {
         <Map
           center={currentCenter}
@@ -318,10 +317,11 @@ const LeafletGraph = (props) => {
           <MarkerClusterer
             iconCreateFunction={createClusterCustomIcon}
             showCoverageOnHover={false}
+            spiderfyOnMaxZoom={true}
             onClusterClick={handleClustererClick}
           >
-            {renderMarkersIfNeeded()}
-            {renderPolylineIfNeeded()}
+            {renderMarkers()}
+            {renderPolyline()}
           </MarkerClusterer>
         </Map>
       }

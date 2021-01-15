@@ -497,8 +497,8 @@ const GeoMap = (props) => {
   let mapHeight = height;
 
   const currentCenter = {
-    lat: Number(process.env.REACT_APP_GOOGLE_MAP_LAT),
-    lng: Number(process.env.REACT_APP_GOOGLE_MAP_LNG),
+    lat: Number(process.env.REACT_APP_MAP_LAT),
+    lng: Number(process.env.REACT_APP_MAP_LNG),
   }
 
   const defaultLatLng = defaultCenter ? defaultCenter : currentCenter;

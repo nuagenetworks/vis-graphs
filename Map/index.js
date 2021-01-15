@@ -24,7 +24,7 @@ GoogleMapsWrapper.defaultProps = {
   mapElement: <div style={{ height: `100%` }} />,
   googleMapURL: `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAP_API}&v=3.exp&libraries=${process.env.REACT_APP_GOOGLE_MAP_LIBRARIES}`,
   defaultZoom: Number(process.env.REACT_APP_GOOGLE_MAP_ZOOM),
-  defaultCenter: { lat: Number(process.env.REACT_APP_GOOGLE_MAP_LAT), lng: Number(process.env.REACT_APP_GOOGLE_MAP_LNG) }
+  defaultCenter: { lat: Number(process.env.REACT_APP_MAP_LAT), lng: Number(process.env.REACT_APP_MAP_LNG) }
 }
 
 GoogleMapsWrapper.propTypes = {
