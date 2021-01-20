@@ -16,3 +16,4 @@ export { default as TreeGraph } from './TreeGraph';
 export { default as PortGraph } from './PortGraph';
 export { default as ProgressBarGraph } from './ProgressBarGraph';
 export { default as GroupBarGraph } from './BarGraph';
+export { default as LeafletGraph } from './LeafletGraph';

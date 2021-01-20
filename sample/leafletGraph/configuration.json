@@ -1,0 +1,107 @@
+{
+    "id": "aar-enterprise-geomap",
+    "graph": "LeafletGraph",
+    "title": "All NSGs in enterprise {{enterpriseName}}",
+    "data": {
+        "minZoom": 3,
+        "latitudeColumn": "latitude",
+        "longitudeColumn": "longitude",
+        "nameColumn": "gatewayName",
+        "localityColumn": "address",
+        "idColumn": "gatewayID",
+        "criticalAlarmColumn": "criticalAlarmsCount",
+        "majorAlarmColumn": "majorAlarmsCount",
+        "minorAlarmColumn": "minorAlarmsCount",
+        "bootstrapStatusColumn": "bootstrapStatus",
+        "NSGVersionColumn": "NSGVersion",
+        "tooltip": [
+            {
+                "column": "gatewayName",
+                "label": "NSG"
+            },
+            {
+                "column": "address",
+                "label": "Address"
+            },
+            {
+                "column": "bootstrapStatus",
+                "label": "Bootstrap Status"
+            },
+            {
+                "column": "NSGVersion",
+                "label": "NSG Version"
+            },
+            {
+                "column": "criticalAlarmsCount",
+                "label": "Critical Alarms"
+            },
+            {
+                "column": "majorAlarmsCount",
+                "label": "Major Alarms"
+            },
+            {
+                "column": "minorAlarmsCount",
+                "label": "Minor Alarms"
+            }
+        ],
+        "filters": [
+            {
+                "columnText": "NSG Name",
+                "columnField": "gatewayName",
+                "type": "text"
+            },
+            {
+                "columnText": "NSG Region",
+                "columnField": "locality",
+                "type": "text"
+            },
+            {
+                "columnField": "bootstrapStatus",
+                "columnText": "Bootstrap Status",
+                "type": "selection"
+            },
+            {
+                "columnField": "NSGVersion",
+                "columnText": "NSG Version",
+                "type": "selection"
+            },
+            {
+                "columnField": "majorAlarmsCount",
+                "columnText": "Major Alarms Count",
+                "type": "text"
+            },
+            {
+                "columnField": "criticalAlarmsCount",
+                "columnText": "Critical Alarms Count",
+                "type": "text"
+            },
+            {
+                "columnField": "minorAlarmsCount",
+                "columnText": "Minor Alarms Count",
+                "type": "text"
+            }
+        ],
+        "links": {
+            "source": "data1",
+            "sourceColumn": "source",
+            "destinationColumn": "destination"
+        }
+    },
+    "query": {
+        "data": "aar-enterprise-geomap",
+        "data1": {
+            "name": "aar-enterprise-all-flows",
+            "required": false
+        }
+    },
+    "listeners": [
+        {
+            "redirect": "/enterprises/enterprise/{{enterpriseID}}/infrastructure/nsgs/nsgateway/{{nsgId}}/design/analytics/aar-nsg/aarNSG",
+            "type": "url",
+            "params": {
+                "snsg": "gatewayName",
+                "nsgId": "gatewayID"
+            }
+        }
+    ]
+}
