@@ -8,6 +8,7 @@ import {
     Brush,
     CartesianGrid
 } from 'recharts';
+import isEmpty from 'lodash/isEmpty';
 
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -85,6 +86,7 @@ const BarGraph = (props) => {
         colorColumn,
         otherColors,
         yLabelLimit,
+        groupedKeys,
         id,
         classes,
     } = properties;
@@ -116,7 +118,8 @@ const BarGraph = (props) => {
             key: stack,
             xColumn,
             yColumn,
-            isVertical
+            isVertical,
+            groupedKeys
         }
     );
 
@@ -173,7 +176,7 @@ const BarGraph = (props) => {
                 }
 
                 {
-                    customTooltip({ tooltip, tooltipKey, yColumn, stack })
+                    customTooltip({ tooltip, tooltipKey, yColumn, stack, groupedKeys })
                 }
 
                 {
@@ -199,7 +202,7 @@ const BarGraph = (props) => {
                                     setToolTipKey(item)
                                 }}
                             >
-                                {!stack && parsedData.map((item, index) => (
+                                {!stack  && !groupedKeys && parsedData.map((item, index) => (
                                     <Cell
                                         key={`cell-${index}`}
                                         fill={barColors[(index + startIndex) % 20]}
