@@ -251,6 +251,10 @@ const TableGraph = (props) => {
     }
 
     const handleScrollSorting = (sortBy, sortDirection) => {
+        const selectedColumn = getColumns().find(item => item.column === sortBy);
+        if (!selectedColumn || selectedColumn.sort === false) {
+            return;
+        }
 
         const sort = objectPath.has(scrollData, 'sort') ? objectPath.get(scrollData, 'sort') : undefined;
         if (sort && sort.column === sortBy.toLowerCase()) {
