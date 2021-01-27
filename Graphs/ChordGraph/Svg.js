@@ -1,5 +1,6 @@
 import React from 'react';
 import { styled } from '@material-ui/core/styles';
+import { isFunction } from '../../utils/helpers';
 
 const SvgContainer = styled('div')({
     display: 'inline-block',
@@ -36,7 +37,7 @@ export default ({
               <rect
                 fillOpacity={0}
                 height={height}
-                onClick={ (event) => { clearHover(); onClick(event) } }
+                onClick={ (event) => { clearHover(); isFunction(onClick) && onClick(event) } }
                 width={width}
                 x={`-${width / 2}`}
                 y={`-${height / 2}`}
