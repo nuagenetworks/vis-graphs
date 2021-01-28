@@ -37,7 +37,12 @@ export default ({
               <rect
                 fillOpacity={0}
                 height={height}
-                onClick={ (event) => { clearHover(); isFunction(onClick) && onClick(event) } }
+                onClick={(event) => {
+                    clearHover();
+                    if (isFunction(onClick)) {
+                        onClick(event);
+                    }
+                }}
                 width={width}
                 x={`-${width / 2}`}
                 y={`-${height / 2}`}
