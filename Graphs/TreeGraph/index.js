@@ -208,6 +208,8 @@ const TreeGraph = (props) => {
     const isFirst = useRef(true);
     const [nodeElement, setNodeElement] = useState(null);
 
+    const kids = Array.isArray(props.data) && props.data.length ? props.data[0].kids : null;
+
     useEffect(() => {
         if (isFirst.current) {
             isFirst.current = false;
@@ -222,7 +224,7 @@ const TreeGraph = (props) => {
             elementGenerator();
             setDraggingRef(props);
         }
-    }, [props, nodeElement]);
+    }, [props, nodeElement, kids]);
 
     // Toggle children on click.
     const click = d => {
