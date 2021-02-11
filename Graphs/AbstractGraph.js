@@ -582,12 +582,12 @@ export default class AbstractGraph extends React.Component {
             // Place the legends in the bottom left corner
             legendStyle = { ...legendStyle, alignSelf: 'flex-end', height: legendHeight }
         } else {
-            // Place legends horizontally, 20 is margin between legends
+            // Place legends horizontally, 30 is margin between legends
             const highestLabel = this.getLongestLabel(legendData, label);
             legendStyle = {
                 ...legendStyle,
                 display: 'grid',        
-                gridTemplateColumns: `repeat(auto-fit, ${highestLabel+20}px)`,
+                gridTemplateColumns: `repeat(auto-fit, ${highestLabel+30}px)`,
             }
         }
 
@@ -694,8 +694,8 @@ export default class AbstractGraph extends React.Component {
 
         if (legend) {
             const { legendCount, lineHeight, legendWidth } = legend;
-            //Caluting legendContainer height, 20 is margin between margin label.
-            let legendRow = Math.ceil( legendCount * (highestLabel + 20) );
+            //Caluting legendContainer height, 30 is margin between margin label.
+            let legendRow = Math.ceil( legendCount * (highestLabel + 30) );
             legendRow = Math.ceil(legendRow / legendWidth)
             
             return legendRow * lineHeight;
