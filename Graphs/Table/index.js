@@ -401,7 +401,7 @@ const TableGraph = (props) => {
     }
 
     const onScroll = ({ startIndex }) => {
-        const page = (startIndex / LIMIT) + 1;
+        const page = (startIndex / (scrollData.pageSize || LIMIT)) + 1;
         props.updateScroll({ currentPage: page, event: events.PAGING });
     }
 
