@@ -290,7 +290,7 @@ const TableGraph = (props) => {
     }
 
     const getHeaderData = () => {
-        const { ESColumns } = props;
+        const { ESColumns, data, properties } = props;
         let columnKeys = new Map();
 
         if (ESColumns) {
@@ -306,6 +306,8 @@ const TableGraph = (props) => {
                 const columnRow = columns[index];
                 const displayColumn = stateColumn.includes(columnRow.label || columnRow.column) ? 'false' : 'true';
                 const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
+                // save typeof column value if additionalSearchOperator is true
+                const columnDataType = !!properties.additionalSearchOperator && !!data.length ? typeof objectPath.get(data[0], columnRow.column) : undefined;
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
@@ -321,7 +323,8 @@ const TableGraph = (props) => {
                         sort,
                     },
                     tooltip: columnRow.tooltip,
-                    totalCharacters: columnRow.totalCharacters
+                    totalCharacters: columnRow.totalCharacters,
+                    columnDataType
                 };
 
                 headerData.push(headerColumn);

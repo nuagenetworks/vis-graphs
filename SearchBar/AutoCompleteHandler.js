@@ -9,7 +9,14 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
     }
     needOperators(parsedCategory) {
         const result = super.needOperators(parsedCategory);
-        return this.scroll ? ["==", "!="] : result.concat(["startsWith"]);
+        // check if typeof search column values is number
+        const columnType = this.options.filter(val => val.label === parsedCategory && val.columnDataType === "number")[0];
+
+        let operator = ["==", "!="];
+        if (!!columnType) {
+            operator = ["==", "!=", "<=", ">=", '<', '>'];
+        } 
+        return this.scroll ? operator : result.concat(["startsWith"]);
     }
 
     needValues(parsedCategory, parsedOperator) {
