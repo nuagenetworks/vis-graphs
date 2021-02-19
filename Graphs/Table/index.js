@@ -301,15 +301,14 @@ const TableGraph = (props) => {
 
         const columns = getColumns();
         let headerData = [];
+        const conditionProcessColumnDataType = properties.searchBar && properties.enableNumericSearch;
         for (let index in columns) {
             if (columns.hasOwnProperty(index)) {
                 const columnRow = columns[index];
                 const displayColumn = stateColumn.includes(columnRow.label || columnRow.column) ? 'false' : 'true';
                 const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
                 // save typeof column value if enableNumericSearch is true
-                const conditionProcessColumnDataType = properties.searchBar && properties.enableNumericSearch;
-                const columnType = !!ESColumns && ESColumns.filter( val => val.key === columnRow.column)[0];
-                const columnDataType = conditionProcessColumnDataType && columnType ? columnType.type : undefined;
+                const columnType = conditionProcessColumnDataType && ESColumns ? ESColumns.filter(val => val.key === columnRow.column)[0] : null;
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
@@ -326,7 +325,7 @@ const TableGraph = (props) => {
                     },
                     tooltip: columnRow.tooltip,
                     totalCharacters: columnRow.totalCharacters,
-                    columnDataType
+                    columnDataType: columnType ? columnType.type : null
                 };
 
                 headerData.push(headerColumn);

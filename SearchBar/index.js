@@ -24,7 +24,7 @@ export default class SearchBar extends React.Component {
             data,
             scroll
         } = this.props
-            
+        
         this.autoCompleteHandler = new AutoCompleteHandler(data, options, scroll)
         this.onChange = this.onChange.bind(this)
         this.onParseOk = this.onParseOk.bind(this)

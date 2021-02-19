@@ -11,14 +11,12 @@ export default class AutoCompleteHandler extends GridDataAutoCompleteHandler {
     }
     needOperators(parsedCategory) {
         const result = super.needOperators(parsedCategory);
-        // check if typeof search column values is number
-        const columnType = this.options.filter(val => val.label === parsedCategory && ES_NUMBER_DATA_TYPES.includes(val.columnDataType))[0];
-
-        let operator = ["==", "!="];
-        if (!!columnType) {
-            operator = ["==", "!=", "<=", ">=", '<', '>'];
-        } 
-        return this.scroll ? operator : result.concat(["startsWith"]);
+        if (this.scroll) {
+            // check if typeof search column values is number
+            const numericColumnType = this.options.filter(val => val.label === parsedCategory && ES_NUMBER_DATA_TYPES.includes(val.columnDataType))[0];
+            return numericColumnType ? ["==", "!=", "<=", ">=", "<", ">"] : ["==", "!="];
+        }
+        return result.concat(["startsWith"]);
     }
 
     needValues(parsedCategory, parsedOperator) {
