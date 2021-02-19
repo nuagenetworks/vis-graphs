@@ -19,6 +19,13 @@ export default class SearchBar extends React.Component {
             query: (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '',
         }
 
+        const {
+            options,
+            data,
+            scroll
+        } = this.props
+            
+        this.autoCompleteHandler = new AutoCompleteHandler(data, options, scroll)
         this.onChange = this.onChange.bind(this)
         this.onParseOk = this.onParseOk.bind(this)
         this.setTimeout = null;
@@ -26,15 +33,6 @@ export default class SearchBar extends React.Component {
         this.query = (this.props.searchText && typeof (this.props.searchText) === 'string') ? this.props.searchText : '';
         this.finalExpression = null;
         this.searchWidth = this.props.cardWidth;
-    }
-
-    autoCompleteHandler = () => {
-        const {
-            options,
-            data,
-            scroll
-        } = this.props
-        return new AutoCompleteHandler(data, options, scroll)
     }
 
     componentDidMount () {
@@ -142,7 +140,7 @@ export default class SearchBar extends React.Component {
                             ref="filterBox"
                             data={data}
                             onChange={this.onChange}
-                            autoCompleteHandler={this.autoCompleteHandler()}
+                            autoCompleteHandler={this.autoCompleteHandler}
                             query={query}
                             options={options}
                             onParseOk={this.onParseOk}

@@ -290,7 +290,7 @@ const TableGraph = (props) => {
     }
 
     const getHeaderData = () => {
-        const { ESColumns, data, properties } = props;
+        const { ESColumns, properties = {} } = props;
         let columnKeys = new Map();
 
         if (ESColumns) {
@@ -306,8 +306,10 @@ const TableGraph = (props) => {
                 const columnRow = columns[index];
                 const displayColumn = stateColumn.includes(columnRow.label || columnRow.column) ? 'false' : 'true';
                 const sort = !isEmpty(columnKeys) ? columnKeys.get(columnRow.column) : true;
-                // save typeof column value if additionalSearchOperator is true
-                const columnDataType = !!properties.additionalSearchOperator && !!data.length ? typeof objectPath.get(data[0], columnRow.column) : undefined;
+                // save typeof column value if enableNumericSearch is true
+                const conditionProcessColumnDataType = properties.searchBar && properties.enableNumericSearch;
+                const columnType = !!ESColumns && ESColumns.filter( val => val.key === columnRow.column)[0];
+                const columnDataType = conditionProcessColumnDataType && columnType ? columnType.type : undefined;
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
