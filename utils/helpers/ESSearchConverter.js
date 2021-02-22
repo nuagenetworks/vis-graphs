@@ -129,6 +129,42 @@ export const convertElementToElastic = (elem) => {
           }
         };
 
+      case '<=':
+        return {
+          range: {
+            [element.category]: {
+              lte: element.value
+            }
+          }
+        };
+
+      case '>=':
+        return {
+          range: {
+            [element.category]: {
+              gte: element.value
+            }
+          }
+        };
+
+      case '<':
+        return {
+          range: {
+            [element.category]: {
+              lt: element.value
+            }
+          }
+        };
+
+      case '>':
+        return {
+          range: {
+            [element.category]: {
+              gt: element.value
+            }
+          }
+        };
+
       default:
         break;
 
