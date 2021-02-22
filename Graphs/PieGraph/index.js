@@ -76,7 +76,7 @@ const PieGraph = (props) => {
                 prev = prev[sliceColumn];
             }
             return prev + cur[sliceColumn];
-        });
+        }, 0);
 
         data.forEach(element => {
             element.percantage = `${(element[sliceColumn] / Total * 100).toFixed(2)}%`;
