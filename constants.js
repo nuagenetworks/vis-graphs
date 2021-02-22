@@ -15,3 +15,4 @@ export const FILTER_COLUMN_MAX_HEIGHT = 250;
 export const FILTER_COLUMN_WIDTH = 250;
 export const LIMIT = 100;
 export const FOOTER_HEIGHT = 65;
+export const ES_NUMBER_DATA_TYPES = ['long', 'integer', 'short', 'double', 'float'];
