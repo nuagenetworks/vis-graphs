@@ -5,8 +5,8 @@ const tableStyle = {
         maxHeight: '0px',
         maxWidth: '30px',
         padding: '0',
-        top: "40px",
-        right: '10px',
+        top: "45px",
+        right: '-5px',
         position: "fixed"
     }
 }

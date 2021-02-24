@@ -714,7 +714,7 @@ const TableGraph = (props) => {
                 </div>
                 <div style={{ clear: "both" }}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
-                <div style={{ overflowX: "auto" }}>
+                <div style={{ overflowX: "auto", paddingTop: '10px' }}>
                     <div style={{ height: graphHeight, minWidth: width }}>
                         <InfiniteLoader
                             isRowLoaded={({ index }) => !!filterData[index]}
