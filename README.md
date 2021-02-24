@@ -439,6 +439,8 @@ __fixedHeader__ - (boolean) fix table header while scrolling. Default is `true`.
 
 __hidePagination__ - Hide paging and search bar if data size is less than pagination limit - Default is `true`
 
+__enableNumericSearch__ - (boolean) To enable/disable addition search operator for number type column value - Default is `false`
+
 __border__
 - **top** set top border. Default is `solid 1px #ccc`
 - **bottom** set bottom border. Default is `0`
