@@ -127,7 +127,7 @@ const LineGraph = (props) => {
                 })
             }
             {
-                customTooltip({ tooltip, tooltipKey, yColumn })
+                customTooltip({ tooltip, tooltipKey, yColumn, graph })
             }
             {
                 lineKeys.map((lineItem, index) => {
@@ -141,14 +141,16 @@ const LineGraph = (props) => {
                             connectNulls={zeroStart}
                             key={`line-${index}`}
                             className="line-graph-line"
-                            onMouseEnter={({ name }) => setToolTipKey(name)}
-                            onMouseLeave={() => setToolTipKey(-1)}
+                            onMouseEnter={() => setToolTipKey(lineItem)}
                             name={lineItem}
                             dataKey={lineItem}
                             stroke={color}
                             fill={color}
                             isAnimationActive={false}
-                            activeDot={{ r: 8 }}
+                            activeDot={{
+                                onMouseOver: () => setToolTipKey(lineItem),
+                                r: 8
+                            }}
                             dot={showDots}
                         />
                     )
