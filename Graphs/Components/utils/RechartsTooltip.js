@@ -3,7 +3,7 @@ import { styled } from '@material-ui/core/styles';
 import { Tooltip } from 'recharts';
 import isEmpty from 'lodash/isEmpty';
 import columnAccessor from '../../../utils/columnAccessor';
-import { isVariableNonNullAndDefined } from '../../../../../utils';
+import { isVariableNonNullAndDefined } from '../../../utils/helpers';
 
 const Container = styled('div')({
     marginLeft: '0.5rem',
