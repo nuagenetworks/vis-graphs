@@ -50,10 +50,6 @@ const LineGraph = (props) => {
       tooltip,
     } = properties;
 
-    if (dateHistogram && tooltip) {
-        tooltip = insertTimestampToTooltip({tooltip, xColumn});
-    }
-
     if (margin.right < 15) {
         margin.right = 15;
     }
@@ -68,6 +64,18 @@ const LineGraph = (props) => {
         isVertical: true,
         graph
     });
+
+    let tooltipUpdated = Array.isArray(tooltip) ? [...tooltip] : null;
+    if (dateHistogram && tooltipUpdated) {
+        tooltipUpdated = insertTimestampToTooltip({tooltip: tooltipUpdated, xColumn});
+        const linesColumnIndex = tooltipUpdated.findIndex(item => item.column === linesColumn);
+        if (linesColumnIndex !== -1) {
+            tooltipUpdated.splice(linesColumnIndex, 1);
+            lineKeys.forEach(lineKey => {
+                tooltipUpdated.push({ column: lineKey});
+            })
+        }
+    }
 
     XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;
 
@@ -127,7 +135,7 @@ const LineGraph = (props) => {
                 })
             }
             {
-                customTooltip({ tooltip, tooltipKey, yColumn })
+                customTooltip({ tooltip: tooltipUpdated, tooltipKey, yColumn, graph })
             }
             {
                 lineKeys.map((lineItem, index) => {
@@ -141,14 +149,16 @@ const LineGraph = (props) => {
                             connectNulls={zeroStart}
                             key={`line-${index}`}
                             className="line-graph-line"
-                            onMouseEnter={({ name }) => setToolTipKey(name)}
-                            onMouseLeave={() => setToolTipKey(-1)}
+                            onMouseEnter={() => setToolTipKey(lineItem)}
                             name={lineItem}
                             dataKey={lineItem}
                             stroke={color}
                             fill={color}
                             isAnimationActive={false}
-                            activeDot={{ r: 8 }}
+                            activeDot={{
+                                onMouseOver: () => setToolTipKey(lineItem),
+                                r: 8
+                            }}
                             dot={showDots}
                         />
                     )
