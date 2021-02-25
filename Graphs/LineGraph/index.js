@@ -43,6 +43,7 @@ const LineGraph = (props) => {
         brushEnabled,
         xTicks,
         graph,
+        activeDotOnlyTooltip
     } = properties;
 
     let {
@@ -127,7 +128,7 @@ const LineGraph = (props) => {
                 })
             }
             {
-                customTooltip({ tooltip, tooltipKey, yColumn, graph })
+                customTooltip({ tooltip, tooltipKey, yColumn, graph, activeDotOnlyTooltip })
             }
             {
                 lineKeys.map((lineItem, index) => {
@@ -149,7 +150,8 @@ const LineGraph = (props) => {
                             isAnimationActive={false}
                             activeDot={{
                                 onMouseOver: () => setToolTipKey(lineItem),
-                                r: 8
+                                onMouseLeave: () => setToolTipKey(-1),
+                                r : 8
                             }}
                             dot={showDots}
                         />

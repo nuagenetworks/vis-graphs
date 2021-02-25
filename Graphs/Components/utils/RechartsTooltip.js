@@ -16,11 +16,19 @@ const Item = styled('p')({
     color: 'white',
 });
 
-export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys, graph }) => {
+export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys, graph, activeDotOnlyTooltip }) => {
     if (!isEmpty(tooltip)) {
         return (<Tooltip
             content={
-                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} stack={stack} groupedKeys={groupedKeys} graph={graph} />
+                <TooltipComponent
+                    tooltip={tooltip}
+                    tooltipKey={tooltipKey}
+                    yColumn={yColumn}
+                    stack={stack}
+                    groupedKeys={groupedKeys}
+                    graph={graph}
+                    activeDotOnlyTooltip={activeDotOnlyTooltip}
+                />
             }
             wrapperStyle={{ backgroundColor: "black" }}
         />)
@@ -28,7 +36,7 @@ export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys, graph }) => 
 }
 
 const TooltipComponent = (props) => {
-    const { tooltip, payload, tooltipKey, yColumn, stack, groupedKeys, graph } = props;
+    const { tooltip, payload, tooltipKey, yColumn, stack, groupedKeys, graph, activeDotOnlyTooltip } = props;
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
@@ -51,6 +59,9 @@ const TooltipComponent = (props) => {
                     }
                 }
                 if(!col) {
+                    if (activeDotOnlyTooltip) {
+                        return null;
+                    }
                     col = payload[0];
                 }
                 let columnFormatter = columnAccessor(element);
