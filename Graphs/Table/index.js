@@ -99,7 +99,7 @@ const setSelectedRows = (props) => {
     } = props;
 
     const selectedRows = objectPath.has(scrollData, 'selectedRow') ? objectPath.get(scrollData, 'selectedRow') : [];
-    return !isEmpty(selectedRows) ? selectedRows[requestId] : [];
+    return !isEmpty(selectedRows) ? (selectedRows[requestId] || []) : [];
 }
 
 const TableGraph = (props) => {
