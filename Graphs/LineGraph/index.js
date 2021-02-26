@@ -150,7 +150,7 @@ const LineGraph = (props) => {
                             isAnimationActive={false}
                             activeDot={{
                                 onMouseOver: () => setToolTipKey(lineItem),
-                                onMouseLeave: () => setToolTipKey(-1),
+                                onMouseLeave: () => activeDotOnlyTooltip ? setToolTipKey(-1) : '',
                                 r : 8
                             }}
                             dot={showDots}
