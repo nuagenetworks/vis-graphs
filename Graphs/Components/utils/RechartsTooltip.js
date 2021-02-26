@@ -2,6 +2,8 @@ import React from 'react';
 import { styled } from '@material-ui/core/styles';
 import { Tooltip } from 'recharts';
 import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
+
 import columnAccessor from '../../../utils/columnAccessor';
 import { isVariableNonNullAndDefined } from '../../../../../utils';
 
@@ -14,11 +16,19 @@ const Item = styled('p')({
     color: 'white',
 });
 
-export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys }) => {
+export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys, graph, activeDotOnlyTooltip }) => {
     if (!isEmpty(tooltip)) {
         return (<Tooltip
             content={
-                <TooltipComponent tooltip={tooltip} tooltipKey={tooltipKey} yColumn={yColumn} stack={stack} groupedKeys={groupedKeys} />
+                <TooltipComponent
+                    tooltip={tooltip}
+                    tooltipKey={tooltipKey}
+                    yColumn={yColumn}
+                    stack={stack}
+                    groupedKeys={groupedKeys}
+                    graph={graph}
+                    activeDotOnlyTooltip={activeDotOnlyTooltip}
+                />
             }
             wrapperStyle={{ backgroundColor: "black" }}
         />)
@@ -26,7 +36,7 @@ export default ({ tooltip, tooltipKey, yColumn, stack, groupedKeys }) => {
 }
 
 const TooltipComponent = (props) => {
-    const { tooltip, payload, tooltipKey, yColumn, stack, groupedKeys } = props;
+    const { tooltip, payload, tooltipKey, yColumn, stack, groupedKeys, graph, activeDotOnlyTooltip } = props;
     return (
         <Container>
             {!isEmpty(tooltip) && payload && payload.length && tooltip.map((element, index) => {
@@ -36,9 +46,12 @@ const TooltipComponent = (props) => {
                     elementKey = payload[0].name;
                     col = payload[0];
                 }
-                if(tooltipKey && tooltipKey !== -1) {
-                    col = payload.find(k => k['name'] === tooltipKey);
-                    if(col && !col.payload[elementKey]) {
+                if (tooltipKey && tooltipKey !== -1) {
+                    col = cloneDeep(payload.find(k => k['name'] === tooltipKey));
+                    if (!payload.hasOwnProperty(elementKey) && yColumn.includes(elementKey) && graph === 'MultiLineGraph') {
+                        elementKey = tooltipKey;
+                    }
+                    if (col && !col.payload.hasOwnProperty(elementKey)) {
                         col.payload[elementKey] = tooltipKey;
                     }
                     if(col && yColumn && col.payload[yColumn] && stack) {
@@ -46,6 +59,9 @@ const TooltipComponent = (props) => {
                     }
                 }
                 if(!col) {
+                    if (activeDotOnlyTooltip) {
+                        return null;
+                    }
                     col = payload[0];
                 }
                 let columnFormatter = columnAccessor(element);
