@@ -553,7 +553,7 @@ const TableGraph = (props) => {
         };
 
         return (
-            <div className={'select-column'} style={{ flex: "none" }}>
+            <div className={'select-column'} style={{ flex: "none", marginRight: '15px' }}>
                 <Select
                     labelId="demo-mutiple-checkbox-label"
                     id="demo-mutiple-checkbox"
@@ -687,7 +687,7 @@ const TableGraph = (props) => {
     const resetScrollData = () => {
         return (
             scroll && !disableRefresh ?
-                <div style={{ flex: "none" }}>
+                <div style={{ flex: "none", marginTop: '-10px', marginRight: selectColumnOption? '-10px' : '10px' }}>
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
@@ -708,13 +708,13 @@ const TableGraph = (props) => {
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 45 : 20 }}>
-                    {resetScrollData()}
+                <div style={{ float: 'right', display: 'flex', flexDirection: 'row-reverse'}}>
                     {filteredColumnBar(selectColumnOption)}
+                    {resetScrollData()}
                 </div>
                 <div style={{ clear: "both" }}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
-                <div style={{ overflowX: "auto", paddingTop: '10px' }}>
+                <div style={{ overflowX: "auto" }}>
                     <div style={{ height: graphHeight, minWidth: width }}>
                         <InfiniteLoader
                             isRowLoaded={({ index }) => !!filterData[index]}
