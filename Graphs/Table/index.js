@@ -553,7 +553,7 @@ const TableGraph = (props) => {
         };
 
         return (
-            <div className={'select-column'} style={{ flex: "none", marginRight: '15px' }}>
+            <div className={'select-column'} style={{ flex: "none" }}>
                 <Select
                     labelId="demo-mutiple-checkbox-label"
                     id="demo-mutiple-checkbox"
@@ -687,11 +687,11 @@ const TableGraph = (props) => {
     const resetScrollData = () => {
         return (
             scroll && !disableRefresh ?
-                <div style={{ flex: "none", marginTop: '-10px', marginRight: selectColumnOption? '-10px' : '10px' }}>
+                <div style={{ flex: "none" }}>
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={style.design}
+                        style={style.refresh}
                         onClick={() => props.updateScroll({ currentPage: 1, selectedRow: {}, event: events.REFRESH })}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -708,7 +708,7 @@ const TableGraph = (props) => {
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                <div style={{ float: 'right', display: 'flex', flexDirection: 'row-reverse'}}>
+                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 10 : 15 }}>
                     {filteredColumnBar(selectColumnOption)}
                     {resetScrollData()}
                 </div>
