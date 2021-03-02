@@ -8,6 +8,9 @@ const tableStyle = {
         top: "40px",
         right: '10px',
         position: "fixed"
+    },
+    refresh: {
+        marginTop: "-10px",
     }
 }
 
