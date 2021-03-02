@@ -691,7 +691,7 @@ const TableGraph = (props) => {
                     <IconButton
                         tooltip="Refresh"
                         tooltipPosition={'top-left'}
-                        style={style.design}
+                        style={style.refresh}
                         onClick={() => props.updateScroll({ currentPage: 1, selectedRow: {}, event: events.REFRESH })}
                     >
                         <RefreshIcon className='refreshIcon' />
@@ -708,9 +708,9 @@ const TableGraph = (props) => {
             <div ref={(input) => { container = input; }}
                 onContextMenu={props.handleContextMenu ? props.handleContextMenu : handleContextMenu}
             >
-                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 45 : 20 }}>
-                    {resetScrollData()}
+                <div style={{ float: 'right', display: 'flex', paddingRight: !disableRefresh ? 10 : 15 }}>
                     {filteredColumnBar(selectColumnOption)}
+                    {resetScrollData()}
                 </div>
                 <div style={{ clear: "both" }}></div>
                 {renderSearchBarIfNeeded(getHeaderData())}
