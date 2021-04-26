@@ -37,6 +37,7 @@ let container = '';
 let selectedRows = [];
 let displayColumn = [];
 let unformattedData = {};
+let isAllColumnSelected = false;
 
 const getGraphProperties = (props) => {
     const {
@@ -175,7 +176,7 @@ const TableGraph = (props) => {
             updateScroll,
         } = props;
 
-        if (!isEmpty(displayColumn)) {
+        if (!isEmpty(displayColumn) || isAllColumnSelected) {
             updateScroll({
                 [`removedColumn`]: displayColumn,
                 event: events.REMOVED_COLUMNS
@@ -558,7 +559,7 @@ const TableGraph = (props) => {
                     value={stateColumn}
                     onChange={handleColumnSelection}
                     renderValue={(selected) => 'Select Columns'}
-                    MenuProps={MenuProps}s
+                    MenuProps={MenuProps}
                     classes={{
                         root: 'select-column',
                         selectMenu: 'select-column',
@@ -589,6 +590,7 @@ const TableGraph = (props) => {
 
     const handleColumnSelection = (event) => {
         displayColumn = event.target.value;
+        isAllColumnSelected = isEmpty(displayColumn) ? true : false;
         setStateColumn(event.target.value);
     }
 
