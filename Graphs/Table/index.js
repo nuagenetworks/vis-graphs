@@ -176,7 +176,7 @@ const TableGraph = (props) => {
             updateScroll,
         } = props;
 
-        if (!isEmpty(displayColumn) || isAllColumnSelected === true) {
+        if (!isEmpty(displayColumn) || isAllColumnSelected) {
             updateScroll({
                 [`removedColumn`]: displayColumn,
                 event: events.REMOVED_COLUMNS
