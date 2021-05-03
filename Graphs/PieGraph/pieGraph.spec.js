@@ -98,8 +98,8 @@ describe('PieGrpah', () => {
         });
 
         it('Number of Legends', () => {
-            const legend = $('.recharts-legend-wrapper div').children().length;
-            expect(legend/2).toBe(3);
+            const legend = $('.recharts-legend-wrapper').children().length;
+            expect(legend).toBe(3);
         });
 
         it('Legends Label', () => {
