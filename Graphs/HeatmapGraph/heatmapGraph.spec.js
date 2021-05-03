@@ -12,7 +12,7 @@ configure({ adapter: new Adapter() });
 describe('Heatmap', () => {
     let config;
     beforeAll(async () => {
-        config = await getDataAndConfig('Heatmap');
+        config = await getDataAndConfig('HeatmapGraph');
         window.SVGElement.prototype.getBBox = () => ({
             x: 0,
             y: 0,
@@ -85,7 +85,7 @@ describe('Heatmap', () => {
 
         it("Legends", () => {
             const legend = $('.legend').children().length;
-            expect(legend).toEqual(2);
+            expect(legend).toEqual(4);
         });
     });
 

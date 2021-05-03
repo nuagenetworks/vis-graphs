@@ -2,7 +2,7 @@ import React, { Children } from 'react';
 import { mount, configure } from 'enzyme';
 import ReactDOM from 'react-dom';
 
-import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar } from '../testHelper';
+import { checkTicks, getDataAndConfig, getHtml, checkSvg, checkBar, mockGetBBox, clearAllMocks } from '../testHelper';
 import BarGraph from '.';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -14,6 +14,7 @@ describe('Bar Graph', () => {
     let config;
     beforeAll(async () => {
         config = await getDataAndConfig('BarGraph');
+        mockGetBBox();
     });
 
     describe('Vertical Bar', () => {
@@ -50,20 +51,20 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks / 2).toBe(6);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(5);
             });
 
             it('First Bar Dimensions Height, Width and Positions', () => {
                 const firstBar = checkBar($, 'first', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 78.41666666666667,
+                    'width': 25,
+                    'x': 108.16666666666667,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -71,8 +72,8 @@ describe('Bar Graph', () => {
             it('Second Bar Dimensions Height, Width and Positions', () => {
                 const secondBar = checkBar($, 'second', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 112.58333333333333
+                    'width': 25,
+                    'x': 139.83333333333331
                 }
                 expect(secondBar).toEqual(bar);
             });
@@ -111,20 +112,20 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks / 2).toBe(6);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(5);
             });
 
             it('First Bar Dimensions Height, Width and Positions', () => {
                 const firstBar = checkBar($, 'first', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 78.41666666666667,
+                    'width': 25,
+                    'x': 108.16666666666667,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -132,8 +133,8 @@ describe('Bar Graph', () => {
             it('Second Bar Dimensions Height, Width and Positions', () => {
                 const secondBar = checkBar($, 'second', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 112.58333333333333
+                    'width': 25,
+                    'x': 139.83333333333331
                 }
                 expect(secondBar).toEqual(bar);
             });
@@ -172,20 +173,20 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks / 2).toBe(6);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(5);
             });
 
             it('First Bar Dimensions Height, Width and Positions', () => {
                 const firstBar = checkBar($, 'first', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 78.41666666666667,
+                    'width': 25,
+                    'x': 108.16666666666667,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -193,8 +194,8 @@ describe('Bar Graph', () => {
             it('Second Bar Dimensions Height, Width and Positions', () => {
                 const secondBar = checkBar($, 'second', 'vertical');
                 const bar = {
-                    'width': 27,
-                    'x': 112.58333333333333
+                    'width': 25,
+                    'x': 139.83333333333331
                 }
                 expect(secondBar).toEqual(bar);
             });
@@ -233,20 +234,20 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(7);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(5);
             });
 
             it('First Bar Dimensions Height, Width and Positions', () => {
                 const firstBar = checkBar($, 'first', 'vertical');
                 const bar = {
-                    'width': 46,
-                    'x': 80.85714285714286,
+                    'width': 43,
+                    'x': 110.42857142857143,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -290,20 +291,20 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(3);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(5);
             });
 
             it('First Bar Dimensions Height, Width and Positions', () => {
                 const firstBar = checkBar($, 'first', 'vertical');
                 const bar = {
-                    'width': 109,
-                    'x': 88.66666666666666,
+                    'width': 101,
+                    'x': 117.66666666666667,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -312,7 +313,7 @@ describe('Bar Graph', () => {
                 const height = parseFloat($('.recharts-brush').find('rect').attr('height'));
                 const width = parseFloat($('.recharts-brush').find('rect').attr('width'));
                 expect(height).toEqual(20);
-                expect(width).toBeCloseTo(410);
+                expect(width).toBeCloseTo(380);
             });
 
             it('Number of Legends', () => {
@@ -361,12 +362,12 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(5);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks/2).toBe(6);
             });
 
@@ -375,7 +376,7 @@ describe('Bar Graph', () => {
                 const bar = {
                     'height': 27,
                     'y': 18.375,
-                    'x': 75,
+                    'x': 105,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -414,12 +415,12 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(5);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks/2).toBe(6);
             });
 
@@ -428,7 +429,7 @@ describe('Bar Graph', () => {
                 const bar = {
                     'height': 27,
                     'y': 18.375,
-                    'x': 75,
+                    'x': 105,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -467,12 +468,12 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(5);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks/2).toBe(6);
             });
 
@@ -481,7 +482,7 @@ describe('Bar Graph', () => {
                 const bar = {
                     'height': 27,
                     'y': 18.375,
-                    'x': 75,
+                    'x': 105,
                 }
                 expect(firstBar).toEqual(bar);
             });
@@ -520,12 +521,12 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(5);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks/2).toBe(5);
             });
 
@@ -533,7 +534,7 @@ describe('Bar Graph', () => {
                 const firstBar = checkBar($, 'first', 'horizontal');
                 const bar = {
                     'height': 32,
-                    'x': 75,
+                    'x': 105,
                     'y': 19.05,
                 }
                 expect(firstBar).toEqual(bar);
@@ -578,12 +579,12 @@ describe('Bar Graph', () => {
             });
 
             it('xAxis Ticks Length', () => {
-                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const xAxisTicks = $('.xAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(xAxisTicks).toBe(5);
             });
 
             it('yAxis Ticks Length', () => {
-                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick-line').length;
+                const yAxisTicks = $('.yAxis').find('.recharts-cartesian-axis-tick').length;
                 expect(yAxisTicks).toBe(3);
             });
 
@@ -591,7 +592,7 @@ describe('Bar Graph', () => {
                 const firstBar = checkBar($, 'first', 'horizontal');
                 const bar = {
                     "height": 102,
-                    "x": 75,
+                    "x": 105,
                     "y": 27.833333333333336,
                 }
                 expect(firstBar).toEqual(bar);
@@ -601,7 +602,7 @@ describe('Bar Graph', () => {
                 const height = parseFloat($('.recharts-brush').find('rect').attr('height'));
                 const width = parseFloat($('.recharts-brush').find('rect').attr('width'));
                 expect(height).toEqual(20);
-                expect(width).toBeCloseTo(410);
+                expect(width).toBeCloseTo(380);
             });
 
             it('Number of Legends', () => {
@@ -684,4 +685,8 @@ describe('Bar Graph', () => {
         });
 
     });
+
+    afterAll(async () => {
+        clearAllMocks();
+    })
 });

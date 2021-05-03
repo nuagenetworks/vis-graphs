@@ -126,3 +126,8 @@ export const createElement = () => document.createElement('div');
 export const appendChildToElement = (element) => document.body.appendChild(element);
 
 export const removeElement = (element) => document.body.removeChild(element);
+
+export const mockGetBBox = window.SVGElement.prototype.getBBox = () => ({
+    x: 0,
+    y: 0,
+});
