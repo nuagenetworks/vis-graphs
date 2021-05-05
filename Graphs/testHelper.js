@@ -151,3 +151,7 @@ export const rgbToHex = (rbgColor) => {
     const r = parseInt(rbgColor[0]), g = parseInt(rbgColor[1]), b = parseInt(rbgColor[2]);
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 }
+export const mockGetBBox = window.SVGElement.prototype.getBBox = () => ({
+    x: 0,
+    y: 0,
+});
