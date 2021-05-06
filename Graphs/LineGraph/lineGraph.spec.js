@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-import { getDataAndConfig, createElement, appendChildToElement, removeElement } from '../testHelper';
+import { getDataAndConfig, createElement, appendChildToElement, removeElement, mockGetBBox, clearAllMocks } from '../testHelper';
 import LineGraph from '.';
 import { BRUSH_HEIGHT } from '../../constants';
 
@@ -12,6 +12,7 @@ describe('LineGraph', () => {
 
   beforeAll(async () => {
     config = await getDataAndConfig('LineGraph');
+    mockGetBBox()
   })
 
   describe("Multi Lines", () => {
@@ -298,7 +299,12 @@ describe('LineGraph', () => {
 
     it('Default brush tick end', () => {
       const tickPos = parseInt($('.recharts-brush').find('g').next().find('rect').attr('x'));
-      expect(tickPos).toBe(485);
+      expect(tickPos).toBe(480);
     });
   });
+
+  afterAll(async () => {
+    clearAllMocks();
+  })
+
 });

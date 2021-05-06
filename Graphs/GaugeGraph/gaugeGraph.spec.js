@@ -11,7 +11,7 @@ describe('GaugeGraph', () => {
     let config;
 
     beforeAll(async () => {
-      config = await getDataAndConfig('GaugeChart');
+      config = await getDataAndConfig('GaugeGraph');
     });
     
     describe('Initial Configurations', () => {
@@ -46,7 +46,7 @@ describe('GaugeGraph', () => {
       it("SVG Dimensions", () => {
         const height = $('svg').attr('height');
         const width = $('svg').attr('width');
-        expect(height).toEqual("500");
+        expect(height).toEqual("480");
         expect(width).toEqual("500");
       });
 
@@ -62,12 +62,12 @@ describe('GaugeGraph', () => {
 
       it('Gauge Needle path Definition', () => {
         const needle = $('svg').find('#needle').find('polygon').attr('points');
-        expect(needle).toEqual("305,252.5 305,257.5 423.75,255");
+        expect(needle).toEqual("255,277.5 255,282.5 397.5,280");
       });
 
       it('Gauge Needle Transform', () => {
         const needle = $('svg').find('#needle').find('polygon').attr('transform');
-        expect(needle).toEqual("rotate(233 305 255)");
+        expect(needle).toEqual("rotate(275 255 280)");
       })
 
     });

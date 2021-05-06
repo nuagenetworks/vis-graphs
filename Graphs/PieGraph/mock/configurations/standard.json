@@ -6,6 +6,7 @@
             { "column": "Application", "label": "Application" },
             { "column": "value", "format": ",.1f"}
         ],
+        "percentages": true,
         "percentagesFormat": ",.1%",
         "pieLabelRadius": 0.55,
         "pieOuterRadius": 0.95,
