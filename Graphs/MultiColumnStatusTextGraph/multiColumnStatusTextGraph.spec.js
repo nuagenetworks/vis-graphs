@@ -63,24 +63,21 @@ describe('MultiColumnStatusText Graph', () => {
     });
 
     it("First Data Color", () => {
-        const style = $('#color-0').attr('style');
-        const rbgColor = getColor(style);
+        const rbgColor = getColor($, 'first');
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[0];
         expect(hexColor).toEqual(color);
     });
 
     it("Second Data Color", () => {
-        const style = $('#color-1').attr('style');
-        const rbgColor = getColor(style);
+        const rbgColor = getColor($, 'second');
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[1];
         expect(hexColor).toEqual(color);
     });
 
     it("Third Data Color", () => {
-        const style = $('#color-2').attr('style');
-        const rbgColor = getColor(style);
+        const rbgColor = getColor($, 'third');
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[2];
         expect(hexColor).toEqual(color);

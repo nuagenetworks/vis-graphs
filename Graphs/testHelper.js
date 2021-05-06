@@ -141,7 +141,16 @@ export const columnStatusTextGraphData = ($, rowNo) => {
     return value.reverse();
 }
 
-export const getColor = (style) => {
+
+export const getColor = ($, index) => {
+    let currentChild = $('.inline-alarms').children().first();
+    if (index === 'second') {
+        currentChild = currentChild.next();
+    }
+    if (index === 'third') {
+        currentChild = currentChild.next().next();
+    }
+    const style = currentChild.children().children().attr('style');
     const value = style.split('background: ')[1].split(';')[0];
     const color = value.replace('rgb(', '').replace(')', '').split(',');
     return color;

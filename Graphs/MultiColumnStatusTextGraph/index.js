@@ -29,9 +29,7 @@ class MultiColumnStatusTextGraph extends TextGraph {
     renderRow = ({data, column, text, color, fontColor, inline, key}) => (
         <div key={key} style={inline ? {} : {display: "block", marginTop: '2%'}}>
             <div style={{width: "25%", display: "inline-block"}}>
-                <div 
-                id={`color-${key}`}
-                style={{
+                <div style={{
                     borderRadius: "100%",
                     height: "2.7em",
                     width: "2.7em",
