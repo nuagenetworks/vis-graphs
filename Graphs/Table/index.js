@@ -733,8 +733,8 @@ const TableGraph = (props) => {
                                                     setCurrentStartIndex(props.startIndex);
                                                     onRowsRendered(props);
                                                 }}
-                                                width={graphWidth || 500}   
-                                                height={height || 500}
+                                                width={graphWidth}   
+                                                height={height}
                                                 headerHeight={headerHeight}
                                                 rowHeight={rowHeight}
                                                 rowCount={filterData.length}

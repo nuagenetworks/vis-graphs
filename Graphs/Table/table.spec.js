@@ -2,7 +2,7 @@ import React, { Children } from 'react';
 import { mount, configure } from 'enzyme';
 import ReactDOM from 'react-dom';
 
-import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn, checkTime } from '../testHelper';
+import { getDataAndConfig, getHtml, totalRows, checkRowData, totalColumn, checkTime, clearAllMocks } from '../testHelper';
 import Table from '.';
 import Adapter from 'enzyme-adapter-react-16';
 
@@ -13,6 +13,7 @@ configure({ adapter: new Adapter() });
 describe('Table Graph', () => {
     let config;
     beforeAll(async () => {
+        jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(500);
         config = await getDataAndConfig('Table');
     });
 
@@ -378,5 +379,9 @@ describe('Table Graph', () => {
                 }, 1000);
             });
         });
+    });
+
+    afterAll(() => {
+        clearAllMocks();
     });
 });
