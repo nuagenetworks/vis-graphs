@@ -127,12 +127,7 @@ export const appendChildToElement = (element) => document.body.appendChild(eleme
 
 export const removeElement = (element) => document.body.removeChild(element);
 
-export const columnStatusTextGraphData = ($, rowNo) => {
-    let textData = $('.inline-alarms').children().first();
-    if (rowNo == 'second')
-        textData = textData.next();
-    if (rowNo == 'third')
-        textData = textData.next().next();
+export const columnStatusTextGraphData = ($, textData) => {
     const value = textData.find('span').map(
         function (i) {
             return $(this).text().trim();
@@ -141,16 +136,8 @@ export const columnStatusTextGraphData = ($, rowNo) => {
     return value.reverse();
 }
 
-
-export const getColor = ($, index) => {
-    let currentChild = $('.inline-alarms').children().first();
-    if (index === 'second') {
-        currentChild = currentChild.next();
-    }
-    if (index === 'third') {
-        currentChild = currentChild.next().next();
-    }
-    const style = currentChild.children().children().attr('style');
+export const getColor = ($, colorData) => {
+    const style = colorData.children().children().attr('style');
     const value = style.split('background: ')[1].split(';')[0];
     const color = value.replace('rgb(', '').replace(')', '').split(',');
     return color;
@@ -160,6 +147,7 @@ export const rgbToHex = (rbgColor) => {
     const r = parseInt(rbgColor[0]), g = parseInt(rbgColor[1]), b = parseInt(rbgColor[2]);
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 }
+
 export const mockGetBBox = window.SVGElement.prototype.getBBox = () => ({
     x: 0,
     y: 0,

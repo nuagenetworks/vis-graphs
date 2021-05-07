@@ -1,5 +1,5 @@
-import React, { Children } from 'react';
-import { mount, configure } from 'enzyme';
+import React from 'react';
+import { configure } from 'enzyme';
 import ReactDOM from 'react-dom';
 
 import { getDataAndConfig, columnStatusTextGraphData, getColor, rgbToHex } from '../testHelper';
@@ -36,48 +36,54 @@ describe('MultiColumnStatusText Graph', () => {
     });
 
     it("First Data", () => {
-        const value = columnStatusTextGraphData($);
-        const firstColumnStatusText = [
+        const textData = $('.inline-alarms').children().first();
+        const value = columnStatusTextGraphData($, textData);
+        const columnStatusText = [
             'Critical Alarms',
             '2'
         ];
-        expect(firstColumnStatusText).toEqual(value);
+        expect(columnStatusText).toEqual(value);
     });
 
     it("Second Data", () => {
-        const value = columnStatusTextGraphData($, 'second');
-        const firstColumnStatusText = [
+        const textData = $('.inline-alarms').children().first().next();
+        const value = columnStatusTextGraphData($, textData);
+        const columnStatusText = [
             'Major Alarms',
             '1'
         ];
-        expect(firstColumnStatusText).toEqual(value);
+        expect(columnStatusText).toEqual(value);
     });
 
     it("Third Data", () => {
-        const value = columnStatusTextGraphData($, 'third');
-        const firstColumnStatusText = [
+        const textData = $('.inline-alarms').children().first().next().next();
+        const value = columnStatusTextGraphData($, textData);
+        const columnStatusText = [
             'Minor Alarms',
             '3'
         ];
-        expect(firstColumnStatusText).toEqual(value);
+        expect(columnStatusText).toEqual(value);
     });
 
     it("First Data Color", () => {
-        const rbgColor = getColor($, 'first');
+        const colorData = $('.inline-alarms').children().first();
+        const rbgColor = getColor($, colorData);
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[0];
         expect(hexColor).toEqual(color);
     });
 
     it("Second Data Color", () => {
-        const rbgColor = getColor($, 'second');
+        const colorData = $('.inline-alarms').children().first().next();
+        const rbgColor = getColor($, colorData);
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[1];
         expect(hexColor).toEqual(color);
     });
 
     it("Third Data Color", () => {
-        const rbgColor = getColor($, 'third');
+        const colorData = $('.inline-alarms').children().first().next().next();
+        const rbgColor = getColor($, colorData);
         const hexColor = rgbToHex(rbgColor);
         const color = config.visualization.data.colors[2];
         expect(hexColor).toEqual(color);
