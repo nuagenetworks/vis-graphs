@@ -70,12 +70,8 @@ export const totalColumn = ($) => {
     return noOfColumns;
 }
 
-export const checkRowData = ($, rowNo) => {
-    let table, value;
-    table = $('.ReactVirtualized__Table__row').first();
-    if (rowNo == 'second')
-        table = table.next();
-    value = table.children().map(
+export const checkRowData = ($, table) => {
+    const value = table.children().map(
         function (i) {
             if ($(this).find('p')) {
                 return $(this).find('p').text().trim();

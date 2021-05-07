@@ -56,7 +56,8 @@ describe('Table Graph', () => {
             });
 
             it("First Row Data", () => {
-                const value = checkRowData($);
+                const firstRowData = $('.ReactVirtualized__Table__row').first();
+                const value = checkRowData($, firstRowData);
                 const date = checkTime(15008863469);
                 const firstRow = [
                     date,
@@ -68,7 +69,8 @@ describe('Table Graph', () => {
             });
 
             it("Second Row Data", () => {
-                const value = checkRowData($, "second");
+                const secondRowData = $('.ReactVirtualized__Table__row').first().next();
+                const value = checkRowData($, secondRowData);
                 const date = checkTime(25008863469);
                 const secondRow = [
                     date,
@@ -131,7 +133,8 @@ describe('Table Graph', () => {
             });
 
             it("First Row Data", () => {
-                const value = checkRowData($);
+                const firstRowData = $('.ReactVirtualized__Table__row').first();
+                const value = checkRowData($, firstRowData);
                 const date = checkTime(15008863469);
                 const firstRow = [
                     date,
@@ -143,7 +146,8 @@ describe('Table Graph', () => {
             });
 
             it("Second Row Data", () => {
-                const value = checkRowData($, "second");
+                const secondRowData = $('.ReactVirtualized__Table__row').first().next();
+                const value = checkRowData($, secondRowData);
                 const date = checkTime(25008863469);
                 const secondRow = [
                     date,
@@ -193,7 +197,8 @@ describe('Table Graph', () => {
             });
 
             it("First Row Data", () => {
-                const value = checkRowData($);
+                const firstRowData = $('.ReactVirtualized__Table__row').first();
+                const value = checkRowData($, firstRowData);
                 const date = checkTime(15008863469);
                 const firstRow = [
                     date,
@@ -205,7 +210,8 @@ describe('Table Graph', () => {
             });
 
             it("Second Row Data", () => {
-                const value = checkRowData($, "second");
+                const secondRowData = $('.ReactVirtualized__Table__row').first().next();
+                const value = checkRowData($, secondRowData);
                 const date = checkTime(25008863469);
                 const secondRow = [
                     date,
@@ -255,7 +261,8 @@ describe('Table Graph', () => {
             });
 
             it("First Row Data", () => {
-                const value = checkRowData($);
+                const firstRowData = $('.ReactVirtualized__Table__row').first();
+                const value = checkRowData($, firstRowData);
                 const date = checkTime(15008863469);
                 const firstRow = [
                     date,
@@ -267,7 +274,8 @@ describe('Table Graph', () => {
             });
 
             it("Second Row Data", () => {
-                const value = checkRowData($, "second");
+                const secondRowData = $('.ReactVirtualized__Table__row').first().next();
+                const value = checkRowData($, secondRowData);
                 const date = checkTime(25008863469);
                 const secondRow = [
                     date,
@@ -323,7 +331,8 @@ describe('Table Graph', () => {
             });
 
             it("First Row Data", () => {
-                const value = checkRowData($);
+                const firstRowData = $('.ReactVirtualized__Table__row').first();
+                const value = checkRowData($, firstRowData);
                 const date = checkTime(15008863469);
                 const firstRow = [
                     date,
@@ -335,7 +344,8 @@ describe('Table Graph', () => {
             });
 
             it("Second Row Data", () => {
-                const value = checkRowData($, "second");
+                const secondRowData = $('.ReactVirtualized__Table__row').first().next();
+                const value = checkRowData($, secondRowData);
                 const date = checkTime(25008863469);
                 const secondRow = [
                     date,
