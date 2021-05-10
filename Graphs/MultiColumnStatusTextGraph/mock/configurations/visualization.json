@@ -1,0 +1,29 @@
+{
+    "data": {
+        "targetedColumns": [
+            "criticalAlarmsCount",
+            "majorAlarmsCount",
+            "minorAlarmsCount"
+        ],
+        "colors": [
+            "#D9070A",
+            "#FFBF02",
+            "#62AC00"
+        ],
+        "texts": [
+            "Critical Alarms",
+            "Major Alarms",
+            "Minor Alarms"
+        ],
+        "inline": true,
+        "disableTitle": true
+    },
+    "listeners": [
+        {
+            "redirect": "aarNSGAlarms",
+            "params": {
+                "nsgId": "gatewayID"
+            }
+        }
+    ]
+}
