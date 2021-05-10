@@ -61,24 +61,21 @@ export const checkSvg = (component) => {
 }
 
 export const totalRows = ($) => {
-    const noOfRows = $('table tbody tr').length;
+    const noOfRows = $('.ReactVirtualized__Table').attr('aria-rowcount');
     return noOfRows;
 }
 
 export const totalColumn = ($) => {
-    const noOfColumns = $('table').find('thead').find('tr').children().length;
+    const noOfColumns = $('.ReactVirtualized__Table').attr('aria-colcount');
     return noOfColumns;
 }
 
-export const checkRowData = ($, rowNo) => {
-    let table, value;
-    table = $('table tbody tr').first();
-    if (rowNo == 'second')
-        table = table.next();
-    value = table.find('td').map(
+export const checkRowData = ($, table) => {
+    const value = table.children().map(
         function (i) {
-            if ($(this).attr('data-testid'))
-                return $(this).text().trim();
+            if ($(this).find('p')) {
+                return $(this).find('p').text().trim();
+            }
         }
     ).get();
     return value;
