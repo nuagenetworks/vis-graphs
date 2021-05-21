@@ -23,14 +23,12 @@ const GraphAxis = (props) => {
     dx = dx || 0;
     dy = dy || 0;
 
-    const parsedData = tickLabel  && tickLabel[payload.value] ? 
-                        tickLabel[payload.value]
-                        :
-                        Formatter({
-                            dateHistogram,
-                            value: payload.value,
-                            tickFormat
-                        })
+    const parsedData = Formatter({
+        dateHistogram,
+        value: payload.value,
+        tickLabel,
+        tickFormat
+    })
 
     return (
         <g transform={`translate(${x},${y})`} className="graph-axis">
