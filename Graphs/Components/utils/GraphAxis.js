@@ -8,6 +8,7 @@ const GraphAxis = (props) => {
         payload,
         dateHistogram,
         tickFormat,
+        tickLabel,
         limit,
     } = props;
 
@@ -22,11 +23,14 @@ const GraphAxis = (props) => {
     dx = dx || 0;
     dy = dy || 0;
 
-    const parsedData = Formatter({
-        dateHistogram,
-        value: payload.value,
-        tickFormat
-    })
+    const parsedData = tickLabel  && tickLabel[payload.value] ? 
+                        tickLabel[payload.value]
+                        :
+                        Formatter({
+                            dateHistogram,
+                            value: payload.value,
+                            tickFormat
+                        })
 
     return (
         <g transform={`translate(${x},${y})`} className="graph-axis">

@@ -7,6 +7,7 @@ import GraphAxis from './GraphAxis';
 export default ({
     xColumn,
     xLabel,
+    xTicksLabel,
     XAxisLabelConfig,
     xLabelRotateHeight,
     xTickFormat,
@@ -28,6 +29,7 @@ export default ({
                 <GraphAxis
                     rotation={xLabelRotateHeight * -1}
                     tickFormat={xTickFormat}
+                    tickLabel={xTicksLabel}
                     dateHistogram={dateHistogram}
                     dy="15"
                     dx="-10"
