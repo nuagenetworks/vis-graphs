@@ -89,6 +89,7 @@ const BarGraph = (props) => {
         groupedKeys,
         id,
         classes,
+        xTicksLabel
     } = properties;
 
     let dimension;
@@ -151,6 +152,7 @@ const BarGraph = (props) => {
                     xAxis({
                         xColumn,
                         xLabel,
+                        xTicksLabel,
                         XAxisLabelConfig,
                         xLabelRotateHeight,
                         xTickFormat,

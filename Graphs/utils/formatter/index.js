@@ -6,7 +6,10 @@ export default (props) => {
         value,
         tickFormat,
         dateHistogram,
+        tickLabel,
     } = props;
 
-    return dateHistogram ? TimeFormatter({tickFormat, value}) : NumbersFormatter({tickFormat, value});
+    return tickLabel  && tickLabel[value] ? tickLabel[value]
+            :
+            dateHistogram ? TimeFormatter({tickFormat, value}) : NumbersFormatter({tickFormat, value})
 }
