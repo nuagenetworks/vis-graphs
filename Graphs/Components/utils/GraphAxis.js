@@ -8,6 +8,7 @@ const GraphAxis = (props) => {
         payload,
         dateHistogram,
         tickFormat,
+        tickLabel,
         limit,
     } = props;
 
@@ -25,6 +26,7 @@ const GraphAxis = (props) => {
     const parsedData = Formatter({
         dateHistogram,
         value: payload.value,
+        tickLabel,
         tickFormat
     })
 
