@@ -103,6 +103,26 @@ const setSelectedRows = (props) => {
     return !isEmpty(selectedRows) ? (selectedRows[requestId] || []) : [];
 }
 
+
+// get columns current displayOption type selected.
+const selectedContext = (props) => {
+    const { context, columns } = props;
+    let key = [];
+    columns.forEach(column => {
+        if(column.displayOption){
+            key.push(...Object.keys(column.displayOption));
+        }
+    });
+    key = uniq(key);
+    let queryKey = 'ALL';
+    key.forEach(element => {
+        if(context && context[element]) {
+            queryKey += context[element];
+        }
+    });
+    return queryKey
+}
+
 const TableGraph = (props) => {
     const {
         width,
@@ -146,10 +166,10 @@ const TableGraph = (props) => {
     if(searchBar === false && (!scroll) && (!selectColumnOption)) {
         graphHeight -= 35;
     }
-
+    const filteredColumn = selectedContext({context, columns: getColumns()})
     const { filterColumns } = getColumnByContext(getColumns(), context);
     const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
-    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+    const removedColumn = objectPath.has(scrollData, `removedColumn.${filteredColumn}`) ? objectPath.get(scrollData, `removedColumn.${filteredColumn}`) : uniq(removedColumns);
 
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [rowSelected, setRowSelected] = useState(selectedRows);
@@ -172,19 +192,22 @@ const TableGraph = (props) => {
     }, []);
 
     const cleanup = () => {
+        selectedRows = [];
+        displayColumn = [];
+    }
+
+    const setRemovedColumn = () => {
         const {
             updateScroll,
         } = props;
 
         if (!isEmpty(displayColumn) || isAllColumnSelected) {
+            const contextKey = selectedContext({context, columns: getColumns()});
             updateScroll({
-                [`removedColumn`]: displayColumn,
+                [`removedColumn`]: {...scrollData.removedColumn, [contextKey]: displayColumn},
                 event: events.REMOVED_COLUMNS
             });
         }
-
-        selectedRows = [];
-        displayColumn = [];
     }
 
     const {
@@ -249,6 +272,7 @@ const TableGraph = (props) => {
         });
         setFilterData(filterData);
         setOrignalData(filterData);
+        setStateColumn(removedColumn);
     }
 
     const handleScrollSorting = (sortBy, sortDirection) => {
@@ -596,6 +620,7 @@ const TableGraph = (props) => {
         displayColumn = event.target.value;
         isAllColumnSelected = isEmpty(displayColumn) ? true : false;
         setStateColumn(event.target.value);
+        setRemovedColumn();
     }
 
     const handleContextMenu = (event) => {
