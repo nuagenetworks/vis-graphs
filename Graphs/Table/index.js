@@ -103,6 +103,58 @@ const setSelectedRows = (props) => {
     return !isEmpty(selectedRows) ? (selectedRows[requestId] || []) : [];
 }
 
+
+/**
+ * get columns current displayOption type selected.:
+ * - key will find the value on which table column is dependent (displayOption).
+ * - default value of queryKey is ALL for the case which does not have (displayOption)
+ * - find respective combination of key values in filterContext
+ * @param {object} props - @param {object} context : filterContext,
+ *                         @param {object} columns : tableColumn
+ * @returns {string}
+ *
+ *  Sample inputs:
+ *
+        context = {
+          "domainID": "dbcdeaad-d333-11eb-81b2-3503897bc1a8",
+          "domainName": "vss-domain",
+          "duration": "15",
+          "endTime": "now",
+          "enterpriseID": "b8f99841-d333-11eb-81b2-5d0ab7c08ea2",
+          "enterpriseName": "vss-corp",
+          "eventType": "TCA-bytes"
+        }
+
+        columns = [
+            { "column": "timestamp", "label": "Timestamp", "timeFormat": "%b %d, %y %X"},
+            { "column": "nuage_metadata.vportId", "label": "VPort ID", "totalCharacters": 20, "tooltip" : {"column": "nuage_metadata.vportId"}, "displayOption": {"eventType": ["ALL", "ACL_DENY", "IP_MAC_SPOOF"] } },
+            { "column": "nuage_metadata.subnetName", "label": "Subnet", "displayOption": {"eventType": ["ALL", "ACL_DENY", "IP_MAC_SPOOF"] } }
+        ]
+
+    Sample output (for the above inputs):
+        key = eventType
+        queryKey = "TCA-bytes"
+
+    @returns {string} "ALLTCA-bytes"
+ */
+const selectedContext = (props) => {
+    const { context, columns } = props;
+    let key = [];
+    columns.forEach(column => {
+        if(column.displayOption){
+            key.push(...Object.keys(column.displayOption));
+        }
+    });
+    key = uniq(key);
+    let queryKey = 'ALL';
+    key.forEach(element => {
+        if(context && context[element]) {
+            queryKey += context[element];
+        }
+    });
+    return queryKey
+}
+
 const TableGraph = (props) => {
     const {
         width,
@@ -146,10 +198,10 @@ const TableGraph = (props) => {
     if(searchBar === false && (!scroll) && (!selectColumnOption)) {
         graphHeight -= 35;
     }
-
+    const filteredColumn = selectedContext({context, columns: getColumns()})
     const { filterColumns } = getColumnByContext(getColumns(), context);
     const removedColumns = getRemovedColumns(getColumns(), filterColumns, selectedColumns);
-    const removedColumn = objectPath.has(scrollData, `removedColumn`) ? objectPath.get(scrollData, `removedColumn`) : uniq(removedColumns);
+    const removedColumn = objectPath.has(scrollData, `removedColumn.${filteredColumn}`) ? objectPath.get(scrollData, `removedColumn.${filteredColumn}`) : uniq(removedColumns);
 
     const [stateSortOrder, setStateSortOrder] = useState({});
     const [rowSelected, setRowSelected] = useState(selectedRows);
@@ -172,19 +224,22 @@ const TableGraph = (props) => {
     }, []);
 
     const cleanup = () => {
+        selectedRows = [];
+        displayColumn = [];
+    }
+
+    const setRemovedColumn = () => {
         const {
             updateScroll,
         } = props;
 
         if (!isEmpty(displayColumn) || isAllColumnSelected) {
+            const contextKey = selectedContext({context, columns: getColumns()});
             updateScroll({
-                [`removedColumn`]: displayColumn,
+                [`removedColumn`]: {...scrollData.removedColumn, [contextKey]: displayColumn},
                 event: events.REMOVED_COLUMNS
             });
         }
-
-        selectedRows = [];
-        displayColumn = [];
     }
 
     const {
@@ -249,6 +304,7 @@ const TableGraph = (props) => {
         });
         setFilterData(filterData);
         setOrignalData(filterData);
+        setStateColumn(removedColumn);
     }
 
     const handleScrollSorting = (sortBy, sortDirection) => {
@@ -596,6 +652,7 @@ const TableGraph = (props) => {
         displayColumn = event.target.value;
         isAllColumnSelected = isEmpty(displayColumn) ? true : false;
         setStateColumn(event.target.value);
+        setRemovedColumn();
     }
 
     const handleContextMenu = (event) => {
