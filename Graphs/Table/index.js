@@ -507,20 +507,28 @@ const TableGraph = (props) => {
     }
 
     const rowStyleFormat = (row) => {
+        let rowHighlight = false;
+        props.properties.rowHighlighCondition && props.properties.rowHighlighCondition.forEach( item => {
+            if (data[row["index"]] && data[row["index"]].testResult[item.column] === item.value) {
+                rowHighlight = true;
+            }
+        });
+
         if (!!rowSelected && rowSelected.includes(row.index)) {
             return {
                 backgroundColor: '#b7b9bd',
-                color: '#333'
+                color: rowHighlight ? '#f00' : '#333'
             };
         } else if (row.index === onRowOver) {
             return {
                 backgroundColor: '#f2f2f2',
+                color: rowHighlight ? '#f00' : '#333',
                 cursor: 'pointer'
             }
         }
         return {
             backgroundColor: '#fff',
-            color: '#333'
+            color: rowHighlight ? '#f00' : '#333'
         };
     }
 
