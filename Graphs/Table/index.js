@@ -773,6 +773,7 @@ const TableGraph = (props) => {
                             isRowLoaded={({ index }) => !!filterData[index]}
                             loadMoreRows={onScroll}
                             rowCount={size}
+                            threshold={1}
                         >
                             {({ onRowsRendered, registerChild }) => (
                                 <AutoSizer>
@@ -798,7 +799,7 @@ const TableGraph = (props) => {
                                                 onRowMouseOver={onRowMouseOver}
                                                 onRowMouseOut={onRowMouseOut}
                                                 rowStyle={rowStyleFormat}
-                                                scrollToIndex={startIndex}
+                                                scrollToIndex={parseInt(startIndex)}
                                                 noRowsRenderer={noRowsRenderer}
                                             >
                                                 {columnsDetail()}
