@@ -450,6 +450,7 @@ const TableGraph = (props) => {
                     return data;
                 }}
                 headerRenderer={headerRenderer}
+                headerStyle={props.properties.headerStyle}
                 width={150}
                 cellRenderer={({cellData, columnIndex, rowIndex}) => cellRendererData(cellData, columnIndex, rowIndex, column)}
             />
