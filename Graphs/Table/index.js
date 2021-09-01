@@ -510,8 +510,28 @@ const TableGraph = (props) => {
     const rowStyleFormat = (row) => {
         let rowHighlight = false;
         props.properties.rowHighlighCondition && props.properties.rowHighlighCondition.forEach( item => {
-            if (data[row["index"]] && data[row["index"]].testResult[item.column] === item.value) {
-                rowHighlight = true;
+            if (item.type === "RELATIONAL") {
+                switch (item.operator) {
+                    case ">":
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] > data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                    case "<":
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] < data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                    default:
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] === data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                }            
+            } else {
+                if (data[row["index"]] && data[row["index"]].testResult[item.column1] === item.value) {
+                    rowHighlight = true;
+                }
             }
         });
 
