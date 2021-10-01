@@ -127,11 +127,11 @@ export default class SearchBar extends React.Component {
             enableRefresh,
         } = this.props;
 
-        this.searchWidth = enableRefresh ? this.searchWidth - 50 : this.searchWidth;
-        this.searchWidth = columnOption ? this.searchWidth - 70 : this.searchWidth;
+        this.searchWidth = enableRefresh ? 95 : 98;
+        this.searchWidth = columnOption ? this.searchWidth - 3 : this.searchWidth;
 
         return (
-            <div style={{ display: "flex", maxWidth: this.searchWidth, margin: "6px 5px 5px 6px"}}>
+            <div style={{ display: "flex", maxWidth: `${this.searchWidth}%`, margin: "6px 5px 5px 6px"}}>
                 <div className="search-label">
                     Search: &nbsp;
                 </div>
