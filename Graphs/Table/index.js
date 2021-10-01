@@ -23,7 +23,7 @@ import WithConfigHOC from '../../HOC/WithConfigHOC';
 import { properties } from "./default.config";
 import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
-import { expandExpression, labelToField } from '../../utils/helpers';
+import { expandExpression, labelToField, isVariableNonNullAndDefined } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
 import style from './style';
 import { 
@@ -467,7 +467,8 @@ const TableGraph = (props) => {
     }
 
     const onScroll = ({ startIndex }) => {
-        const page = (startIndex / LIMIT) + 1;
+        const pageSize = isVariableNonNullAndDefined(scrollData.pageSize) ? scrollData.pageSize : LIMIT;
+        const page = (startIndex / pageSize) + 1;
         props.updateScroll({ currentPage: page, event: events.PAGING });
     }
 

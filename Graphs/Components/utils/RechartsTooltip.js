@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 
 import columnAccessor from '../../../utils/columnAccessor';
-import { isVariableNonNullAndDefined } from '../../../../../utils';
+import { isVariableNonNullAndDefined } from '../../../utils/helpers';
 
 const Container = styled('div')({
     marginLeft: '0.5rem',

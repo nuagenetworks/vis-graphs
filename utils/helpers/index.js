@@ -12,3 +12,4 @@ export * from "./ESSearchConverter"
 
 export const isFunction = fnC => fnC && typeof fnC === 'function';
 
+export const isVariableNonNullAndDefined = varValue => varValue !== undefined && varValue !== null;
