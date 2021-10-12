@@ -426,10 +426,11 @@ const TableGraph = (props) => {
     }
 
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
-        const data = (!!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+        const isScrollable = props.properties.columDataScrollable.includes(column.columnField)
+        const data = (!isScrollable && !!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
 
         return (
-            <div>
+            <div style={{overflowX: isScrollable ? 'scroll' : 'none'}}>
                 <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>{data}</p>
                 { !!column.tooltip && renderTooltip(cellData, columnIndex, rowIndex)}
             </div>
