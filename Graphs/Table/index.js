@@ -176,7 +176,12 @@ const TableGraph = (props) => {
         searchBar,
         disableRefresh,
         matchingRowColumn,
+        id,
     } = properties;
+
+    const vizID = id.replace(/-/g, '');
+    const contextKey = Object.keys(context).filter(key => key.startsWith(vizID) && key.endsWith('size'));
+    const customSize = contextKey && context[contextKey] !== '1000' ? context[contextKey] : size;
 
     const getColumns = () => (properties.columns || []);
     let graphHeight = searchBar !== false ? height - FOOTER_HEIGHT : height;
@@ -802,7 +807,8 @@ const TableGraph = (props) => {
                         <InfiniteLoader
                             isRowLoaded={({ index }) => !!filterData[index]}
                             loadMoreRows={onScroll}
-                            rowCount={size}
+                            rowCount={customSize}
+                            threshold={1}
                         >
                             {({ onRowsRendered, registerChild }) => (
                                 <AutoSizer>
@@ -828,7 +834,7 @@ const TableGraph = (props) => {
                                                 onRowMouseOver={onRowMouseOver}
                                                 onRowMouseOut={onRowMouseOut}
                                                 rowStyle={rowStyleFormat}
-                                                scrollToIndex={startIndex}
+                                                scrollToIndex={parseInt(startIndex)}
                                                 noRowsRenderer={noRowsRenderer}
                                             >
                                                 {columnsDetail()}
