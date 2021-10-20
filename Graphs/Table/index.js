@@ -369,6 +369,7 @@ const TableGraph = (props) => {
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
+                    width: columnRow.width,
                     columnField: columnRow.column,
                     columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                     filter: columnRow.filter !== false,
@@ -431,7 +432,7 @@ const TableGraph = (props) => {
     }
 
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
-        const isScrollable = props.properties.columDataScrollable.includes(column.columnField)
+        const isScrollable = props.properties.columDataScrollable && props.properties.columDataScrollable.includes(column.columnField)
         const data = (!isScrollable && !!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
 
         return (
@@ -457,7 +458,7 @@ const TableGraph = (props) => {
                 }}
                 headerRenderer={headerRenderer}
                 headerStyle={props.properties.headerStyle}
-                width={150}
+                width={column.width || 150}
                 cellRenderer={({cellData, columnIndex, rowIndex}) => cellRendererData(cellData, columnIndex, rowIndex, column)}
             />
             ));
@@ -859,5 +860,4 @@ const TableGraph = (props) => {
 TableGraph.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
 };
-
-export default WithConfigHOC(properties)(TableGraph);
+export default WithConfigHOC(properties)(TableGraph)
