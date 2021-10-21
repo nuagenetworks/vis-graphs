@@ -420,13 +420,24 @@ const TableGraph = (props) => {
         // top calculate position of tooltip, -20 is to show tooltip below element when element at top of table otherwise -15 is to show tooltip above element.
         const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex + 1)) - 20 : (rowHeight * rowIndex) - 15;
 
+        //calculate tooltip left position based on the column width. column width default is 150
+        let left = 0;
+        for(var ii=0; ii < columnIndex ; ii++) {
+            if (columns[ii].width) {
+                left = left + (parseInt(columns[ii].width))
+            } else {
+                left = left + 150;
+            }
+        }
+        left = left - 3 * cellData.length
+
         return <ReactTooltip
             id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
             place={place}
             delayUpdate={1000}
             afterShow={() => setTooltipStatus(true)}
             afterHide={() => setTooltipStatus(false)}
-            overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 3 * cellData.length, top })}
+            overridePosition={() => ({ left, top })}
             getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
         />;
     }
