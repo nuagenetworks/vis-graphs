@@ -422,14 +422,16 @@ const TableGraph = (props) => {
 
         //calculate tooltip left position based on the column width. column width default is 150
         let left = 0;
-        for(var ii=0; ii < columnIndex ; ii++) {
-            if (columns[ii].width) {
-                left = left + (parseInt(columns[ii].width))
-            } else {
-                left = left + 150;
+        if (cellData){
+            for(var ii=0; ii < columnIndex ; ii++) {
+                if (columns[ii].width) {
+                    left = left + (parseInt(columns[ii].width))
+                } else {
+                    left = left + 150;
+                }
             }
+            left = left - 3 * cellData.length
         }
-        left = left - 3 * cellData.length
 
         return <ReactTooltip
             id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
