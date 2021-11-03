@@ -374,6 +374,7 @@ const TableGraph = (props) => {
                 const headerColumn = {
                     name: index,
                     label: columnRow.label || columnRow.column,
+                    width: columnRow.width,
                     columnField: columnRow.column,
                     columnText: columnRow.selection ? "" : (columnRow.label || columnRow.column),
                     filter: columnRow.filter !== false,
@@ -424,22 +425,36 @@ const TableGraph = (props) => {
         // top calculate position of tooltip, -20 is to show tooltip below element when element at top of table otherwise -15 is to show tooltip above element.
         const top = rowIndex === currentStartIndex ? (rowHeight * (rowIndex + 1)) - 20 : (rowHeight * rowIndex) - 15;
 
+        //calculate tooltip left position based on the column width. column width default is 150
+        let left = 0;
+        if (cellData){
+            for(var ii=0; ii < columnIndex ; ii++) {
+                if (columns[ii].width) {
+                    left = left + (parseInt(columns[ii].width))
+                } else {
+                    left = left + 150;
+                }
+            }
+            left = left - 3 * cellData.length
+        }
+
         return <ReactTooltip
             id={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}
             place={place}
             delayUpdate={1000}
             afterShow={() => setTooltipStatus(true)}
             afterHide={() => setTooltipStatus(false)}
-            overridePosition={() => ({ left: (graphWidth / columns.length) * columnIndex - 3 * cellData.length, top })}
+            overridePosition={() => ({ left, top })}
             getContent={[() => hoverContent(cellData, columnIndex, rowIndex)]}
         />;
     }
 
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
-        const data = (!!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+        const isScrollable = props.properties.columDataScrollable && props.properties.columDataScrollable.includes(column.columnField)
+        const data = (!isScrollable && !!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
 
         return (
-            <div>
+            <div style={{overflowX: isScrollable ? 'scroll' : 'none'}}>
                 <p data-tip='' data-for={`tooltip_${cellData}_${columnIndex}_${rowIndex}`}>{data}</p>
                 { !!column.tooltip && renderTooltip(cellData, columnIndex, rowIndex)}
             </div>
@@ -460,7 +475,8 @@ const TableGraph = (props) => {
                     return data;
                 }}
                 headerRenderer={headerRenderer}
-                width={150}
+                headerStyle={props.properties.headerStyle}
+                width={column.width || 150}
                 cellRenderer={({cellData, columnIndex, rowIndex}) => cellRendererData(cellData, columnIndex, rowIndex, column)}
             />
             ));
@@ -517,20 +533,48 @@ const TableGraph = (props) => {
     }
 
     const rowStyleFormat = (row) => {
+        let rowHighlight = false;
+        props.properties.rowHighlighCondition && props.properties.rowHighlighCondition.forEach( item => {
+            if (item.type === "RELATIONAL") {
+                switch (item.operator) {
+                    case ">":
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] > data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                    case "<":
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] < data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                    default:
+                        if (data[row["index"]] && data[row["index"]].testResult[item.column1] === data[row["index"]].testResult[item.column2]) {
+                            rowHighlight = true;
+                        }
+                        break;
+                }            
+            } else {
+                if (data[row["index"]] && data[row["index"]].testResult[item.column1] === item.value) {
+                    rowHighlight = true;
+                }
+            }
+        });
+
         if (!!rowSelected && rowSelected.includes(row.index)) {
             return {
                 backgroundColor: '#b7b9bd',
-                color: '#333'
+                color: rowHighlight ? '#f00' : '#333'
             };
         } else if (row.index === onRowOver) {
             return {
                 backgroundColor: '#f2f2f2',
+                color: rowHighlight ? '#f00' : '#333',
                 cursor: 'pointer'
             }
         }
         return {
             backgroundColor: '#fff',
-            color: '#333'
+            color: rowHighlight ? '#f00' : '#333'
         };
     }
 
@@ -835,5 +879,4 @@ const TableGraph = (props) => {
 TableGraph.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
 };
-
-export default WithConfigHOC(properties)(TableGraph);
+export default WithConfigHOC(properties)(TableGraph)
