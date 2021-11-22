@@ -580,7 +580,7 @@ const TreeGraph = (props) => {
         <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
             {!isEmpty(nodes) && nodes.map((node) => {
                 return (
-                    <div onClick={() => click(node)}>
+                    <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext(node)}>
                         { renderRectNode(node, props, rectNode)}
                     </div>
                 );
