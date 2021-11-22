@@ -245,17 +245,6 @@ const TreeGraph = (props) => {
         update(d);
     }
 
-    useEffect(()=> {
-        if(!isEmpty(nodes)) {
-            nodes.forEach(node => {
-                console.log("", document.getElementById(`node-${node.id}`), document.getElementById(`node-hidden-${node.id}`));
-                if(document.getElementById(`node-${node.id}`) && document.getElementById(`node-hidden-${node.id}`)) {
-                    document.getElementById(`node-${node.id}`).innerHTML = document.getElementById(`node-hidden-${node.id}`).innerHTML;
-                }
-            })
-        }
-    });
-
     const getGraph = () => select(nodeElement);
 
     const getGraphContainer = () => getGraph().select('.tree-graph-container');
@@ -480,9 +469,6 @@ const TreeGraph = (props) => {
         const nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr('transform', d => d.parent ? `translate(${d.parent.y}, ${d.parent.x})` : `translate(${source.y0}, ${source.x0})`)
-            .on('click', d => {
-                !graphRenderView ? click(d) : props.OnChangleContext(d);
-            })
             .on('dragleave', event => props.OnSubmitFormOnDragLeave(event));
 
         // ****************** Nodes section ***************************
@@ -592,16 +578,13 @@ const TreeGraph = (props) => {
 
     return (
         <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
-            <div style={{ display: "none" }}>
-                {!isEmpty(nodes) && nodes.map((node) => {
-                    return (
-                        <div className="node-hidden" id={`node-hidden-${node.id}`}>
-                            { renderRectNode(node, props, rectNode)}
-                        </div>
-                    );
-                })
-                }
-            </div>
+            {!isEmpty(nodes) && nodes.map((node) => {
+                return (
+                    <div onClick={() => click(node)}>
+                        { renderRectNode(node, props, rectNode)}
+                    </div>
+                );
+            })}
             <svg
                 height={'100%'}
                 className='svgWidth'
