@@ -15,6 +15,7 @@ import WithValidationHOC from '../../HOC/WithValidationHOC';
 import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
+import { isEmpty } from 'lodash';
 
 let root = null;
 let treeData = null;
@@ -207,6 +208,7 @@ const TreeGraph = (props) => {
 
     const isFirst = useRef(true);
     const [nodeElement, setNodeElement] = useState(null);
+    const [nodes, setNodes] = useState(null);
 
     const kids = Array.isArray(props.data) && props.data.length ? props.data[0].kids : null;
 
@@ -228,16 +230,18 @@ const TreeGraph = (props) => {
 
     // Toggle children on click.
     const click = d => {
+        let collapseTree = false;
         d.clicked = true;
         if (d.children) {
             d._children = d.children;
             d.children = null;
             collapse(d);
+            collapseTree = true;
         } else {
             d.children = d._children;
             d._children = null;
-            onClickChild(d);
         }
+        onClickChild(d, collapseTree);
         update(d);
     }
 
@@ -465,9 +469,6 @@ const TreeGraph = (props) => {
         const nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr('transform', d => d.parent ? `translate(${d.parent.y}, ${d.parent.x})` : `translate(${source.y0}, ${source.x0})`)
-            .on('click', d => {
-                !graphRenderView ? click(d) : props.OnChangleContext(d);
-            })
             .on('dragleave', event => props.OnSubmitFormOnDragLeave(event));
 
         // ****************** Nodes section ***************************
@@ -498,12 +499,12 @@ const TreeGraph = (props) => {
                 .attr('id', d => `node-${d.id}`)
                 .attr('width', rectWidth)
                 .attr('height', rectHeight)
-                .html(d => renderRectNode(d, props, rectNode))
                 .on('mouseover', d => showToolTip(tooltip, d, (d.data.name && d.data.name.length > 23) || (d.data.description && d.data.name.description > 24), commonEN))
                 .on('mouseout', d => hideToolTip(tooltip, d));
         }
         // UPDATE
         const nodeUpdate = nodeEnter.merge(node);
+        setNodes(nodes);
 
         nodeUpdate.select('rect')
             .attr('cursor', 'pointer');
@@ -577,6 +578,13 @@ const TreeGraph = (props) => {
 
     return (
         <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
+            {!isEmpty(nodes) && nodes.map((node) => {
+                return (
+                    <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext(node)}>
+                        { renderRectNode(node, props, rectNode)}
+                    </div>
+                );
+            })}
             <svg
                 height={'100%'}
                 className='svgWidth'
