@@ -182,7 +182,7 @@ const TableGraph = (props) => {
 
     const vizID = id && id.replace(/-/g, '');
     const contextKey = vizID && Object.keys(context).filter(key => key.startsWith(vizID) && key.endsWith('size'));
-    const customSize = contextKey && context[contextKey] !== '1000' ? context[contextKey] : size;
+    const customSize = contextKey.length && context[contextKey] !== '1000' ? context[contextKey] : size;
 
     const getColumns = () => (properties.columns || []);
     let graphHeight = searchBar !== false ? height - FOOTER_HEIGHT : height;
