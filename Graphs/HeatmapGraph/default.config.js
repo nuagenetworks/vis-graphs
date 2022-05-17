@@ -12,4 +12,5 @@ export const properties = {
     brushArea: 5,
     brushColor: theme.palette.yellowLightColor,
     margin: { top: 5, bottom: 5, left: 10, right: 10 },
+    yLabelLimit: 12,
 }

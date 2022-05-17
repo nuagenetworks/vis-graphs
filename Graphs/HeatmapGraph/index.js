@@ -489,6 +489,7 @@ class HeatmapGraph extends XYGraph {
             yColumn,
             xAlign,
             stroke,
+            yLabelLimit,
             brushColor
         } = this.getConfiguredProperties()
 
@@ -524,7 +525,8 @@ class HeatmapGraph extends XYGraph {
 
                 scale.y.rangeRound([mainZoom(originalRange[1]), mainZoom(originalRange[0])])
 
-                this.getGraph().select(".yAxis").call(this.getAxis().y)
+                this.getGraph().select(".yAxis").call(this.getAxis().y).selectAll('.tick text')
+                .call(this.wrapD3Text, yLabelLimit)
 
                 const box = this.getBoxSize()
 
