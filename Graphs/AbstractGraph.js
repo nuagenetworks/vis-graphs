@@ -366,10 +366,14 @@ export default class AbstractGraph extends React.Component {
 
     setLeftMargin() {
         const {
-            margin
+            margin,
+            yLabel
         } = this.getConfiguredProperties();
 
         this.leftMargin = margin.left + this.getYlabelWidth();
+        if (this.isBrush() && !this.isVertical() && yLabel) {
+            this.leftMargin += margin.right;
+        }
     }
 
     getLeftMargin() {
@@ -487,10 +491,12 @@ export default class AbstractGraph extends React.Component {
         const {
             height,
             width,
+            configuration,
             data
         } = this.props;
 
         const { legend, margin } = this.getConfiguredProperties();
+        const { nextPrevFilter } = configuration
 
         let dimensions = {
             graphWidth: width,
@@ -530,6 +536,10 @@ export default class AbstractGraph extends React.Component {
                 legendWidth: this.getAvailableWidth(),
                 labelWidth: labelTextWidth,
             }
+        }
+
+        if(nextPrevFilter) {
+            dimensions.graphHeight -= 5;
         }
 
         return dimensions;
