@@ -383,7 +383,8 @@ const TableGraph = (props) => {
                     },
                     tooltip: columnRow.tooltip,
                     totalCharacters: columnRow.totalCharacters,
-                    columnDataType: columnType ? columnType.type : null
+                    columnDataType: columnType ? columnType.type : null,
+                    colors: columnRow.colors
                 };
 
                 headerData.push(headerColumn);
@@ -447,6 +448,12 @@ const TableGraph = (props) => {
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
         const isScrollable = props.properties.columDataScrollable && props.properties.columDataScrollable.includes(column.columnField)
         const data = (!isScrollable && !!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+
+        if (column.colors && column.colors.hasOwnProperty(cellData)) {
+            return  (
+                <div style={{ background:  column.colors[cellData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+            );
+        }
 
         return (
             <div style={{overflowX: isScrollable ? 'scroll' : 'none'}}>
