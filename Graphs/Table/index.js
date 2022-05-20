@@ -293,6 +293,19 @@ const TableGraph = (props) => {
                     const accessor = columnAccessor(columnData);
                     data[columnData.column] = accessor(d);
 
+                    //Format alarm table description.
+                    if(columnData.tabify) {
+                        if(data[columnData.column].includes(`NSG ${d.alarmedObjectID}`)) {
+                            const index = data[columnData.column].indexOf(`NSG ${d.alarmedObjectID}`);
+                            data[columnData.column] = data[columnData.column].substring(index).replace(` ${d.alarmedObjectID}`, '');
+                        }
+
+                        if(data[columnData.column].includes(`SystemID:${d.systemID}`)) {
+                            const index = data[columnData.column].lastIndexOf(`SystemID:${d.systemID}`);
+                            data[columnData.column] = data[columnData.column].substring(index).replace(`SystemID:${d.systemID}`, '').replace(') -', '').replace('] ', '');
+                        }
+                    }
+
                     if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
                         data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
                     }
