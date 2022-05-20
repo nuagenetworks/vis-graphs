@@ -154,6 +154,54 @@ const selectedContext = (props) => {
     return queryKey
 }
 
+
+/**
+ * Modified colum data:
+ * -remove subtring from data according to columnData tabify options.
+ * -tabify option conatins object
+ * -tabify options key represent value to remove from data
+ * -tabify options value represent dynamic value (value from d) to remove from data
+ * @param {string} data - current data selected column value,
+ * @param {object} columnData - selected column config properties,
+ * @param {object} d - current data value
+ *
+ *
+ *  Sample inputs:
+ *
+        data = "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status."
+
+        columnData = { "column": "description", "label": "Description","sort":false, "width":500, "totalCharacters": 80, "tooltip" : {"column": "description"}, "tabify": {"NSG ":"alarmedObjectID", "SystemID:":"systemID"} }
+
+        d = {
+          "ID": "a17f8ce7-d245-11ec-b639-3ba9acb97f00",
+          "parentID": "199d22f0-cb0b-11ec-b639-3b97ea120875",
+          "title": "Underlay Test Degraded",
+          "systemID": "146.31.164.73",
+          "reason": "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status.",
+          "description": "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status.",
+          "alarmedObjectID": "199d22f0-cb0b-11ec-b639-3b97ea120875",
+          "severity": "MAJOR"
+        }
+
+    Sample new selected column data (for the above inputs):
+
+    *   @param {string} data - "Underlay Test returned a DEGRADED status."
+ */
+const tabifyData = (data, columnData, d) => {
+    const tabifyKeys = Object.keys(columnData.tabify);
+    tabifyKeys.forEach((key) => {
+        const valueToReplace = `${key}${d[columnData.tabify[key]]}`;
+        if (data[columnData.column].includes(valueToReplace)) {
+            const index = data[columnData.column].lastIndexOf(valueToReplace);
+            data[columnData.column] = data[columnData.column]
+              .substring(index)
+              .replace(valueToReplace, "")
+              .replace(") -", "")
+              .replace("] ", "");
+        }
+    });
+};
+
 const TableGraph = (props) => {
     const {
         width,
@@ -295,15 +343,7 @@ const TableGraph = (props) => {
 
                     //Format alarm table description.
                     if(columnData.tabify) {
-                        if(data[columnData.column].includes(`NSG ${d.alarmedObjectID}`)) {
-                            const index = data[columnData.column].indexOf(`NSG ${d.alarmedObjectID}`);
-                            data[columnData.column] = data[columnData.column].substring(index).replace(` ${d.alarmedObjectID}`, '');
-                        }
-
-                        if(data[columnData.column].includes(`SystemID:${d.systemID}`)) {
-                            const index = data[columnData.column].lastIndexOf(`SystemID:${d.systemID}`);
-                            data[columnData.column] = data[columnData.column].substring(index).replace(`SystemID:${d.systemID}`, '').replace(') -', '').replace('] ', '');
-                        }
+                        tabifyData(data, columnData, d);
                     }
 
                     if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
