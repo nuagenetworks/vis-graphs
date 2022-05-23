@@ -154,6 +154,54 @@ const selectedContext = (props) => {
     return queryKey
 }
 
+
+/**
+ * Modified colum data:
+ * -remove subtring from data according to columnData tabify options.
+ * -tabify option conatins object
+ * -tabify options key represent value to remove from data
+ * -tabify options value represent dynamic value (value from d) to remove from data
+ * @param {string} data - current data selected column value,
+ * @param {object} columnData - selected column config properties,
+ * @param {object} d - current data value
+ *
+ *
+ *  Sample inputs:
+ *
+        data = "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status."
+
+        columnData = { "column": "description", "label": "Description","sort":false, "width":500, "totalCharacters": 80, "tooltip" : {"column": "description"}, "tabify": {"NSG ":"alarmedObjectID", "SystemID:":"systemID"} }
+
+        d = {
+          "ID": "a17f8ce7-d245-11ec-b639-3ba9acb97f00",
+          "parentID": "199d22f0-cb0b-11ec-b639-3b97ea120875",
+          "title": "Underlay Test Degraded",
+          "systemID": "146.31.164.73",
+          "reason": "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status.",
+          "description": "[SystemID:146.31.164.73] NSG:ovs-2(SystemID:146.31.164.73) - Underlay Test returned a DEGRADED status.",
+          "alarmedObjectID": "199d22f0-cb0b-11ec-b639-3b97ea120875",
+          "severity": "MAJOR"
+        }
+
+    Sample new selected column data (for the above inputs):
+
+    *   @param {string} data - "Underlay Test returned a DEGRADED status."
+ */
+const tabifyData = (data, columnData, d) => {
+    const tabifyKeys = Object.keys(columnData.tabify);
+    tabifyKeys.forEach((key) => {
+        const valueToReplace = `${key}${d[columnData.tabify[key]]}`;
+        if (data[columnData.column].includes(valueToReplace)) {
+            const index = data[columnData.column].lastIndexOf(valueToReplace);
+            data[columnData.column] = data[columnData.column]
+              .substring(index)
+              .replace(valueToReplace, "")
+              .replace(") -", "")
+              .replace("] ", "");
+        }
+    });
+};
+
 const TableGraph = (props) => {
     const {
         width,
@@ -293,6 +341,11 @@ const TableGraph = (props) => {
                     const accessor = columnAccessor(columnData);
                     data[columnData.column] = accessor(d);
 
+                    //Format alarm table description.
+                    if(columnData.tabify) {
+                        tabifyData(data, columnData, d);
+                    }
+
                     if (columnData.tooltip && !columnNameList.includes(columnData.tooltip.column)) {
                         data[columnData.tooltip.column] = columnAccessor({ column: columnData.tooltip.column })(d);
                     }
@@ -383,7 +436,8 @@ const TableGraph = (props) => {
                     },
                     tooltip: columnRow.tooltip,
                     totalCharacters: columnRow.totalCharacters,
-                    columnDataType: columnType ? columnType.type : null
+                    columnDataType: columnType ? columnType.type : null,
+                    colors: columnRow.colors
                 };
 
                 headerData.push(headerColumn);
@@ -447,6 +501,12 @@ const TableGraph = (props) => {
     const cellRendererData = (cellData, columnIndex, rowIndex, column) => {
         const isScrollable = props.properties.columDataScrollable && props.properties.columDataScrollable.includes(column.columnField)
         const data = (!isScrollable && !!column.totalCharacters && !!cellData && cellData.length > column.totalCharacters) ? cellData.slice(0, column.totalCharacters) + '...' : cellData;
+
+        if (column.colors && column.colors.hasOwnProperty(cellData)) {
+            return  (
+                <div style={{ background:  column.colors[cellData] || '', width: "10px", height: "10px", borderRadius: "50%", marginRight: "6px" }}></div>
+            );
+        }
 
         return (
             <div style={{overflowX: isScrollable ? 'scroll' : 'none'}}>
