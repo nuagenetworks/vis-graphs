@@ -229,7 +229,7 @@ const TableGraph = (props) => {
     } = properties;
 
     const vizID = id && id.replace(/-/g, '');
-    const contextKey = vizID && Object.keys(context).filter(key => key.startsWith(vizID) && key.endsWith('size'));
+    const contextKey = vizID && context && Object.keys(context).filter(key => key.startsWith(vizID) && key.endsWith('size'));
     const customSize = contextKey && context[contextKey] !== '1000' ? context[contextKey] : size;
 
     const getColumns = () => (properties.columns || []);
