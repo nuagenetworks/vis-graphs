@@ -863,7 +863,12 @@ const TableGraph = (props) => {
         )
     }
 
-    const graphWidth = (columns.length * 150) > width ? (columns.length * 150) : width;
+    let graphWidth = 0;
+
+    columns.forEach(d => {
+        graphWidth += d.width || 150;
+    });
+
 
     return (
         <React.Fragment>
