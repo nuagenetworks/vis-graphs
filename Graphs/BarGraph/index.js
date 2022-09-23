@@ -22,7 +22,7 @@ import {
     YTICK_LENGTH,
     DEFAULT_MARGIN_LEFT,
     NO_DATA_FOUND,
-    MIN_BARGRAPH_HEIGHT,
+    MIN_WIDTH,
 } from '../../constants';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
@@ -188,7 +188,7 @@ const BarGraph = (props) => {
                             <Bar
                                 key={`barGraph-${index}`}
                                 dataKey={item}
-                                minPointSize={!stack ? MIN_BARGRAPH_HEIGHT : 0}
+                                minPointSize={!stack ? MIN_WIDTH : 0}
                                 onClick={(d) => {
                                     if (stack) {
                                         const value = d.value;
