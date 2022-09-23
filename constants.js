@@ -17,3 +17,4 @@ export const LIMIT = 100;
 export const FOOTER_HEIGHT = 65;
 export const ES_NUMBER_DATA_TYPES = ['long', 'integer', 'short', 'double', 'float'];
 export const MIN_BARGRAPH_HEIGHT = 10;
+export const MIN_WIDTH = 10;

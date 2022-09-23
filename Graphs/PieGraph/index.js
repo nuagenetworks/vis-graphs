@@ -8,7 +8,8 @@ import {
 } from 'recharts';
 
 import { 
-    LEGEND_PERCENTAGE
+    LEGEND_PERCENTAGE,
+    MIN_WIDTH
 } from './../../constants';
 import { config } from './default.config';
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -101,6 +102,7 @@ const PieGraph = (props) => {
             <Pie
                 labelLine={false}
                 data={data}
+                minAngle={MIN_WIDTH}
                 innerRadius={pieInnerRadius * 100}
                 outerRadius={pieOuterRadius * 100}
                 dataKey={sliceColumn}
