@@ -22,7 +22,7 @@ export default ({
     return (
         <YAxis
             type={type}
-            dataKey={type ? yColumn : undefined}
+            dataKey={type ? (Array.isArray(yColumn) ? yColumn[0] : yColumn) : undefined}
             axisLine={{ stroke: '#E9ECF0' }}
             tickLine={false}
             tick={
