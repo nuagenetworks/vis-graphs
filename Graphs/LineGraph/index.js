@@ -43,6 +43,7 @@ const LineGraph = (props) => {
         brushEnabled,
         xTicks,
         graph,
+        type,
         activeDotOnlyTooltip
     } = properties;
 
@@ -116,8 +117,10 @@ const LineGraph = (props) => {
             }
             {
                 yAxis({
+                    yColumn,
                     yLabel,
                     yTickFormat,
+                    type: type,
                     limit: yLabelLimit,
                 })
             }
