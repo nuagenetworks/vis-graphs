@@ -866,7 +866,7 @@ const TableGraph = (props) => {
     let graphWidth = 0;
 
     columns.forEach(d => {
-        graphWidth += d.width || 150;
+        graphWidth += parseInt(d.width) || 150;
     });
 
 
