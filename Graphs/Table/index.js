@@ -197,7 +197,8 @@ const tabifyData = (data, columnData, d) => {
               .substring(index)
               .replace(valueToReplace, "")
               .replace(") -", "")
-              .replace("] ", "");
+              .replace("] ", "")
+              .replace(/\n/, "");
         }
     });
 };
