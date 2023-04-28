@@ -8,6 +8,7 @@ import {
     tree,
     hierarchy
 } from 'd3';
+import * as htmlToImage from 'html-to-image';
 import { styled } from '@material-ui/core/styles';
 
 import WithConfigHOC from '../../HOC/WithConfigHOC';
@@ -16,6 +17,7 @@ import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
 import { isEmpty } from 'lodash';
+import { Button } from 'ui-components';
 
 let root = null;
 let treeData = null;
@@ -206,6 +208,7 @@ const TreeGraph = (props) => {
         xLabelRotate,
     } = properties;
 
+    let count = 0;
     const isFirst = useRef(true);
     const [nodeElement, setNodeElement] = useState(null);
     const [nodes, setNodes] = useState(null);
@@ -227,6 +230,67 @@ const TreeGraph = (props) => {
             setDraggingRef(props);
         }
     }, [props, nodeElement, kids]);
+
+    const downloadTreeGraph = async (name) => {
+        count++;
+        await htmlToImage.toJpeg(document.getElementsByClassName('tree-graph').item(0), { quality: 0.95 })
+            .then(function (dataUrl) {
+                let link = document.createElement('a');
+                link.download = `${name}-snapshot-${count}.jpeg`;
+                link.href = dataUrl;
+                link.click();
+            });
+            await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    const onDownloadClick = async () => {
+        const enterpriseId = `node-${nodes[0].id}`;
+        const enterpriseName = nodes[0].data.name;
+        const enterprise = document.getElementById(enterpriseId);
+        await enterprise.firstChild.click();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const domainIds = document.querySelectorAll('[id^=domain]');
+        if (domainIds.length) {
+            let domainCount = 0;
+            while (domainCount < domainIds.length) {
+                const domainName = await domainIds[domainCount].firstChild.firstChild.innerHTML;
+                const domainId = domainIds[domainCount].getAttribute('id');
+                document.getElementById(domainId).click();
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const zoneIds = document.querySelectorAll('[id^=zone]');
+                if (zoneIds.length) {
+                    let zoneCount = 0;
+                    while (zoneCount < zoneIds.length) {
+                        const zoneId = zoneIds[zoneCount].getAttribute('id');
+                        const zoneName = await zoneIds[zoneCount].firstChild.firstChild.innerHTML;
+                        document.getElementById(zoneId).click();
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const subnetIds = document.querySelectorAll('[id^=subnet]');
+                        if (subnetIds.length) {
+                            let subnetCount = 0;
+                            while (subnetCount < subnetIds.length) {
+                                const subnetId = subnetIds[subnetCount].getAttribute('id');
+                                const subnetName = await subnetIds[subnetCount].firstChild.firstChild.innerHTML;
+                                document.getElementById(subnetId).click();
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                await downloadTreeGraph(enterpriseName + '_' + domainName + '_' + zoneName + '_' + subnetName);
+                                subnetCount++;
+                            }
+                        } else {
+                            await downloadTreeGraph(enterpriseName + '_' + domainName + '_' + zoneName);
+                        }
+                        zoneCount++;
+                    }
+                } else {
+                    await downloadTreeGraph(enterpriseName + '_' + domainName);
+                }
+                domainCount++;
+            }
+        } else {
+            await downloadTreeGraph(enterpriseName);
+
+        }
+    }
 
     // Toggle children on click.
     const click = d => {
@@ -577,30 +641,33 @@ const TreeGraph = (props) => {
     } = props;
 
     return (
-        <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
-            {!isEmpty(nodes) && nodes.map((node) => {
-                return (
-                    <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext(node)}>
-                        { renderRectNode(node, props, rectNode)}
-                    </div>
-                );
-            })}
-            <svg
-                height={'100%'}
-                className='svgWidth'
-                ref={(node) => {
-                    setNodeElement(node);
-                    select(node)
-                        .call(zoom()
-                            .scaleExtent([1 / 2, 8])
-                            .on('zoom', zoomed)
-                        )
-                }
-                }
-            >
-                <g className='tree-graph-container' transform={transformAttr}></g>
-            </svg>
-        </div>
+        <>
+            <Button onClick={onDownloadClick} id="button-treeGraph" width={'50px'}>Download</Button>
+            <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
+                {!isEmpty(nodes) && nodes.map((node) => {
+                    return (
+                        <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext && props.OnChangleContext(node)}>
+                            {renderRectNode(node, props, rectNode)}
+                        </div>
+                    );
+                })}
+                <svg
+                    height={'100%'}
+                    className='svgWidth'
+                    ref={(node) => {
+                        setNodeElement(node);
+                        select(node)
+                            .call(zoom()
+                                .scaleExtent([1 / 2, 8])
+                                .on('zoom', zoomed)
+                            )
+                        }
+                    }
+                >
+                    <g className='tree-graph-container' transform={transformAttr}></g>
+                </svg>
+            </div>
+        </>
     )
 }
 TreeGraph.propTypes = {
