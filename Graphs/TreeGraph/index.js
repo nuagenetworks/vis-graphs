@@ -286,9 +286,6 @@ const TreeGraph = (props) => {
                 }
                 domainCount++;
             }
-        } else {
-            await downloadTreeGraph(enterpriseName);
-
         }
     }
 
