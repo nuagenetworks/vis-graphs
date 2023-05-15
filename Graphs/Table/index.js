@@ -9,9 +9,6 @@ import uniq from 'lodash/uniq';
 import orderBy from 'lodash/orderBy';
 import uuid from 'lodash/uniqueId';
 import isEqual from 'lodash/isEqual';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -25,6 +22,11 @@ import { events } from '../../utils/types';
 import SearchBar from "../../SearchBar";
 import { expandExpression, labelToField } from '../../utils/helpers';
 import columnAccessor from "../../utils/columnAccessor";
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import TextField from '@material-ui/core/TextField';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import style from './style';
 import { 
     FILTER_COLUMN_MAX_HEIGHT, 
@@ -716,48 +718,61 @@ const TableGraph = (props) => {
 
         return (
             <div className={'select-column'} style={{ flex: "none" }}>
-                <Select
+                <Autocomplete
+                    multiple
                     labelId="demo-mutiple-checkbox-label"
                     id="demo-mutiple-checkbox"
-                    multiple
-                    displayEmpty={true}
-                    value={stateColumn}
+                    options={getColumns()}
                     onChange={handleColumnSelection}
-                    renderValue={(selected) => 'Select Columns'}
-                    MenuProps={MenuProps}s
-                    classes={{
-                        root: 'select-column',
-                        selectMenu: 'select-column',
-                        select: 'select-column'
-                    }}
-                >
-                    {getColumns().map((name) => (
-                        <MenuItem
-                            key={name.label || name.column}
-                            value={name.label || name.column}
-                            classes={{
-                                root: 'select-column',
-                                selected: 'select-column'
-                            }}
-                        >
-                            <Checkbox checked={stateColumn.indexOf(name.label || name.column) === -1} size="small"/>
-                            <ListItemText
-                                disableTypography
-                                primary={name.label || name.column}
-                                classes={{root: 'select-column'}}
-                            />
-                        </MenuItem>
-                    ))}
-                </Select>
+                    onClose={setRemovedColumn}
+                    style={MenuProps.PaperProps.style}
+                    renderTags={() => null}
+                    disableCloseOnSelect
+                    disableClearable
+                    getOptionLabel={(option) => option.label || option.column}
+                    renderOption={(option) => <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={!stateColumn.some(opt => opt === (option.label|| option.column))}
+                                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                    onChange={handleToggle(option)}
+                                    value={option.label}
+                                    size='small'
+                                />
+                            }
+                            label={option.label}
+                        />
+                    }
+                    renderInput={(params) => (
+                        <TextField {...params} variant="standard" label="Select Columns" placeholder="Select Columns" />
+                    )}
+                    PopupProps={{ ...MenuProps }}
+                />
             </div>
         )
     }
 
-    const handleColumnSelection = (event) => {
-        displayColumn = event.target.value;
-        setStateColumn(event.target.value);
-        setRemovedColumn();
+    const handleColumnSelection = (event, selectedOption) => {
+        const displayColumn = stateColumn.filter((stateColumnValue) => {
+            const [obj] = selectedOption.filter((selectedOptionValue) => Object.values(selectedOptionValue).includes(stateColumnValue));
+            return !(typeof obj==='object' && (obj.label || obj.column));
+        });
+        isAllColumnSelected = isEmpty(displayColumn) ? true : false;
+        setStateColumn(displayColumn);
     }
+
+    const handleToggle = ({ label }) => () => {
+        const currentIndex = stateColumn.findIndex((value) => value === label);
+        const newValue = [...stateColumn];
+
+        if (currentIndex === -1) {
+            newValue.push(label);
+        } else {
+            newValue.splice(currentIndex, 1);
+        }
+        setStateColumn(newValue);
+    };
 
     const handleContextMenu = (event) => {
         const menu = getMenu(props);
