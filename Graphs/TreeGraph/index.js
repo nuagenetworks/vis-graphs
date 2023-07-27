@@ -16,6 +16,8 @@ import { config } from './default.config';
 import './styles.css';
 import { isFunction } from '../../utils/helpers';
 import { isEmpty } from 'lodash';
+import * as htmlToImage from 'html-to-image';
+import { Button } from 'ui-components';
 
 let root = null;
 let treeData = null;
@@ -210,6 +212,20 @@ const TreeGraph = (props) => {
     const [nodeElement, setNodeElement] = useState(null);
     const [nodes, setNodes] = useState(null);
 
+    let count = 0;
+
+    const downloadTreeGraph = async () => {
+        count++;
+        await htmlToImage.toJpeg(document.getElementsByClassName('tree-graph').item(0), { quality: 0.95 })
+            .then(function (dataUrl) {
+                let link = document.createElement('a');
+                link.download = `dashboard-topology-snapshot-${count}.jpeg`;
+                link.href = dataUrl;
+                link.click();
+            });
+            await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
     const kids = Array.isArray(props.data) && props.data.length ? props.data[0].kids : null;
 
     useEffect(() => {
@@ -265,7 +281,7 @@ const TreeGraph = (props) => {
         treeData = data[0];
 
         // Assigns parent, children, height, depth
-        root = hierarchy(treeData, d => { return graphRenderView ? d.kids : d.children; });
+        root = hierarchy(treeData, d => { return d.kids  });
         //form x and y axis
         root.x0 = getAvailableHeight() / 2;
         root.y0 = 0;
@@ -577,11 +593,13 @@ const TreeGraph = (props) => {
     } = props;
 
     return (
+        <>
+        <Button  onClick={downloadTreeGraph} id="button-treeGraph" width={'50px'}>Download</Button>
         <div className='tree-graph' style={{ height: '100%', background: '#FCFCFC' }}>
             {!isEmpty(nodes) && nodes.map((node) => {
                 return (
-                    <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext(node)}>
-                        { renderRectNode(node, props, rectNode)}
+                    <div onClick={() => !graphRenderView ? click(node) : props.OnChangleContext && props.OnChangleContext(node)}>
+                        {renderRectNode(node, props, rectNode)}
                     </div>
                 );
             })}
@@ -595,12 +613,13 @@ const TreeGraph = (props) => {
                             .scaleExtent([1 / 2, 8])
                             .on('zoom', zoomed)
                         )
-                }
+                    }
                 }
             >
                 <g className='tree-graph-container' transform={transformAttr}></g>
             </svg>
         </div>
+    </>
     )
 }
 TreeGraph.propTypes = {
