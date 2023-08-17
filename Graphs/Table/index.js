@@ -758,7 +758,6 @@ const TableGraph = (props) => {
             const [obj] = selectedOption.filter((selectedOptionValue) => Object.values(selectedOptionValue).includes(stateColumnValue));
             return !(typeof obj==='object' && (obj.label || obj.column));
         });
-        isAllColumnSelected = isEmpty(displayColumn) ? true : false;
         setStateColumn(displayColumn);
     }
 
