@@ -13,7 +13,7 @@ import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
-import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH, UPLINKCONNECTION_CONTEXT} from '../../constants';
 
 const LineGraph = (props) => {
     const {
@@ -21,6 +21,7 @@ const LineGraph = (props) => {
         height,
         width,
         data,
+        context,
     } = props;
 
     const {
@@ -74,6 +75,9 @@ const LineGraph = (props) => {
     XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;
 
     const [tooltipKey, setToolTipKey] = useState(-1);
+
+    const scale = context.name === UPLINKCONNECTION_CONTEXT ? 'time' : 'auto';
+
     sortAscendingOnKey(parsedData, 'ts');
 
     return (
@@ -112,7 +116,8 @@ const LineGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
-                    interval: Math.floor(parsedData.length / xtickLimits)
+                    interval: Math.floor(parsedData.length / xtickLimits),
+                    scale
                 })
             }
             {
