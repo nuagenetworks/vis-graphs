@@ -18,3 +18,5 @@ export const FOOTER_HEIGHT = 65;
 export const ES_NUMBER_DATA_TYPES = ['long', 'integer', 'short', 'double', 'float'];
 export const MIN_WIDTH = 10;
 export const UPLINKCONNECTION_CONTEXT = "uplinkconnection"
+export const TIME = 'time';
+export const AUTO = 'auto';

@@ -13,7 +13,8 @@ import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
-import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH, UPLINKCONNECTION_CONTEXT} from '../../constants';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH, UPLINKCONNECTION_CONTEXT, TIME, AUTO} from '../../constants';
+
 
 const LineGraph = (props) => {
     const {
@@ -63,7 +64,7 @@ const LineGraph = (props) => {
 
     const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 
-    const { parsedData, uniqueKeys: lineKeys } = dataParser({
+    let { parsedData, uniqueKeys: lineKeys } = dataParser({
         data,
         key: linesColumn,
         xColumn,
@@ -76,9 +77,11 @@ const LineGraph = (props) => {
 
     const [tooltipKey, setToolTipKey] = useState(-1);
 
-    const scale = context.name === UPLINKCONNECTION_CONTEXT ? 'time' : 'auto';
 
     sortAscendingOnKey(parsedData, 'ts');
+
+    const domain = context.name === UPLINKCONNECTION_CONTEXT ? [parsedData[0][xColumn], parsedData[parsedData.length - 1][xColumn]] : undefined;
+    const scale = context.name === UPLINKCONNECTION_CONTEXT ? TIME : AUTO;
 
     return (
         <LineChart
@@ -109,6 +112,7 @@ const LineGraph = (props) => {
             }
             {
                 xAxis({
+                    data:parsedData,
                     xColumn,
                     xLabel,
                     XAxisLabelConfig,
@@ -116,8 +120,9 @@ const LineGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
+                    domain,
                     interval: Math.floor(parsedData.length / xtickLimits),
-                    scale
+                    scale,
                 })
             }
             {

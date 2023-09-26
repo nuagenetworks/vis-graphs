@@ -16,6 +16,7 @@ export default ({
     limit,
     interval,
     scale,
+    domain,
 }) => {
     return (
         <XAxis
@@ -37,6 +38,7 @@ export default ({
                     limit={limit}
                 />
             }
+            domain={domain}
             scale={scale}
         />
     )
