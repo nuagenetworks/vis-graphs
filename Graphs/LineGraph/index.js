@@ -64,7 +64,7 @@ const LineGraph = (props) => {
 
     const xtickLimits = xTicks || Math.ceil(width / XTICKS_WIDTH);
 
-    let { parsedData, uniqueKeys: lineKeys } = dataParser({
+    const { parsedData, uniqueKeys: lineKeys } = dataParser({
         data,
         key: linesColumn,
         xColumn,
