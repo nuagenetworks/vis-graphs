@@ -13,7 +13,7 @@ import Formatter from '../utils/formatter';
 import xAxis from '../Components/utils/xAxis';
 import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
-import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH, UPLINKCONNECTION_CONTEXT, TIME, AUTO} from '../../constants';
+import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
 
 
 const LineGraph = (props) => {
@@ -22,7 +22,7 @@ const LineGraph = (props) => {
         height,
         width,
         data,
-        context,
+        statsInfo
     } = props;
 
     const {
@@ -80,8 +80,8 @@ const LineGraph = (props) => {
 
     sortAscendingOnKey(parsedData, 'ts');
 
-    const domain = context.name === UPLINKCONNECTION_CONTEXT ? [parsedData[0][xColumn], parsedData[parsedData.length - 1][xColumn]] : undefined;
-    const scale = context.name === UPLINKCONNECTION_CONTEXT ? TIME : AUTO;
+    const { getDomainAndScale } = statsInfo;
+    const {domain, scale} = getDomainAndScale(parsedData, xColumn) || {};
 
     return (
         <LineChart

@@ -39,7 +39,7 @@ export default ({
                 />
             }
             domain={domain}
-            scale={scale}
+            scale={scale || 'auto'}
         />
     )
 }
