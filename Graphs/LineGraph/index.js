@@ -81,7 +81,7 @@ const LineGraph = (props) => {
     sortAscendingOnKey(parsedData, 'ts');
 
     const { getDomainAndScale } = statsInfo;
-    const {domain, scale} = getDomainAndScale(parsedData, xColumn) || {};
+    const {domain, scale} = !!getDomainAndScale && getDomainAndScale(parsedData, xColumn) || {};
 
     return (
         <LineChart
