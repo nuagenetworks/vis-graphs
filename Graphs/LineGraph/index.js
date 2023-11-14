@@ -15,12 +15,14 @@ import yAxis from '../Components/utils/yAxis';
 import { sortAscendingOnKey, insertTimestampToTooltip } from '../utils/helper';
 import { BRUSH_HEIGHT, XLABEL_HEIGHT, XTICKS_WIDTH} from '../../constants';
 
+
 const LineGraph = (props) => {
     const {
         properties,
         height,
         width,
         data,
+        statsInfo
     } = props;
 
     const {
@@ -74,7 +76,12 @@ const LineGraph = (props) => {
     XAxisLabelConfig = brushEnabled ? {...XAxisLabelConfig, dy: XAxisLabelConfig.dy + XLABEL_HEIGHT } : XAxisLabelConfig;
 
     const [tooltipKey, setToolTipKey] = useState(-1);
+
+
     sortAscendingOnKey(parsedData, 'ts');
+
+    const { getDomainAndScale } = statsInfo;
+    const {domain, scale} = !!getDomainAndScale && getDomainAndScale(parsedData, xColumn) || {};
 
     return (
         <LineChart
@@ -105,6 +112,7 @@ const LineGraph = (props) => {
             }
             {
                 xAxis({
+                    data:parsedData,
                     xColumn,
                     xLabel,
                     XAxisLabelConfig,
@@ -112,7 +120,9 @@ const LineGraph = (props) => {
                     xTickFormat,
                     dateHistogram,
                     limit: xLabelLimit,
-                    interval: Math.floor(parsedData.length / xtickLimits)
+                    domain,
+                    interval: Math.floor(parsedData.length / xtickLimits),
+                    scale,
                 })
             }
             {
